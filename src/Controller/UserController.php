@@ -14,4 +14,10 @@ class UserController extends AbstractController
     {
         return $this->render('user/pages/index.html.twig');
     }
+
+    #[Route('/recettes', name: 'recipe_index')]
+    public function list(): Response
+    {
+        return $this->render('user/pages/recipes/index.html.twig');
+    }
 }

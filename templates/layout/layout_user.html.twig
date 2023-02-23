@@ -10,7 +10,7 @@
 {% block body %}
     {% include "layout/components/page-loader.html.twig" %}
 
-    <div class="layout-1 layout-horizontal-1">
+    <div class="layout-1 layout-vertical-1">
         <nav>
             <div class="nav-menu">
                 <div class="nav-menu-header">
@@ -56,6 +56,8 @@
             {% block breadcrumb %}
                 {% include "layout/components/app/breadcrumbs.html.twig" %}
             {% endblock %}
+
+            {% include "layout/components/user/page_title.html.twig" %}
 
             <main>
                 <div>
