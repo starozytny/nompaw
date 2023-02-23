@@ -8,7 +8,7 @@
         {% if breadcrumbs is defined %}
             {% for item in breadcrumbs %}
                 <span class="breadcrumb-separator"></span>
-                <a class="breadcrumb-item {{ loop.last ? " active" : "" }}" href="{{ item.url ? item.url : "" }}">
+                <a class="breadcrumb-item {{ loop.last ? " active" : "" }}" href="{{ item.url is defined ? item.url : "" }}">
                     {% if item.icon is defined %}<span class="icon-{{ item.icon }}"></span>{% endif %}
                     {% if item.text is defined %}<span>{{ item.text }}</span>{% endif %}
                 </a>

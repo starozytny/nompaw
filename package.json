@@ -30,6 +30,7 @@
         "@fullcalendar/list": "^6.0.3",
         "@fullcalendar/react": "^6.0.4",
         "@fullcalendar/timegrid": "^6.0.3",
+        "antd": "^5.2.2",
         "axios": "^1.2.1",
         "js-datepicker": "^5.18.2",
         "moment": "^2.29.4",

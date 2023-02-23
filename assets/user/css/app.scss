@@ -4,6 +4,7 @@
 
 @import "./components/layout";
 @import "./components/layout-custom";
+@import "./components/footer";
 @import "./components/page";
 @import "./components/cookies";
 @import "./components/loader";
@@ -16,6 +17,8 @@
 @import "./components/elements/alert";
 @import "./components/elements/button";
 @import "./components/elements/tooltip";
+
+@import "./pages/components/form";
 
 body {
   @include fontRegular();
