@@ -18,8 +18,6 @@
 @import "./components/elements/button";
 @import "./components/elements/tooltip";
 
-@import "./pages/components/form";
-
 body {
   @include fontRegular();
 }
