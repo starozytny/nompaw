@@ -7,6 +7,7 @@
     width: calc(100% - var(--espaceLayout) * 2);
 
     .avatar{
+      position: relative;
       border-radius: calc(var(--radius) * 3);
       background-color: var(--color0);
     }

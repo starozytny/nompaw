@@ -1,0 +1,12 @@
+{% extends 'user/pages/profil/template.html.twig' %}
+
+{% set page_title %}{{ app.user.lastname }} {{ app.user.firstname }}{% endset %}
+{% set page_subtitle %}Profil de {{ app.user.lastname }} {{ app.user.firstname }}{% endset %}
+
+{% block main_content %}
+    <div class="main-content">
+        <div id="contacts_create">
+            {% include "layout/components/loader.html.twig" %}
+        </div>
+    </div>
+{% endblock %}

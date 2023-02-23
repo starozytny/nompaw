@@ -15,6 +15,7 @@
 @import "./components/elements/breadcrumb";
 @import "./components/elements/alert";
 @import "./components/elements/button";
+@import "./components/elements/tooltip";
 
 body {
   @include fontRegular();
