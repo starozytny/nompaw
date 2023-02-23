@@ -1,7 +1,8 @@
 .page-title{
   background: linear-gradient(0.35turn, var(--color0), var(--color1));
   color: var(--alpha);
-  margin-top: 1.2rem;
+  margin-top: var(--espaceDiv);
+  margin-bottom: var(--espaceDiv);
 }
 
 .page-title-container{
