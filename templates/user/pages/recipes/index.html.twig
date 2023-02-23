@@ -1,12 +1,10 @@
 {% extends 'user/pages/recipes/template.html.twig' %}
 
-{% set page_title %}Demande de contact{% endset %}
-{% set page_subtitle %}Demande de contact{% endset %}
+{% set page_title %}Recettes{% endset %}
+{% set page_subtitle %}Liste des recettes !{% endset %}
 
 {% block main_content %}
-    <div class="main-content">
-        <div id="contacts_create">
-            {% include "layout/components/loader.html.twig" %}
-        </div>
+    <div id="contacts_create">
+        {% include "layout/components/loader.html.twig" %}
     </div>
 {% endblock %}

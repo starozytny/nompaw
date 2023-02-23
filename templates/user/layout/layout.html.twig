@@ -3,10 +3,10 @@
 {% set page_prefix = "Espace membre" %}
 
 {% set menu = [
-    { name: "Dashboard",
+    { name: "Dashboard", icon: "home",
         path: path('user_homepage'), matchRoute: ['user_homepage']
     },
-    { name: "Dashboard",
+    { name: "Recettes", icon: "book-1",
         path: path('user_recipe_index'), matchRoute: ['user_recipe_index']
     },
 ] %}
