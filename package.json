@@ -25,6 +25,7 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "@ant-design/icons": "^5.0.1",
         "@fullcalendar/core": "^6.0.3",
         "@fullcalendar/daygrid": "^6.0.3",
         "@fullcalendar/interaction": "^6.0.3",

@@ -7,7 +7,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { ContactFormulaire } from "@appFolder/pages/components/Contact/ContactForm";
 import { Cookies } from "@commonComponents/Modules/Cookies/Cookies";
-import {UserFormulaire} from "@adminPages/Users/UserForm";
+import { UserFormulaire } from "@adminPages/Users/UserForm";
 
 Routing.setRoutingData(routes);
 

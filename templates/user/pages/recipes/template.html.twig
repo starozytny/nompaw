@@ -1,3 +1,13 @@
 {% extends 'user/layout/layout.html.twig' %}
 
 {% set breadcrumbs = [{ text: "Recettes", icon: "book-1" }] %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_recipes') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_recipes') }}
+{% endblock %}
