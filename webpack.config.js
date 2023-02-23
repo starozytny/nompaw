@@ -41,6 +41,14 @@ Encore
         from: './assets/admin/images',
         to: 'admin/images/[path][name].[ext]',
     })
+    .copyFiles({
+        from: './assets/user/fonts',
+        to: 'user/fonts/[path][name].[ext]',
+    })
+    .copyFiles({
+        from: './assets/user/images',
+        to: 'user/images/[path][name].[ext]',
+    })
 
     .configureFilenames({
         css: !Encore.isProduction() ? 'css/[name].css' : 'css/[name].[hash:8].css',
@@ -72,8 +80,10 @@ Encore
     .addEntry('admin_storage',      './assets/admin/js/pages/storage.js')
     .addEntry('admin_styleguide',   './assets/admin/js/pages/styleguide.js')
 
+    .addEntry('user_app', './assets/user/js/app.js')
+
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
-    .enableStimulusBridge('./assets/controllers.json')
+    // .enableStimulusBridge('./assets/controllers.json')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

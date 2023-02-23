@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    {{ encore_entry_link_tags('app_app') }}
+    {{ encore_entry_link_tags('user_app') }}
 {% endblock %}
 
 {% block body %}
@@ -15,7 +15,7 @@
             <div class="nav-menu">
                 <div class="nav-menu-header">
                     <a href="{{ path('app_homepage') }}" class="nav-menu-header-logo">
-                        <img src="{{ asset('build/app/images/logo.png') }}" alt="logo">
+                        <img src="{{ asset('build/user/images/logo.png') }}" alt="logo">
                     </a>
                     <div class="btn-menu-mobile">
                         <button class="btn-icon"><span class="icon-close"></span></button>
@@ -40,7 +40,7 @@
             <header>
                 <div>
                     <a href="{{ path('app_homepage') }}" class="header-logo">
-                        <img src="{{ asset('build/app/images/logo.png') }}" alt="logo">
+                        <img src="{{ asset('build/user/images/logo.png') }}" alt="logo">
                     </a>
                 </div>
                 <div>
@@ -54,7 +54,7 @@
             </header>
 
             {% block breadcrumb %}
-                {% include "layout/components/app/breadcrumbs.html.twig" %}
+                {% include "layout/components/user/breadcrumbs.html.twig" %}
             {% endblock %}
 
             {% include "layout/components/user/page_title.html.twig" %}
@@ -75,5 +75,5 @@
 
 {% block javascripts %}
     {{ parent() }}
-    {{ encore_entry_script_tags('app_app') }}
+    {{ encore_entry_script_tags('user_app') }}
 {% endblock %}

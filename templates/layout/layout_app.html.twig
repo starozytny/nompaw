@@ -35,26 +35,6 @@
         </nav>
 
         <div class="body">
-            <header>
-                <div>
-                    <a href="{{ path('app_homepage') }}" class="header-logo">
-                        <img src="{{ asset('build/app/images/logo.png') }}" alt="logo">
-                    </a>
-                </div>
-                <div>
-                    <div class="avatar">
-                        <img src="https://robohash.org/random" alt="avatar">
-                    </div>
-                    <div class="btn-menu-mobile">
-                        <button class="btn-icon"><span class="icon-menu-1"></span></button>
-                    </div>
-                </div>
-            </header>
-
-            {% block breadcrumb %}
-                {% include "layout/components/app/breadcrumbs.html.twig" %}
-            {% endblock %}
-
             <main>
                 <div>
                     {% block main_content %}{% endblock %}

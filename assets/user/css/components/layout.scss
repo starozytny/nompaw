@@ -1,0 +1,202 @@
+$minHeight: 60px;
+$headerHeight: 30px;
+
+.layout-1{
+  position: relative;
+
+  .btn-menu-mobile{
+    font-size: 24px;
+
+    .btn-icon{
+      padding: var(--espaceDiv);
+    }
+  }
+
+  header{
+    @include flex(row, center, space-between, var(--espaceEls));
+    background-color: red;
+    padding-left: var(--espaceLayout);
+
+    .header-logo{
+      @include flex(row, center, center);
+
+      img{
+        height: $headerHeight;
+      }
+    }
+
+    .avatar{
+      width: $headerHeight; height: $headerHeight;
+    }
+
+    & > div{
+      @include flex(row, center, flex-start, var(--espaceEls));
+    }
+  }
+
+  nav{
+    background-color: var(--overlay);
+    position: fixed;
+    top: 0; left: -100vw;
+    z-index: -1;
+    width: 100vw; height: 100%;
+
+    .nav-menu{
+      position: relative;
+      @include flex(column, flex-start, flex-start, var(--espaceLayout));
+      background-color: yellow;
+      left: -90vw;
+      width: 90vw;
+      height: 100vh;
+      padding-bottom: var(--espaceLayout);
+      transition: left 0.2s ease-in-out;
+    }
+
+    .nav-menu-header{
+      @include flex(row, center, space-between, var(--espaceEls));
+      padding-left: var(--espaceLayout);
+      width: 100%;
+
+      .nav-menu-header-logo{
+        @include flex(row, center, center);
+
+        img{
+          height: 30px;
+          object-fit: contain;
+        }
+      }
+    }
+
+    .nav-menu-items{
+      @include flex(column, flex-start, space-between, var(--espaceLayout));
+      width: 100%; height: 100%;
+
+      & > div{
+        @include flex(column, flex-start, flex-start, var(--espaceEls));
+        width: 100%;
+        overflow: auto;
+      }
+    }
+
+    .nav-menu-item{
+      @include flex(row, flex-start, flex-start, 4px);
+      padding: var(--espaceEls) var(--espaceLayout);
+      width: 100%;
+      word-break: break-all;
+    }
+  }
+
+  nav.active{
+    left: 0;
+    z-index: 1000;
+
+    .nav-menu{
+      left: 0;
+    }
+  }
+
+  .body{
+    background-color: blue;
+    min-height: calc(100vh - $minHeight);
+  }
+
+  footer{
+    background-color: green;
+    min-height: $minHeight;
+  }
+}
+
+//                      __   _ ____  ___   ___    __
+//                     | _| / |___ \( _ ) / _ \  |_ |
+//    _____ _____ _____| |  | | __) / _ \| | | |  | |_____ _____ _____
+//   |_____|_____|_____| |  | |/ __/ (_) | |_| |  | |_____|_____|_____|
+//                     | |  |_|_____\___/ \___/   | |
+//                     |__|                      |__|
+@media (min-width:1280px) {
+  .layout-1{
+    .btn-menu-mobile{
+      display: none;
+    }
+
+    header{
+      min-height: $minHeight;
+      padding-right: var(--espaceLayout);
+    }
+
+    nav{
+      position: relative;
+      left: 0;
+      z-index: 1000;
+      height: auto;
+
+      .nav-menu{
+        left: 0;
+        height: auto;
+        padding-bottom: 0;
+      }
+    }
+
+  }
+
+  .layout-horizontal-1{
+    nav{
+      .nav-menu{
+        width: 100vw;
+        min-height: $minHeight;
+      }
+
+      .nav-menu-header{
+        display: none;
+      }
+
+      .nav-menu-items{
+        flex-direction: row;
+        padding: 0 var(--espaceLayout);
+
+        & > div{
+          flex-direction: row;
+        }
+      }
+
+      .nav-menu-item{
+        width: auto;
+        padding: 20px var(--espaceEls);
+      }
+    }
+
+    .body{
+      min-height: calc(100vh - ($minHeight * 2));
+    }
+  }
+
+  .layout-vertical-1{
+    @include flex(row, stretch, flex-start);
+    flex-wrap: wrap;
+
+    header, footer{
+      width: 100%;
+    }
+
+    header{
+      .header-logo{
+        display: none;
+      }
+    }
+
+    $navWidth: 15%;
+
+    nav{
+      width: $navWidth;
+
+      .nav-menu{
+        width: 100%; height: 100%;
+        padding: var(--espaceDiv) 0;
+      }
+    }
+
+    .body{
+      width: calc(100% - $navWidth);
+      min-height: calc(100vh - $minHeight);
+    }
+  }
+}
