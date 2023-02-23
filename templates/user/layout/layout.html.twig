@@ -3,8 +3,9 @@
 {% set page_prefix = "Espace membre" %}
 
 {% set menu = [
-    { name: "Dashboard",        icon: "home",    nameRoute: 'user_homepage' },
-    { name: "Utilisateurs",     icon: "group",   nameRoute: 'admin_homepage' },
+    { name: "Dashboard",
+        path: path('user_homepage'), matchRoute: ['user_homepage']
+    },
 ] %}
 
 {% block footer %}
