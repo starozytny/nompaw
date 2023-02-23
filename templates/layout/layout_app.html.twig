@@ -8,15 +8,65 @@
 {% block body %}
     {% include "layout/components/page-loader.html.twig" %}
 
-    <div class="body">
-        <main>
-            <div>
-                {% block main_content %}{% endblock %}
+    <div class="layout-1 layout-horizontal-1">
+        <nav>
+            <div class="nav-menu">
+                <div class="nav-menu-header">
+                    <a href="{{ path('app_homepage') }}" class="nav-menu-header-logo">
+                        <img src="{{ asset('build/app/images/logo.png') }}" alt="logo">
+                    </a>
+                    <div class="btn-menu-mobile">
+                        <button class="btn-icon"><span class="icon-close"></span></button>
+                    </div>
+                </div>
+                <div class="nav-menu-items">
+                    <div>
+                        {% for item in menu %}
+                            <a class="nav-menu-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
+                               href="{{ item.path }}"
+                            >
+                                {% if item.icon is defined %}<span class="icon-{{ item.icon }}"></span>{% endif %}
+                                <span>{{ item.name }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
+        </nav>
 
+        <div class="body">
+            <header>
+                <div>
+                    <a href="{{ path('app_homepage') }}" class="header-logo">
+                        <img src="{{ asset('build/app/images/logo.png') }}" alt="logo">
+                    </a>
+                </div>
+                <div>
+                    <div class="avatar">
+                        <img src="https://robohash.org/random" alt="avatar">
+                    </div>
+                    <div class="btn-menu-mobile">
+                        <button class="btn-icon"><span class="icon-menu-1"></span></button>
+                    </div>
+                </div>
+            </header>
+
+            {% block breadcrumb %}
+                {% include "layout/components/app/breadcrumbs.html.twig" %}
+            {% endblock %}
+
+            <main>
+                <div>
+                    {% block main_content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+
+        <footer>
             {% block footer %}{% endblock %}
-        </main>
+        </footer>
     </div>
+
 {% endblock %}
 
 {% block javascripts %}

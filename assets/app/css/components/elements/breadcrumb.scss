@@ -1,0 +1,40 @@
+.breadcrumb{
+  .breadcrumb-items{
+    @include flex(row, center, flex-start, var(--espaceEls));
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb-separator{
+    &:before{
+      content: "/";
+    }
+  }
+
+  .breadcrumb-item{
+    @include flex(row, center, flex-start, 4px);
+
+    [class^="icon-"]{
+      display: inline-block;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.breadcrumb{
+  padding: 0.8rem var(--espaceLayout) 0 var(--espaceLayout);
+
+  .breadcrumb-separator{
+    opacity: 0.70;
+  }
+
+  .breadcrumb-item{
+    color: var(--txt);
+    opacity: 0.70;
+    transition: opacity 0.2s ease-in-out;
+
+    &.active,
+    &:hover{
+      opacity: 1;
+    }
+  }
+}

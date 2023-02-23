@@ -1,4 +1,10 @@
 {% extends 'layout/layout_app.html.twig' %}
 
+{% set menu = [
+    { name: "Accueil",
+        path: path('app_homepage'), matchRoute: ['app_homepage']
+    },
+] %}
+
 {% block footer %}
 {% endblock %}
