@@ -13,46 +13,7 @@
         </div>
 
         <div class="content">
-            <form action="{{ path('app_login') }}" method="post" class="form-login">
-                {% if error %}
-                    <div class="alert alert-danger">
-                        <p>{{ error.messageKey|trans(error.messageData, 'security') }}</p>
-                    </div>
-                {% endif %}
 
-                <div class="line">
-                    <div class="form-group">
-                        <label for="username">
-                            <span class="icon-user"></span>
-                            <span>Nom utilisateur</span>
-                        </label>
-                        <input type="text" id="username" name="_username" value="{{ last_username }}" required autofocus/>
-                    </div>
-                </div>
-
-                <div class="line">
-                    <div class="form-group">
-                        <label for="password">
-                            <span class="icon-padlock"></span>
-                            <span>Mot de passe</span>
-                        </label>
-                        <input type="password" name="_password" id="password" required />
-                        <div class="input-show"><span class="icon-vision" id="password-icon"></span></div>
-                    </div>
-                </div>
-
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-                <input type="hidden" name="_target_path" value="{{ path('app_logged') }}"/>
-
-                <div class="line">
-                    <div id="forget"></div>
-                </div>
-
-                <div class="line-buttons">
-                    <button type="submit" class="btn btn-primary">Se connecter</button>
-                </div>
-            </form>
         </div>
     </div>
 

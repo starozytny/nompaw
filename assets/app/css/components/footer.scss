@@ -15,8 +15,11 @@ footer{
 }
 
 .footer{
+  padding: var(--espaceDiv);
+
   .footer-menu{
     @include flex(column, flex-start, flex-start, 24px);
+    margin-bottom: var(--espaceDiv);
   }
 
   .footer-logo{

@@ -2,6 +2,11 @@
 
 {% block title %}Hello AppController!{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('app_homepage') }}
+{% endblock %}
+
 {% block main_content %}
     <div class="main-content">Hello</div>
 {% endblock %}

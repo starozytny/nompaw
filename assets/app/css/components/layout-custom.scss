@@ -61,15 +61,32 @@ html{
   }
 
   .body{
-    min-height: calc(100vh - 60px - 60px);
+    min-height: calc(100vh - 266px);
+  }
+
+  @media (min-width:768px) {
+    .body{
+      min-height: calc(100vh - 177px);
+    }
+  }
+
+  @media (min-width:1024px) {
+    .body{
+      min-height: calc(100vh - 158px);
+    }
   }
 
   @media (min-width:1280px) {
     header{
       display: none;
     }
+
     nav{
-      background-color: var(--alpha);
+      backdrop-filter: blur(2px) saturate(26%);
+      background-color: rgba(255, 255, 255, 0.11);
+      width: calc(100% - (var(--espaceDiv) * 2));
+      border-radius: calc(var(--radius) * 2);
+      margin: var(--espaceDiv);
 
       .nav-menu-header{
         width: 140px;
@@ -81,6 +98,7 @@ html{
         justify-content: space-between;
         width: 100%;
         @include maxscreen();
+        background-color: transparent;
       }
 
       .nav-menu-items{
@@ -88,25 +106,21 @@ html{
           justify-content: flex-end;
         }
       }
+
+      .nav-menu-item{
+        @include fontSemibold();
+      }
+    }
+
+    .body{
+      margin-top: calc(-60px - var(--espaceDiv) * 2);
+      min-height: calc(100vh - 160px);
     }
   }
-}
 
-.layout-vertical-1:not(.brut){
-
-  nav{
-    .nav-menu{
-      border-right: 1px solid var(--grey1);
-      padding-top: calc(var(--espaceDiv) + 12px);
-    }
-
-    .nav-menu-items{
-      padding: 0 var(--espaceLayout);
-    }
-
-    .nav-menu-item{
-      border-radius: var(--radius);
-      padding-left: 12px; padding-right: 12px;
+  @media (min-width:1600px) {
+    .body{
+      min-height: calc(100vh - 175px);
     }
   }
 }

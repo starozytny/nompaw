@@ -83,6 +83,8 @@
 
     .col-2{
       width: 60%;
+      height: calc(100vh - 160px);
+      overflow: hidden;
 
       .image{
         img{
@@ -96,5 +98,14 @@
   .form-login{
     margin-bottom: 0;
     max-width: 280px;
+  }
+}
+
+
+@media (min-width:1600px) {
+  .login-page{
+    .col-2 {
+      height: calc(100vh - 175px);
+    }
   }
 }
