@@ -1,10 +1,17 @@
 {% extends 'layout/layout_app.html.twig' %}
 
-{% set menu = [
+{% set menu_left = [
     { name: "Accueil",
         path: path('app_homepage'), matchRoute: ['app_homepage']
     },
 ] %}
 
+{% set menu_right = [
+    { name: "Mon espace",
+        path: path('app_login'), matchRoute: ['app_login']
+    },
+] %}
+
 {% block footer %}
+    {% include "app/layout/components/footer.html.twig" %}
 {% endblock %}
