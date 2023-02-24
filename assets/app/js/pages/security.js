@@ -7,6 +7,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Forget } from '@appFolder/pages/components/Security/Forget';
 import { Reinit } from "@appFolder/pages/components/Security/Reinit";
+import { UserFormulaire } from "@appFolder/pages/components/Security/UserForm";
 
 Routing.setRoutingData(routes);
 
@@ -18,6 +19,11 @@ if(el){
 el = document.getElementById("reinit");
 if(el){
     createRoot(el).render(<Reinit {...el.dataset} />)
+}
+
+el = document.getElementById("registration");
+if(el){
+    createRoot(el).render(<UserFormulaire />)
 }
 
 let inputShow = document.querySelector('.input-show');

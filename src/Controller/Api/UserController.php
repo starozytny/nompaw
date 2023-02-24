@@ -50,7 +50,11 @@ class UserController extends AbstractController
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
         }
 
-        $society = $em->getRepository(Society::class)->find($data->society);
+        if($data->context == "registration"){
+            $society = $em->getRepository(Society::class)->findOneBy(['code' => 999]);
+        }else{
+            $society = $em->getRepository(Society::class)->find($data->society);
+        }
         if(!$society) throw new NotFoundHttpException("Society not found.");
 
         $obj = $dataEntity->setDataUser($obj, $data);
@@ -60,6 +64,18 @@ class UserController extends AbstractController
             if($data->password != ""){
                 $obj->setPassword($passwordHasher->hashPassword($obj, $data->password));
             }
+        }
+
+        if($em->getRepository(User::class)->findOneBy(['username' => $obj->getUsername()])){
+            return $apiResponse->apiJsonResponseValidationFailed([
+                ["name" => "username", "message" => "Ce nom d'utilisateur existe déjà."]
+            ]);
+        }
+
+        if($em->getRepository(User::class)->findOneBy(['email' => $obj->getEmail()])){
+            return $apiResponse->apiJsonResponseValidationFailed([
+                ["name" => "email", "message" => "Cette addresse e-mail existe déjà."]
+            ]);
         }
 
         $obj->setSociety($society);
@@ -81,7 +97,6 @@ class UserController extends AbstractController
     }
 
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'POST')]
-    #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, ManagerRegistry $doctrine, ApiResponse $apiResponse,
                            ValidatorService $validator, DataMain$dataEntity, UserRepository $repository,
                            UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader): Response

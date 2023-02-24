@@ -18,7 +18,7 @@ $c-02: #a6dcee;
 
 .loader-content{
   width: 100%;
-  background-color: $bg;
+  backdrop-filter: blur(2px) saturate(26%);
   @include flex(row, flex-start, flex-start);
 }
 

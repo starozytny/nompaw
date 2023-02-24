@@ -7,13 +7,12 @@
     <div class="col-1">
         <div class="title-page">
             <h1>Espace membre</h1>
-            <div>
-                <a href="{{ path('app_homepage') }}">Accueil</a>
-            </div>
         </div>
 
         <div class="content">
-
+            <div id="registration">
+                {% include "layout/components/loader.html.twig" %}
+            </div>
         </div>
     </div>
 
