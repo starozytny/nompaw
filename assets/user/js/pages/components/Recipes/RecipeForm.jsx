@@ -11,7 +11,7 @@ import { Button }           from "@commonComponents/Elements/Button";
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 
-const URL_INDEX_ELEMENTS    = "user_recipes_index";
+const URL_INDEX_ELEMENTS    = "user_recipes_read";
 const URL_CREATE_ELEMENT    = "api_help_products_create";
 const URL_UPDATE_GROUP      = "api_help_products_update";
 const TEXT_CREATE           = "Ajouter le produit";
