@@ -3,6 +3,8 @@
 namespace App\Entity\Cook;
 
 use App\Repository\Cook\CoRecipeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,7 +22,7 @@ class CoRecipe
     #[ORM\Column]
     private ?int $rate = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
@@ -31,6 +33,14 @@ class CoRecipe
 
     #[ORM\Column]
     private ?int $difficulty = null;
+
+    #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoStep::class)]
+    private Collection $steps;
+
+    public function __construct()
+    {
+        $this->steps = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -66,7 +76,7 @@ class CoRecipe
         return $this->content;
     }
 
-    public function setContent(string $content): self
+    public function setContent(?string $content): self
     {
         $this->content = $content;
 
@@ -105,6 +115,36 @@ class CoRecipe
     public function setDifficulty(int $difficulty): self
     {
         $this->difficulty = $difficulty;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoStep>
+     */
+    public function getSteps(): Collection
+    {
+        return $this->steps;
+    }
+
+    public function addStep(CoStep $step): self
+    {
+        if (!$this->steps->contains($step)) {
+            $this->steps->add($step);
+            $step->setRecipe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStep(CoStep $step): self
+    {
+        if ($this->steps->removeElement($step)) {
+            // set the owning side to null (unless already changed)
+            if ($step->getRecipe() === $this) {
+                $step->setRecipe(null);
+            }
+        }
 
         return $this;
     }
