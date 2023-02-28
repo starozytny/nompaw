@@ -1,9 +1,9 @@
 {% extends 'user/pages/recipes/template.html.twig' %}
 
-{% block title %}Crêpes au Nutella | {{ page_prefix }}{% endblock %}
+{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
 
 {% block main_content %}
-    <div id="recipes_read">
+    <div id="recipes_read" data-element="{{ element }}">
         {% include "layout/components/loader.html.twig" %}
     </div>
 {% endblock %}

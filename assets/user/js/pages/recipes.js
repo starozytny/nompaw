@@ -13,7 +13,7 @@ if(el){
 
 el = document.getElementById("recipes_read");
 if(el){
-    createRoot(el).render(<RecipeRead />)
+    createRoot(el).render(<RecipeRead elem={JSON.parse(el.dataset.element)} />)
 }
 
 el = document.getElementById("recipes_update");

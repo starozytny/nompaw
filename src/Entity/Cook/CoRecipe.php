@@ -17,38 +17,40 @@ class CoRecipe extends DataEntity
 
     const LIST = ['recipe_list'];
     const FORM = ['recipe_form'];
+    const READ = ['recipe_read'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['recipe_list', 'recipe_form'])]
+    #[Groups(['recipe_list', 'recipe_form', 'recipe_read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['recipe_list', 'recipe_form'])]
+    #[Groups(['recipe_list', 'recipe_form', 'recipe_read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['recipe_list'])]
+    #[Groups(['recipe_list', 'recipe_read'])]
     private ?string $slug = null;
 
     #[ORM\Column]
+    #[Groups(['recipe_read'])]
     private ?int $rate = 0;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['recipe_list', 'recipe_form'])]
+    #[Groups(['recipe_list', 'recipe_form', 'recipe_read'])]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_form', 'recipe_read'])]
     private ?\DateTimeInterface $durationPrepare = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_form', 'recipe_read'])]
     private ?\DateTimeInterface $durationCooking = null;
 
     #[ORM\Column]
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_form', 'recipe_read'])]
     private ?int $difficulty = null;
 
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoStep::class)]
@@ -149,6 +151,13 @@ class CoRecipe extends DataEntity
         $this->difficulty = $difficulty;
 
         return $this;
+    }
+
+    #[Groups(['recipe_read'])]
+    public function getDifficultyString(): string
+    {
+        $values = ['Facile', 'Moyen', 'Difficile'];
+        return $values[$this->difficulty];
     }
 
     /**

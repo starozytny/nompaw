@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import _ from "lodash";
 
+import Sanitaze from '@commonFunctions/sanitaze';
+
+import moment from "moment";
+import 'moment/locale/fr';
+
 import {Avatar, Checkbox, List, Radio, Rate, Steps} from "antd";
 
 const menu = [
@@ -46,7 +51,7 @@ const data = [
     },
 ];
 
-export function RecipeRead () {
+export function RecipeRead ({ elem }) {
     const [context, setContext] = useState(window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'instructions');
 
     const onChangeContext = ({ target: { value } }) => {
@@ -84,9 +89,9 @@ export function RecipeRead () {
         <div className="col-1">
             <img alt="example" src={`https://source.unsplash.com/random/?Food`} style={{ height: 260, objectFit: 'cover' }}/>
             <div className="recipe-instructions">
-                <h1>Crêpe au nutella</h1>
+                <h1>{elem.name}</h1>
                 <div className="rating">
-                    <Rate disabled defaultValue={3} />
+                    <Rate disabled defaultValue={elem.rate} />
                 </div>
 
                 <div className="instructions">
@@ -117,21 +122,23 @@ export function RecipeRead () {
 
             <div className="menu-content">
                 <div className="recipe-data">
-                    <div className="recipe-data-item">
+                    {elem.durationPrepare && <div className="recipe-data-item">
                         <span className="icon-time"></span>
-                        <span>30 minutes de préparation</span>
-                    </div>
-                    <div className="recipe-data-item">
+                        <span>{Sanitaze.toDateFormat(elem.durationPrepare, 'LT')} minutes de préparation</span>
+                    </div>}
+
+                    {elem.durationCooking && <div className="recipe-data-item">
                         <span className="icon-time"></span>
-                        <span>30 minutes de cuisson</span>
-                    </div>
+                        <span>{Sanitaze.toDateFormat(elem.durationCooking, 'LT')} minutes de cuisson</span>
+                    </div>}
+
                     <div className="recipe-data-item">
                         <span className="icon-group"></span>
                         <span>2 personnes</span>
                     </div>
                     <div className="recipe-data-item">
                         <span className="icon-flash"></span>
-                        <span>Difficulté facile</span>
+                        <span>Difficulté {elem.difficultyString.toLowerCase()}</span>
                     </div>
                 </div>
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Cook\CoRecipe;
 use App\Entity\Main\User;
 use App\Repository\Cook\CoRecipeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,9 +33,16 @@ class UserController extends AbstractController
     }
 
     #[Route('/recettes/recette/{slug}', name: 'recipes_read', options: ['expose' => true])]
-    public function read($slug, CoRecipeRepository $repository): Response
+    public function read($slug, CoRecipeRepository $repository, SerializerInterface $serializer): Response
     {
-        return $this->render('user/pages/recipes/read.html.twig');
+        $obj = $repository->findOneBy(['slug' => $slug]);
+
+        $elem = $serializer->serialize($obj, 'json', ['groups' => CoRecipe::READ]);
+
+        return $this->render('user/pages/recipes/read.html.twig', [
+            'elem' => $obj,
+            'element' => $elem
+        ]);
     }
 
     #[Route('/recettes/ajouter', name: 'recipes_create')]
