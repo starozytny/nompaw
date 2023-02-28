@@ -1,0 +1,10 @@
+{% extends 'user/pages/recipes/template.html.twig' %}
+
+{% set page_title %}Création d'un recette{% endset %}
+{% set page_subtitle %}Ajoutez le maximum de détails à votre recette !{% endset %}
+
+{% block main_content %}
+    <div id="recipes_create">
+        {% include "layout/components/loader.html.twig" %}
+    </div>
+{% endblock %}

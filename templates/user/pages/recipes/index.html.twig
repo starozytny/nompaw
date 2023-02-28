@@ -4,6 +4,13 @@
 {% set page_subtitle %}Liste totale des recettes !{% endset %}
 
 {% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_recipes_create') }}" class="btn btn-primary">
+                <span>Ajouter une recette</span>
+            </a>
+        </div>
+    </div>
     <div id="recipes_list">
         {% include "layout/components/loader.html.twig" %}
     </div>

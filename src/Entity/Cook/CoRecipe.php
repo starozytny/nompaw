@@ -15,23 +15,28 @@ class CoRecipe extends DataEntity
 {
     const FOLDER = 'recipes';
 
+    const LIST = ['recipe_list'];
     const FORM = ['recipe_form'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_list', 'recipe_form'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_list', 'recipe_form'])]
     private ?string $name = null;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(['recipe_list'])]
+    private ?string $slug = null;
+
     #[ORM\Column]
-    private ?int $rate = null;
+    private ?int $rate = 0;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_list', 'recipe_form'])]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
@@ -70,6 +75,18 @@ class CoRecipe extends DataEntity
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }

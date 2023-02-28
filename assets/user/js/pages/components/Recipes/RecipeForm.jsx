@@ -10,10 +10,11 @@ import { Button }           from "@commonComponents/Elements/Button";
 
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
+import Inputs               from "@commonFunctions/inputs";
 
 const URL_INDEX_ELEMENTS    = "user_recipes_read";
-const URL_CREATE_ELEMENT    = "api_help_products_create";
-const URL_UPDATE_GROUP      = "api_help_products_update";
+const URL_CREATE_ELEMENT    = "api_recipes_create";
+const URL_UPDATE_GROUP      = "api_recipes_update";
 const TEXT_CREATE           = "Ajouter le produit";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
@@ -62,7 +63,16 @@ class Form extends Component {
         this.file = React.createRef();
     }
 
-    handleChange = (e) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
+    handleChange = (e) => {
+        let name = e.currentTarget.name;
+        let value = e.currentTarget.value;
+
+        if(name === 'durationPrepare' || name === 'durationCooking'){
+            value = Inputs.timeInput(e, this.state[name]);
+        }
+
+        this.setState({ [name]: value })
+    }
 
     handleChangeTrumb = (e) => {
         let name = e.currentTarget.id;
@@ -160,7 +170,7 @@ class Form extends Component {
                             <div className="line">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
                                            placeholder="Glissez et déposer une image" {...params}>
-                                    Logo
+                                    Illustration
                                 </InputFile>
                             </div>
                         </div>

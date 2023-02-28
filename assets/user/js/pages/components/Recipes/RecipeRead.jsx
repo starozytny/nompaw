@@ -18,6 +18,17 @@ const menu = [
     },
 ];
 
+const menuTiny = [
+    {
+        label: 'Ingrédients',
+        value: 'ingredients',
+    },
+    {
+        label: 'Avis',
+        value: 'avis',
+    },
+];
+
 const ingredients = ['Apple', 'Pear', 'Orange'];
 
 const data = [
@@ -36,7 +47,7 @@ const data = [
 ];
 
 export function RecipeRead () {
-    const [context, setContext] = useState('instructions');
+    const [context, setContext] = useState(window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'instructions');
 
     const onChangeContext = ({ target: { value } }) => {
         setContext(value);
@@ -65,33 +76,7 @@ export function RecipeRead () {
             content = <Checkbox.Group options={ingredients} defaultValue={['Apple']} onChange={onChange} />
             break;
         default:
-            content = <Steps
-                progressDot
-                current={5}
-                direction="vertical"
-                items={[
-                    {
-                        title: 'Finished',
-                        description: 'This is a description. This is a description.',
-                    },
-                    {
-                        title: 'Finished',
-                        description: 'This is a description. This is a description.',
-                    },
-                    {
-                        title: 'In Progress',
-                        description: 'This is a description. This is a description.',
-                    },
-                    {
-                        title: 'Waiting',
-                        description: 'This is a description.',
-                    },
-                    {
-                        title: 'Waiting',
-                        description: 'This is a description.',
-                    },
-                ]}
-            />
+            content = <Instructions />
             break;
     }
 
@@ -104,25 +89,87 @@ export function RecipeRead () {
                     <Rate disabled defaultValue={3} />
                 </div>
 
-                <div className="recipe-menu">
-                    <Radio.Group
-                        options={menu}
-                        onChange={onChangeContext}
-                        value={context}
-                        optionType="button"
-                        buttonStyle="solid"
-                    />
-                </div>
-
                 <div className="instructions">
-                    <h2>{_.capitalize(context)}</h2>
-                    {content}
+                    <h2>Instructions</h2>
+                    <Instructions />
                 </div>
             </div>
         </div>
         <div className="col-2">
+            <div className="recipe-menu">
+                <Radio.Group
+                    options={menu}
+                    onChange={onChangeContext}
+                    value={context}
+                    optionType="button"
+                    buttonStyle="solid"
+                />
+            </div>
+            <div className="recipe-menu-tiny">
+                <Radio.Group
+                    options={menuTiny}
+                    onChange={onChangeContext}
+                    value={context}
+                    optionType="button"
+                    buttonStyle="solid"
+                />
+            </div>
 
+            <div className="menu-content">
+                <div className="recipe-data">
+                    <div className="recipe-data-item">
+                        <span className="icon-time"></span>
+                        <span>30 minutes de préparation</span>
+                    </div>
+                    <div className="recipe-data-item">
+                        <span className="icon-time"></span>
+                        <span>30 minutes de cuisson</span>
+                    </div>
+                    <div className="recipe-data-item">
+                        <span className="icon-group"></span>
+                        <span>2 personnes</span>
+                    </div>
+                    <div className="recipe-data-item">
+                        <span className="icon-flash"></span>
+                        <span>Difficulté facile</span>
+                    </div>
+                </div>
+
+                <h2>{_.capitalize(context)}</h2>
+
+                {content}
+            </div>
         </div>
 
     </div>
+}
+
+function Instructions ({  }) {
+    return <Steps
+        progressDot
+        current={5}
+        direction="vertical"
+        items={[
+            {
+                title: 'Finished',
+                description: 'This is a description. This is a description.',
+            },
+            {
+                title: 'Finished',
+                description: 'This is a description. This is a description.',
+            },
+            {
+                title: 'In Progress',
+                description: 'This is a description. This is a description.',
+            },
+            {
+                title: 'Waiting',
+                description: 'This is a description.',
+            },
+            {
+                title: 'Waiting',
+                description: 'This is a description.',
+            },
+        ]}
+    />
 }

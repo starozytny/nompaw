@@ -3,8 +3,25 @@
 .recipe-read{
   margin-top: var(--espaceDiv);
 
-  & > .col-1{
+  h2{
+    position: relative;
+    padding: var(--espaceEls) var(--espaceDiv);
+    background-color: var(--color0Opacity1);
+    border-radius: var(--radius);
+    margin-bottom: var(--espaceEls);
 
+    &:before{
+      content: "";
+      background-color: var(--color0);
+      display: inline-block;
+      width: 6px; height: 100%;
+      position: absolute;
+      top: 0; left: 0;
+      border-radius: var(--radius) 0 0 var(--radius);
+    }
+  }
+
+  & > .col-1{
     .recipe-instructions{
       padding: var(--espaceLayout);
 
@@ -12,27 +29,83 @@
         margin-bottom: 0.8rem;
       }
 
-      h2{
-        position: relative;
-        padding: var(--espaceEls) var(--espaceDiv);
-        background-color: var(--color0Opacity1);
-        border-radius: var(--radius);
-        margin-bottom: var(--espaceEls);
+      .instructions{
+        display: none;
+        margin: var(--espaceDiv) 0;
+      }
+    }
+  }
 
-        &:before{
-          content: "";
-          background-color: var(--color0);
-          display: inline-block;
-          width: 6px; height: 100%;
-          position: absolute;
-          top: 0; left: 0;
-          border-radius: var(--radius) 0 0 var(--radius);
+  & > .col-2{
+    padding: 0 var(--espaceLayout) var(--espaceLayout) var(--espaceLayout);
+
+    .recipe-menu, .recipe-menu-tiny{
+      @include flex(row, center, center);
+      margin-bottom: calc(var(--espaceDiv) * 2);
+    }
+
+    .recipe-menu-tiny{
+      display: none;
+    }
+
+    .recipe-data{
+      @include flex(column, flex-start, flex-start, 8px);
+      margin: var(--espaceDiv) 0;
+      padding: var(--espaceDiv) 0;
+      border-top: 1px solid var(--grey2);
+      border-bottom: 1px solid var(--grey2);
+
+      .recipe-data-item{
+        @include flex(row, flex-start, flex-start, 8px);
+
+        [class^="icon-"]{
+          opacity: 0.85;
         }
       }
+    }
+
+    .ant-checkbox-group{
+      @include flex(column, flex-start, flex-start, var(--espaceEls));
+
+      :where(.css-dev-only-do-not-override-1km3mtt).ant-checkbox-wrapper+.ant-checkbox-wrapper{
+        margin-left: 0;
+      }
+    }
+  }
+
+  //                      __   _ ____  ___   ___    __
+  //                     | _| / |___ \( _ ) / _ \  |_ |
+  //    _____ _____ _____| |  | | __) / _ \| | | |  | |_____ _____ _____
+  //   |_____|_____|_____| |  | |/ __/ (_) | |_| |  | |_____|_____|_____|
+  //                     | |  |_|_____\___/ \___/   | |
+  //                     |__|                      |__|
+  @media (min-width:1280px) {
+    @include flex(row, stretch, flext-start, var(--espaceDiv));
+
+    & > .col-1{
+      width: 60%;
+
+      .recipe-instructions{
+        .instructions{
+          display: flex;
+          flex-direction: column;
+        }
+      }
+    }
+
+    & > .col-2{
+      width: 40%;
+      background-color: var(--alpha);
+      border-radius: calc(var(--radius) * 4) 0 0 calc(var(--radius) * 4);
+      margin-bottom: var(--espaceLayout);
 
       .recipe-menu{
-        @include flex(row, center, center);
-        margin: calc(var(--espaceDiv) * 2) 0;
+        display: none;
+      }
+
+      .recipe-menu-tiny{
+        display: flex;
+        margin-top: calc(var(--espaceDiv) * 2);
       }
     }
   }

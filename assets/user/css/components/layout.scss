@@ -79,10 +79,15 @@ $headerHeight: 30px;
     }
 
     .nav-menu-item{
-      @include flex(row, flex-start, flex-start, 4px);
+      @include flex(row, flex-start, flex-start, 8px);
       padding: var(--espaceEls) var(--espaceLayout);
       width: 100%;
       word-break: break-all;
+
+      [class^="icon-"]{
+        display: inline-block;
+        transform: translateY(1px);
+      }
     }
   }
 

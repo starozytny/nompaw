@@ -36,4 +36,10 @@ class UserController extends AbstractController
     {
         return $this->render('user/pages/recipes/read.html.twig');
     }
+
+    #[Route('/recettes/ajouter', name: 'recipes_create')]
+    public function create(): Response
+    {
+        return $this->render('user/pages/recipes/create.html.twig');
+    }
 }
