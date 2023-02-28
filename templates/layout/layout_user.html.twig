@@ -58,7 +58,9 @@
                 {% include "layout/components/user/breadcrumbs.html.twig" %}
             {% endblock %}
 
-            {% include "layout/components/user/page_title.html.twig" %}
+            {% if page_title is defined %}
+                {% include "layout/components/user/page_title.html.twig" %}
+            {% endif %}
 
             <main>
                 <div>

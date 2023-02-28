@@ -1,0 +1,39 @@
+@import "../../../vars/vars";
+
+.recipe-read{
+  margin-top: var(--espaceDiv);
+
+  & > .col-1{
+
+    .recipe-instructions{
+      padding: var(--espaceLayout);
+
+      h1{
+        margin-bottom: 0.8rem;
+      }
+
+      h2{
+        position: relative;
+        padding: var(--espaceEls) var(--espaceDiv);
+        background-color: var(--color0Opacity1);
+        border-radius: var(--radius);
+        margin-bottom: var(--espaceEls);
+
+        &:before{
+          content: "";
+          background-color: var(--color0);
+          display: inline-block;
+          width: 6px; height: 100%;
+          position: absolute;
+          top: 0; left: 0;
+          border-radius: var(--radius) 0 0 var(--radius);
+        }
+      }
+
+      .recipe-menu{
+        @include flex(row, center, center);
+        margin: calc(var(--espaceDiv) * 2) 0;
+      }
+    }
+  }
+}

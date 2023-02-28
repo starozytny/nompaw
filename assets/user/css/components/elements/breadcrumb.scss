@@ -21,7 +21,7 @@
 }
 
 .breadcrumb{
-  padding: 0.8rem var(--espaceLayout) 0 var(--espaceLayout);
+  padding: var(--espaceDiv) var(--espaceLayout) 0 var(--espaceLayout);
 
   .breadcrumb-separator{
     opacity: 0.70;

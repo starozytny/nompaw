@@ -11,7 +11,7 @@ export function Recipes () {
             {new Array(20).fill(null).map((_, index) => (
                 <Card
                     cover={
-                        <img alt="example" src={`https://source.unsplash.com/random/&${index}`} style={{ height: 300, objectFit: 'cover' }}/>
+                        <img alt="example" src={`https://source.unsplash.com/random/?Food&${index}`} style={{ height: 260, objectFit: 'cover' }}/>
                     }
                     actions={[ <EyeOutlined key="voir" />, <HeartOutlined key="favoris" /> ]}
                 >
