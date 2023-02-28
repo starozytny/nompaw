@@ -24,7 +24,7 @@ class UserController extends AbstractController
         return $this->render('user/pages/profil/index.html.twig', ['elem' => $this->getUser(), 'obj' => $obj]);
     }
 
-    #[Route('/recettes', name: 'recipe_index')]
+    #[Route('/recettes', name: 'recipes_index',  options: ['expose' => true])]
     public function list(): Response
     {
         return $this->render('user/pages/recipes/index.html.twig');
