@@ -7,9 +7,6 @@
     <div class="col-1">
         <div class="title-page">
             <h1>Espace membre</h1>
-            <div>
-                <a href="{{ path('app_homepage') }}">Accueil</a>
-            </div>
         </div>
 
         <div class="content">
@@ -26,7 +23,7 @@
                             <span class="icon-user"></span>
                             <span>Nom utilisateur</span>
                         </label>
-                        <input type="text" id="username" name="_username" value="{{ last_username }}" required autofocus/>
+                        <input type="text" id="username" name="_username" value="{{ last_username }}" placeholder="email ou identifiant" required autofocus/>
                     </div>
                 </div>
 
@@ -36,7 +33,7 @@
                             <span class="icon-padlock"></span>
                             <span>Mot de passe</span>
                         </label>
-                        <input type="password" name="_password" id="password" required />
+                        <input type="password" name="_password" id="password" placeholder="**********" required />
                         <div class="input-show"><span class="icon-vision" id="password-icon"></span></div>
                     </div>
                 </div>

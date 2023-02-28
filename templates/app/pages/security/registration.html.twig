@@ -1,0 +1,25 @@
+{% extends 'app/pages/security/template.html.twig' %}
+
+{% block title %}Connexion à son espace{% endblock %}
+
+{% block main_content %}
+<div class="login-page">
+    <div class="col-1">
+        <div class="title-page">
+            <h1>Espace membre</h1>
+        </div>
+
+        <div class="content">
+            <div id="registration">
+                {% include "layout/components/loader.html.twig" %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-2">
+        <div class="image">
+            <img src="{{ asset('build/app/images/login-page.jpg') }}" alt="formulaire connexion">
+        </div>
+    </div>
+</div>
+{% endblock %}

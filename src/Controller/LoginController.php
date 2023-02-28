@@ -81,4 +81,11 @@ class LoginController extends AbstractController
 
         return $this->render('app/pages/security/reinit.html.twig', ['token' => $token]);
     }
+
+
+    #[Route('/inscription', name: 'app_registration')]
+    public function registration(): Response
+    {
+        return $this->render('app/pages/security/registration.html.twig');
+    }
 }

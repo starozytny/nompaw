@@ -96,12 +96,10 @@ $headerHeight: 30px;
   }
 
   .body{
-    background-color: blue;
     min-height: calc(100vh - $minHeight);
   }
 
   footer{
-    background-color: green;
     min-height: $minHeight;
   }
 }
@@ -146,7 +144,6 @@ $headerHeight: 30px;
       }
 
       .nav-menu-header{
-        display: none;
       }
 
       .nav-menu-items{
@@ -166,37 +163,6 @@ $headerHeight: 30px;
 
     .body{
       min-height: calc(100vh - ($minHeight * 2));
-    }
-  }
-
-  .layout-vertical-1{
-    @include flex(row, stretch, flex-start);
-    flex-wrap: wrap;
-
-    header, footer{
-      width: 100%;
-    }
-
-    header{
-      .header-logo{
-        display: none;
-      }
-    }
-
-    $navWidth: 15%;
-
-    nav{
-      width: $navWidth;
-
-      .nav-menu{
-        width: 100%; height: 100%;
-        padding: var(--espaceDiv) 0;
-      }
-    }
-
-    .body{
-      width: calc(100% - $navWidth);
-      min-height: calc(100vh - $minHeight);
     }
   }
 }

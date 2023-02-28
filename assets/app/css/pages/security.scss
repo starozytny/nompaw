@@ -13,8 +13,12 @@
     @include flex(column, center, center);
 
     .title-page{
-      margin-bottom: 24px;
+      margin-bottom: var(--espaceDiv);
       text-align: center;
+    }
+
+    .content{
+      width: 100%;
     }
   }
 }
@@ -78,11 +82,17 @@
 
     .col-1{
       width: 40%;
-      margin-top: 148px;
+      height: calc(100vh - 175px);
+
+      .content{
+        width: 414px;
+      }
     }
 
     .col-2{
       width: 60%;
+      height: calc(100vh - 160px);
+      overflow: hidden;
 
       .image{
         img{
@@ -95,6 +105,15 @@
 
   .form-login{
     margin-bottom: 0;
-    max-width: 280px;
+    max-width: 320px;
+  }
+}
+
+
+@media (min-width:1600px) {
+  .login-page{
+    .col-2 {
+      height: calc(100vh - 175px);
+    }
   }
 }
