@@ -22,12 +22,12 @@ export function RecipeDelete ({ context, id, name, productSlug })
         let self = this;
 
         modalRef.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
-        axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': id}), data: {} })
-            .then(function (response) {
-                location.href = Routing.generate(URL_INDEX_ELEMENTS, {'slug': productSlug});
-            })
-            .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        // axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': id}), data: {} })
+        //     .then(function (response) {
+        //         location.href = Routing.generate(URL_INDEX_ELEMENTS, {'slug': productSlug});
+        //     })
+        //     .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        // ;
     }
 
     return <>
