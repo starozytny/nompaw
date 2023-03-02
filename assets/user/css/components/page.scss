@@ -1,13 +1,8 @@
-.page-title{
-  background: linear-gradient(0.35turn, var(--color0), var(--color1));
-  color: var(--alpha);
-  margin-top: var(--espaceDiv);
-  margin-bottom: var(--espaceDiv);
-}
-
 .page-title-container{
   padding: 1.8rem 1.2rem;
+}
 
+.page-title-container, .page-default-title{
   h1{
     margin-bottom: 4px;
   }
@@ -19,12 +14,13 @@
 
 .page-toolbar,
 .page-actions{
-  padding: 0 1.2rem;
+  padding: 0 var(--espaceLayout);
   margin-bottom: 1.2rem;
 }
 
 .page-actions{
   @include flex(row, center, space-between, 8px);
+  flex-wrap: wrap;
 
   & > .col-1{
     @include flex(row, center, flex-start);
@@ -36,9 +32,9 @@
   & > .col-1,
   & > .col-2{
     gap: 8px;
+    flex-wrap: wrap;
 
     .btn, .btn-icon{
-      display: inline-block;
       width: auto;
     }
 
@@ -46,6 +42,10 @@
       padding: 10px 12px;
     }
   }
+}
+
+.page-default{
+  padding: 0 var(--espaceLayout);
 }
 
 //                      __   _____ __    ___    __

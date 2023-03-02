@@ -7,3 +7,103 @@
     width: 100%;
   }
 }
+
+.delete-recipe{
+  @include flex(row, center, center);
+}
+
+.recipes{
+  @include flex(row, flex-start, flex-start, var(--espaceDiv));
+  flex-wrap: wrap;
+
+  .card{
+    background-color: var(--grey2);
+    border-radius: calc(var(--radius) * 2);
+    width: 100%;
+    max-width: 321px;
+
+    .card-header, .card-body, .card-footer{
+      padding: var(--espaceDiv);
+    }
+
+    .card-header{
+      @include flex(row, center, flex-start, 24px);
+      border-bottom: 1px solid var(--color3);
+
+      .logo{
+        @include flex();
+        width: 64px;
+        height: 64px;
+      }
+
+      .name{
+        & > span:first-child{
+          @include fontSemibold();
+          font-size: 20px;
+        }
+        .linkTo{
+          margin-top: 2px;
+
+          a{
+            color: var(--primary);
+            @include flex(row, flex-start, flex-start, 6px);
+
+            [class^="icon-"]{
+              font-size: 12px;
+              transform: translateY(3px);
+            }
+          }
+        }
+      }
+    }
+
+    .card-body{
+      border-bottom: 1px solid var(--color3);
+      opacity: 0.85;
+      font-size: 15px;
+      min-height: 110px;
+    }
+
+    .card-footer{
+      @include flex(row, flex-start, flex-end);
+      border-top: 1px solid var(--color3);
+
+      .btn-icon{
+        color: var(--alpha);
+      }
+
+      & > .delete-recipe .btn-icon{
+        &:hover{
+          .tooltip{
+            top: -27px;
+            right: -22px;
+          }
+        }
+      }
+
+      & > *{
+        position: relative;
+        width: 100%;
+        min-height: 48px;
+
+        &:not(.delete-recipe):hover{
+          .tooltip{
+            top: -18px;
+            right: 54px;
+          }
+        }
+
+        &:not(:last-child){
+          &:after{
+            content: "";
+            display: block;
+            width: 1px; height: calc(100% - 16px);
+            position: absolute;
+            top: 8px; right: 0;
+            background-color: var(--color3);
+          }
+        }
+      }
+    }
+  }
+}

@@ -5,19 +5,25 @@ namespace App\Entity\Cook;
 use App\Repository\Cook\CoStepRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CoStepRepository::class)]
 class CoStep
 {
+    const FORM = ['step_form'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['step_form'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['step_form'])]
     private ?int $position = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['step_form'])]
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'steps')]

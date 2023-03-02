@@ -11,7 +11,52 @@
             </a>
         </div>
     </div>
-    <div id="recipes_list">
-        {% include "layout/components/loader.html.twig" %}
+    <div class="page-default">
+        <div class="recipes">
+            {% for elem in recipes %}
+                <div class="card">
+                    <div class="card-header">
+                        <div class="logo">
+                            <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
+                        </div>
+                        <div class="name">
+                            <div>{{ elem.name }}</div>
+                            <div class="linkTo">
+                                <span>{{ elem.difficultyString }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="content">
+                            {{ elem.content | raw }}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a
+                                href="{{ path('user_recipes_read', {'slug': elem.slug}) }}"
+                                class="btn-icon"
+                        >
+                            <span class="icon-vision"></span>
+                            <span class="tooltip">Modifier</span>
+                        </a>
+                        {% if app.user.id == elem.author.id %}
+                            <a
+                                    href="{{ path('user_recipes_update', {'slug': elem.slug}) }}"
+                                    class="btn-icon"
+                            >
+                                <span class="icon-pencil"></span>
+                                <span class="tooltip">Modifier</span>
+                            </a>
+                            <div class="delete-recipe"
+                                 data-id="{{ elem.id }}"
+                                 data-name="{{ elem.name }}"
+                            >
+                                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
