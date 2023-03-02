@@ -1,10 +1,15 @@
 {% extends 'user/layout/layout.html.twig' %}
 
-{% block title %}Hello UserController!{% endblock %}
-{% set page_title %}Hello UserController!{% endset %}
+{% set page_title %}Dashboard{% endset %}
+{% set page_subtitle %}Retrouvez pleins de recettes et un blog dédié à la cuisine !{% endset %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_homepage') }}
+{% endblock %}
 
 {% block main_content %}
-    <div class="main-content">
-        <h1>Hello {{ app.user.username }}</h1>
+    <div class="page-default">
+        En cours de développement ! 😇
     </div>
 {% endblock %}
