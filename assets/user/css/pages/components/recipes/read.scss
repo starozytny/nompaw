@@ -52,8 +52,8 @@
       @include flex(column, flex-start, flex-start, 8px);
       margin: var(--espaceDiv) 0;
       padding: var(--espaceDiv) 0;
-      border-top: 1px solid var(--color3);
-      border-bottom: 1px solid var(--color3);
+      border-top: 1px solid var(--color1);
+      border-bottom: 1px solid var(--color1);
 
       .recipe-data-item{
         @include flex(row, flex-start, flex-start, 8px);
@@ -73,6 +73,39 @@
     }
   }
 
+  .steps{
+    position: relative;
+    @include flex(column, flex-start, flex-start, calc(var(--espaceLayout) * 2));
+
+    &:before{
+      content: "";
+      background-color: var(--color3);
+      display: block;
+      width: 3px; height: 100%;
+      position: absolute;
+      top: 0; left: 15px;
+    }
+
+    .step{
+      position: relative;
+      @include flex(row, flex-start, flex-start, var(--espaceDiv));
+      width: 100%;
+    }
+
+    .number{
+      @include flex();
+      border-radius: var(--radius);
+      background-color: var(--color0);
+      width: 32px; height: 32px;
+      @include fontSemibold();
+    }
+
+    .content{
+      padding-top: 4px;
+      width: calc(100% - 32px);
+    }
+  }
+
   //                      __   _ ____  ___   ___    __
   //                     | _| / |___ \( _ ) / _ \  |_ |
   //    _____ _____ _____| |  | | __) / _ \| | | |  | |_____ _____ _____
@@ -80,7 +113,7 @@
   //                     | |  |_|_____\___/ \___/   | |
   //                     |__|                      |__|
   @media (min-width:1280px) {
-    @include flex(row, stretch, flext-start, var(--espaceDiv));
+    @include flex(row, stretch, flex-start, var(--espaceDiv));
 
     & > .col-1{
       width: 60%;
@@ -96,7 +129,7 @@
     & > .col-2{
       width: 40%;
       background-color: var(--color0);
-      border-radius: calc(var(--radius) * 4) 0 0 calc(var(--radius) * 4);
+      border-radius: calc(var(--radius) * 4);
       margin-bottom: var(--espaceLayout);
 
       .recipe-menu{
@@ -106,6 +139,22 @@
       .recipe-menu-tiny{
         display: flex;
         margin-top: calc(var(--espaceDiv) * 2);
+      }
+    }
+
+    .steps{
+      &:before{
+        left: 23px;
+      }
+
+      .number{
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+      }
+
+      .content{
+        width: calc(100% - 48px);
       }
     }
   }

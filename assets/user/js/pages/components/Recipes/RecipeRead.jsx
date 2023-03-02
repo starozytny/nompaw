@@ -9,7 +9,7 @@ import Sanitaze from '@commonFunctions/sanitaze';
 import moment from "moment";
 import 'moment/locale/fr';
 
-import {Avatar, Checkbox, List, Radio, Rate, Steps} from "antd";
+import { Avatar, Checkbox, List, Radio, Rate } from "antd";
 
 const menu = [
     {
@@ -159,18 +159,15 @@ RecipeRead.propTypes = {
     steps: PropTypes.array.isRequired,
 }
 
-
-function Instructions ({ steps }) {
-
+function Instructions ({ steps })
+{
     let items = [];
     steps.forEach((st, index) => {
-        items.push({ title: `Etape ${index + 1}`, description: parse(st.content) })
+        items.push(<div className="step" key={index}>
+            <div className="number">{st.position}</div>
+            <div className="content">{parse(st.content)}</div>
+        </div>)
     })
 
-    return <Steps
-        progressDot
-        current={5}
-        direction="vertical"
-        items={items}
-    />
+    return <div className="steps">{items}</div>
 }

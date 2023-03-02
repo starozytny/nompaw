@@ -59,7 +59,8 @@ class UserController extends AbstractController
         return $this->render('user/pages/recipes/read.html.twig', [
             'elem' => $obj,
             'element' => $elem,
-            'steps' => $steps
+            'steps' => $steps,
+            'stepsObject' => $stepRepository->findBy(['recipe' => $obj])
         ]);
     }
 
