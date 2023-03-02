@@ -9,7 +9,7 @@ import Sanitaze from '@commonFunctions/sanitaze';
 import moment from "moment";
 import 'moment/locale/fr';
 
-import { Avatar, Checkbox, List, Radio, Rate } from "antd";
+import { Avatar, List, Radio, Rate } from "antd";
 
 const menu = [
     {
@@ -37,21 +37,11 @@ const menuTiny = [
     },
 ];
 
-const ingredients = ['Apple', 'Pear', 'Orange'];
-
 const data = [
-    {
-        title: 'Ant Design Title 1',
-    },
-    {
-        title: 'Ant Design Title 2',
-    },
-    {
-        title: 'Ant Design Title 3',
-    },
-    {
-        title: 'Ant Design Title 4',
-    },
+    {title: 'Ant Design Title 1',},
+    {title: 'Ant Design Title 2',},
+    {title: 'Ant Design Title 3',},
+    {title: 'Ant Design Title 4',},
 ];
 
 export function RecipeRead ({ elem, steps }) {
@@ -60,8 +50,6 @@ export function RecipeRead ({ elem, steps }) {
     const onChangeContext = ({ target: { value } }) => {
         setContext(value);
     };
-
-    const onChange = (checkedValues) => { };
 
     let content;
     switch (context){
@@ -81,7 +69,7 @@ export function RecipeRead ({ elem, steps }) {
             />
             break;
         case "ingredients":
-            content = <Checkbox.Group options={ingredients} defaultValue={['Apple']} onChange={onChange} />
+            content = <Ingredients />
             break;
         default:
             content = <Instructions steps={steps} />
@@ -171,4 +159,22 @@ function Instructions ({ steps })
     })
 
     return <div className="steps">{items}</div>
+}
+
+function Ingredients ({  })
+{
+    return <div className="ingredients">
+        <div className="item">
+            <div className="item-box"></div>
+            <div className="item-data">30g sel</div>
+        </div>
+        <div className="item">
+            <div className="item-box"></div>
+            <div className="item-data">30g poulet</div>
+        </div>
+        <div className="item">
+            <div className="item-box"></div>
+            <div className="item-data">Poivre</div>
+        </div>
+    </div>
 }

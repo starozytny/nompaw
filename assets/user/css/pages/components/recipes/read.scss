@@ -6,13 +6,13 @@
   h2{
     position: relative;
     padding: var(--espaceEls) var(--espaceDiv);
-    background-color: var(--color0Opacity1);
+    background-color: var(--color3Opacity4);
     border-radius: var(--radius);
-    margin-bottom: var(--espaceEls);
+    margin-bottom: var(--espaceDiv);
 
     &:before{
       content: "";
-      background-color: var(--color0);
+      background-color: var(--color3);
       display: inline-block;
       width: 6px; height: 100%;
       position: absolute;
@@ -63,12 +63,32 @@
         }
       }
     }
+  }
 
-    .ant-checkbox-group{
-      @include flex(column, flex-start, flex-start, var(--espaceEls));
+  .ingredients{
+    @include flex(column, flex-start, flex-start, var(--espaceEls));
 
-      :where(.css-dev-only-do-not-override-1km3mtt).ant-checkbox-wrapper+.ant-checkbox-wrapper{
-        margin-left: 0;
+    .item{
+      @include flex(row, center, flex-start, 8px);
+      width: 100%;
+      cursor: pointer;
+
+      .item-box{
+        background-color: var(--grey1);
+        border-radius: 100px;
+        width: 24px; height: 24px;
+        border: 2px solid var(--grey3);
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      .item-data{
+        width: calc(100% - 26px);
+      }
+
+      &:hover{
+        .item-box{
+          background-color: var(--color0);
+        }
       }
     }
   }
@@ -119,6 +139,8 @@
       width: 60%;
 
       .recipe-instructions{
+        padding: var(--espaceLayout) 0;
+
         .instructions{
           display: flex;
           flex-direction: column;
