@@ -18,10 +18,10 @@ if(el){
 
 el = document.getElementById("recipes_update");
 if(el){
-    createRoot(el).render(<RecipeFormulaire context="update" element={JSON.parse(el.dataset.element)} />)
+    createRoot(el).render(<RecipeFormulaire context="update" element={JSON.parse(el.dataset.element)} steps={JSON.parse(el.dataset.steps)} />)
 }
 
 el = document.getElementById("recipes_create");
 if(el){
-    createRoot(el).render(<RecipeFormulaire context="create" element={null} />)
+    createRoot(el).render(<RecipeFormulaire context="create" element={null} steps={[]} />)
 }

@@ -62,7 +62,7 @@
                 {% include "layout/components/user/page_title.html.twig" %}
             {% endif %}
 
-            <main>
+            <main class="{{ full_width is defined ? 'full-width' : '' }}">
                 <div>
                     {% block main_content %}{% endblock %}
                 </div>

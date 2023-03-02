@@ -1,6 +1,6 @@
 {% extends 'user/layout/layout.html.twig' %}
 
-{% set breadcrumbs = [{ text: "Recettes", icon: "book-1" }] %}
+{% set breadcrumbs = [{ text: "Recettes", icon: "book-1", url: path('user_recipes_index') }] %}
 
 {% block stylesheets %}
     {{ parent() }}

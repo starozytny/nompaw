@@ -2,28 +2,33 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import axios from "axios";
+import toastr from "toastr";
+import { uid } from "uid";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import { Input, InputFile, Radiobox } from "@commonComponents/Elements/Fields";
 import { Trumb }            from "@commonComponents/Elements/Trumb";
 import { Button }           from "@commonComponents/Elements/Button";
+import { LoaderTxt }        from "@commonComponents/Elements/Loader";
+import { StepFormulaire }   from "@userPages/Recipes/StepForm";
 
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 import Inputs               from "@commonFunctions/inputs";
 
-const URL_INDEX_ELEMENTS    = "user_recipes_read";
+
+const URL_INDEX_PAGE        = "user_recipes_read";
 const URL_CREATE_ELEMENT    = "api_recipes_create";
-const URL_UPDATE_GROUP      = "api_recipes_update";
+const URL_UPDATE_ELEMENT    = "api_recipes_update";
 const TEXT_CREATE           = "Ajouter le produit";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
-export function RecipeFormulaire ({ context, element })
+export function RecipeFormulaire ({ context, element, steps })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
     if(context === "update"){
-        url = Routing.generate(URL_UPDATE_GROUP, {'id': element.id});
+        url = Routing.generate(URL_UPDATE_ELEMENT, {'id': element.id});
     }
 
     let form = <Form
@@ -33,8 +38,11 @@ export function RecipeFormulaire ({ context, element })
         content={element ? Formulaire.setValue(element.content) : ""}
         durationPrepare={element ? Formulaire.setValueTime(element.durationPrepare) : ""}
         durationCooking={element ? Formulaire.setValueTime(element.durationCooking) : ""}
-        difficulty={element ? Formulaire.setValue(element.difficulty) : ""}
+        difficulty={element ? Formulaire.setValue(element.difficulty) : 0}
+        status={element ? Formulaire.setValue(element.status) : 0}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
+
+        steps={steps}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -43,6 +51,7 @@ export function RecipeFormulaire ({ context, element })
 RecipeFormulaire.propTypes = {
     context: PropTypes.string.isRequired,
     element: PropTypes.object,
+    steps: PropTypes.array,
 }
 
 class Form extends Component {
@@ -56,11 +65,30 @@ class Form extends Component {
             durationPrepare: props.durationPrepare,
             durationCooking: props.durationCooking,
             difficulty: props.difficulty,
+            status: props.status,
             content: { value: content, html: content },
             errors: [],
+            loadSteps: true,
         }
 
         this.file = React.createRef();
+    }
+
+    componentDidMount = () => {
+        const { steps } = this.props;
+
+        let nbSteps = steps.length > 0 ? steps.length : 1;
+
+        if(steps.length > 0){
+            let self = this;
+            steps.forEach((s, index) => {
+                self.setState({ [`step${index + 1}`]: { uid: uid(), value: s.content} })
+            })
+        }else{
+            this.setState({ step1: { uid: uid(), value: '' } })
+        }
+
+        this.setState({ nbSteps: nbSteps, loadStep: false })
     }
 
     handleChange = (e) => {
@@ -81,17 +109,42 @@ class Form extends Component {
         this.setState({[name]: {value: [name].value, html: text}})
     }
 
-    handleSubmit = (e) => {
+    handleIncreaseStep = () => { this.setState((prevState, prevProps) => ({
+        nbSteps: prevState.nbSteps + 1, [`step${(prevState.nbSteps + 1)}`]: { uid: uid(), value: '' }
+    })) }
+
+    handleUpdateContentStep = (i, content) => {
+        let name = `step${i}`;
+        this.setState({ [name]: { uid: this.state[name].uid, value: content } })
+    }
+
+    handleRemoveStep = (step) => {
+        const { nbSteps } = this.state;
+
+        this.setState({ loadStep: true })
+
+        let newNbSteps = nbSteps - 1;
+        if(step !== nbSteps){
+            for(let i = step + 1; i <= nbSteps ; i++){
+                this.setState({ [`step${i - 1}`]: { uid: uid(), value: this.state[`step${i}`].value } })
+            }
+        }
+
+        this.setState({ nbSteps: newNbSteps, loadStep: false })
+    }
+
+    handleSubmit = (e, stay = false) => {
         e.preventDefault();
 
         const { url } = this.props;
-        const { name, durationPrepare, durationCooking, difficulty, content } = this.state;
+        const { name, status, durationPrepare, durationCooking, difficulty, content } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
             {type: "text",  id: 'name', value: name},
             {type: "text",  id: 'difficulty', value: difficulty},
+            {type: "text",  id: 'status', value: status},
             {type: "text",  id: 'content', value: content.html},
         ];
 
@@ -120,7 +173,17 @@ class Form extends Component {
 
             axios({ method: "POST", url: url, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
                 .then(function (response) {
-                    location.href = Routing.generate(URL_INDEX_ELEMENTS, {'slug': response.data.slug});
+                    if(!stay){
+                        location.href = Routing.generate(URL_INDEX_PAGE, {'slug': response.data.slug});
+                    }else{
+                        toastr.info('Données enregistrées.');
+
+                        if(context === "create"){
+                            location.href = Routing.generate(URL_INDEX_PAGE, {'slug': response.data.slug});
+                        }else{
+                            Formulaire.loader(false);
+                        }
+                    }
                 })
                 .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
@@ -129,7 +192,15 @@ class Form extends Component {
 
     render () {
         const { context, imageFile } = this.props;
-        const { errors, name, durationPrepare, durationCooking, difficulty, content } = this.state;
+        const { errors, loadStep, name, status, durationPrepare, durationCooking,  difficulty, content, nbSteps } = this.state;
+
+        let steps = [];
+        for(let i = 1 ; i <= nbSteps ; i++){
+            let val = this.state[`step${i}`];
+            steps.push(<StepFormulaire key={val.uid} content={val.value} step={i}
+                                       onUpdateData={this.handleUpdateContentStep}
+                                       onRemoveStep={this.handleRemoveStep} />)
+        }
 
         let params  = { errors: errors, onChange: this.handleChange };
 
@@ -137,6 +208,11 @@ class Form extends Component {
             { value: 0, label: 'Facile',     identifiant: 'type-0' },
             { value: 1, label: 'Moyen',      identifiant: 'type-1' },
             { value: 2, label: 'Difficile',  identifiant: 'type-2' },
+        ]
+
+        let statusItems = [
+            { value: 0, label: 'Hors ligne', identifiant: 'status-0' },
+            { value: 1, label: 'En ligne',   identifiant: 'status-1' },
         ]
 
         return <>
@@ -150,6 +226,11 @@ class Form extends Component {
                             </div>
                         </div>
                         <div className="line-col-2">
+                            <div className="line line-fat-box">
+                                <Radiobox items={statusItems} identifiant="status" valeur={status} {...params}>
+                                    Visibilité *
+                                </Radiobox>
+                            </div>
                             <div className="line line-fat-box">
                                 <Radiobox items={typesItems} identifiant="difficulty" valeur={difficulty} {...params}>
                                     Difficulté
@@ -175,6 +256,26 @@ class Form extends Component {
                             </div>
                         </div>
                     </div>
+
+                    <div className="line">
+                        <div className="line-col-1">
+                            <div className="title">Contenu</div>
+                            <div className="subtitle">
+                                Le contenu d'un tutoriel est scindé en étapes.
+                            </div>
+                        </div>
+                        <div className="line-col-2">
+                            {loadStep
+                                ? <LoaderTxt />
+                                : <>
+                                    {steps}
+                                    <div className="line">
+                                        <Button outline={true} type="warning" onClick={this.handleIncreaseStep}>Ajouter une étape</Button>
+                                    </div>
+                                </>
+                            }
+                        </div>
+                    </div>
                 </div>
 
                 <div className="line-buttons">
@@ -192,6 +293,7 @@ Form.propTypes = {
     content: PropTypes.string.isRequired,
     durationPrepare: PropTypes.string.isRequired,
     durationCooking: PropTypes.string.isRequired,
-    difficulty: PropTypes.string.isRequired,
+    difficulty: PropTypes.number.isRequired,
+    status: PropTypes.number.isRequired,
     imageFile: PropTypes.string.isRequired,
 }

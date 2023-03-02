@@ -2,8 +2,11 @@
 
 namespace App\Entity\Main;
 
+use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Repository\Main\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -90,6 +93,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups(['user_list'])]
     private ?bool $blocked = false;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: CoRecipe::class)]
+    private Collection $coRecipes;
+
     /**
      * @throws Exception
      */
@@ -97,6 +103,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     {
         $this->createdAt = $this->initNewDateImmutable();
         $this->token = $this->initToken();
+        $this->coRecipes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -367,6 +374,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setBlocked(bool $blocked): self
     {
         $this->blocked = $blocked;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoRecipe>
+     */
+    public function getCoRecipes(): Collection
+    {
+        return $this->coRecipes;
+    }
+
+    public function addCoRecipe(CoRecipe $coRecipe): self
+    {
+        if (!$this->coRecipes->contains($coRecipe)) {
+            $this->coRecipes->add($coRecipe);
+            $coRecipe->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCoRecipe(CoRecipe $coRecipe): self
+    {
+        if ($this->coRecipes->removeElement($coRecipe)) {
+            // set the owning side to null (unless already changed)
+            if ($coRecipe->getAuthor() === $this) {
+                $coRecipe->setAuthor(null);
+            }
+        }
 
         return $this;
     }

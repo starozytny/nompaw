@@ -1,2 +1,9 @@
 @import "./components/recipes/list";
 @import "./components/recipes/read";
+
+.line-tuto-step{
+  label{
+    @include flex(row, center, space-between, var(--espaceEls));
+    width: 100%;
+  }
+}
