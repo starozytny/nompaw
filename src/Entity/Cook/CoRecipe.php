@@ -71,6 +71,7 @@ class CoRecipe extends DataEntity
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\Column]
+    #[Groups(['recipe_form', 'recipe_read'])]
     private ?int $status = null;
 
     public function __construct()

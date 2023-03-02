@@ -94,7 +94,8 @@ export function RecipeRead ({ elem, steps }) {
             <div className="recipe-instructions">
                 <p className="recipe-description">{parse(elem.content)}</p>
                 <div className="rating">
-                    <Rate disabled defaultValue={elem.rate} />
+                    {/*<Rate disabled defaultValue={elem.rate} />*/}
+                    <Rate disabled defaultValue={3} />
                 </div>
 
                 <div className="instructions">

@@ -43,7 +43,7 @@ class RecipeController extends AbstractController
         }else{
             $obj->setUpdatedAt(new \DateTime());
 
-            $steps = $stepRepository->findBy(['tutorial' => $obj]);
+            $steps = $stepRepository->findBy(['recipe' => $obj]);
             foreach($steps as $s){
                 $stepRepository->remove($s);
             }
@@ -87,7 +87,7 @@ class RecipeController extends AbstractController
         return $this->submitForm("create", $repository, new CoRecipe(), $request, $apiResponse, $validator, $dataEntity, $fileUploader, $stepRepository);
     }
 
-    #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'PUT')]
+    #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'POST')]
     public function update(Request $request, CoRecipe $obj, ApiResponse $apiResponse, ValidatorService $validator,
                            DataCook $dataEntity, CoRecipeRepository $repository, FileUploader $fileUploader, CoStepRepository $stepRepository): Response
     {
