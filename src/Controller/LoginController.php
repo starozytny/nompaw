@@ -20,7 +20,7 @@ class LoginController extends AbstractController
     public function index(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
-            if($this->isGranted('ROLE_ADMIN')) return $this->redirectToRoute('admin_homepage');
+            if($this->isGranted('ROLE_ADMIN')) return $this->redirectToRoute('user_homepage');
             if($this->isGranted('ROLE_USER')) return $this->redirectToRoute('user_homepage');
         }
 
@@ -43,7 +43,7 @@ class LoginController extends AbstractController
             $user->setLastLoginAt(new \DateTime());
             $registry->getManager()->flush();
 
-            if($this->isGranted('ROLE_ADMIN')) return $this->redirectToRoute('admin_homepage');
+            if($this->isGranted('ROLE_ADMIN')) return $this->redirectToRoute('user_homepage');
             if($this->isGranted('ROLE_USER')) return $this->redirectToRoute('user_homepage');
         }
 

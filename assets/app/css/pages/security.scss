@@ -13,12 +13,8 @@
     @include flex(column, center, center);
 
     .title-page{
-      margin-bottom: var(--espaceDiv);
+      margin-bottom: 24px;
       text-align: center;
-    }
-
-    .content{
-      width: 100%;
     }
   }
 }
@@ -52,21 +48,9 @@
   }
 }
 
-.see-password{
-  position: relative;
-
-  .btn-see-password{
-    position: absolute;
-    top: 0; right: 0;
-    padding: 8px;
-    color: var(--grey2);
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-
-    &:hover, .active{
-      color: var(--txt);
-    }
-  }
+#forget{
+  width: 100%;
+  text-align: right;
 }
 
 //                      __   _ ____  ___   ___    __
@@ -82,17 +66,11 @@
 
     .col-1{
       width: 40%;
-      height: calc(100vh - 175px);
-
-      .content{
-        width: 414px;
-      }
+      margin-top: 148px;
     }
 
     .col-2{
       width: 60%;
-      height: calc(100vh - 160px);
-      overflow: hidden;
 
       .image{
         img{
@@ -105,15 +83,6 @@
 
   .form-login{
     margin-bottom: 0;
-    max-width: 320px;
-  }
-}
-
-
-@media (min-width:1600px) {
-  .login-page{
-    .col-2 {
-      height: calc(100vh - 175px);
-    }
+    max-width: 280px;
   }
 }

@@ -1,8 +1,10 @@
 footer{
-  background-color: var(--color0Opacity4);
+  background-color: transparent;
+  color: var(--alpha);
+  padding: var(--espaceDiv);
 
   a{
-    color: var(--txt);
+    color: var(--alpha);
 
     &:hover{
       text-decoration: underline;
@@ -15,11 +17,13 @@ footer{
 }
 
 .footer{
-  padding: var(--espaceDiv);
+  @include maxscreen();
+  border-top: 2px solid var(--color1);
+  padding-top: var(--espaceLayout);
 
   .footer-menu{
     @include flex(column, flex-start, flex-start, 24px);
-    margin-bottom: var(--espaceDiv);
+    margin-bottom: 24px;
   }
 
   .footer-logo{
@@ -65,7 +69,6 @@ footer{
 //                     |__|                       |__|
 @media (min-width: 1024px) {
   .footer{
-    padding: 1.8rem;
 
     .footer-logo{
       flex-direction: row;

@@ -8,68 +8,23 @@
 {% block body %}
     {% include "layout/components/page-loader.html.twig" %}
 
-    <div class="layout-1 layout-horizontal-1">
+    <div class="body">
         <nav>
-            <div class="nav-menu">
-                <div class="nav-menu-header">
-                    <a href="{{ path('app_homepage') }}" class="nav-menu-header-logo">
-                        <img src="{{ asset('build/app/images/logo.png') }}" alt="logo">
-                    </a>
-                    <div class="btn-menu-mobile">
-                        <button class="btn-icon"><span class="icon-close"></span></button>
-                    </div>
-                </div>
-                <div class="nav-menu-items">
-                    <div>
-                        {% for item in menu_left %}
-                            <a class="nav-menu-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
-                               href="{{ item.path }}"
-                            >
-                                {% if item.icon is defined %}<span class="icon-{{ item.icon }}"></span>{% endif %}
-                                <span>{{ item.name }}</span>
-                            </a>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {% for item in menu_right %}
-                            <a class="nav-menu-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
-                               href="{{ item.path }}"
-                            >
-                                {% if item.icon is defined %}<span class="icon-{{ item.icon }}"></span>{% endif %}
-                                <span>{{ item.name }}</span>
-                            </a>
-                        {% endfor %}
-                    </div>
-                </div>
+            <a href="{{ path('app_homepage') }}">
+                <img src="{{ asset('build/app/images/logo.png') }}" alt="Logo logilink">
+            </a>
+            <div>
+                <div class="name"><b>Nompaw</b></div>
             </div>
         </nav>
+        <main>
+            <div>
+                {% block main_content %}{% endblock %}
+            </div>
 
-        <div class="body">
-            <header>
-                <div>
-                    <a href="{{ path('app_homepage') }}" class="header-logo">
-                        <img src="{{ asset('build/app/images/logo.png') }}" alt="logo">
-                    </a>
-                </div>
-                <div>
-                    <div class="btn-menu-mobile">
-                        <button class="btn-icon"><span class="icon-menu-1"></span></button>
-                    </div>
-                </div>
-            </header>
-
-            <main>
-                <div>
-                    {% block main_content %}{% endblock %}
-                </div>
-            </main>
-        </div>
-
-        <footer>
             {% block footer %}{% endblock %}
-        </footer>
+        </main>
     </div>
-
 {% endblock %}
 
 {% block javascripts %}

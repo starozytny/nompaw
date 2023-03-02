@@ -91,7 +91,7 @@ class Form extends Component {
         let paramsInput0 = {...params, ...{ onChange: this.handleChange }}
 
         return <>
-            <form onSubmit={this.handleSubmit}>
+            <form onSubmit={this.handleSubmit} className="form-login">
                 <div className="line line-2">
                     <Input identifiant="username" valeur={username} {...paramsInput0}>Nom utilisateur</Input>
                     <Input identifiant="email"    valeur={email}    {...paramsInput0} type="email">Adresse e-mail</Input>
