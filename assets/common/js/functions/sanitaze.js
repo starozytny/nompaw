@@ -100,7 +100,7 @@ function removeAccents (str) {
 
 function toFormatCalendar(value, retour = "") {
     if(value){
-        return moment(value).calendar().replace(":", "h")
+        return moment(value).utc().calendar().replace(":", "h")
     }
 
     return retour;
@@ -108,7 +108,7 @@ function toFormatCalendar(value, retour = "") {
 
 function toDateFormat(date, format = 'LLL', retour = "") {
     if(date === null) return retour;
-    return moment(date).format(format).replace(':', 'h');
+    return moment(date).utc().format(format).replace(':', 'h');
 }
 
 module.exports = {
