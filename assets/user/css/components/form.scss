@@ -3,106 +3,140 @@
 .line{
   label{
     text-transform: uppercase;
+    color: var(--grey3);
     @include fontSemibold();
     font-size: 13px;
   }
 }
 
-.formulaire{
-  padding: 1.8rem 1.2rem;
-  background-color: var(--alpha);
-
-  .line-container > .line:not(:last-child){
-    border-bottom: 1px solid var(--color3);
-    margin-bottom: 1.2rem;
-    padding-bottom: 0.4rem;
+.checkbox-item, .radiobox-item{
+  label{
+    border: 2px solid var(--grey3);
   }
 
-  .line-col-1{
-    margin-bottom: 0.4rem;
-
-    .title{
-      @include fontSemibold();
-      font-size: 18px;
-    }
-
-    .subtitle{
+  &:hover{
+    label{
       color: var(--grey3);
-      font-size: 14px;
+      border-color: var(--primary);
     }
   }
 }
 
-//                      __   _____ __    ___    __
-//                     | _| |___  / /_  ( _ )  |_ |
-//    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
-//   |_____|_____|_____| |    / /| (_) | (_) |  | |_____|_____|_____|
-//                     | |   /_/  \___/ \___/   | |
-//                     |__|                    |__|
-@media (min-width:768px) {
-  .formulaire{
-    .line-col-1{
-      width: 320px;
+.line-fat-box {
+  .checkbox-item, .radiobox-item {
+    overflow: hidden;
+    border-radius: 6px;
 
-      .title, .subtitle{
-        max-width: 320px;
+    &.checked{
+      & > label{
+        background-color: var(--color3);
       }
     }
 
-    .line-col-2{
-      width: calc(100% - 320px - 24px - 8px);
-      margin-left: 24px;
+    label{
+      padding: 20px 12px;
+      border-style: solid;
+      min-width: 120px;
+      text-align: center;
+      background-color: var(--color4);
+    }
+
+    .item-selected{
+      position: absolute;
+      top: -4px;
+      right: -10px;
+      background: var(--primary);
+      transform: rotate(45deg) translateY(-5px);
+      width: 40px;
+      padding-top: 8px;
+      text-align: center;
+
+      [class^="icon-"]{
+        transform: rotate(-45deg);
+      }
+    }
+  }
+
+  .checkbox-item{
+    label{
+      border-radius: 6px;
+    }
+  }
+
+  .radiobox-item{
+    label{
+      border-radius: 40px;
     }
   }
 }
 
-//                      __   _  ___ ____  _  _     __
-//                     | _| / |/ _ \___ \| || |   |_ |
-//    _____ _____ _____| |  | | | | |__) | || |_   | |_____ _____ _____
-//   |_____|_____|_____| |  | | |_| / __/|__   _|  | |_____|_____|_____|
-//                     | |  |_|\___/_____|  |_|    | |
-//                     |__|                       |__|
-@media (min-width: 1024px) {
-  .formulaire{
-    margin: 0 1.8rem;
-    border-radius: 12px;
-    border: 1px solid var(--color0);
+.select-custom{
+  .item{
+    &:hover{
+      background-color: var(--color0Opacity1);
+    }
   }
 }
 
+input, textarea, select, .input-view{
+  background-color: var(--color4);
+  border-color: var(--color3Opacity4);
+  color: var(--grey3);
 
+  &::placeholder{
+    color: var(--grey3);
+  }
+}
 
-//                      __   _ ____  ___   ___    __
-//                     | _| / |___ \( _ ) / _ \  |_ |
-//    _____ _____ _____| |  | | __) / _ \| | | |  | |_____ _____ _____
-//   |_____|_____|_____| |  | |/ __/ (_) | |_| |  | |_____|_____|_____|
-//                     | |  |_|_____\___/ \___/   | |
-//                     |__|                      |__|
-@media (min-width:1280px) {
-  .formulaire{
+.file-uploader{
+  .file-uploader-container{
+    background-color: var(--color4);
 
-    .line-container > .line:not(:last-child){
-      margin-bottom: 1.4rem;
-      padding-bottom: 0.8rem;
+    .infos{
+      color: var(--grey3);
     }
+  }
 
-    .line-col-1{
-      width: 420px;
-
-      .title{
-        font-size: 22px;
+  &:hover{
+    .file-uploader-container{
+      .infos{
+        border-color: var(--alpha);
       }
-      .subtitle{
-        font-size: 16px;
-      }
+    }
+  }
+}
+
+.input-show{
+  color: var(--grey3);
+}
+
+.line-icons{
+  .icon-chart-3{
+    animation: none;
+  }
+
+  .icons-choice{
+    @include flex(row, flex-start, flex-start, 4px);
+    flex-wrap: wrap;
+  }
+
+  .icon-choice{
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.75;
+    background-color: var(--color0Opacity4);
+
+    &.active{
+      background-color: var(--primaryOpacity1);
+      color: var(--primary);
+      opacity: 1;
     }
 
-    .line-col-2{
-      width: calc(100% - 420px - 24px - 8px);
-    }
-
-    .line-buttons{
-      margin-top: 24px;
+    &:not(.active):hover{
+      background-color: var(--color0);
+      opacity: 1;
     }
   }
 }

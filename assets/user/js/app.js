@@ -6,10 +6,17 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min';
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { ContactFormulaire } from "@appFolder/pages/components/Contact/ContactForm";
+import { Notifications } from "@commonComponents/Elements/Notifications";
 import { Cookies } from "@commonComponents/Modules/Cookies/Cookies";
 import { UserFormulaire } from "@adminPages/Users/UserForm";
+import { Theme } from "@userPages/Theme/Theme";
 
 Routing.setRoutingData(routes);
+
+let notifs = document.getElementById("notifs_list");
+if(notifs){
+    createRoot(notifs).render(<Notifications />)
+}
 
 let ck = document.getElementById("cookies");
 if(ck){
@@ -52,4 +59,9 @@ function menu () {
             elements.classList.add('active');
         }
     }
+}
+
+let theme = document.getElementById('theme');
+if(theme){
+    createRoot(theme).render(<Theme />)
 }

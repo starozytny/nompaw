@@ -10,70 +10,91 @@
 {% block body %}
     {% include "layout/components/page-loader.html.twig" %}
 
-    <div class="layout-1 layout-vertical-1">
+    <div class="body">
         <nav>
-            <div class="nav-menu">
-                <div class="nav-menu-header">
-                    <a href="{{ path('app_homepage') }}" class="nav-menu-header-logo">
-                        <img src="{{ asset('build/user/images/logo.png') }}" alt="logo">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="{{ path('user_homepage') }}">
+                        <img src="{{ asset('build/user/images/logo.png') }}" alt="Logo societe">
                     </a>
-                    <div class="btn-menu-mobile">
-                        <button class="btn-icon"><span class="icon-close"></span></button>
-                    </div>
                 </div>
-                <div class="nav-menu-items">
-                    <div>
-                        {% for item in menu %}
-                            <a class="nav-menu-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
-                               href="{{ item.path }}"
-                            >
-                                {% if item.icon is defined %}<span class="icon-{{ item.icon }}"></span>{% endif %}
-                                <span>{{ item.name }}</span>
+
+                <div class="nav-mobile">
+                    <span class="icon-menu"></span>
+                </div>
+
+                <div class="nav-content">
+                    <div class="nav-header">
+                        <div class="avatar">
+                            {% if app.user.avatarFile %}
+                                <img src="{{ app.user.avatarFile }}" alt="Avatar utilisateur">
+                            {% else %}
+                                <div class="avatar-letter">{{ app.user.lastname | slice(0, 1) }}{{ app.user.firstname | slice(0,1) }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="nav-header-infos">
+                            <div>{{ app.user.userIdentifier }}</div>
+                            <div>{{ app.user.email }}</div>
+                        </div>
+                        <div class="nav-header-actions">
+                            <div id="notifs_list">
+                                {% include "layout/components/admin/loaders/btn-icon.html.twig" %}
+                            </div>
+                            {#                            <div id="theme">#}
+                            {#                                {% include "layout/components/admin/loaders/btn-icon.html.twig" %}#}
+                            {#                            </div>#}
+                            <a href="{{ path('app_logout') }}" class="btn-icon btn-icon-outline-default">
+                                <span class="icon-logout"></span>
+                                <span class="tooltip" style="width: 108px;">Se déconnecter</span>
                             </a>
-                        {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="nav-menu">
+                        <div class="nav-items">
+                            {% for item in menu %}
+                                <a class="nav-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
+                                   href="{{ item.path }}"
+                                >
+                                    <span class="icon-{{ item.icon }}"></span>
+                                    <span>{{ item.name }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <div class="nav-items">
+                            {% for item in menu_bottom %}
+                                <a class="nav-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
+                                   href="{{ item.path }}"
+                                >
+                                    <span class="icon-{{ item.icon }}"></span>
+                                    <span>{{ item.name }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <div class="body">
-            <header>
-                <div>
-                    <a href="{{ path('app_homepage') }}" class="header-logo">
-                        <img src="{{ asset('build/user/images/logo.png') }}" alt="logo">
-                    </a>
-                </div>
-                <div>
-                    <a href="{{ path('user_profil_index') }}" class="avatar">
-                        <img src="https://robohash.org/random" alt="avatar">
-                        <span class="tooltip" style="width: 72px">Mon profil</span>
-                    </a>
-                    <div class="btn-menu-mobile">
-                        <button class="btn-icon"><span class="icon-menu-1"></span></button>
-                    </div>
-                </div>
-            </header>
-
+        <main class="{{ full_width is defined ? 'full-width' : '' }}">
             {% block breadcrumb %}
-                {% include "layout/components/user/breadcrumbs.html.twig" %}
+                {% include "user/layout/components/breadcrumbs.html.twig" %}
             {% endblock %}
 
             {% if page_title is defined %}
-                {% include "layout/components/user/page_title.html.twig" %}
+                {% include "layout/components/admin/page_title.html.twig" %}
             {% endif %}
 
-            <main class="{{ full_width is defined ? 'full-width' : '' }}">
-                <div>
-                    {% block main_content %}{% endblock %}
-                </div>
-            </main>
-        </div>
-
-        <footer>
-            {% block footer %}{% endblock %}
-        </footer>
+            {% if page_title_alone is defined %}
+                {% include "layout/components/admin/page_title.html.twig" with {page_title: page_title_alone} %}
+            {% endif %}
+            <div>
+                {% block main_content %}{% endblock %}
+            </div>
+        </main>
     </div>
 
+    {% block footer %}{% endblock %}
 {% endblock %}
 
 {% block javascripts %}

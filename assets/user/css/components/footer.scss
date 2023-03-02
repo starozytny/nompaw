@@ -1,8 +1,9 @@
 footer{
   background-color: var(--color0Opacity4);
+  color: var(--alpha);
 
   a{
-    color: var(--txt);
+    color: var(--alpha);
 
     &:hover{
       text-decoration: underline;
@@ -15,11 +16,11 @@ footer{
 }
 
 .footer{
-  padding: var(--espaceLayout);
+  padding: var(--espaceDiv);
 
   .footer-menu{
-    @include flex(column, flex-start, flex-start, var(--espaceEls));
-    margin-bottom: var(--espaceDiv);
+    @include flex(column, flex-start, flex-start, 24px);
+    margin-bottom: 24px;
   }
 
   .footer-logo{

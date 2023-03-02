@@ -37,24 +37,33 @@
   --error: #f7685b;
   --errorBackground: #ffeeee;
 
-  --txt: #02040f;
-  --alpha: #fdfdfd;
+  --txt: #101010;
+  //--alpha: #fdfdfd;
+  --alpha: #efefef;
 
   --black: #000000;
   --white: #FFFFFF;
 
-  --color0: #220b34;
-  --color1: #c11e38;
-  --color2: #e59500;
+  --color0: #121420;
+  --color1: #1b2432;
+  --color2: #2c2b3c;
   --color3: #403f4c;
   --color4: #605f6b;
 
-  --color0Opacity1: rgba(0, 38, 66, 0.1);
+  --color0Opacity1: rgba(18, 20, 32, 0.1);
+  --color1Opacity1: rgba(27, 36, 50, 0.1);
+  --color2Opacity1: rgba(44, 43, 60, 0.1);
+  --color3Opacity1: rgba(64, 63, 76, 0.1);
+  --color4Opacity1: rgba(96, 95, 107, 0.1);
 
-  --color0Opacity4: rgba(0, 38, 66, 0.4);
-  --color1Opacity4: rgba(132, 0, 50, 0.4);
-  --color2Opacity4: rgba(229, 149, 0, 0.4);
+  --color0Opacity4: rgba(18, 20, 32, 0.4);
+  --color1Opacity4: rgba(27, 36, 50, 0.4);
+  --color2Opacity4: rgba(44, 43, 60, 0.4);
   --color3Opacity4: rgba(64, 63, 76, 0.4);
+  --color4Opacity4: rgba(96, 95, 107, 0.4);
 
-  --color0Opacity6: rgba(0, 38, 66, 0.6);
+  --color0Opacity6: rgba(18, 20, 32, 0.6);
+}
+
+.light-theme{
 }

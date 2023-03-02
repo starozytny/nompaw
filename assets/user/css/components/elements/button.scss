@@ -4,15 +4,6 @@
   border-radius: var(--radius);
 }
 
-.btn-icon, .btn{
-  opacity: 1;
-  transition: opacity 0.2s ease-in-out;
-
-  &:hover{
-    opacity: 0.85;
-  }
-}
-
 .txt-button{
   color: var(--alpha);
 }
@@ -25,6 +16,7 @@ $data:
         "grey3" var(--grey3) var(--grey3) var(--alpha),
         "grey4" var(--grey4) var(--grey4) var(--alpha),
         "default" var(--alpha) var(--grey2) var(--txt),
+        "reverse" var(--grey2) var(--grey2) var(--txt),
 ;
 
 @each $name, $bg, $border, $txt in $data {
@@ -45,7 +37,11 @@ $data:
 [class*="btn-outline-"],
 [class*="btn-icon-outline-"]{
   background-color: var(--color0);
-  border-color: var(--color0);
+}
+
+.btn-outline-default,
+.btn-icon-outline-default{
+  border-color: var(--color2);
 }
 
 $data:

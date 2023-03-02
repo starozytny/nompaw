@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import 'jquery-resizable-dom/dist/jquery-resizable';
 // import Routing     from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Trumbowyg from 'react-trumbowyg';
@@ -13,6 +14,7 @@ import '@nodeModulesFolder/trumbowyg/dist/plugins/fontsize/trumbowyg.fontsize';
 import '@nodeModulesFolder/trumbowyg/dist/plugins/pasteimage/trumbowyg.pasteimage';
 import '@nodeModulesFolder/trumbowyg/dist/plugins/history/trumbowyg.history';
 import '@nodeModulesFolder/trumbowyg/dist/plugins/upload/trumbowyg.upload';
+import '@nodeModulesFolder/trumbowyg/dist/plugins/resizimg/trumbowyg.resizimg';
 
 import { Structure } from "@commonComponents/Elements/Fields";
 
@@ -26,10 +28,8 @@ export function Trumb (props){
                                      ['historyUndo', 'historyRedo'],
                                      ['formatting'],
                                      ['fontsize'],
-                                     'btnGrp-semantic',
+                                     ['bold', 'italic', 'underline', 'strikethrough'],
                                      ['link'],
-                                     ['insertImage'],
-                                     ['upload'],
                                      ['base64'],
                                      ['foreColor', 'backColor'],
                                      'btnGrp-justify',
@@ -43,6 +43,10 @@ export function Trumb (props){
                              onChange={onChange}
                              ref={reference}
                              plugins= {{
+                                 resizimg: {
+                                     minSize: 32,
+                                     step: 16,
+                                 },
                                  upload: {
                                      serverPath: url,
                                      fileFieldName: 'image',

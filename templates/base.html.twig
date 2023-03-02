@@ -1,39 +1,40 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="{% block meta_description %}{% endblock %}" />
-        <meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
-        {% block noindex %}{% endblock %}
-        {% block openGraph %}{% endblock %}
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/ico">
-        <title>{% block title %} | Nompaw{% endblock %}</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}{% endblock %}" />
+    <meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
+    {% block noindex %}{% endblock %}
+    {% block openGraph %}{% endblock %}
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/ico">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}"/>
+    <title>{% block title %} | Nompaw{% endblock %}</title>
 
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('common_app') }}
-        {% endblock %}
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('common_app') }}
+    {% endblock %}
 
-        {% set consent = "logilinkLocalCookie" %} <!-- CONSENT Value -->
-    </head>
-    <body>
+    {% set consent = "nompawLocalCookie" %} <!-- CONSENT Value -->
+</head>
+<body id="body-theme">
 
-        <div id="cookies" data-consent="{{ consent }}"></div>
+<div id="cookies" data-consent="{{ consent }}"></div>
 
-        <div>
-            {# --------------- BODY ---------------- #}
-            {% block body %}{% endblock %}
-        </div>
+<div>
+    {# --------------- BODY ---------------- #}
+    {% block body %}{% endblock %}
+</div>
 
-        {% for label, messages in app.flashes %}
-            <div>{{ label }}</div>
-            {% for message in messages %}
-                <pre>{{ message }}</pre>
-            {% endfor %}
-        {% endfor %}
+{% for label, messages in app.flashes %}
+    <div>{{ label }}</div>
+    {% for message in messages %}
+        <pre>{{ message }}</pre>
+    {% endfor %}
+{% endfor %}
 
-        {% block javascripts %}
-            {{ encore_entry_script_tags('common_app') }}
-        {% endblock %}
-    </body>
+{% block javascripts %}
+    {{ encore_entry_script_tags('common_app') }}
+{% endblock %}
+</body>
 </html>
