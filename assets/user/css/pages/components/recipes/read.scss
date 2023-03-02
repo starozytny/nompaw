@@ -25,7 +25,7 @@
     .recipe-instructions{
       padding: var(--espaceLayout);
 
-      h1{
+      .recipe-description{
         margin-bottom: 0.8rem;
       }
 
@@ -52,8 +52,8 @@
       @include flex(column, flex-start, flex-start, 8px);
       margin: var(--espaceDiv) 0;
       padding: var(--espaceDiv) 0;
-      border-top: 1px solid var(--grey2);
-      border-bottom: 1px solid var(--grey2);
+      border-top: 1px solid var(--color3);
+      border-bottom: 1px solid var(--color3);
 
       .recipe-data-item{
         @include flex(row, flex-start, flex-start, 8px);
@@ -95,7 +95,7 @@
 
     & > .col-2{
       width: 40%;
-      background-color: var(--alpha);
+      background-color: var(--color0);
       border-radius: calc(var(--radius) * 4) 0 0 calc(var(--radius) * 4);
       margin-bottom: var(--espaceLayout);
 

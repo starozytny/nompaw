@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
+
 import _ from "lodash";
+import parse from "html-react-parser"
 
 import Sanitaze from '@commonFunctions/sanitaze';
 
@@ -51,7 +54,7 @@ const data = [
     },
 ];
 
-export function RecipeRead ({ elem }) {
+export function RecipeRead ({ elem, steps }) {
     const [context, setContext] = useState(window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'instructions');
 
     const onChangeContext = ({ target: { value } }) => {
@@ -81,7 +84,7 @@ export function RecipeRead ({ elem }) {
             content = <Checkbox.Group options={ingredients} defaultValue={['Apple']} onChange={onChange} />
             break;
         default:
-            content = <Instructions />
+            content = <Instructions steps={steps} />
             break;
     }
 
@@ -89,14 +92,14 @@ export function RecipeRead ({ elem }) {
         <div className="col-1">
             <img alt="example" src={`https://source.unsplash.com/random/?Food`} style={{ height: 260, objectFit: 'cover' }}/>
             <div className="recipe-instructions">
-                <h1>{elem.name}</h1>
+                <p className="recipe-description">{parse(elem.content)}</p>
                 <div className="rating">
                     <Rate disabled defaultValue={elem.rate} />
                 </div>
 
                 <div className="instructions">
                     <h2>Instructions</h2>
-                    <Instructions />
+                    <Instructions steps={steps} />
                 </div>
             </div>
         </div>
@@ -151,32 +154,23 @@ export function RecipeRead ({ elem }) {
     </div>
 }
 
-function Instructions ({  }) {
+RecipeRead.propTypes = {
+    elem: PropTypes.object.isRequired,
+    steps: PropTypes.array.isRequired,
+}
+
+
+function Instructions ({ steps }) {
+
+    let items = [];
+    steps.forEach((st, index) => {
+        items.push({ title: `Etape ${index + 1}`, description: parse(st.content) })
+    })
+
     return <Steps
         progressDot
         current={5}
         direction="vertical"
-        items={[
-            {
-                title: 'Finished',
-                description: 'This is a description. This is a description.',
-            },
-            {
-                title: 'Finished',
-                description: 'This is a description. This is a description.',
-            },
-            {
-                title: 'In Progress',
-                description: 'This is a description. This is a description.',
-            },
-            {
-                title: 'Waiting',
-                description: 'This is a description.',
-            },
-            {
-                title: 'Waiting',
-                description: 'This is a description.',
-            },
-        ]}
+        items={items}
     />
 }

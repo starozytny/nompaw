@@ -11,19 +11,20 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class CoStep
 {
     const FORM = ['step_form'];
+    const READ = ['step_read'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['step_form'])]
+    #[Groups(['step_form', 'step_read'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['step_form'])]
+    #[Groups(['step_form', 'step_read'])]
     private ?int $position = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['step_form'])]
+    #[Groups(['step_form', 'step_read'])]
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'steps')]

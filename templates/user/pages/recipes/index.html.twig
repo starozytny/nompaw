@@ -20,7 +20,7 @@
                             <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
                         </div>
                         <div class="name">
-                            <div>{{ elem.name }}</div>
+                            <div>{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}</div>
                             <div class="linkTo">
                                 <span>{{ elem.difficultyString }}</span>
                             </div>
@@ -48,6 +48,7 @@
                                 <span class="tooltip">Modifier</span>
                             </a>
                             <div class="delete-recipe"
+                                 data-context="recipes"
                                  data-id="{{ elem.id }}"
                                  data-name="{{ elem.name }}"
                             >

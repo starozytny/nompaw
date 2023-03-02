@@ -407,4 +407,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
         return $this;
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->getHighRoleCode() == self::CODE_ROLE_DEVELOPER || $this->getHighRoleCode() == self::CODE_ROLE_ADMIN;
+    }
 }

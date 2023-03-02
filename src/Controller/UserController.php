@@ -48,15 +48,18 @@ class UserController extends AbstractController
     }
 
     #[Route('/recettes/recette/{slug}', name: 'recipes_read', options: ['expose' => true])]
-    public function read($slug, CoRecipeRepository $repository, SerializerInterface $serializer): Response
+    public function read($slug, CoRecipeRepository $repository, CoStepRepository $stepRepository, SerializerInterface $serializer): Response
     {
-        $obj = $repository->findOneBy(['slug' => $slug]);
+        $obj   = $repository->findOneBy(['slug' => $slug]);
+        $steps = $stepRepository->findBy(['recipe' => $obj]);
 
-        $elem = $serializer->serialize($obj, 'json', ['groups' => CoRecipe::READ]);
+        $elem  = $serializer->serialize($obj, 'json', ['groups' => CoRecipe::READ]);
+        $steps = $serializer->serialize($steps, 'json', ['groups' => CoStep::READ]);
 
         return $this->render('user/pages/recipes/read.html.twig', [
             'elem' => $obj,
-            'element' => $elem
+            'element' => $elem,
+            'steps' => $steps
         ]);
     }
 

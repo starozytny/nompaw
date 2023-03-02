@@ -12,7 +12,7 @@ import { Modal } from "@commonComponents/Elements/Modal";
 const URL_INDEX_ELEMENTS = 'user_recipes_index';
 const URL_DELETE_ELEMENT = 'api_recipes_delete';
 
-export function RecipeDelete ({ context, id, name, productSlug })
+export function RecipeDelete ({ context, id, name })
 {
     let modalRef = useRef(null);
 
@@ -24,7 +24,7 @@ export function RecipeDelete ({ context, id, name, productSlug })
         modalRef.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
         axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': id}), data: {} })
             .then(function (response) {
-                location.href = Routing.generate(URL_INDEX_ELEMENTS, {'slug': productSlug});
+                location.href = Routing.generate(URL_INDEX_ELEMENTS);
             })
             .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
         ;
@@ -45,5 +45,4 @@ RecipeDelete.propTypes = {
     context: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    productSlug: PropTypes.string.isRequired,
 }
