@@ -95,8 +95,12 @@ class RecipeController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(CoRecipe $obj, CoRecipeRepository $repository, ApiResponse $apiResponse): Response
+    public function delete(CoRecipe $obj, CoRecipeRepository $repository, CoStepRepository $stepRepository, ApiResponse $apiResponse): Response
     {
+        foreach($obj->getSteps() as $step){
+            $stepRepository->remove($step);
+        }
+
         $repository->remove($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");

@@ -2,9 +2,10 @@ import '../../css/pages/recipes.scss';
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { Recipes } from "./components/Recipes/Recipes";
-import { RecipeRead } from "./components/Recipes/RecipeRead";
-import { RecipeFormulaire } from "./components/Recipes/RecipeForm";
+import { Recipes } from "@userPages/Recipes/Recipes";
+import { RecipeRead } from "@userPages/Recipes/RecipeRead";
+import { RecipeFormulaire } from "@userPages/Recipes/RecipeForm";
+import { RecipeDelete } from "@userPages/Recipes/RecipeDelete";
 
 let el = document.getElementById("recipes_list");
 if(el){
@@ -24,4 +25,11 @@ if(el){
 el = document.getElementById("recipes_create");
 if(el){
     createRoot(el).render(<RecipeFormulaire context="create" element={null} steps={[]} />)
+}
+
+let deletesRecipe = document.querySelectorAll('.delete-recipe');
+if(deletesRecipe){
+    deletesRecipe.forEach(elem => {
+        createRoot(elem).render(<RecipeDelete context="recipes" {...elem.dataset}/>)
+    })
 }
