@@ -21,7 +21,7 @@
                 {% set url = path('user_recipes_read', {'slug': elem.slug}) %}
             {% endif %}
 
-            <div>Vue actuel : <span class="txt-danger">{{ force_user == null ? "auteur" : "Utilisateur" }}</span></div>
+            <div>Vue actuel : <span class="txt-danger">{{ force_user == null ? "Auteur" : "Utilisateur" }}</span></div>
 
             <a href="{{ url }}" class="btn btn-default">
                 <span class="icon-vision"></span>

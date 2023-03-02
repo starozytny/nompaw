@@ -7,6 +7,8 @@
   @include flex(row, center, center);
   width: 100px;
   padding: 1.2rem;
+  border-radius: 8px;
+  overflow: hidden;
 
   a {
     @include flex(row, center, center);
