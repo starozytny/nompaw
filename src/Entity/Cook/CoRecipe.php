@@ -74,10 +74,14 @@ class CoRecipe extends DataEntity
     #[Groups(['recipe_form', 'recipe_read'])]
     private ?int $status = null;
 
+    #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoIngredient::class)]
+    private Collection $ingredients;
+
     public function __construct()
     {
         $this->createdAt = $this->initNewDateImmutable();
         $this->steps = new ArrayCollection();
+        $this->ingredients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -268,6 +272,36 @@ class CoRecipe extends DataEntity
     public function setStatus(int $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoIngredient>
+     */
+    public function getIngredients(): Collection
+    {
+        return $this->ingredients;
+    }
+
+    public function addIngredient(CoIngredient $ingredient): self
+    {
+        if (!$this->ingredients->contains($ingredient)) {
+            $this->ingredients->add($ingredient);
+            $ingredient->setRecipe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIngredient(CoIngredient $ingredient): self
+    {
+        if ($this->ingredients->removeElement($ingredient)) {
+            // set the owning side to null (unless already changed)
+            if ($ingredient->getRecipe() === $this) {
+                $ingredient->setRecipe(null);
+            }
+        }
 
         return $this;
     }

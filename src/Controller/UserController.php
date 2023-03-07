@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Cook\CoIngredient;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\Cook\CoStep;
 use App\Entity\Enum\Cook\CookStatut;
 use App\Entity\Main\User;
+use App\Repository\Cook\CoIngredientRepository;
 use App\Repository\Cook\CoRecipeRepository;
 use App\Repository\Cook\CoStepRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,18 +50,22 @@ class UserController extends AbstractController
     }
 
     #[Route('/recettes/recette/{slug}', name: 'recipes_read', options: ['expose' => true])]
-    public function read($slug, CoRecipeRepository $repository, CoStepRepository $stepRepository, SerializerInterface $serializer): Response
+    public function read($slug, CoRecipeRepository $repository, CoStepRepository $stepRepository,
+                         CoIngredientRepository $ingredientRepository, SerializerInterface $serializer): Response
     {
         $obj   = $repository->findOneBy(['slug' => $slug]);
         $steps = $stepRepository->findBy(['recipe' => $obj]);
+        $ingre = $ingredientRepository->findBy(['recipe' => $obj]);
 
-        $elem  = $serializer->serialize($obj, 'json', ['groups' => CoRecipe::READ]);
-        $steps = $serializer->serialize($steps, 'json', ['groups' => CoStep::READ]);
+        $elem  = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::READ]);
+        $steps = $serializer->serialize($steps, 'json', ['groups' => CoStep::FORM]);
+        $ingre = $serializer->serialize($ingre, 'json', ['groups' => CoIngredient::FORM]);
 
         return $this->render('user/pages/recipes/read.html.twig', [
             'elem' => $obj,
             'element' => $elem,
             'steps' => $steps,
+            'ingre' => $ingre,
             'stepsObject' => $stepRepository->findBy(['recipe' => $obj])
         ]);
     }
@@ -71,7 +77,8 @@ class UserController extends AbstractController
     }
 
     #[Route('/recettes/modifier/{slug}', name: 'recipes_update', options: ['expose' => true])]
-    public function update($slug, CoRecipeRepository $repository, CoStepRepository $stepRepository, SerializerInterface $serializer): Response
+    public function update($slug, CoRecipeRepository $repository, CoStepRepository $stepRepository,
+                           SerializerInterface $serializer): Response
     {
         $obj   = $repository->findOneBy(['slug' => $slug]);
 
@@ -81,7 +88,7 @@ class UserController extends AbstractController
 
         $steps = $stepRepository->findBy(['recipe' => $obj]);
 
-        $element = $serializer->serialize($obj,'json', ['groups' => CoRecipe::FORM]);
+        $element = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::FORM]);
         $steps   = $serializer->serialize($steps, 'json', ['groups' => CoStep::FORM]);
 
         return $this->render('user/pages/recipes/update.html.twig', [

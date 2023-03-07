@@ -9,7 +9,8 @@ import { RecipeDelete } from "@userPages/Recipes/RecipeDelete";
 let el = document.getElementById("recipes_read");
 if(el){
     createRoot(el).render(<RecipeRead elem={JSON.parse(el.dataset.element)}
-                                      steps={JSON.parse(el.dataset.steps)} />)
+                                      steps={JSON.parse(el.dataset.steps)}
+                                      ingre={JSON.parse(el.dataset.ingre)} />)
 }
 
 el = document.getElementById("recipes_update");
