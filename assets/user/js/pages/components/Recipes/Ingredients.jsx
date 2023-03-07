@@ -12,6 +12,7 @@ import { Input } from "@commonComponents/Elements/Fields";
 
 const URL_CREATE_ELEMENT = 'api_ingredients_create';
 const URL_UPDATE_ELEMENT = 'api_ingredients_update';
+const URL_DELETE_ELEMENT = 'api_ingredients_delete';
 
 export class Ingredients extends Component
 {
@@ -29,7 +30,9 @@ export class Ingredients extends Component
         }
     }
 
-    handleReset = () => { this.setState({
+    handleReset = (ingredients) => { this.setState({
+        context: 'create',
+        ingredients: ingredients,
         ingreId: '',
         ingreUnit: '',
         ingreNombre: '',
@@ -39,33 +42,14 @@ export class Ingredients extends Component
 
     handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
 
-    handleUpdate = (context, element) => {
-        const { ingredients } = this.state;
-
-        let nIngredients = [];
-        ingredients.forEach((ingre) => {
-            if(ingre.id === element.id){
-                ingre.context = context
-            }
-
-            nIngredients.push(ingre);
-        })
-
-        this.handleReset();
-
+    handleUpdate = (element) => {
         this.setState({
-            context: context,
-            ingredients: nIngredients,
+            context: 'update',
+            ingreId: element.id,
+            ingreUnit: Formulaire.setValue(element.unit),
+            ingreNombre: Formulaire.setValue(element.nombre),
+            ingreName: Formulaire.setValue(element.name),
         })
-
-        if(context === 'update'){
-            this.setState({
-                ingreId: element.id,
-                ingreUnit: Formulaire.setValue(element.unit),
-                ingreNombre: Formulaire.setValue(element.nombre),
-                ingreName: Formulaire.setValue(element.name),
-            })
-        }
     }
 
     handleSubmit = (e) => {
@@ -86,44 +70,56 @@ export class Ingredients extends Component
         if(!validate.code){
             Formulaire.showErrors(this, validate);
         }else {
-            let data = {recipeId: recipe.id, id: ingreId, nombre: ingreNombre, unit: ingreUnit, name: ingreName, context: context}
+            let data = {recipeId: recipe.id, id: ingreId, nombre: ingreNombre, unit: ingreUnit, name: ingreName}
 
-            let url, method, nIngredients = [];
-            switch (context){
-                case 'create':
-                    method = 'POST';
-                    url = Routing.generate(URL_CREATE_ELEMENT);
-                    nIngredients = [...ingredients, ...[data]];
-                    break;
-                case 'update':
-                    method = 'PUT';
-                    url = Routing.generate(URL_UPDATE_ELEMENT, {'id': ingreId});
-                    ingredients.forEach((ingre) => {
-                        if(ingre.id === ingreId){
-                            ingre = data;
-                        }
-
-                        nIngredients.push(ingre);
-                    })
-                    break;
-                default:
-                    nIngredients = ingredients;
-                    break;
-            }
+            let method    = context === "create" ? 'POST' : 'PUT',
+                url       = context === 'create'
+                    ? Routing.generate(URL_CREATE_ELEMENT)
+                    : Routing.generate(URL_UPDATE_ELEMENT, {'id': ingreId});
 
             let self = this;
             axios({ method: method, url: url, data: data })
                 .then(function (response) {
-                    self.handleReset();
+                    let nIngredients = [];
 
-                    self.setState({
-                        ingredients: nIngredients,
-                        context: 'create',
-                    })
+                    if(context === "update"){
+                        ingredients.forEach((ingre) => {
+                            if(ingre.id === response.data.id){
+                                ingre = data;
+                            }
+
+                            nIngredients.push(ingre);
+                        })
+                    }else{
+                        nIngredients = ingredients;
+                        nIngredients.push({...data, ...{id: response.data.id}})
+                    }
+
+                    self.handleReset(nIngredients);
                 })
                 .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
         }
+    }
+
+    handleDelete = (element) => {
+        const { ingredients } = this.state;
+
+        let self = this;
+        axios({ method: 'DELETE', url: Routing.generate(URL_DELETE_ELEMENT, {'id': element.id}), data: {} })
+            .then(function (response) {
+
+                let nIngredients = [];
+                ingredients.forEach((ingre) => {
+                    if(ingre.id !== element.id){
+                        nIngredients.push(ingre);
+                    }
+                })
+
+                self.handleReset(nIngredients);
+            })
+            .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
     }
 
     render () {
@@ -153,14 +149,10 @@ export class Ingredients extends Component
                         <span>{ingre.name}</span>
                     </div>
                     <div className="item-actions">
-                        {mode && ingre.context !== 'delete'
-                            ? <>
-                                <ButtonIcon onClick={() => this.handleUpdate('update', ingre)} icon="pencil">Modifier</ButtonIcon>
-                                <ButtonIcon onClick={() => this.handleUpdate('delete', ingre)} icon="trash">Supprimer</ButtonIcon>
-                            </>
-                            : <ButtonIcon onClick={() => this.handleUpdate('revert', ingre)} icon="refresh1">Annuler</ButtonIcon>
-                        }
-
+                        {mode && <>
+                            <ButtonIcon onClick={() => this.handleUpdate(ingre)} icon="pencil">Modifier</ButtonIcon>
+                            <ButtonIcon onClick={() => this.handleDelete(ingre)} icon="trash">Supprimer</ButtonIcon>
+                        </>}
                     </div>
                 </div>
             })}
@@ -169,7 +161,7 @@ export class Ingredients extends Component
 }
 
 Ingredients.propTypes = {
-    mode: PropTypes.number.isRequired,
+    mode: PropTypes.bool.isRequired,
     recipe: PropTypes.object.isRequired,
     ingre: PropTypes.array.isRequired,
 }

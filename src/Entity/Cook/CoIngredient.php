@@ -85,10 +85,4 @@ class CoIngredient
 
         return $this;
     }
-
-    #[Groups(['ingre_form'])]
-    public function getContext(): string
-    {
-        return 'update';
-    }
 }
