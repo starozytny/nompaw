@@ -17,10 +17,6 @@ class CoIngredient
     #[Groups(['ingre_form'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['ingre_form'])]
-    private ?string $uid = null;
-
     #[ORM\Column(nullable: true)]
     #[Groups(['ingre_form'])]
     private ?float $nombre = null;
@@ -40,18 +36,6 @@ class CoIngredient
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getUid(): ?string
-    {
-        return $this->uid;
-    }
-
-    public function setUid(string $uid): self
-    {
-        $this->uid = $uid;
-
-        return $this;
     }
 
     public function getNombre(): ?float
