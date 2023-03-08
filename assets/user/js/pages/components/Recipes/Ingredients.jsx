@@ -9,6 +9,7 @@ import Validateur from "@commonFunctions/validateur";
 
 import { ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input } from "@commonComponents/Elements/Fields";
+import {ModalDelete} from "@commonComponents/Shortcut/Modal";
 
 const URL_CREATE_ELEMENT = 'api_ingredients_create';
 const URL_UPDATE_ELEMENT = 'api_ingredients_update';
@@ -26,8 +27,11 @@ export class Ingredients extends Component
             ingreUnit: "",
             ingreNombre: "",
             ingreName: "",
-            errors: []
+            errors: [],
+            loadData: false,
         }
+
+        this.delete = React.createRef();
     }
 
     handleReset = (ingredients) => { this.setState({
@@ -37,7 +41,8 @@ export class Ingredients extends Component
         ingreUnit: '',
         ingreNombre: '',
         ingreName: '',
-        errors: []
+        errors: [],
+        loadData: false,
     }) }
 
     handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
@@ -49,6 +54,7 @@ export class Ingredients extends Component
             ingreUnit: Formulaire.setValue(element.unit),
             ingreNombre: Formulaire.setValue(element.nombre),
             ingreName: Formulaire.setValue(element.name),
+            errors: []
         })
     }
 
@@ -56,7 +62,7 @@ export class Ingredients extends Component
         e.preventDefault();
 
         const { recipe } = this.props;
-        const { context, ingredients, ingreId, ingreUnit, ingreNombre, ingreName } = this.state;
+        const { context, ingreId, ingreUnit, ingreNombre, ingreName } = this.state;
 
         this.setState({ errors: [] });
 
@@ -77,67 +83,80 @@ export class Ingredients extends Component
                     ? Routing.generate(URL_CREATE_ELEMENT)
                     : Routing.generate(URL_UPDATE_ELEMENT, {'id': ingreId});
 
+            this.setState({ loadData: true })
+
             let self = this;
             axios({ method: method, url: url, data: data })
                 .then(function (response) {
-                    let nIngredients = [];
-
-                    if(context === "update"){
-                        ingredients.forEach((ingre) => {
-                            if(ingre.id === response.data.id){
-                                ingre = data;
-                            }
-
-                            nIngredients.push(ingre);
-                        })
-                    }else{
-                        nIngredients = ingredients;
-                        nIngredients.push({...data, ...{id: response.data.id}})
-                    }
-
-                    self.handleReset(nIngredients);
+                    let element = {...data, ...{id: response.data.id}}
+                    self.handleUpdateList(element, context)
                 })
                 .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
         }
     }
 
-    handleDelete = (element) => {
+    handleUpdateList = (element, context) => {
         const { ingredients } = this.state;
 
-        let self = this;
-        axios({ method: 'DELETE', url: Routing.generate(URL_DELETE_ELEMENT, {'id': element.id}), data: {} })
-            .then(function (response) {
+        let nIngredients = [];
+        switch (context){
+            case 'create':
+                nIngredients = ingredients;
+                nIngredients.push(element)
+                break;
+            case 'update':
+                ingredients.forEach((ingre) => {
+                    if(ingre.id === element.id){
+                        ingre = element;
+                    }
 
-                let nIngredients = [];
+                    nIngredients.push(ingre);
+                })
+                break;
+            case 'delete':
                 ingredients.forEach((ingre) => {
                     if(ingre.id !== element.id){
                         nIngredients.push(ingre);
                     }
                 })
+                break;
+            default:break;
+        }
 
-                self.handleReset(nIngredients);
-            })
-            .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        this.setState({ ingredients: nIngredients });
+        this.handleReset(nIngredients);
+    }
+
+    handleDelete = (element) => {
+        this.setState({ ingreId: element.id })
+        this.delete.current.handleClick();
     }
 
     render () {
         const { mode } = this.props;
-        const { context, errors, ingredients, ingreNombre, ingreUnit, ingreName } = this.state;
+        const { context, errors, loadData, ingredients, ingreId, ingreNombre, ingreUnit, ingreName } = this.state;
 
         const paramsInput0 = {errors: errors, onChange: this.handleChange};
 
         return <div className="ingredients">
             {mode && <div className="form">
-                <div className="line line-3">
+                <div className="line line-4">
                     <Input identifiant='ingreNombre' valeur={ingreNombre} placeholder='0' {...paramsInput0} />
                     <Input identifiant='ingreUnit' valeur={ingreUnit} placeholder='unité' {...paramsInput0} />
                     <Input identifiant='ingreName' valeur={ingreName} placeholder="Ingrédient" {...paramsInput0} />
-                    {context === "create"
-                        ? <ButtonIcon onClick={this.handleSubmit} icon="add">Ajouter</ButtonIcon>
-                        : <ButtonIcon onClick={this.handleSubmit} icon="pencil">Modifier</ButtonIcon>
-                    }
+                    <div className="form-group">
+                        {loadData
+                            ? <ButtonIcon icon='chart-3' />
+                            : (context === "create"
+                                    ? <ButtonIcon onClick={this.handleSubmit} icon="add" text="Ajouter l'ingrédient" />
+                                    : <>
+                                        <ButtonIcon onClick={this.handleSubmit} icon="pencil" text="Enregistrer les modifs." />
+                                        <ButtonIcon onClick={() => this.handleReset(ingredients)} icon="cancel">Annuler</ButtonIcon>
+                                    </>
+                            )
+                        }
+                    </div>
                 </div>
             </div>}
             {ingredients.map((ingre, index) => {
@@ -156,6 +175,12 @@ export class Ingredients extends Component
                     </div>
                 </div>
             })}
+            {mode && <ModalDelete refModal={this.delete} element={{id: ingreId}} routeName={URL_DELETE_ELEMENT}
+                             title="Supprimer cet ingrédient" msgSuccess="Ingrédient supprimé"
+                             onUpdateList={this.handleUpdateList} >
+                    Etes-vous sûr de vouloir supprimer cet ingrédient ?
+                </ModalDelete>
+            }
         </div>
     }
 }

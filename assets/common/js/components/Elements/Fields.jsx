@@ -671,7 +671,7 @@ export function Structure({ identifiant, content, errors, label, classForm="", n
         })
     }
     return <div className={classForm + 'form-group' + (error ? " form-group-error" : "")}>
-        <label htmlFor={identifiant}>{label}</label>
+        {label ? <label htmlFor={identifiant}>{label}</label> : null}
         {content}
         {!noErrors && <div className="error">
             {error ? <><span className='icon-error'/>{error}</> : null}

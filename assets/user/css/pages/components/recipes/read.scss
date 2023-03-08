@@ -68,10 +68,74 @@
   .ingredients{
     @include flex(column, flex-start, flex-start, var(--espaceEls));
 
+    .form{
+      width: 100%;
+      max-width: 568px;
+
+      .line.line-4{
+        flex-direction: row;
+
+        $widthNumber: 48px;
+        $widthUnit: 60px;
+        $widthBtn: 68px;
+
+        .error{
+          display: none;
+        }
+
+        & > .form-group:nth-child(1){ width: $widthNumber; }
+        & > .form-group:nth-child(2){ width: $widthUnit; }
+        & > .form-group:nth-child(3){
+          width: calc(100% - $widthNumber - $widthUnit - $widthBtn);
+        }
+        & > .form-group:nth-child(4){
+          @include flex(row, flex-start, flex-start, 8px);
+          width: $widthBtn;
+
+          .btn-icon{
+            padding: 8px 6px;
+
+            span:last-child{
+              display: none;
+            }
+          }
+        }
+
+        //                      __   _____ __    ___    __
+        //                     | _| |___  / /_  ( _ )  |_ |
+        //    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
+        //   |_____|_____|_____| |    / /| (_) | (_) |  | |_____|_____|_____|
+        //                     | |   /_/  \___/ \___/   | |
+        //                     |__|                    |__|
+        @media (min-width:768px) {
+          $widthBtn: 248px;
+
+          & > .form-group:nth-child(3){
+            width: calc(100% - $widthNumber - $widthUnit - $widthBtn);
+          }
+          & > .form-group:nth-child(4){
+            width: $widthBtn;
+
+            .btn-icon{
+              width: 100%;
+
+              & + .btn-icon{
+                width: auto;
+              }
+
+              span:last-child{
+                display: inline-block;
+              }
+            }
+          }
+        }
+      }
+    }
+
     .item{
       @include flex(row, center, flex-start, 8px);
       width: 100%;
-      cursor: pointer;
+      //cursor: pointer;
 
       .item-box{
         background-color: var(--grey1);
@@ -82,12 +146,18 @@
       }
 
       .item-data{
+        @include flex(row, flex-start, flex-start, 4px);
+        flex-wrap: wrap;
         width: calc(100% - 26px);
+      }
+
+      .item-actions{
+        @include flex(row, flex-start, flex-start, 8px);
       }
 
       &:hover{
         .item-box{
-          background-color: var(--color0);
+          //background-color: var(--color0);
         }
       }
     }
