@@ -21,6 +21,14 @@
     }
   }
 
+  .form-input{
+    @include flex(row, flex-start, flex-start, 8px);
+
+    .btn-icon{
+      padding: 8px 6px;
+    }
+  }
+
   & > .col-1{
     .recipe-instructions{
       padding: var(--espaceLayout);

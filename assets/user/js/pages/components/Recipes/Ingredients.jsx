@@ -9,7 +9,7 @@ import Validateur from "@commonFunctions/validateur";
 
 import { ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input } from "@commonComponents/Elements/Fields";
-import {ModalDelete} from "@commonComponents/Shortcut/Modal";
+import { ModalDelete } from "@commonComponents/Shortcut/Modal";
 
 const URL_CREATE_ELEMENT = 'api_ingredients_create';
 const URL_UPDATE_ELEMENT = 'api_ingredients_update';
@@ -62,7 +62,7 @@ export class Ingredients extends Component
         e.preventDefault();
 
         const { recipe } = this.props;
-        const { context, ingreId, ingreUnit, ingreNombre, ingreName } = this.state;
+        const { context, loadData, ingreId, ingreUnit, ingreNombre, ingreName } = this.state;
 
         this.setState({ errors: [] });
 
@@ -83,16 +83,18 @@ export class Ingredients extends Component
                     ? Routing.generate(URL_CREATE_ELEMENT)
                     : Routing.generate(URL_UPDATE_ELEMENT, {'id': ingreId});
 
-            this.setState({ loadData: true })
+            if(!loadData){
+                this.setState({ loadData: true })
 
-            let self = this;
-            axios({ method: method, url: url, data: data })
-                .then(function (response) {
-                    let element = {...data, ...{id: response.data.id}}
-                    self.handleUpdateList(element, context)
-                })
-                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-            ;
+                let self = this;
+                axios({ method: method, url: url, data: data })
+                    .then(function (response) {
+                        let element = {...data, ...{id: response.data.id}}
+                        self.handleUpdateList(element, context)
+                    })
+                    .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+                ;
+            }
         }
     }
 
@@ -143,15 +145,15 @@ export class Ingredients extends Component
             {mode && <div className="form">
                 <div className="line line-4">
                     <Input identifiant='ingreNombre' valeur={ingreNombre} placeholder='0' {...paramsInput0} />
-                    <Input identifiant='ingreUnit' valeur={ingreUnit} placeholder='unité' {...paramsInput0} />
-                    <Input identifiant='ingreName' valeur={ingreName} placeholder="Ingrédient" {...paramsInput0} />
+                    <Input identifiant='ingreUnit'   valeur={ingreUnit}   placeholder='unité' {...paramsInput0} />
+                    <Input identifiant='ingreName'   valeur={ingreName}   placeholder="Ingrédient" {...paramsInput0} />
                     <div className="form-group">
                         {loadData
-                            ? <ButtonIcon icon='chart-3' />
+                            ? <ButtonIcon icon='chart-3' isLoader={true} />
                             : (context === "create"
                                     ? <ButtonIcon onClick={this.handleSubmit} icon="add" text="Ajouter l'ingrédient" />
                                     : <>
-                                        <ButtonIcon onClick={this.handleSubmit} icon="pencil" text="Enregistrer les modifs." />
+                                        <ButtonIcon onClick={this.handleSubmit} icon="check1" text="Enregistrer les modifs." />
                                         <ButtonIcon onClick={() => this.handleReset(ingredients)} icon="cancel">Annuler</ButtonIcon>
                                     </>
                             )

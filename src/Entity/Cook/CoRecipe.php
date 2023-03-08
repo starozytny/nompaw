@@ -77,6 +77,10 @@ class CoRecipe extends DataEntity
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoIngredient::class)]
     private Collection $ingredients;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['recipe_read'])]
+    private ?int $nbPerson = null;
+
     public function __construct()
     {
         $this->createdAt = $this->initNewDateImmutable();
@@ -222,7 +226,7 @@ class CoRecipe extends DataEntity
         return $this;
     }
 
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_read', 'recipe_form'])]
     public function getImageFile()
     {
         return $this->getFileOrDefault($this->getImage(), self::FOLDER);
@@ -302,6 +306,18 @@ class CoRecipe extends DataEntity
                 $ingredient->setRecipe(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNbPerson(): ?int
+    {
+        return $this->nbPerson;
+    }
+
+    public function setNbPerson(?int $nbPerson): self
+    {
+        $this->nbPerson = $nbPerson;
 
         return $this;
     }

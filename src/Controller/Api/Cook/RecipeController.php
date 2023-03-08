@@ -105,4 +105,23 @@ class RecipeController extends AbstractController
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
+
+    #[Route('/update-data/{id}', name: 'update_data', options: ['expose' => true], methods: 'PUT')]
+    public function updateData(Request $request, CoRecipe $obj, CoRecipeRepository $repository, ApiResponse $apiResponse): Response
+    {
+        $data = json_decode($request->getContent());
+
+        $name  = $data->name;
+        $value = $data->value;
+
+        switch ($name){
+            case 'nbPerson':
+                $obj->setNbPerson($value ? (int) $value : null);
+                break;
+            default: break;
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful("ok");
+    }
 }
