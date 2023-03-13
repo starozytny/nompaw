@@ -4,9 +4,11 @@
 namespace App\Service;
 
 
+use App\Entity\Cook\CoRecipe;
 use App\Entity\Enum\Image\ImageType;
 use App\Entity\Main\Agenda\AgEvent;
 use App\Entity\Main\Changelog;
+use App\Entity\Main\Help\HeQuestion;
 use App\Entity\Main\Image;
 use App\Repository\Main\ImageRepository;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -107,6 +109,8 @@ class FileUploader
             $folder = match ($type){
                 ImageType::Changelog => Changelog::FOLDER,
                 ImageType::AgEvent => AgEvent::FOLDER,
+                ImageType::Question => HeQuestion::FOLDER,
+                ImageType::Recipe => CoRecipe::FOLDER,
             };
 
             $fileName = $this->replaceFile($file, $folder);

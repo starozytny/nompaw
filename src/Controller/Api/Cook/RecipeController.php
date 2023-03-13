@@ -72,7 +72,7 @@ class RecipeController extends AbstractController
 
         $file = $request->files->get('image');
         if ($file) {
-            $fileName = $fileUploader->replaceFile($file, CoRecipe::FOLDER, $obj->getImage());
+            $fileName = $fileUploader->replaceFile($file, CoRecipe::FOLDER_ILLU, $obj->getImage());
             $obj->setImage($fileName);
         }
 

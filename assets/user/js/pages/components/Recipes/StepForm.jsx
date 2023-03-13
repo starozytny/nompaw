@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { Trumb }      from "@commonComponents/Elements/Trumb";
 import { LoaderTxt }  from "@commonComponents/Elements/Loader";
 import { ButtonIcon } from "@commonComponents/Elements/Button";
+import { TinyMCE }    from "@commonComponents/Elements/TinyMCE";
 
 import Formulaire   from "@commonFunctions/formulaire";
 
@@ -42,12 +42,9 @@ class Form extends Component {
         this.setState({ [name]: { value: nContent, html: nContent }, loadData: false })
     }
 
-    handleChangeTrumb = (e) => {
-        let name = e.currentTarget.id;
-        let text = e.currentTarget.innerHTML;
-
-        this.setState({[name]: {value: [name].value, html: text}})
-        this.props.onUpdateData(this.props.step, text);
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+        this.props.onUpdateData(this.props.step, html);
     }
 
     handleRemove = () => {
@@ -61,10 +58,11 @@ class Form extends Component {
         return <div className="line line-tuto-step">
             {loadData
                 ? <LoaderTxt />
-                : <Trumb identifiant={`content-${step}`} valeur={this.state['content-' + step].value} errors={errors} onChange={this.handleChangeTrumb}>
+                : <TinyMCE type={4} identifiant={`content-${step}`} valeur={this.state['content-' + step].value}
+                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                     <span>Etape {step}</span>
                     <ButtonIcon icon="close" type="danger" onClick={this.handleRemove}>Enlever</ButtonIcon>
-                </Trumb>
+                </TinyMCE>
             }
         </div>
     }

@@ -14,7 +14,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: CoRecipeRepository::class)]
 class CoRecipe extends DataEntity
 {
-    const FOLDER = 'recipes';
+    const FOLDER = "images/editor/recipes";
+    const FOLDER_ILLU = 'recipes';
 
     const LIST = ['recipe_list'];
     const FORM = ['recipe_form'];
@@ -229,7 +230,7 @@ class CoRecipe extends DataEntity
     #[Groups(['recipe_read', 'recipe_form'])]
     public function getImageFile()
     {
-        return $this->getFileOrDefault($this->getImage(), self::FOLDER);
+        return $this->getFileOrDefault($this->getImage(), self::FOLDER_ILLU);
     }
 
     public function getAuthor(): ?User

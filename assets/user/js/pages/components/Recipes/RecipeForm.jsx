@@ -7,7 +7,7 @@ import { uid } from "uid";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import { Input, InputFile, Radiobox } from "@commonComponents/Elements/Fields";
-import { Trumb }            from "@commonComponents/Elements/Trumb";
+import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 import { Button }           from "@commonComponents/Elements/Button";
 import { LoaderTxt }        from "@commonComponents/Elements/Loader";
 import { StepFormulaire }   from "@userPages/Recipes/StepForm";
@@ -102,11 +102,8 @@ class Form extends Component {
         this.setState({ [name]: value })
     }
 
-    handleChangeTrumb = (e) => {
-        let name = e.currentTarget.id;
-        let text = e.currentTarget.innerHTML;
-
-        this.setState({[name]: {value: [name].value, html: text}})
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
     }
 
     handleIncreaseStep = () => { this.setState((prevState, prevProps) => ({
@@ -244,9 +241,10 @@ class Form extends Component {
                                 <Input identifiant="durationCooking" valeur={durationCooking} placeholder="00h00" {...params}>Durée de cuisson</Input>
                             </div>
                             <div className="line">
-                                <Trumb identifiant="content" valeur={content.value} errors={errors} onChange={this.handleChangeTrumb}>
+                                <TinyMCE type={4} identifiant='content' valeur={content.value}
+                                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                                     Courte description *
-                                </Trumb>
+                                </TinyMCE>
                             </div>
                             <div className="line">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
