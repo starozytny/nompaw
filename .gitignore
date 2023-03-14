@@ -37,3 +37,8 @@ winpty.exe.stackdump
 /bin/backup/*
 
 /config/databaseConfig.json
+
+.yarnrc
+/.yarn/*
+
+/public/tinymce/

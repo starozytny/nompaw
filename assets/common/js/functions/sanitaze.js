@@ -111,6 +111,27 @@ function toDateFormat(date, format = 'LLL', retour = "") {
     return moment(date).utc().format(format).replace(':', 'h');
 }
 
+function toFormatDuration(value){
+    let duration = value.split('h');
+
+    let hours = duration[0];
+    let minutes = duration[1];
+
+    if(hours === "00"){
+        return parseInt(minutes) + 'min';
+    }
+
+    if(minutes === "00"){
+        return parseInt(hours) + 'h';
+    }
+
+    if(parseInt(hours) < 10){
+        return parseInt(hours) + 'h' + minutes
+    }
+
+    return value;
+}
+
 module.exports = {
     sanitizeString,
     addZeroToNumber,
@@ -121,4 +142,5 @@ module.exports = {
     capitalize,
     removeAccents,
     toDateFormat,
+    toFormatDuration,
 }

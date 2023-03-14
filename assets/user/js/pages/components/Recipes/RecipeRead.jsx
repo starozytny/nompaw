@@ -173,12 +173,12 @@ export class RecipeRead extends Component {
                     <div className="recipe-data">
                         {elem.durationPrepare && <div className="recipe-data-item">
                             <span className="icon-time"></span>
-                            <span>{Sanitaze.toDateFormat(elem.durationPrepare, 'LT')} minutes de préparation</span>
+                            <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT'))} minutes de préparation</span>
                         </div>}
 
                         {elem.durationCooking && <div className="recipe-data-item">
                             <span className="icon-time"></span>
-                            <span>{Sanitaze.toDateFormat(elem.durationCooking, 'LT')} minutes de cuisson</span>
+                            <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT'))} minutes de cuisson</span>
                         </div>}
 
                         {(mode || elem.nbPerson) && <div className="recipe-data-item">
