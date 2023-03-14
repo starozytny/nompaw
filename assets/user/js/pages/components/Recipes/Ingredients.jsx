@@ -29,6 +29,7 @@ export class Ingredients extends Component
             ingreName: "",
             errors: [],
             loadData: false,
+            actives: []
         }
 
         this.delete = React.createRef();
@@ -135,9 +136,29 @@ export class Ingredients extends Component
         this.delete.current.handleClick();
     }
 
+    handleActive = (element) => {
+        const { actives } = this.state;
+
+        let find = false;
+        actives.forEach(act => {
+            if(act.id === element.id){
+                find = true;
+            }
+        })
+
+        let nActives = actives;
+        if(find){
+            nActives = nActives.filter(act => { return act.id !== element.id });
+        }else{
+            nActives.push(element);
+        }
+
+        this.setState({ actives: nActives })
+    }
+
     render () {
         const { mode } = this.props;
-        const { context, errors, loadData, ingredients, ingreId, ingreNombre, ingreUnit, ingreName } = this.state;
+        const { context, errors, loadData, ingredients, ingreId, ingreNombre, ingreUnit, ingreName, actives } = this.state;
 
         const paramsInput0 = {errors: errors, onChange: this.handleChange};
 
@@ -162,7 +183,15 @@ export class Ingredients extends Component
                 </div>
             </div>}
             {ingredients.map((ingre, index) => {
-                return <div className="item" key={index}>
+
+                let active = "";
+                actives.forEach(act => {
+                    if(act.id === ingre.id){
+                        active = ' active';
+                    }
+                })
+
+                return <div className={`item${active}`} onClick={() => this.handleActive(ingre)} key={index}>
                     <div className="item-box"></div>
                     <div className="item-data">
                         <span>{ingre.nombre}</span>
