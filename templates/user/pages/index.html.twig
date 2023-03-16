@@ -10,10 +10,52 @@
 
 {% block main_content %}
     <div class="page-default">
-        En cours de développement ! 😇
+
+        <div class="alert alert-danger">
+            <div class="alert-container">
+                <p>
+                    En cours de développement ! 😇 <b>[ALPHA]</b>
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.2rem; margin-bottom: 1.2rem;">
+            <p>Liste à faire</p>
+
+            <ul>
+                <li>Formulaire recette sur la page de lecture</li>
+                <li style="text-decoration: line-through;">Lancement ALPHA</li>
+                <li style="text-decoration: line-through;">Textarea avec TinyMCE</li>
+                <li>Champs durée plus agréable a saisir</li>
+                <li>Système de commentaires/avis</li>
+                <li>Meilleur responsive design (mobile)</li>
+                <li>Système d'image par étape - Suppression de l'ajout d'image via la textarea</li>
+                <li>Ajouter plusieurs photos</li>
+                <li>Système de favoris</li>
+                <li>Système de notation</li>
+                <li>Meilleur système pour les ingrédients ou meilleur design - à réfléchir</li>
+                <li>Sauvegarder les cliques des ingrédients en session ou local storage</li>
+                <li>Page profil / modification du compte</li>
+                <li>Restreindre l'inscription aux gens connus + système de parrainage</li>
+                <li>Design global</li>
+                <li>Blog astuce & co</li>
+                <li>....</li>
+            </ul>
+
+            <p>Projet en parallèle</p>
+
+            <ul>
+                <li>Site de gestion des projets (randonnées, voyages, etc..)</li>
+                <li>Refonte du site de planificateur de budget</li>
+                <li>Site d'entraide financier</li>
+                <li>Articles : Les histoires de Borito</li>
+                <li>Refonte du site principal</li>
+            </ul>
+
+        </div>
 
         <div style="margin-top: 12px;">
-            <a href="{{ path('user_recipes_index') }}" class="btn btn-primary">Voir les recettes</a>
+            <a href="{{ path('user_recipes_index') }}" class="btn btn-primary" style="display: inline-block">Voir les recettes</a>
         </div>
     </div>
 {% endblock %}

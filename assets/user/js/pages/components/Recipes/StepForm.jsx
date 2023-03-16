@@ -52,6 +52,7 @@ class Form extends Component {
 
     handleRemove = () => {
         this.props.onRemoveStep(this.props.step);
+        this.delete.current.handleClose();
     }
 
     handleDelete = () => {

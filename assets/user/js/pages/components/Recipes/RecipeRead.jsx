@@ -60,7 +60,7 @@ export class RecipeRead extends Component {
         }
     }
 
-    handleChangeContext = (context) => { this.setState({ context }) }
+    handleChangeContext = (e) => { console.log(e); this.setState({ context: e.target.value }) }
 
     handleChange = (e) => {
         let name = e.currentTarget.name;
