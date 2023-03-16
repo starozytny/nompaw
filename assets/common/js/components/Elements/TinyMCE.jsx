@@ -53,6 +53,6 @@ TinyMCE.propTypes = {
     type: PropTypes.number.isRequired,
     valeur: PropTypes.node,
     errors: PropTypes.array.isRequired,
-    children: PropTypes.node.isRequired,
+    children: PropTypes.node,
     onUpdateData: PropTypes.func.isRequired,
 }

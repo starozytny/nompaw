@@ -6,7 +6,6 @@ import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import { Input, InputFile, Radiobox } from "@commonComponents/Elements/Fields";
-import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 import { Button }           from "@commonComponents/Elements/Button";
 
 import Formulaire           from "@commonFunctions/formulaire";
@@ -30,7 +29,6 @@ export function RecipeFormulaire ({ context, element })
         context={context}
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
-        content={element ? Formulaire.setValue(element.content) : ""}
         status={element ? Formulaire.setValue(element.status) : 0}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
     />
@@ -48,12 +46,9 @@ class Form extends Component {
     constructor(props) {
         super(props);
 
-        let content = props.content ? props.content : "";
-
         this.state = {
             name: props.name,
             status: props.status,
-            content: { value: content, html: content },
             errors: [],
         }
 
@@ -62,22 +57,17 @@ class Form extends Component {
 
     handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
 
-    handleChangeTinyMCE = (name, html) => {
-        this.setState({ [name]: {value: this.state[name].value, html: html} })
-    }
-
     handleSubmit = (e, stay = false) => {
         e.preventDefault();
 
         const { context, url } = this.props;
-        const { name, status, content } = this.state;
+        const { name, status } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
             {type: "text",  id: 'name', value: name},
             {type: "text",  id: 'status', value: status},
-            {type: "text",  id: 'content', value: content.html},
         ];
 
         let validate = Validateur.validateur(paramsToValidate)
@@ -116,7 +106,7 @@ class Form extends Component {
 
     render () {
         const { context, imageFile } = this.props;
-        const { errors,  name, status, content } = this.state;
+        const { errors,  name, status } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
 
@@ -145,12 +135,6 @@ class Form extends Component {
                                 <Input identifiant="name" valeur={name} {...params}>Intitulé *</Input>
                             </div>
                             <div className="line">
-                                <TinyMCE type={4} identifiant='content' valeur={content.value}
-                                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
-                                    Courte description *
-                                </TinyMCE>
-                            </div>
-                            <div className="line">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
                                            placeholder="Glissez et déposer une image" {...params}>
                                     Illustration
@@ -172,7 +156,6 @@ Form.propTypes = {
     context: PropTypes.string.isRequired,
     url: PropTypes.node.isRequired,
     name: PropTypes.string.isRequired,
-    content: PropTypes.string.isRequired,
     status: PropTypes.number.isRequired,
     imageFile: PropTypes.string.isRequired,
 }
