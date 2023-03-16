@@ -55,8 +55,8 @@ main{
   main{
     width: calc(100% - 280px);
 
-    //&:not(.full-width){
-    //  max-width: 1060px;
-    //}
+    &.half-width{
+      max-width: 1060px;
+    }
   }
 }

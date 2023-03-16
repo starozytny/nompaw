@@ -8,12 +8,53 @@
     {{ parent() }}
 {% endblock %}
 
-{% block main_content %}
-    {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_profil_index') } %}
+{% set half_width = true %}
 
-    <div id="users_update"
-         data-obj="{{ obj }}"
-    >
-        {% include "layout/components/loader.html.twig" %}
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('admin_users_index', {'h': app.user.id}) }}" class="btn btn-outline-default">
+                <span class="icon-left-arrow"></span>
+                <span>Retourner à la liste</span>
+            </a>
+        </div>
+        <div class="col-2">
+            <a href="{{ path('user_profil_update', {'username': app.user.username}) }}" class="btn btn-primary">
+                <span class="icon-lock-1"></span>
+                <span>Modifier mes informations</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="page-profil-0">
+        <div class="page-profil-header">
+            <div class="profil-header-avatar">
+                {% if app.user.avatarFile %}
+                    <img src={{ app.user.avatarFile }} alt="avatar" />
+                {% else %}
+                    <div class="avatar-letter">{{ app.user.lastname | slice(0,1) }}{{ app.user.firstname | slice(0,1) }}</div>
+                {% endif %}
+            </div>
+            <div class="profil-header-infos">
+                <div class="name">
+                    <span>{{ app.user.lastname }} {{ app.user.firstname }}</span>
+                </div>
+                <div class="sub">ID: {{ app.user.username }}</div>
+            </div>
+        </div>
+
+        <div class="page-profil-body">
+            <div class="col-1">
+                <div class="profil-card">
+                    <div class="title">Détails</div>
+                    <div class="content-infos content-infos-details">
+                        <div class="item">
+                            <span class="icon-email"></span>
+                            <div>{{ app.user.email }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

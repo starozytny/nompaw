@@ -15,6 +15,7 @@ import Sort       from "@commonFunctions/sort";
 
 const URL_SELECT_SOCIETIES  = "api_selection_societies";
 const URL_INDEX_ELEMENTS    = "admin_users_index";
+const URL_PROFIL_ELEMENT    = "user_profil_index";
 const URL_CREATE_ELEMENT    = "api_users_create";
 const URL_UPDATE_GROUP      = "api_users_update";
 const TEXT_CREATE           = "Ajouter l'utilisateur";
@@ -22,7 +23,7 @@ const TEXT_UPDATE           = "Enregistrer les modifications";
 
 let societies = [];
 
-export function UserFormulaire ({ context, element })
+export function UserFormulaire ({ context, element, page = 'user' })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -33,6 +34,7 @@ export function UserFormulaire ({ context, element })
     let form = <Form
         context={context}
         url={url}
+        page={page}
         society={element ? Formulaire.setValue(element.society.id) : ""}
         username={element ? Formulaire.setValue(element.username) : ""}
         firstname={element ? Formulaire.setValue(element.firstname) : ""}
@@ -48,6 +50,7 @@ export function UserFormulaire ({ context, element })
 UserFormulaire.propTypes = {
     context: PropTypes.string.isRequired,
     element: PropTypes.object,
+    page: PropTypes.string,
 }
 
 class Form extends Component {
@@ -55,6 +58,7 @@ class Form extends Component {
         super(props);
 
         this.state = {
+            context: 'user',
             society: props.society,
             username: props.username,
             firstname: props.firstname,
@@ -114,7 +118,7 @@ class Form extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
-        const { context, url } = this.props;
+        const { context, page, url } = this.props;
         const { username, firstname, lastname, password, password2, email, roles, society } = this.state;
 
         this.setState({ errors: [] });
@@ -152,7 +156,11 @@ class Form extends Component {
 
             axios({ method: "POST", url: url, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
                 .then(function (response) {
-                    location.href = Routing.generate(URL_INDEX_ELEMENTS, {'h': response.data.id});
+                    if(page === "user"){
+                        location.href = Routing.generate(URL_INDEX_ELEMENTS, {'h': response.data.id});
+                    }else{
+                        location.href = Routing.generate(URL_PROFIL_ELEMENT);
+                    }
                 })
                 .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
@@ -160,7 +168,7 @@ class Form extends Component {
     }
 
     render () {
-        const { context, avatarFile } = this.props;
+        const { context, page, avatarFile } = this.props;
         const { errors, username, firstname, lastname, email, password, password2, roles, societyName, loadData } = this.state;
 
         let rolesItems = [
@@ -203,24 +211,29 @@ class Form extends Component {
                             <div className="title">Profil utilisateur</div>
                         </div>
                         <div className="line-col-2">
-                            <div className="line line-fat-box">
-                                <Checkbox items={rolesItems} identifiant="roles" valeur={roles} {...paramsInput0}>
-                                    Rôles
-                                </Checkbox>
-                            </div>
+                            {page !== "profil"
+                                ? <>
+                                    <div className="line line-fat-box">
+                                        <Checkbox items={rolesItems} identifiant="roles" valeur={roles} {...paramsInput0}>
+                                            Rôles
+                                        </Checkbox>
+                                    </div>
 
-                            <div className="line">
-                                {loadData
-                                    ? <>
-                                        <label>Société</label>
-                                        <LoaderElements text="Récupération des sociétés..." />
-                                    </>
-                                    : <SelectCustom ref={this.select} identifiant="society" inputValue={societyName}
-                                              items={societies} {...paramsInput1}>
-                                        Société
-                                    </SelectCustom>
-                                }
-                            </div>
+                                    <div className="line">
+                                        {loadData
+                                            ? <>
+                                                <label>Société</label>
+                                                <LoaderElements text="Récupération des sociétés..." />
+                                            </>
+                                            : <SelectCustom ref={this.select} identifiant="society" inputValue={societyName}
+                                                            items={societies} {...paramsInput1}>
+                                                Société
+                                            </SelectCustom>
+                                        }
+                                    </div>
+                                </>
+                                : null
+                            }
 
                             <div className="line">
                                 <InputFile ref={this.file} type="simple" identifiant="avatar" valeur={avatarFile}
@@ -250,4 +263,5 @@ Form.propTypes = {
     email: PropTypes.string.isRequired,
     avatarFile: PropTypes.node,
     roles: PropTypes.array.isRequired,
+    page: PropTypes.string.isRequired,
 }
