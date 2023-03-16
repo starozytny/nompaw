@@ -17,7 +17,6 @@ class DataCook
         return ($obj)
             ->setName($this->sanitizeData->trimData($data->name))
             ->setSlug($this->sanitizeData->slugString($data->name))
-            ->setContent($this->sanitizeData->trimData($data->content->html))
         ;
     }
 

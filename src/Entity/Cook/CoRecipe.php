@@ -40,19 +40,19 @@ class CoRecipe extends DataEntity
     private ?int $rate = 0;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['recipe_list', 'recipe_form', 'recipe_read'])]
+    #[Groups(['recipe_list', 'recipe_read'])]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
-    #[Groups(['recipe_form', 'recipe_read'])]
+    #[Groups(['recipe_read'])]
     private ?\DateTimeInterface $durationPrepare = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
-    #[Groups(['recipe_form', 'recipe_read'])]
+    #[Groups(['recipe_read'])]
     private ?\DateTimeInterface $durationCooking = null;
 
     #[ORM\Column]
-    #[Groups(['recipe_form', 'recipe_read'])]
+    #[Groups(['recipe_read'])]
     private ?int $difficulty = 0;
 
     #[ORM\Column(nullable: true)]
