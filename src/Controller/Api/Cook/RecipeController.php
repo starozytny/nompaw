@@ -110,6 +110,9 @@ class RecipeController extends AbstractController
             case 'durationPrepare':
                 $obj->setDurationPrepare($sanitizeData->createTime($value));
                 break;
+            case 'description':
+                $obj->setContent($sanitizeData->trimData($value->html));
+                break;
             default: break;
         }
 

@@ -21,6 +21,7 @@ import { ButtonIcon } from "@commonComponents/Elements/Button";
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
 import Inputs from "@commonFunctions/inputs";
+import {TinyMCE} from "@commonComponents/Elements/TinyMCE";
 
 const URL_UPDATE_DATA = 'api_recipes_update_data';
 
@@ -47,6 +48,7 @@ export class RecipeRead extends Component {
         super(props);
 
         const elem = props.elem;
+        let description = elem.content ? elem.content : "";
 
         this.state = {
             context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'ingredients',
@@ -55,6 +57,7 @@ export class RecipeRead extends Component {
             difficulty: Formulaire.setValue(elem.difficulty),
             durationCooking: Formulaire.setValueTime(elem.durationCooking),
             durationPrepare: Formulaire.setValueTime(elem.durationPrepare),
+            description: { value: description, html: description },
             errors: [],
             loadData: false,
         }
@@ -77,6 +80,10 @@ export class RecipeRead extends Component {
         }
     }
 
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
+
     handleSubmit = (e, type, name, nValue = null) => {
         e.preventDefault();
 
@@ -86,7 +93,10 @@ export class RecipeRead extends Component {
         this.setState({ errors: [] });
 
         let value = nValue ? nValue : this.state[name];
-        let paramsToValidate = [{type: type,  id: name, value: value}];
+        let paramsToValidate = [{type: type, id: name, value: value}];
+        if(type === "textarea"){
+            paramsToValidate = [{type: 'text', id: name, value: value.html}];
+        }
 
         let validate = Validateur.validateur(paramsToValidate)
         if(!validate.code){
@@ -108,7 +118,7 @@ export class RecipeRead extends Component {
 
     render () {
         const { mode, elem, steps, ingre } = this.props;
-        const { context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare } = this.state;
+        const { context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare, description } = this.state;
 
         let content;
         switch (context){
@@ -147,7 +157,22 @@ export class RecipeRead extends Component {
             <div className="col-1">
                 <img alt="example" src={elem.imageFile} style={{ height: 260, objectFit: 'cover' }}/>
                 <div className="recipe-instructions">
-                    <p className="recipe-description">{parse(elem.content)}</p>
+                    {(mode || elem.content) && <p className="recipe-description">
+                        {mode
+                            ? <div className="form-input">
+                                <TinyMCE type={4} identifiant='description' valeur={description.value}
+                                         errors={errors} onUpdateData={this.handleChangeTinyMCE} />
+                                {loadData
+                                    ? <ButtonIcon icon='chart-3' isLoader={true} />
+                                    : <ButtonIcon icon='check1' type="primary"
+                                                  onClick={(e) => this.handleSubmit(e, 'textarea', 'description')}>
+                                        Enregistrer
+                                    </ButtonIcon>
+                                }
+                            </div>
+                            : parse(elem.content)
+                        }
+                    </p>}
                     <div className="rating">
                         {/*<Rate disabled defaultValue={elem.rate} />*/}
                         <Rate disabled defaultValue={3} />
