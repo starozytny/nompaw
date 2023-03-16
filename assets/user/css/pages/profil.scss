@@ -1,0 +1,14 @@
+@import "../vars/vars";
+
+@import "./components/form";
+@import "../components/profil";
+
+.page-profil-0{
+  .content-infos-details{
+    @include flex(column, flex-start, flex-start, 8px);
+
+    & > .item{
+      @include flex(row, flex-start, flex-start, 8px);
+    }
+  }
+}

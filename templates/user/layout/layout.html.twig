@@ -9,9 +9,23 @@
     { name: "Recettes", icon: "book-1",
         path: path('user_recipes_index'), matchRoute: ['user_recipes_index', 'user_recipes_read']
     },
+    { name: "Mon profil", icon: "user-octagon",
+        path: path('user_profil_index'), matchRoute: ['user_profil_index', 'user_profil_update']
+    },
 ] %}
 
 {% set menu_bottom = [] %}
+
+ {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
+     {% set menu_bottom = menu_bottom | merge([
+         { name: "Espace admin", icon: "earth",
+             path: path('admin_homepage'), matchRoute: ['admin_homepage']
+         },
+         { name: "Page accueil", icon: "earth",
+             path: path('app_homepage'), matchRoute: ['app_homepage']
+         },
+     ]) %}
+ {% endif %}
 
 {% block footer %}
     {% include "user/layout/components/footer.html.twig" %}
