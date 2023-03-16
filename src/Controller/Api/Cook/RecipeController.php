@@ -8,6 +8,7 @@ use App\Repository\Cook\CoStepRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataCook;
 use App\Service\FileUploader;
+use App\Service\SanitizeData;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -85,12 +86,16 @@ class RecipeController extends AbstractController
     }
 
     #[Route('/update-data/{id}', name: 'update_data', options: ['expose' => true], methods: 'PUT')]
-    public function updateData(Request $request, CoRecipe $obj, CoRecipeRepository $repository, ApiResponse $apiResponse): Response
+    public function updateData(Request $request, CoRecipe $obj, CoRecipeRepository $repository, ApiResponse $apiResponse, SanitizeData $sanitizeData): Response
     {
         $data = json_decode($request->getContent());
 
         $name  = $data->name;
         $value = $data->value;
+
+        if($name == "durationCooking" || $name == "durationPrepare"){
+            $value = str_replace('h', ':', $value);
+        }
 
         switch ($name){
             case 'nbPerson':
@@ -98,6 +103,12 @@ class RecipeController extends AbstractController
                 break;
             case 'difficulty':
                 $obj->setDifficulty((int) $value);
+                break;
+            case 'durationCooking':
+                $obj->setDurationCooking($sanitizeData->createTime($value));
+                break;
+            case 'durationPrepare':
+                $obj->setDurationPrepare($sanitizeData->createTime($value));
                 break;
             default: break;
         }

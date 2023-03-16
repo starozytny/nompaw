@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { LoaderTxt }  from "@commonComponents/Elements/Loader";
-import {Button, ButtonIcon} from "@commonComponents/Elements/Button";
 import { TinyMCE }    from "@commonComponents/Elements/TinyMCE";
+import { Modal }      from "@commonComponents/Elements/Modal";
 
 import Formulaire   from "@commonFunctions/formulaire";
-import {ModalDelete} from "@commonComponents/Shortcut/Modal";
-import {Modal} from "@commonComponents/Elements/Modal";
 
 export function StepFormulaire ({ step, content, onUpdateData, onRemoveStep })
 {
@@ -74,7 +73,7 @@ class Form extends Component {
             }
 
             <Modal ref={this.delete} identifiant={`delete-content-${step}`} maxWidth={414} title={`Supprimer l'étape ${step}`}
-                   content={<p>Etes-vous sûr de vouloir supprimer cette étape ?</p>}
+                   content={<p>Etes-vous sûr de vouloir supprimer cette étape ? <br/><br/> <b class="txt-primary">Valider les modifications</b> pour que la suppression soit prise en compte. </p>}
                    footer={<>
                        <Button onClick={this.handleRemove} type="danger">Confirmer la suppression</Button>
                    </>} />

@@ -20,6 +20,7 @@ import { ButtonIcon } from "@commonComponents/Elements/Button";
 
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
+import Inputs from "@commonFunctions/inputs";
 
 const URL_UPDATE_DATA = 'api_recipes_update_data';
 
@@ -52,6 +53,8 @@ export class RecipeRead extends Component {
             elem: elem,
             nbPerson: Formulaire.setValue(elem.nbPerson),
             difficulty: Formulaire.setValue(elem.difficulty),
+            durationCooking: Formulaire.setValueTime(elem.durationCooking),
+            durationPrepare: Formulaire.setValueTime(elem.durationPrepare),
             errors: [],
             loadData: false,
         }
@@ -63,7 +66,11 @@ export class RecipeRead extends Component {
         let name = e.currentTarget.name;
         let value = e.currentTarget.value;
 
-        if(name === "nbPerson"){
+        if(name !== "difficulty"){
+            if(name === 'durationPrepare' || name === 'durationCooking'){
+                value = Inputs.timeInput(e, this.state[name]);
+            }
+
             this.setState({ [name]: value });
         }else{
             this.handleSubmit(e, 'text', 'difficulty', value);
@@ -101,7 +108,7 @@ export class RecipeRead extends Component {
 
     render () {
         const { mode, elem, steps, ingre } = this.props;
-        const { context, errors, loadData, nbPerson, difficulty } = this.state;
+        const { context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare } = this.state;
 
         let content;
         switch (context){
@@ -174,16 +181,38 @@ export class RecipeRead extends Component {
 
                 <div className="menu-content">
                     <div className="recipe-data">
-                        {elem.durationPrepare && <div className="recipe-data-item">
+                        {(mode || elem.durationPrepare) && <div className="recipe-data-item">
                             <span className="icon-time"></span>
-                            <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT'))} minutes de préparation</span>
+                            {mode
+                                ? <div className="form-input">
+                                    <Input identifiant="durationPrepare" valeur={durationPrepare} placeholder="00h00 préparation" {...paramsInput0} />
+                                    {loadData
+                                        ? <ButtonIcon icon='chart-3' isLoader={true} />
+                                        : <ButtonIcon icon='check1' type="primary"
+                                                      onClick={(e) => this.handleSubmit(e, 'time', 'durationPrepare')}>
+                                            Enregistrer
+                                        </ButtonIcon>
+                                    }
+                                </div>
+                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT'))} minutes de préparation</span>
+                            }
                         </div>}
-
-                        {elem.durationCooking && <div className="recipe-data-item">
+                        {(mode || elem.durationCooking) && <div className="recipe-data-item">
                             <span className="icon-time"></span>
-                            <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT'))} minutes de cuisson</span>
+                            {mode
+                                ? <div className="form-input">
+                                    <Input identifiant="durationCooking" valeur={durationCooking} placeholder="00h00 cuisson" {...paramsInput0} />
+                                    {loadData
+                                        ? <ButtonIcon icon='chart-3' isLoader={true} />
+                                        : <ButtonIcon icon='check1' type="primary"
+                                                      onClick={(e) => this.handleSubmit(e, 'time', 'durationCooking')}>
+                                            Enregistrer
+                                        </ButtonIcon>
+                                    }
+                                </div>
+                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT'))} minutes de cuisson</span>
+                            }
                         </div>}
-
                         {(mode || elem.nbPerson) && <div className="recipe-data-item">
                             <span className="icon-group"></span>
                             {mode
@@ -191,7 +220,7 @@ export class RecipeRead extends Component {
                                     <Input identifiant="nbPerson" valeur={nbPerson} placeholder="Pour combien de pers." {...paramsInput0} />
                                     {loadData
                                         ? <ButtonIcon icon='chart-3' isLoader={true} />
-                                        : <ButtonIcon icon='check1'
+                                        : <ButtonIcon icon='check1' type="primary"
                                                       onClick={(e) => this.handleSubmit(e, 'text', 'nbPerson')}>
                                             Enregistrer
                                         </ButtonIcon>
