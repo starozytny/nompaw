@@ -206,7 +206,7 @@ export class RecipeRead extends Component {
 
                 <div className="menu-content">
                     <div className="recipe-data">
-                        {(mode || elem.durationPrepare) && <div className="recipe-data-item">
+                        {(mode || elem.durationPrepare) ? <div className="recipe-data-item">
                             <span className="icon-time"></span>
                             {mode
                                 ? <div className="form-input">
@@ -221,8 +221,8 @@ export class RecipeRead extends Component {
                                 </div>
                                 : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT'))} minutes de préparation</span>
                             }
-                        </div>}
-                        {(mode || elem.durationCooking) && <div className="recipe-data-item">
+                        </div> : null}
+                        {(mode || elem.durationCooking) ? <div className="recipe-data-item">
                             <span className="icon-time"></span>
                             {mode
                                 ? <div className="form-input">
@@ -237,8 +237,8 @@ export class RecipeRead extends Component {
                                 </div>
                                 : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT'))} minutes de cuisson</span>
                             }
-                        </div>}
-                        {(mode || elem.nbPerson) && <div className="recipe-data-item">
+                        </div> : null}
+                        {(mode || elem.nbPerson) ? <div className="recipe-data-item">
                             <span className="icon-group"></span>
                             {mode
                                 ? <div className="form-input">
@@ -253,8 +253,8 @@ export class RecipeRead extends Component {
                                 </div>
                                 : <span>{nbPerson} personnes</span>
                             }
-                        </div>}
-                        {(mode || elem.difficulty) && <div className="recipe-data-item">
+                        </div> : null}
+                        {(mode || elem.difficulty) ? <div className="recipe-data-item">
                             <span className="icon-flash"></span>
                             {mode
                                 ? <div className="form-input">
@@ -262,7 +262,7 @@ export class RecipeRead extends Component {
                                 </div>
                                 : <span>Difficulté {elem.difficultyString.toLowerCase()}</span>
                             }
-                        </div>}
+                        </div> : null}
                     </div>
 
                     <h2>{_.capitalize(context)}</h2>
