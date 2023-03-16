@@ -73,7 +73,7 @@ class Form extends Component {
             }
 
             <Modal ref={this.delete} identifiant={`delete-content-${step}`} maxWidth={414} title={`Supprimer l'étape ${step}`}
-                   content={<p>Etes-vous sûr de vouloir supprimer cette étape ? <br/><br/> <b class="txt-primary">Valider les modifications</b> pour que la suppression soit prise en compte. </p>}
+                   content={<p>Etes-vous sûr de vouloir supprimer cette étape ? <br/><br/> <b className="txt-primary">Valider les modifications</b> pour que la suppression soit prise en compte. </p>}
                    footer={<>
                        <Button onClick={this.handleRemove} type="danger">Confirmer la suppression</Button>
                    </>} />

@@ -31,9 +31,9 @@ class CoRecipe extends DataEntity
     #[Groups(['recipe_list', 'recipe_form', 'recipe_read'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['recipe_list', 'recipe_read'])]
-    private ?string $slug = null;
+    #[ORM\Column]
+    #[Groups(['recipe_form', 'recipe_read'])]
+    private ?int $status = null;
 
     #[ORM\Column]
     #[Groups(['recipe_read'])]
@@ -53,7 +53,15 @@ class CoRecipe extends DataEntity
 
     #[ORM\Column]
     #[Groups(['recipe_form', 'recipe_read'])]
-    private ?int $difficulty = null;
+    private ?int $difficulty = 0;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['recipe_read'])]
+    private ?int $nbPerson = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['recipe_list', 'recipe_read'])]
+    private ?string $slug = null;
 
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoStep::class)]
     private Collection $steps;
@@ -71,16 +79,8 @@ class CoRecipe extends DataEntity
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[ORM\Column]
-    #[Groups(['recipe_form', 'recipe_read'])]
-    private ?int $status = null;
-
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoIngredient::class)]
     private Collection $ingredients;
-
-    #[ORM\Column(nullable: true)]
-    #[Groups(['recipe_read'])]
-    private ?int $nbPerson = null;
 
     public function __construct()
     {

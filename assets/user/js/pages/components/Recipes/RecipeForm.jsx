@@ -11,8 +11,6 @@ import { Button }           from "@commonComponents/Elements/Button";
 
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
-import Inputs               from "@commonFunctions/inputs";
-
 
 const URL_INDEX_PAGE        = "user_recipes_read";
 const URL_CREATE_ELEMENT    = "api_recipes_create";
@@ -33,9 +31,6 @@ export function RecipeFormulaire ({ context, element })
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
         content={element ? Formulaire.setValue(element.content) : ""}
-        durationPrepare={element ? Formulaire.setValueTime(element.durationPrepare) : ""}
-        durationCooking={element ? Formulaire.setValueTime(element.durationCooking) : ""}
-        difficulty={element ? Formulaire.setValue(element.difficulty) : 0}
         status={element ? Formulaire.setValue(element.status) : 0}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
     />
@@ -57,9 +52,6 @@ class Form extends Component {
 
         this.state = {
             name: props.name,
-            durationPrepare: props.durationPrepare,
-            durationCooking: props.durationCooking,
-            difficulty: props.difficulty,
             status: props.status,
             content: { value: content, html: content },
             errors: [],
@@ -68,16 +60,7 @@ class Form extends Component {
         this.file = React.createRef();
     }
 
-    handleChange = (e) => {
-        let name = e.currentTarget.name;
-        let value = e.currentTarget.value;
-
-        if(name === 'durationPrepare' || name === 'durationCooking'){
-            value = Inputs.timeInput(e, this.state[name]);
-        }
-
-        this.setState({ [name]: value })
-    }
+    handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
 
     handleChangeTinyMCE = (name, html) => {
         this.setState({ [name]: {value: this.state[name].value, html: html} })
@@ -86,25 +69,16 @@ class Form extends Component {
     handleSubmit = (e, stay = false) => {
         e.preventDefault();
 
-        const { url } = this.props;
-        const { name, status, durationPrepare, durationCooking, difficulty, content } = this.state;
+        const { context, url } = this.props;
+        const { name, status, content } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
             {type: "text",  id: 'name', value: name},
-            {type: "text",  id: 'difficulty', value: difficulty},
             {type: "text",  id: 'status', value: status},
             {type: "text",  id: 'content', value: content.html},
         ];
-
-        if(durationPrepare !== ""){
-            paramsToValidate = [...paramsToValidate, ...[ {type: "time", id: 'durationPrepare', value: durationPrepare} ]];
-        }
-
-        if(durationCooking !== ""){
-            paramsToValidate = [...paramsToValidate, ...[ {type: "time", id: 'durationCooking', value: durationCooking} ]];
-        }
 
         let validate = Validateur.validateur(paramsToValidate)
         if(!validate.code){
@@ -142,15 +116,9 @@ class Form extends Component {
 
     render () {
         const { context, imageFile } = this.props;
-        const { errors,  name, status, durationPrepare, durationCooking,  difficulty, content } = this.state;
+        const { errors,  name, status, content } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
-
-        let typesItems = [
-            { value: 0, label: 'Facile',     identifiant: 'type-0' },
-            { value: 1, label: 'Moyen',      identifiant: 'type-1' },
-            { value: 2, label: 'Difficile',  identifiant: 'type-2' },
-        ]
 
         let statusItems = [
             { value: 0, label: 'Hors ligne', identifiant: 'status-0' },
@@ -173,17 +141,8 @@ class Form extends Component {
                                     Visibilité *
                                 </Radiobox>
                             </div>
-                            <div className="line line-fat-box">
-                                <Radiobox items={typesItems} identifiant="difficulty" valeur={difficulty} {...params}>
-                                    Difficulté
-                                </Radiobox>
-                            </div>
                             <div className="line">
                                 <Input identifiant="name" valeur={name} {...params}>Intitulé *</Input>
-                            </div>
-                            <div className="line line-2">
-                                <Input identifiant="durationPrepare" valeur={durationPrepare} placeholder="00h00" {...params}>Durée de préparation</Input>
-                                <Input identifiant="durationCooking" valeur={durationCooking} placeholder="00h00" {...params}>Durée de cuisson</Input>
                             </div>
                             <div className="line">
                                 <TinyMCE type={4} identifiant='content' valeur={content.value}
@@ -214,9 +173,6 @@ Form.propTypes = {
     url: PropTypes.node.isRequired,
     name: PropTypes.string.isRequired,
     content: PropTypes.string.isRequired,
-    durationPrepare: PropTypes.string.isRequired,
-    durationCooking: PropTypes.string.isRequired,
-    difficulty: PropTypes.number.isRequired,
     status: PropTypes.number.isRequired,
     imageFile: PropTypes.string.isRequired,
 }
