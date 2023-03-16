@@ -11,6 +11,9 @@
                 <a rel="nofollow" href="{{ path('app_mentions') }}">Mentions légales</a>
                 <a rel="nofollow" href="{{ path('app_politique') }}">Politique de confidentialité</a>
                 <a rel="nofollow" href="{{ path('app_cookies') }}">Gestion des cookies</a>
+                {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
+                    <a rel="nofollow" href="{{ path('admin_homepage') }}">Administration</a>
+                {% endif %}
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
                     <a rel="nofollow" href="{{ path('app_login') }}">Mon espace</a>
                     <a rel="nofollow" href="{{ path('app_logout') }}">Me déconnecter</a>
