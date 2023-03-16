@@ -201,7 +201,7 @@ export class Ingredients extends Component
                     <div className="item-actions">
                         {mode && <>
                             <ButtonIcon onClick={() => this.handleUpdate(ingre)} icon="pencil">Modifier</ButtonIcon>
-                            <ButtonIcon onClick={() => this.handleDelete(ingre)} icon="trash">Supprimer</ButtonIcon>
+                            <ButtonIcon onClick={() => this.handleDelete(ingre)} icon="trash" type="danger">Supprimer</ButtonIcon>
                         </>}
                     </div>
                 </div>

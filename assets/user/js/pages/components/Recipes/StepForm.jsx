@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { LoaderTxt }  from "@commonComponents/Elements/Loader";
-import { ButtonIcon } from "@commonComponents/Elements/Button";
+import {Button, ButtonIcon} from "@commonComponents/Elements/Button";
 import { TinyMCE }    from "@commonComponents/Elements/TinyMCE";
 
 import Formulaire   from "@commonFunctions/formulaire";
+import {ModalDelete} from "@commonComponents/Shortcut/Modal";
+import {Modal} from "@commonComponents/Elements/Modal";
 
 export function StepFormulaire ({ step, content, onUpdateData, onRemoveStep })
 {
@@ -32,6 +34,8 @@ class Form extends Component {
             errors: [],
             loadData: true,
         }
+
+        this.delete = React.createRef();
     }
 
     componentDidMount = () => {
@@ -51,6 +55,10 @@ class Form extends Component {
         this.props.onRemoveStep(this.props.step);
     }
 
+    handleDelete = () => {
+        this.delete.current.handleClick();
+    }
+
     render () {
         const { step } = this.props;
         const { errors, loadData } = this.state;
@@ -61,9 +69,15 @@ class Form extends Component {
                 : <TinyMCE type={4} identifiant={`content-${step}`} valeur={this.state['content-' + step].value}
                          errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                     <span>Etape {step}</span>
-                    <ButtonIcon icon="close" type="danger" onClick={this.handleRemove}>Enlever</ButtonIcon>
+                    <ButtonIcon icon="trash" type="danger" onClick={this.handleDelete}>Enlever</ButtonIcon>
                 </TinyMCE>
             }
+
+            <Modal ref={this.delete} identifiant={`delete-content-${step}`} maxWidth={414} title={`Supprimer l'étape ${step}`}
+                   content={<p>Etes-vous sûr de vouloir supprimer cette étape ?</p>}
+                   footer={<>
+                       <Button onClick={this.handleRemove} type="danger">Confirmer la suppression</Button>
+                   </>} />
         </div>
     }
 }
