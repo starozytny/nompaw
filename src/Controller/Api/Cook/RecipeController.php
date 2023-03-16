@@ -96,10 +96,13 @@ class RecipeController extends AbstractController
             case 'nbPerson':
                 $obj->setNbPerson($value ? (int) $value : null);
                 break;
+            case 'difficulty':
+                $obj->setDifficulty((int) $value);
+                break;
             default: break;
         }
 
         $repository->save($obj, true);
-        return $apiResponse->apiJsonResponseSuccessful("ok");
+        return $apiResponse->apiJsonResponse($obj, CoRecipe::READ);
     }
 }

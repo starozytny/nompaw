@@ -15,7 +15,7 @@ import moment from "moment";
 import 'moment/locale/fr';
 
 import { Avatar, List, Radio, Rate } from "antd";
-import { Input } from "@commonComponents/Elements/Fields";
+import {Input, Radiobox} from "@commonComponents/Elements/Fields";
 import { ButtonIcon } from "@commonComponents/Elements/Button";
 
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
@@ -49,7 +49,9 @@ export class RecipeRead extends Component {
 
         this.state = {
             context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'ingredients',
+            elem: elem,
             nbPerson: Formulaire.setValue(elem.nbPerson),
+            difficulty: Formulaire.setValue(elem.difficulty),
             errors: [],
             loadData: false,
         }
@@ -57,9 +59,18 @@ export class RecipeRead extends Component {
 
     handleChangeContext = (context) => { this.setState({ context }) }
 
-    handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
+    handleChange = (e) => {
+        let name = e.currentTarget.name;
+        let value = e.currentTarget.value;
 
-    handleSubmit = (e, type, name) => {
+        if(name === "nbPerson"){
+            this.setState({ [name]: value });
+        }else{
+            this.handleSubmit(e, 'text', 'difficulty', value);
+        }
+    }
+
+    handleSubmit = (e, type, name, nValue = null) => {
         e.preventDefault();
 
         const { elem } = this.props;
@@ -67,7 +78,7 @@ export class RecipeRead extends Component {
 
         this.setState({ errors: [] });
 
-        let value = this.state[name];
+        let value = nValue ? nValue : this.state[name];
         let paramsToValidate = [{type: type,  id: name, value: value}];
 
         let validate = Validateur.validateur(paramsToValidate)
@@ -80,7 +91,7 @@ export class RecipeRead extends Component {
                 axios({ method: "PUT", url: Routing.generate(URL_UPDATE_DATA, {'id': elem.id}), data: {name: name, value: value} })
                     .then(function (response) {
                         toastr.info('Recette mise à jour.');
-                        self.setState({ [name]: value, loadData: false })
+                        self.setState({ [name]: value, elem: response.data, loadData: false })
                     })
                     .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
                 ;
@@ -90,7 +101,7 @@ export class RecipeRead extends Component {
 
     render () {
         const { mode, elem, steps, ingre } = this.props;
-        const { context, errors, loadData, nbPerson } = this.state;
+        const { context, errors, loadData, nbPerson, difficulty } = this.state;
 
         let content;
         switch (context){
@@ -116,6 +127,12 @@ export class RecipeRead extends Component {
                 content = <Instructions mode={mode} recipe={elem} steps={steps} />
                 break;
         }
+
+        let difficultyItems = [
+            { value: 0, label: 'Facile',     identifiant: 'type-0' },
+            { value: 1, label: 'Moyen',      identifiant: 'type-1' },
+            { value: 2, label: 'Difficile',  identifiant: 'type-2' },
+        ]
 
         const paramsInput0 = {errors: errors, onChange: this.handleChange};
 
@@ -183,10 +200,15 @@ export class RecipeRead extends Component {
                                 : <span>{nbPerson} personnes</span>
                             }
                         </div>}
-                        <div className="recipe-data-item">
+                        {(mode || elem.difficulty) && <div className="recipe-data-item">
                             <span className="icon-flash"></span>
-                            <span>Difficulté {elem.difficultyString.toLowerCase()}</span>
-                        </div>
+                            {mode
+                                ? <div className="form-input">
+                                    <Radiobox items={difficultyItems} identifiant="difficulty" valeur={difficulty} {...paramsInput0} />
+                                </div>
+                                : <span>Difficulté {elem.difficultyString.toLowerCase()}</span>
+                            }
+                        </div>}
                     </div>
 
                     <h2>{_.capitalize(context)}</h2>
