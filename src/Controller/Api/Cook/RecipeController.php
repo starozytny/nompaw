@@ -3,7 +3,6 @@
 namespace App\Controller\Api\Cook;
 
 use App\Entity\Cook\CoRecipe;
-use App\Entity\Cook\CoStep;
 use App\Repository\Cook\CoRecipeRepository;
 use App\Repository\Cook\CoStepRepository;
 use App\Service\ApiResponse;
@@ -26,7 +25,7 @@ class RecipeController extends AbstractController
     }
 
     public function submitForm($type, CoRecipeRepository $repository, CoRecipe $obj, Request $request, ApiResponse $apiResponse,
-                               ValidatorService $validator, DataCook $dataEntity, FileUploader $fileUploader, CoStepRepository $stepRepository): JsonResponse
+                               ValidatorService $validator, DataCook $dataEntity, FileUploader $fileUploader): JsonResponse
     {
         $data = json_decode($request->get('data'));
         if ($data === null) {
@@ -42,27 +41,6 @@ class RecipeController extends AbstractController
             $obj->setAuthor($this->getUser());
         }else{
             $obj->setUpdatedAt(new \DateTime());
-
-            $steps = $stepRepository->findBy(['recipe' => $obj]);
-            foreach($steps as $s){
-                $stepRepository->remove($s);
-            }
-        }
-
-        $dataArray = (array) $data; $order = 1;
-        for ($i = 1 ; $i <= $data->nbSteps ; $i++){
-            $name = 'step' . $i;
-
-            if($dataArray[$name] != "" && $dataArray[$name] != "<p><br></p>"){
-                $step = (new CoStep())
-                    ->setPosition($order)
-                    ->setContent($dataArray[$name]->value)
-                    ->setRecipe($obj)
-                ;
-
-                $stepRepository->save($step);
-                $order++;
-            }
         }
 
         $noErrors = $validator->validate($obj);
@@ -82,16 +60,16 @@ class RecipeController extends AbstractController
 
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataCook $dataEntity, CoRecipeRepository $repository, FileUploader $fileUploader, CoStepRepository $stepRepository): Response
+                           DataCook $dataEntity, CoRecipeRepository $repository, FileUploader $fileUploader): Response
     {
-        return $this->submitForm("create", $repository, new CoRecipe(), $request, $apiResponse, $validator, $dataEntity, $fileUploader, $stepRepository);
+        return $this->submitForm("create", $repository, new CoRecipe(), $request, $apiResponse, $validator, $dataEntity, $fileUploader);
     }
 
     #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'POST')]
     public function update(Request $request, CoRecipe $obj, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataCook $dataEntity, CoRecipeRepository $repository, FileUploader $fileUploader, CoStepRepository $stepRepository): Response
+                           DataCook $dataEntity, CoRecipeRepository $repository, FileUploader $fileUploader): Response
     {
-        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $fileUploader, $stepRepository);
+        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $fileUploader);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

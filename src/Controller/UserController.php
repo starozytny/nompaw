@@ -77,8 +77,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/recettes/modifier/{slug}', name: 'recipes_update', options: ['expose' => true])]
-    public function update($slug, CoRecipeRepository $repository, CoStepRepository $stepRepository,
-                           SerializerInterface $serializer): Response
+    public function update($slug, CoRecipeRepository $repository, SerializerInterface $serializer): Response
     {
         $obj   = $repository->findOneBy(['slug' => $slug]);
 
@@ -86,15 +85,11 @@ class UserController extends AbstractController
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
-        $steps = $stepRepository->findBy(['recipe' => $obj]);
-
         $element = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::FORM]);
-        $steps   = $serializer->serialize($steps, 'json', ['groups' => CoStep::FORM]);
 
         return $this->render('user/pages/recipes/update.html.twig', [
             'elem' => $obj,
             'element' => $element,
-            'steps' => $steps,
         ]);
     }
 }

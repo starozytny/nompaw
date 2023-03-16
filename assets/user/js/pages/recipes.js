@@ -16,13 +16,12 @@ if(el){
 
 el = document.getElementById("recipes_update");
 if(el){
-    createRoot(el).render(<RecipeFormulaire context="update" element={JSON.parse(el.dataset.element)}
-                                            steps={JSON.parse(el.dataset.steps)} />)
+    createRoot(el).render(<RecipeFormulaire context="update" element={JSON.parse(el.dataset.element)} />)
 }
 
 el = document.getElementById("recipes_create");
 if(el){
-    createRoot(el).render(<RecipeFormulaire context="create" element={null} steps={[]} />)
+    createRoot(el).render(<RecipeFormulaire context="create" element={null} />)
 }
 
 let deletesRecipe = document.querySelectorAll('.delete-recipe');

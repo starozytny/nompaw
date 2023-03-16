@@ -15,37 +15,23 @@ import moment from "moment";
 import 'moment/locale/fr';
 
 import { Avatar, List, Radio, Rate } from "antd";
-
-import { Ingredients } from "@userPages/Recipes/Ingredients";
 import { Input } from "@commonComponents/Elements/Fields";
 import { ButtonIcon } from "@commonComponents/Elements/Button";
+
+import { Ingredients }  from "@userPages/Recipes/Ingredients";
+import { Instructions } from "@userPages/Recipes/Instructions";
 
 const URL_UPDATE_DATA = 'api_recipes_update_data';
 
 const menu = [
-    {
-        label: 'Instructions',
-        value: 'instructions',
-    },
-    {
-        label: 'Ingrédients',
-        value: 'ingredients',
-    },
-    {
-        label: 'Avis',
-        value: 'avis',
-    },
+    { label: 'Instructions', value: 'instructions' },
+    { label: 'Ingrédients',  value: 'ingredients' },
+    { label: 'Avis',  value: 'avis' },
 ];
 
 const menuTiny = [
-    {
-        label: 'Ingrédients',
-        value: 'ingredients',
-    },
-    {
-        label: 'Avis',
-        value: 'avis',
-    },
+    { label: 'Ingrédients',  value: 'ingredients' },
+    { label: 'Avis',  value: 'avis' },
 ];
 
 const data = [
@@ -127,7 +113,7 @@ export class RecipeRead extends Component {
                 content = <Ingredients mode={mode} recipe={elem} ingre={ingre} />
                 break;
             default:
-                content = <Instructions steps={steps} />
+                content = <Instructions mode={mode} recipe={elem} steps={steps} />
                 break;
         }
 
@@ -145,7 +131,7 @@ export class RecipeRead extends Component {
 
                     <div className="instructions">
                         <h2>Instructions</h2>
-                        <Instructions steps={steps} />
+                        <Instructions mode={mode} recipe={elem} steps={steps} />
                     </div>
                 </div>
             </div>
@@ -216,17 +202,4 @@ export class RecipeRead extends Component {
 RecipeRead.propTypes = {
     elem: PropTypes.object.isRequired,
     steps: PropTypes.array.isRequired,
-}
-
-function Instructions ({ steps })
-{
-    let items = [];
-    steps.forEach((st, index) => {
-        items.push(<div className="step" key={index}>
-            <div className="number">{st.position}</div>
-            <div className="content">{parse(st.content)}</div>
-        </div>)
-    })
-
-    return <div className="steps">{items}</div>
 }
