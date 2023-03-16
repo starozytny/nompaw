@@ -62,6 +62,8 @@
         <div id="recipes_read"
              data-element="{{ element }}"
              data-steps="{{ steps }}"
+             data-ingre="{{ ingre }}"
+             data-mode="{{ app.user.id == elem.author.id and force_user != true }}"
         >
             {% include "layout/components/loader.html.twig" %}
         </div>

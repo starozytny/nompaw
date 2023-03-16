@@ -4,8 +4,17 @@
 namespace App\Service;
 
 
+use App\Entity\Cook\CoRecipe;
+use App\Entity\Enum\Image\ImageType;
+use App\Entity\Main\Agenda\AgEvent;
+use App\Entity\Main\Changelog;
+use App\Entity\Main\Help\HeQuestion;
+use App\Entity\Main\Image;
+use App\Repository\Main\ImageRepository;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 class FileUploader
@@ -93,5 +102,34 @@ class FileUploader
         return $this->privateDirectory;
     }
 
+    public function uploadTinyMCE(Request $request, ImageRepository $repository, $type, $identifiant = null): JsonResponse
+    {
+        $file = $request->files->get('file');
+        if($file){
+            $folder = match ($type){
+                ImageType::Changelog => Changelog::FOLDER,
+                ImageType::AgEvent => AgEvent::FOLDER,
+                ImageType::Question => HeQuestion::FOLDER,
+                ImageType::Recipe => CoRecipe::FOLDER,
+            };
 
+            $fileName = $this->replaceFile($file, $folder);
+
+            $obj = (new Image())
+                ->setType($type)
+                ->setName($fileName)
+                ->setIdentifiant($identifiant)
+            ;
+
+            $repository->save($obj, true);
+
+            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? "https://" : "http://";
+            return new JsonResponse([
+                'success' => true,
+                'location' => $protocol . $request->getHttpHost() . '/' . $folder . '/' . $fileName
+            ]);
+        }
+
+        return new JsonResponse(['success' => false,]);
+    }
 }

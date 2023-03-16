@@ -3,19 +3,14 @@ import PropTypes from 'prop-types';
 
 import axios from "axios";
 import toastr from "toastr";
-import { uid } from "uid";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import { Input, InputFile, Radiobox } from "@commonComponents/Elements/Fields";
-import { Trumb }            from "@commonComponents/Elements/Trumb";
+import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 import { Button }           from "@commonComponents/Elements/Button";
-import { LoaderTxt }        from "@commonComponents/Elements/Loader";
-import { StepFormulaire }   from "@userPages/Recipes/StepForm";
 
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
-import Inputs               from "@commonFunctions/inputs";
-
 
 const URL_INDEX_PAGE        = "user_recipes_read";
 const URL_CREATE_ELEMENT    = "api_recipes_create";
@@ -23,7 +18,7 @@ const URL_UPDATE_ELEMENT    = "api_recipes_update";
 const TEXT_CREATE           = "Ajouter le produit";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
-export function RecipeFormulaire ({ context, element, steps })
+export function RecipeFormulaire ({ context, element })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -36,13 +31,8 @@ export function RecipeFormulaire ({ context, element, steps })
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
         content={element ? Formulaire.setValue(element.content) : ""}
-        durationPrepare={element ? Formulaire.setValueTime(element.durationPrepare) : ""}
-        durationCooking={element ? Formulaire.setValueTime(element.durationCooking) : ""}
-        difficulty={element ? Formulaire.setValue(element.difficulty) : 0}
         status={element ? Formulaire.setValue(element.status) : 0}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
-
-        steps={steps}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -62,99 +52,33 @@ class Form extends Component {
 
         this.state = {
             name: props.name,
-            durationPrepare: props.durationPrepare,
-            durationCooking: props.durationCooking,
-            difficulty: props.difficulty,
             status: props.status,
             content: { value: content, html: content },
             errors: [],
-            loadSteps: true,
         }
 
         this.file = React.createRef();
     }
 
-    componentDidMount = () => {
-        const { steps } = this.props;
+    handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
 
-        let nbSteps = steps.length > 0 ? steps.length : 1;
-
-        if(steps.length > 0){
-            let self = this;
-            steps.forEach((s, index) => {
-                self.setState({ [`step${index + 1}`]: { uid: uid(), value: s.content} })
-            })
-        }else{
-            this.setState({ step1: { uid: uid(), value: '' } })
-        }
-
-        this.setState({ nbSteps: nbSteps, loadStep: false })
-    }
-
-    handleChange = (e) => {
-        let name = e.currentTarget.name;
-        let value = e.currentTarget.value;
-
-        if(name === 'durationPrepare' || name === 'durationCooking'){
-            value = Inputs.timeInput(e, this.state[name]);
-        }
-
-        this.setState({ [name]: value })
-    }
-
-    handleChangeTrumb = (e) => {
-        let name = e.currentTarget.id;
-        let text = e.currentTarget.innerHTML;
-
-        this.setState({[name]: {value: [name].value, html: text}})
-    }
-
-    handleIncreaseStep = () => { this.setState((prevState, prevProps) => ({
-        nbSteps: prevState.nbSteps + 1, [`step${(prevState.nbSteps + 1)}`]: { uid: uid(), value: '' }
-    })) }
-
-    handleUpdateContentStep = (i, content) => {
-        let name = `step${i}`;
-        this.setState({ [name]: { uid: this.state[name].uid, value: content } })
-    }
-
-    handleRemoveStep = (step) => {
-        const { nbSteps } = this.state;
-
-        this.setState({ loadStep: true })
-
-        let newNbSteps = nbSteps - 1;
-        if(step !== nbSteps){
-            for(let i = step + 1; i <= nbSteps ; i++){
-                this.setState({ [`step${i - 1}`]: { uid: uid(), value: this.state[`step${i}`].value } })
-            }
-        }
-
-        this.setState({ nbSteps: newNbSteps, loadStep: false })
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
     }
 
     handleSubmit = (e, stay = false) => {
         e.preventDefault();
 
-        const { url } = this.props;
-        const { name, status, durationPrepare, durationCooking, difficulty, content } = this.state;
+        const { context, url } = this.props;
+        const { name, status, content } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
             {type: "text",  id: 'name', value: name},
-            {type: "text",  id: 'difficulty', value: difficulty},
             {type: "text",  id: 'status', value: status},
             {type: "text",  id: 'content', value: content.html},
         ];
-
-        if(durationPrepare !== ""){
-            paramsToValidate = [...paramsToValidate, ...[ {type: "time", id: 'durationPrepare', value: durationPrepare} ]];
-        }
-
-        if(durationCooking !== ""){
-            paramsToValidate = [...paramsToValidate, ...[ {type: "time", id: 'durationCooking', value: durationCooking} ]];
-        }
 
         let validate = Validateur.validateur(paramsToValidate)
         if(!validate.code){
@@ -192,23 +116,9 @@ class Form extends Component {
 
     render () {
         const { context, imageFile } = this.props;
-        const { errors, loadStep, name, status, durationPrepare, durationCooking,  difficulty, content, nbSteps } = this.state;
-
-        let steps = [];
-        for(let i = 1 ; i <= nbSteps ; i++){
-            let val = this.state[`step${i}`];
-            steps.push(<StepFormulaire key={val.uid} content={val.value} step={i}
-                                       onUpdateData={this.handleUpdateContentStep}
-                                       onRemoveStep={this.handleRemoveStep} />)
-        }
+        const { errors,  name, status, content } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
-
-        let typesItems = [
-            { value: 0, label: 'Facile',     identifiant: 'type-0' },
-            { value: 1, label: 'Moyen',      identifiant: 'type-1' },
-            { value: 2, label: 'Difficile',  identifiant: 'type-2' },
-        ]
 
         let statusItems = [
             { value: 0, label: 'Hors ligne', identifiant: 'status-0' },
@@ -231,22 +141,14 @@ class Form extends Component {
                                     Visibilité *
                                 </Radiobox>
                             </div>
-                            <div className="line line-fat-box">
-                                <Radiobox items={typesItems} identifiant="difficulty" valeur={difficulty} {...params}>
-                                    Difficulté
-                                </Radiobox>
-                            </div>
                             <div className="line">
                                 <Input identifiant="name" valeur={name} {...params}>Intitulé *</Input>
                             </div>
-                            <div className="line line-2">
-                                <Input identifiant="durationPrepare" valeur={durationPrepare} placeholder="00h00" {...params}>Durée de préparation</Input>
-                                <Input identifiant="durationCooking" valeur={durationCooking} placeholder="00h00" {...params}>Durée de cuisson</Input>
-                            </div>
                             <div className="line">
-                                <Trumb identifiant="content" valeur={content.value} errors={errors} onChange={this.handleChangeTrumb}>
+                                <TinyMCE type={4} identifiant='content' valeur={content.value}
+                                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                                     Courte description *
-                                </Trumb>
+                                </TinyMCE>
                             </div>
                             <div className="line">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
@@ -254,26 +156,6 @@ class Form extends Component {
                                     Illustration
                                 </InputFile>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="line">
-                        <div className="line-col-1">
-                            <div className="title">Contenu</div>
-                            <div className="subtitle">
-                                Le contenu d'un tutoriel est scindé en étapes.
-                            </div>
-                        </div>
-                        <div className="line-col-2">
-                            {loadStep
-                                ? <LoaderTxt />
-                                : <>
-                                    {steps}
-                                    <div className="line">
-                                        <Button outline={true} type="warning" onClick={this.handleIncreaseStep}>Ajouter une étape</Button>
-                                    </div>
-                                </>
-                            }
                         </div>
                     </div>
                 </div>
@@ -291,9 +173,6 @@ Form.propTypes = {
     url: PropTypes.node.isRequired,
     name: PropTypes.string.isRequired,
     content: PropTypes.string.isRequired,
-    durationPrepare: PropTypes.string.isRequired,
-    durationCooking: PropTypes.string.isRequired,
-    difficulty: PropTypes.number.isRequired,
     status: PropTypes.number.isRequired,
     imageFile: PropTypes.string.isRequired,
 }

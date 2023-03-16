@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { Trumb }      from "@commonComponents/Elements/Trumb";
+import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { LoaderTxt }  from "@commonComponents/Elements/Loader";
-import { ButtonIcon } from "@commonComponents/Elements/Button";
+import { TinyMCE }    from "@commonComponents/Elements/TinyMCE";
+import { Modal }      from "@commonComponents/Elements/Modal";
 
 import Formulaire   from "@commonFunctions/formulaire";
 
@@ -32,6 +33,8 @@ class Form extends Component {
             errors: [],
             loadData: true,
         }
+
+        this.delete = React.createRef();
     }
 
     componentDidMount = () => {
@@ -42,16 +45,18 @@ class Form extends Component {
         this.setState({ [name]: { value: nContent, html: nContent }, loadData: false })
     }
 
-    handleChangeTrumb = (e) => {
-        let name = e.currentTarget.id;
-        let text = e.currentTarget.innerHTML;
-
-        this.setState({[name]: {value: [name].value, html: text}})
-        this.props.onUpdateData(this.props.step, text);
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+        this.props.onUpdateData(this.props.step, html);
     }
 
     handleRemove = () => {
         this.props.onRemoveStep(this.props.step);
+        this.delete.current.handleClose();
+    }
+
+    handleDelete = () => {
+        this.delete.current.handleClick();
     }
 
     render () {
@@ -61,11 +66,18 @@ class Form extends Component {
         return <div className="line line-tuto-step">
             {loadData
                 ? <LoaderTxt />
-                : <Trumb identifiant={`content-${step}`} valeur={this.state['content-' + step].value} errors={errors} onChange={this.handleChangeTrumb}>
+                : <TinyMCE type={4} identifiant={`content-${step}`} valeur={this.state['content-' + step].value}
+                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                     <span>Etape {step}</span>
-                    <ButtonIcon icon="close" type="danger" onClick={this.handleRemove}>Enlever</ButtonIcon>
-                </Trumb>
+                    <ButtonIcon icon="trash" type="danger" onClick={this.handleDelete}>Enlever</ButtonIcon>
+                </TinyMCE>
             }
+
+            <Modal ref={this.delete} identifiant={`delete-content-${step}`} maxWidth={414} title={`Supprimer l'étape ${step}`}
+                   content={<p>Etes-vous sûr de vouloir supprimer cette étape ? <br/><br/> <b className="txt-primary">Valider les modifications</b> pour que la suppression soit prise en compte. </p>}
+                   footer={<>
+                       <Button onClick={this.handleRemove} type="danger">Confirmer la suppression</Button>
+                   </>} />
         </div>
     }
 }

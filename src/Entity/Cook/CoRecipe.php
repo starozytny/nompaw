@@ -14,7 +14,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: CoRecipeRepository::class)]
 class CoRecipe extends DataEntity
 {
-    const FOLDER = 'recipes';
+    const FOLDER = "images/editor/recipes";
+    const FOLDER_ILLU = 'recipes';
 
     const LIST = ['recipe_list'];
     const FORM = ['recipe_form'];
@@ -30,9 +31,9 @@ class CoRecipe extends DataEntity
     #[Groups(['recipe_list', 'recipe_form', 'recipe_read'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['recipe_list', 'recipe_read'])]
-    private ?string $slug = null;
+    #[ORM\Column]
+    #[Groups(['recipe_form', 'recipe_read'])]
+    private ?int $status = null;
 
     #[ORM\Column]
     #[Groups(['recipe_read'])]
@@ -52,7 +53,15 @@ class CoRecipe extends DataEntity
 
     #[ORM\Column]
     #[Groups(['recipe_form', 'recipe_read'])]
-    private ?int $difficulty = null;
+    private ?int $difficulty = 0;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['recipe_read'])]
+    private ?int $nbPerson = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['recipe_list', 'recipe_read'])]
+    private ?string $slug = null;
 
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoStep::class)]
     private Collection $steps;
@@ -70,14 +79,14 @@ class CoRecipe extends DataEntity
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[ORM\Column]
-    #[Groups(['recipe_form', 'recipe_read'])]
-    private ?int $status = null;
+    #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoIngredient::class)]
+    private Collection $ingredients;
 
     public function __construct()
     {
         $this->createdAt = $this->initNewDateImmutable();
         $this->steps = new ArrayCollection();
+        $this->ingredients = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -218,10 +227,10 @@ class CoRecipe extends DataEntity
         return $this;
     }
 
-    #[Groups(['recipe_form'])]
+    #[Groups(['recipe_read', 'recipe_form'])]
     public function getImageFile()
     {
-        return $this->getFileOrDefault($this->getImage(), self::FOLDER);
+        return $this->getFileOrDefault($this->getImage(), self::FOLDER_ILLU);
     }
 
     public function getAuthor(): ?User
@@ -268,6 +277,48 @@ class CoRecipe extends DataEntity
     public function setStatus(int $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoIngredient>
+     */
+    public function getIngredients(): Collection
+    {
+        return $this->ingredients;
+    }
+
+    public function addIngredient(CoIngredient $ingredient): self
+    {
+        if (!$this->ingredients->contains($ingredient)) {
+            $this->ingredients->add($ingredient);
+            $ingredient->setRecipe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIngredient(CoIngredient $ingredient): self
+    {
+        if ($this->ingredients->removeElement($ingredient)) {
+            // set the owning side to null (unless already changed)
+            if ($ingredient->getRecipe() === $this) {
+                $ingredient->setRecipe(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getNbPerson(): ?int
+    {
+        return $this->nbPerson;
+    }
+
+    public function setNbPerson(?int $nbPerson): self
+    {
+        $this->nbPerson = $nbPerson;
 
         return $this;
     }
