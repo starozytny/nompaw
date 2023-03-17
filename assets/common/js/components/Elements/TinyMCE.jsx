@@ -20,6 +20,10 @@ export function TinyMCE (props){
         }
     }
 
+    const handleReset = () => {
+        setVal('');
+    }
+
     let parametres = params
         ? {...{'type': type}, ...params}
         : {'type': type}

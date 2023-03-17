@@ -205,6 +205,33 @@
     }
   }
 
+  .commentaries{
+    margin-bottom: var(--espaceLayout);
+
+    .commentary{
+      @include flex(row, flex-start, flex-start, var(--espaceDiv));
+
+      .commentary-body{
+        width: calc(100% - 32px);
+
+        .name{
+          @include fontSemibold();
+          margin-bottom: 2px;
+        }
+
+        .message{
+          opacity: 0.9;
+        }
+
+        .date{
+          text-align: right;
+          font-size: 12px;
+          font-style: italic;
+        }
+      }
+    }
+  }
+
   //                      __   _ ____  ___   ___    __
   //                     | _| / |___ \( _ ) / _ \  |_ |
   //    _____ _____ _____| |  | | __) / _ \| | | |  | |_____ _____ _____

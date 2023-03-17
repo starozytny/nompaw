@@ -111,13 +111,13 @@ export class RecipeRead extends Component {
     }
 
     render () {
-        const { mode, elem, steps, ingre } = this.props;
+        const { mode, elem, steps, ingre, coms } = this.props;
         const { context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare, description } = this.state;
 
         let content;
         switch (context){
             case "avis":
-                content = <Commentary mode={mode} recipe={elem} />
+                content = <Commentary mode={mode} recipe={elem} coms={coms} />
                 break;
             case "ingredients":
                 content = <Ingredients mode={mode} recipe={elem} ingre={ingre} />
@@ -260,4 +260,6 @@ export class RecipeRead extends Component {
 RecipeRead.propTypes = {
     elem: PropTypes.object.isRequired,
     steps: PropTypes.array.isRequired,
+    ingre: PropTypes.array.isRequired,
+    coms: PropTypes.array.isRequired,
 }

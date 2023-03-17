@@ -51,11 +51,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form'])]
+    #[Groups(['user_list', 'user_form', 'com_read'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form'])]
+    #[Groups(['user_list', 'user_form', 'com_read'])]
     private ?string $firstname = null;
 
     #[ORM\Column]

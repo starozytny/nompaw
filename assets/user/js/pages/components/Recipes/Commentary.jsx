@@ -2,21 +2,15 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
 import axios from "axios";
+import parse from 'html-react-parser';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Validateur from "@commonFunctions/validateur";
 import Formulaire from "@commonFunctions/formulaire";
+import Sanitaze   from "@commonFunctions/sanitaze";
 
-import { Avatar, List } from "antd";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 import { Button }  from "@commonComponents/Elements/Button";
-
-const data = [
-    {title: 'Ant Design Title 1',},
-    {title: 'Ant Design Title 2',},
-    {title: 'Ant Design Title 3',},
-    {title: 'Ant Design Title 4',},
-];
 
 const URL_CREATE_ELEMENT = 'api_commentaries_create';
 
@@ -28,8 +22,10 @@ export class Commentary extends Component {
             message: {value: '', html: ''},
             errors: [],
             loadData: false,
-            data: []
+            data: props.coms
         }
+
+        this.editorMsg = React.createRef();
     }
 
     handleChangeTinyMCE = (name, html) => {
@@ -45,6 +41,7 @@ export class Commentary extends Component {
         this.setState({ errors: [] });
 
         let validate = Validateur.validateur([{type: "text",  id: 'message', value: message}])
+
         if(!validate.code){
             Formulaire.showErrors(this, validate);
         }else {
@@ -54,7 +51,7 @@ export class Commentary extends Component {
                 let self = this;
                 axios({ method: 'POST', url: Routing.generate(URL_CREATE_ELEMENT, {'recipe': recipe.id}), data: this.state })
                     .then(function (response) {
-                        self.setState({ data: [...self.state.data, ...[response.data]] })
+                        self.setState({ data: [...self.state.data, ...[response.data]], message: {value: '', html: ''}, loadData: false })
                     })
                     .catch(function (error) { Formulaire.displayErrors(self, error); })
                 ;
@@ -64,29 +61,31 @@ export class Commentary extends Component {
 
     render () {
         const { recipe } = this.props;
-        const { errors, message, data } = this.state;
-
-        console.log(data);
+        const { loadData, errors, message, data } = this.state;
 
         return <>
-            <List
-                itemLayout="horizontal"
-                dataSource={data}
-                renderItem={(item) => (
-                    <List.Item>
-                        <List.Item.Meta
-                            avatar={<Avatar src="https://joesch.moe/api/v1/random" />}
-                            title={<a href="https://ant.design">{item.title}</a>}
-                            description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                        />
-                    </List.Item>
-                )}
-            />
+            <div className="commentaries">
+                {data.map((elem, index) => {
+                    return <div className="commentary" key={index}>
+                        <div className="commentary-avatar avatar">
+                            {elem.avatarFile
+                                ? <img src={elem.user.avatarFile} alt={`avatar de ${elem.user.username}`}/>
+                                : <div className="avatar-letter">{elem.user.lastname.slice(0,1) + elem.user.firstname.slice(0,1)}</div>
+                            }
+                        </div>
+                        <div className="commentary-body">
+                            <div className="name">{elem.user.username}</div>
+                            <div className="message">{parse(elem.message)}</div>
+                            <div className="date">{Sanitaze.toFormatCalendar(elem.createdAt)}</div>
+                        </div>
+                    </div>
+                })}
+            </div>
 
             <div className="form">
                 <div className="line">
-                    <TinyMCE type={5} identifiant='message' valeur={message.value} params={{'id': recipe.id}}
-                             errors={errors} onUpdateData={this.handleChangeTinyMCE} />
+                    <TinyMCE ref={this.editorMsg} type={5} identifiant='message' valeur={message.value} params={{'id': recipe.id}}
+                             errors={errors} onUpdateData={this.handleChangeTinyMCE} key={loadData} />
                 </div>
                 <div className="line-buttons">
                     <Button onClick={this.handleSubmit} type="primary">Ajouter le commentaire</Button>
@@ -100,4 +99,5 @@ export class Commentary extends Component {
 Commentary.propTypes = {
     mode: PropTypes.bool.isRequired,
     recipe: PropTypes.object.isRequired,
+    coms: PropTypes.array.isRequired,
 }
