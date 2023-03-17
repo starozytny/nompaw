@@ -206,7 +206,7 @@
   }
 
   .commentaries{
-    margin-bottom: var(--espaceLayout);
+    margin-top: var(--espaceLayout);
 
     .commentary{
       @include flex(row, flex-start, flex-start, var(--espaceDiv));

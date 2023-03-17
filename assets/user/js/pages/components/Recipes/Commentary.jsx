@@ -8,6 +8,7 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Validateur from "@commonFunctions/validateur";
 import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze   from "@commonFunctions/sanitaze";
+import Sort       from "@commonFunctions/sort";
 
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 import { Button }  from "@commonComponents/Elements/Button";
@@ -63,7 +64,19 @@ export class Commentary extends Component {
         const { recipe } = this.props;
         const { loadData, errors, message, data } = this.state;
 
+        data.sort(Sort.compareCreatedAtInverse);
+
         return <>
+            <div className="form">
+                <div className="line">
+                    <TinyMCE ref={this.editorMsg} type={5} identifiant='message' valeur={message.value} params={{'id': recipe.id}}
+                             errors={errors} onUpdateData={this.handleChangeTinyMCE} key={loadData} />
+                </div>
+                <div className="line-buttons">
+                    <Button onClick={this.handleSubmit} type="primary">Ajouter le commentaire</Button>
+                </div>
+            </div>
+
             <div className="commentaries">
                 {data.map((elem, index) => {
                     return <div className="commentary" key={index}>
@@ -81,17 +94,6 @@ export class Commentary extends Component {
                     </div>
                 })}
             </div>
-
-            <div className="form">
-                <div className="line">
-                    <TinyMCE ref={this.editorMsg} type={5} identifiant='message' valeur={message.value} params={{'id': recipe.id}}
-                             errors={errors} onUpdateData={this.handleChangeTinyMCE} key={loadData} />
-                </div>
-                <div className="line-buttons">
-                    <Button onClick={this.handleSubmit} type="primary">Ajouter le commentaire</Button>
-                </div>
-            </div>
-
         </>
     }
 }
