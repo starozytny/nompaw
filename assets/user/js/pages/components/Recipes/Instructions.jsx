@@ -118,8 +118,8 @@ export class Instructions extends Component {
                     {steps}
                     {mode
                         ? <div className="line">
-                            <Button outline={true} type="warning" onClick={this.handleIncreaseStep}>Ajouter une étape</Button>
-                            <Button isLoader={loadData} type="primary" onClick={this.handleSubmit}>Valider les modifications</Button>
+                            <Button outline={true} type="warning" icon="add" onClick={this.handleIncreaseStep}>Ajouter une étape</Button>
+                            <Button isLoader={loadData} type="primary" icon={loadData ? 'chart-3' : 'check1'} onClick={this.handleSubmit}>Valider les modifications</Button>
                         </div>
                         : null
                     }

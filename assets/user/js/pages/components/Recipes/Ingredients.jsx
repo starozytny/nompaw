@@ -172,9 +172,9 @@ export class Ingredients extends Component
                         {loadData
                             ? <ButtonIcon icon='chart-3' isLoader={true} />
                             : (context === "create"
-                                    ? <ButtonIcon onClick={this.handleSubmit} icon="add" text="Ajouter l'ingrédient" />
+                                    ? <ButtonIcon onClick={this.handleSubmit} icon="add" type="primary" text="Ajouter l'ingrédient" />
                                     : <>
-                                        <ButtonIcon onClick={this.handleSubmit} icon="check1" text="Enregistrer les modifs." />
+                                        <ButtonIcon onClick={this.handleSubmit} icon="check1" type="primary" text="Enregistrer les modifs." />
                                         <ButtonIcon onClick={() => this.handleReset(ingredients)} icon="cancel">Annuler</ButtonIcon>
                                     </>
                             )
