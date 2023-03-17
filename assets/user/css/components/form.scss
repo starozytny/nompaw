@@ -88,6 +88,12 @@ input, textarea, select, .input-view{
   }
 }
 
+textarea{
+  & + .tox-tinymce{
+    width: 100%;
+  }
+}
+
 .file-uploader{
   .file-uploader-container{
     background-color: var(--color4);

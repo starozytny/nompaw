@@ -10,18 +10,18 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Sanitaze   from '@commonFunctions/sanitaze';
 import Formulaire from '@commonFunctions/formulaire';
 import Validateur from "@commonFunctions/validateur";
+import Inputs     from "@commonFunctions/inputs";
 
 import moment from "moment";
 import 'moment/locale/fr';
 
 import { Avatar, List, Radio, Rate } from "antd";
-import {Input, Radiobox} from "@commonComponents/Elements/Fields";
+import { Input, Radiobox } from "@commonComponents/Elements/Fields";
 import { ButtonIcon } from "@commonComponents/Elements/Button";
+import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
-import Inputs from "@commonFunctions/inputs";
-import {TinyMCE} from "@commonComponents/Elements/TinyMCE";
 
 const URL_UPDATE_DATA = 'api_recipes_update_data';
 
@@ -160,7 +160,7 @@ export class RecipeRead extends Component {
                     {(mode || elem.content) && <p className="recipe-description">
                         {mode
                             ? <div className="form-input">
-                                <TinyMCE type={4} identifiant='description' valeur={description.value}
+                                <TinyMCE type={4} identifiant='description' valeur={description.value} params={{'id': elem.id}}
                                          errors={errors} onUpdateData={this.handleChangeTinyMCE} />
                                 {loadData
                                     ? <ButtonIcon icon='chart-3' isLoader={true} />
@@ -257,7 +257,7 @@ export class RecipeRead extends Component {
                         {(mode || elem.difficulty) ? <div className="recipe-data-item">
                             <span className="icon-flash"></span>
                             {mode
-                                ? <div className="form-input">
+                                ? <div className="form-input" style={{ marginTop: '5px' }}>
                                     <Radiobox items={difficultyItems} identifiant="difficulty" valeur={difficulty} {...paramsInput0} />
                                 </div>
                                 : <span>Difficulté {elem.difficultyString.toLowerCase()}</span>

@@ -93,7 +93,7 @@ export class Instructions extends Component {
     }
 
     render () {
-        const { mode } = this.props;
+        const { mode, recipe } = this.props;
         const { loadData, loadStep, nbSteps } = this.state;
 
         let steps = [];
@@ -102,7 +102,7 @@ export class Instructions extends Component {
             steps.push(<div className="step" key={i}>
                 <div className="number">{i}</div>
                 {mode
-                    ? <StepFormulaire key={val.uid} content={val.value} step={i}
+                    ? <StepFormulaire key={val.uid} content={val.value} step={i} recipe={recipe}
                                      onUpdateData={this.handleUpdateContentStep}
                                      onRemoveStep={this.handleRemoveStep} />
                     : <div className="content">{parse(val.value)}</div>
