@@ -2,6 +2,7 @@
 
 namespace App\Entity\Main;
 
+use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Repository\Main\UserRepository;
@@ -28,11 +29,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form'])]
+    #[Groups(['user_list', 'user_form', 'com_read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user_list', 'user_form'])]
+    #[Groups(['user_list', 'user_form', 'com_read'])]
     private ?string $username = null;
 
     #[ORM\Column]
@@ -96,6 +97,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: CoRecipe::class)]
     private Collection $coRecipes;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoCommentary::class)]
+    private Collection $coCommentaries;
+
     /**
      * @throws Exception
      */
@@ -104,6 +108,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->createdAt = $this->initNewDateImmutable();
         $this->token = $this->initToken();
         $this->coRecipes = new ArrayCollection();
+        $this->coCommentaries = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -336,7 +341,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-    #[Groups(['user_list', 'user_form'])]
+    #[Groups(['user_list', 'user_form', 'com_read'])]
     public function getAvatarFile(): ?string
     {
         return $this->getFileOrDefault($this->avatar, self::FOLDER, null);
@@ -411,5 +416,35 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function isAdmin(): bool
     {
         return $this->getHighRoleCode() == self::CODE_ROLE_DEVELOPER || $this->getHighRoleCode() == self::CODE_ROLE_ADMIN;
+    }
+
+    /**
+     * @return Collection<int, CoCommentary>
+     */
+    public function getCoCommentaries(): Collection
+    {
+        return $this->coCommentaries;
+    }
+
+    public function addCoCommentary(CoCommentary $coCommentary): self
+    {
+        if (!$this->coCommentaries->contains($coCommentary)) {
+            $this->coCommentaries->add($coCommentary);
+            $coCommentary->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCoCommentary(CoCommentary $coCommentary): self
+    {
+        if ($this->coCommentaries->removeElement($coCommentary)) {
+            // set the owning side to null (unless already changed)
+            if ($coCommentary->getUser() === $this) {
+                $coCommentary->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -82,11 +82,15 @@ class CoRecipe extends DataEntity
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoIngredient::class)]
     private Collection $ingredients;
 
+    #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: CoCommentary::class)]
+    private Collection $commentaries;
+
     public function __construct()
     {
         $this->createdAt = $this->initNewDateImmutable();
         $this->steps = new ArrayCollection();
         $this->ingredients = new ArrayCollection();
+        $this->commentaries = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -319,6 +323,36 @@ class CoRecipe extends DataEntity
     public function setNbPerson(?int $nbPerson): self
     {
         $this->nbPerson = $nbPerson;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoCommentary>
+     */
+    public function getCommentaries(): Collection
+    {
+        return $this->commentaries;
+    }
+
+    public function addCommentary(CoCommentary $commentary): self
+    {
+        if (!$this->commentaries->contains($commentary)) {
+            $this->commentaries->add($commentary);
+            $commentary->setRecipe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommentary(CoCommentary $commentary): self
+    {
+        if ($this->commentaries->removeElement($commentary)) {
+            // set the owning side to null (unless already changed)
+            if ($commentary->getRecipe() === $this) {
+                $commentary->setRecipe(null);
+            }
+        }
 
         return $this;
     }

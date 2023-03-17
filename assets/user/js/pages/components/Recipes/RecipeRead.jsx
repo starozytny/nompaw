@@ -15,13 +15,14 @@ import Inputs     from "@commonFunctions/inputs";
 import moment from "moment";
 import 'moment/locale/fr';
 
-import { Avatar, List, Radio, Rate } from "antd";
+import { Radio, Rate } from "antd";
 import { Input, Radiobox } from "@commonComponents/Elements/Fields";
 import { ButtonIcon } from "@commonComponents/Elements/Button";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
+import {Commentary} from "@userPages/Recipes/Commentary";
 
 const URL_UPDATE_DATA = 'api_recipes_update_data';
 
@@ -36,13 +37,6 @@ const menuTiny = [
     { label: 'Avis',  value: 'avis' },
 ];
 
-const data = [
-    {title: 'Ant Design Title 1',},
-    {title: 'Ant Design Title 2',},
-    {title: 'Ant Design Title 3',},
-    {title: 'Ant Design Title 4',},
-];
-
 export class RecipeRead extends Component {
     constructor(props) {
         super(props);
@@ -51,7 +45,7 @@ export class RecipeRead extends Component {
         let description = elem.content ? elem.content : "";
 
         this.state = {
-            context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'ingredients',
+            context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'instructions',
             elem: elem,
             nbPerson: Formulaire.setValue(elem.nbPerson),
             difficulty: Formulaire.setValue(elem.difficulty),
@@ -123,19 +117,7 @@ export class RecipeRead extends Component {
         let content;
         switch (context){
             case "avis":
-                content = <List
-                    itemLayout="horizontal"
-                    dataSource={data}
-                    renderItem={(item) => (
-                        <List.Item>
-                            <List.Item.Meta
-                                avatar={<Avatar src="https://joesch.moe/api/v1/random" />}
-                                title={<a href="https://ant.design">{item.title}</a>}
-                                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            />
-                        </List.Item>
-                    )}
-                />
+                content = <Commentary mode={mode} recipe={elem} />
                 break;
             case "ingredients":
                 content = <Ingredients mode={mode} recipe={elem} ingre={ingre} />
