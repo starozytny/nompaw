@@ -4,6 +4,7 @@
 namespace App\Service;
 
 
+use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\Enum\Image\ImageType;
 use App\Entity\Main\Agenda\AgEvent;
@@ -111,6 +112,7 @@ class FileUploader
                 ImageType::AgEvent => AgEvent::FOLDER,
                 ImageType::Question => HeQuestion::FOLDER,
                 ImageType::Recipe => CoRecipe::FOLDER,
+                ImageType::Commentary => CoCommentary::FOLDER,
             };
 
             $fileName = $this->replaceFile($file, $folder);

@@ -9,4 +9,5 @@ enum ImageType: int
     const Mail = 2;
     const Question = 3;
     const Recipe = 4;
+    const Commentary = 5;
 }

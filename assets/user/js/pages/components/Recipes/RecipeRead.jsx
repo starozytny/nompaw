@@ -10,18 +10,19 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Sanitaze   from '@commonFunctions/sanitaze';
 import Formulaire from '@commonFunctions/formulaire';
 import Validateur from "@commonFunctions/validateur";
+import Inputs     from "@commonFunctions/inputs";
 
 import moment from "moment";
 import 'moment/locale/fr';
 
-import { Avatar, List, Radio, Rate } from "antd";
-import {Input, Radiobox} from "@commonComponents/Elements/Fields";
+import { Radio, Rate } from "antd";
+import { Input, Radiobox } from "@commonComponents/Elements/Fields";
 import { ButtonIcon } from "@commonComponents/Elements/Button";
+import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
-import Inputs from "@commonFunctions/inputs";
-import {TinyMCE} from "@commonComponents/Elements/TinyMCE";
+import {Commentary} from "@userPages/Recipes/Commentary";
 
 const URL_UPDATE_DATA = 'api_recipes_update_data';
 
@@ -36,13 +37,6 @@ const menuTiny = [
     { label: 'Avis',  value: 'avis' },
 ];
 
-const data = [
-    {title: 'Ant Design Title 1',},
-    {title: 'Ant Design Title 2',},
-    {title: 'Ant Design Title 3',},
-    {title: 'Ant Design Title 4',},
-];
-
 export class RecipeRead extends Component {
     constructor(props) {
         super(props);
@@ -51,7 +45,7 @@ export class RecipeRead extends Component {
         let description = elem.content ? elem.content : "";
 
         this.state = {
-            context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'ingredients',
+            context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'instructions',
             elem: elem,
             nbPerson: Formulaire.setValue(elem.nbPerson),
             difficulty: Formulaire.setValue(elem.difficulty),
@@ -117,25 +111,13 @@ export class RecipeRead extends Component {
     }
 
     render () {
-        const { mode, elem, steps, ingre } = this.props;
+        const { mode, elem, steps, ingre, coms } = this.props;
         const { context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare, description } = this.state;
 
         let content;
         switch (context){
             case "avis":
-                content = <List
-                    itemLayout="horizontal"
-                    dataSource={data}
-                    renderItem={(item) => (
-                        <List.Item>
-                            <List.Item.Meta
-                                avatar={<Avatar src="https://joesch.moe/api/v1/random" />}
-                                title={<a href="https://ant.design">{item.title}</a>}
-                                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            />
-                        </List.Item>
-                    )}
-                />
+                content = <Commentary mode={mode} recipe={elem} coms={coms} />
                 break;
             case "ingredients":
                 content = <Ingredients mode={mode} recipe={elem} ingre={ingre} />
@@ -160,7 +142,7 @@ export class RecipeRead extends Component {
                     {(mode || elem.content) && <p className="recipe-description">
                         {mode
                             ? <div className="form-input">
-                                <TinyMCE type={4} identifiant='description' valeur={description.value}
+                                <TinyMCE type={4} identifiant='description' valeur={description.value} params={{'id': elem.id}}
                                          errors={errors} onUpdateData={this.handleChangeTinyMCE} />
                                 {loadData
                                     ? <ButtonIcon icon='chart-3' isLoader={true} />
@@ -257,7 +239,7 @@ export class RecipeRead extends Component {
                         {(mode || elem.difficulty) ? <div className="recipe-data-item">
                             <span className="icon-flash"></span>
                             {mode
-                                ? <div className="form-input">
+                                ? <div className="form-input" style={{ marginTop: '5px' }}>
                                     <Radiobox items={difficultyItems} identifiant="difficulty" valeur={difficulty} {...paramsInput0} />
                                 </div>
                                 : <span>Difficulté {elem.difficultyString.toLowerCase()}</span>
@@ -278,4 +260,6 @@ export class RecipeRead extends Component {
 RecipeRead.propTypes = {
     elem: PropTypes.object.isRequired,
     steps: PropTypes.array.isRequired,
+    ingre: PropTypes.array.isRequired,
+    coms: PropTypes.array.isRequired,
 }

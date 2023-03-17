@@ -8,10 +8,11 @@ import { Modal }      from "@commonComponents/Elements/Modal";
 
 import Formulaire   from "@commonFunctions/formulaire";
 
-export function StepFormulaire ({ step, content, onUpdateData, onRemoveStep })
+export function StepFormulaire ({ step, recipe, content, onUpdateData, onRemoveStep })
 {
     return <Form
         step={step}
+        recipe={recipe}
         onUpdateData={onUpdateData}
         onRemoveStep={onRemoveStep}
         content={content ? Formulaire.setValue(content) : ""}
@@ -20,6 +21,7 @@ export function StepFormulaire ({ step, content, onUpdateData, onRemoveStep })
 
 StepFormulaire.propTypes = {
     step: PropTypes.number.isRequired,
+    recipe: PropTypes.object.isRequired,
     onUpdateData: PropTypes.func.isRequired,
     onRemoveStep: PropTypes.func.isRequired,
     content: PropTypes.string,
@@ -60,13 +62,13 @@ class Form extends Component {
     }
 
     render () {
-        const { step } = this.props;
+        const { step, recipe } = this.props;
         const { errors, loadData } = this.state;
 
         return <div className="line line-tuto-step">
             {loadData
                 ? <LoaderTxt />
-                : <TinyMCE type={4} identifiant={`content-${step}`} valeur={this.state['content-' + step].value}
+                : <TinyMCE type={4} identifiant={`content-${step}`} valeur={this.state['content-' + step].value} params={{'id': recipe.id}}
                          errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                     <span>Etape {step}</span>
                     <ButtonIcon icon="trash" type="danger" onClick={this.handleDelete}>Enlever</ButtonIcon>
@@ -84,6 +86,7 @@ class Form extends Component {
 
 Form.propTypes = {
     step: PropTypes.number.isRequired,
+    recipe: PropTypes.object.isRequired,
     content: PropTypes.string.isRequired,
     onUpdateData: PropTypes.func.isRequired,
     onRemoveStep: PropTypes.func.isRequired,

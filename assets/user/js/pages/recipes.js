@@ -11,7 +11,8 @@ if(el){
     createRoot(el).render(<RecipeRead mode={el.dataset.mode === "1"}
                                       elem={JSON.parse(el.dataset.element)}
                                       steps={JSON.parse(el.dataset.steps)}
-                                      ingre={JSON.parse(el.dataset.ingre)} />)
+                                      ingre={JSON.parse(el.dataset.ingre)}
+                                      coms={JSON.parse(el.dataset.coms)} />)
 }
 
 el = document.getElementById("recipes_update");

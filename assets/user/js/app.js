@@ -33,31 +33,19 @@ if(el){
     createRoot(el).render(<UserFormulaire context="update" element={JSON.parse(el.dataset.obj)} />)
 }
 
-
 menu();
 
-function menu () {
-    let btns = document.querySelectorAll('.btn-menu-mobile');
-    let elements = document.querySelector('nav');
-
-    if(btns){
-        btns.forEach(btn => {
-            btn.addEventListener('click', () => switchActive(elements))
-        })
-
-        window.onclick = (e) => {
-            if(e.target === elements){
-                switchActive(elements)
+function menu() {
+    let btn = document.querySelector('.nav-mobile');
+    if(btn){
+        btn.addEventListener('click', function () {
+            let content = document.querySelector('.nav-content');
+            if(content.classList.contains('active')){
+                content.classList.remove('active');
+            }else{
+                content.classList.add('active');
             }
-        }
-    }
-
-    function switchActive(elements) {
-        if(elements.classList.contains('active')){
-            elements.classList.remove('active');
-        }else{
-            elements.classList.add('active');
-        }
+        })
     }
 }
 
