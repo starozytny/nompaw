@@ -1,0 +1,49 @@
+{% extends 'user/pages/randos/template.html.twig' %}
+
+{% set page_title %}Groupe de randonnées{% endset %}
+{% set page_subtitle %}Liste des groupes de randonnées disponibles !{% endset %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_randos_groupe_create') }}" class="btn btn-primary">
+                <span>Ajouter un groupe</span>
+            </a>
+        </div>
+    </div>
+    <div class="page-default">
+        <div class="recipes">
+            {% for elem in groupes %}
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="name">
+                            <div>{{ elem.name }}</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {{ elem.description | raw }}
+                    </div>
+                    {% if app.user.id == elem.author.id %}
+                        <div class="card-footer">
+                            <a
+                                    href="{{ path('user_randos_groupe_update', {'slug': elem.slug}) }}"
+                                    class="btn-icon"
+                            >
+                                <span class="icon-pencil"></span>
+                                <span class="tooltip">Modifier</span>
+                            </a>
+                            <div class="delete-groupe"
+                                 data-context="groupes"
+                                 data-id="{{ elem.id }}"
+                                 data-name="{{ elem.name }}"
+                            >
+                                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

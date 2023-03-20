@@ -2,14 +2,15 @@
 
 namespace App\Entity\Rando;
 
-use App\Repository\Rando\RoGroupeRepository;
+use App\Entity\Main\User;
+use App\Repository\Rando\RaGroupeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RoGroupeRepository::class)]
-class RoGroupe
+#[ORM\Entity(repositoryClass: RaGroupeRepository::class)]
+class RaGroupe
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,8 +29,15 @@ class RoGroupe
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: RoLink::class)]
+    #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: RaLink::class)]
     private Collection $links;
+
+    #[ORM\ManyToOne(inversedBy: 'roGroupes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $author = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $slug = null;
 
     public function __construct()
     {
@@ -90,14 +98,14 @@ class RoGroupe
     }
 
     /**
-     * @return Collection<int, RoLink>
+     * @return Collection<int, RaLink>
      */
     public function getLinks(): Collection
     {
         return $this->links;
     }
 
-    public function addLink(RoLink $link): self
+    public function addLink(RaLink $link): self
     {
         if (!$this->links->contains($link)) {
             $this->links->add($link);
@@ -107,7 +115,7 @@ class RoGroupe
         return $this;
     }
 
-    public function removeLink(RoLink $link): self
+    public function removeLink(RaLink $link): self
     {
         if ($this->links->removeElement($link)) {
             // set the owning side to null (unless already changed)
@@ -115,6 +123,30 @@ class RoGroupe
                 $link->setGroupe(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): self
+    {
+        $this->author = $author;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }

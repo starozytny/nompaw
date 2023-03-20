@@ -6,7 +6,8 @@ use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
-use App\Entity\Rando\RoLink;
+use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaLink;
 use App\Repository\Main\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -105,8 +106,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoFavorite::class)]
     private Collection $coFavorites;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: RoLink::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: RaLink::class)]
     private Collection $roLinks;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaGroupe::class)]
+    private Collection $roGroupes;
 
     /**
      * @throws Exception
@@ -119,6 +123,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->coCommentaries = new ArrayCollection();
         $this->coFavorites = new ArrayCollection();
         $this->roLinks = new ArrayCollection();
+        $this->roGroupes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -489,14 +494,14 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     }
 
     /**
-     * @return Collection<int, RoLink>
+     * @return Collection<int, RaLink>
      */
     public function getRoLinks(): Collection
     {
         return $this->roLinks;
     }
 
-    public function addRoLink(RoLink $roLink): self
+    public function addRoLink(RaLink $roLink): self
     {
         if (!$this->roLinks->contains($roLink)) {
             $this->roLinks->add($roLink);
@@ -506,12 +511,42 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-    public function removeRoLink(RoLink $roLink): self
+    public function removeRoLink(RaLink $roLink): self
     {
         if ($this->roLinks->removeElement($roLink)) {
             // set the owning side to null (unless already changed)
             if ($roLink->getUser() === $this) {
                 $roLink->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaGroupe>
+     */
+    public function getRoGroupes(): Collection
+    {
+        return $this->roGroupes;
+    }
+
+    public function addRoGroupe(RaGroupe $roGroupe): self
+    {
+        if (!$this->roGroupes->contains($roGroupe)) {
+            $this->roGroupes->add($roGroupe);
+            $roGroupe->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoGroupe(RaGroupe $roGroupe): self
+    {
+        if ($this->roGroupes->removeElement($roGroupe)) {
+            // set the owning side to null (unless already changed)
+            if ($roGroupe->getAuthor() === $this) {
+                $roGroupe->setAuthor(null);
             }
         }
 

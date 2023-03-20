@@ -3,11 +3,11 @@
 namespace App\Entity\Rando;
 
 use App\Entity\Main\User;
-use App\Repository\Rando\RoLinkRepository;
+use App\Repository\Rando\RaLinkRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RoLinkRepository::class)]
-class RoLink
+#[ORM\Entity(repositoryClass: RaLinkRepository::class)]
+class RaLink
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,7 +20,7 @@ class RoLink
 
     #[ORM\ManyToOne(inversedBy: 'links')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?RoGroupe $groupe = null;
+    private ?RaGroupe $groupe = null;
 
     public function getId(): ?int
     {
@@ -39,12 +39,12 @@ class RoLink
         return $this;
     }
 
-    public function getGroupe(): ?RoGroupe
+    public function getGroupe(): ?RaGroupe
     {
         return $this->groupe;
     }
 
-    public function setGroupe(?RoGroupe $groupe): self
+    public function setGroupe(?RaGroupe $groupe): self
     {
         $this->groupe = $groupe;
 

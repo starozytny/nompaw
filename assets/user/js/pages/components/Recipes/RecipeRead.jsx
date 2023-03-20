@@ -57,7 +57,7 @@ export class RecipeRead extends Component {
         }
     }
 
-    handleChangeContext = (e) => { console.log(e); this.setState({ context: e.target.value }) }
+    handleChangeContext = (e) => { this.setState({ context: e.target.value }) }
 
     handleChange = (e) => {
         let name = e.currentTarget.name;
@@ -139,7 +139,7 @@ export class RecipeRead extends Component {
             <div className="col-1">
                 <img alt="example" src={elem.imageFile} style={{ height: 260, objectFit: 'cover' }}/>
                 <div className="recipe-instructions">
-                    {(mode || elem.content) && <p className="recipe-description">
+                    {(mode || elem.content) && <div className="recipe-description">
                         {mode
                             ? <div className="form-input">
                                 <TinyMCE type={4} identifiant='description' valeur={description.value} params={{'id': elem.id}}
@@ -154,7 +154,7 @@ export class RecipeRead extends Component {
                             </div>
                             : parse(elem.content)
                         }
-                    </p>}
+                    </div>}
                     <div className="rating">
                         {/*<Rate disabled defaultValue={elem.rate} />*/}
                         <Rate disabled defaultValue={3} />

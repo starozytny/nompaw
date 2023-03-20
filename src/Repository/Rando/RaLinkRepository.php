@@ -2,26 +2,26 @@
 
 namespace App\Repository\Rando;
 
-use App\Entity\Rando\RoGroupe;
+use App\Entity\Rando\RaLink;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<RoGroupe>
+ * @extends ServiceEntityRepository<RaLink>
  *
- * @method RoGroupe|null find($id, $lockMode = null, $lockVersion = null)
- * @method RoGroupe|null findOneBy(array $criteria, array $orderBy = null)
- * @method RoGroupe[]    findAll()
- * @method RoGroupe[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method RaLink|null find($id, $lockMode = null, $lockVersion = null)
+ * @method RaLink|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RaLink[]    findAll()
+ * @method RaLink[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class RoGroupeRepository extends ServiceEntityRepository
+class RaLinkRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, RoGroupe::class);
+        parent::__construct($registry, RaLink::class);
     }
 
-    public function save(RoGroupe $entity, bool $flush = false): void
+    public function save(RaLink $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class RoGroupeRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(RoGroupe $entity, bool $flush = false): void
+    public function remove(RaLink $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class RoGroupeRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return RoGroupe[] Returns an array of RoGroupe objects
+//     * @return RoLink[] Returns an array of RoLink objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class RoGroupeRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?RoGroupe
+//    public function findOneBySomeField($value): ?RoLink
 //    {
 //        return $this->createQueryBuilder('r')
 //            ->andWhere('r.exampleField = :val')
