@@ -7,17 +7,18 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import { Input, InputFile, Radiobox } from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
+import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 
-const URL_INDEX_PAGE        = "user_recipes_read";
-const URL_CREATE_ELEMENT    = "api_cook_recipes_create";
-const URL_UPDATE_ELEMENT    = "api_cook_recipes_update";
-const TEXT_CREATE           = "Ajouter le produit";
+const URL_INDEX_PAGE        = "user_randos_groupe_read";
+const URL_CREATE_ELEMENT    = "api_randos_groupes_create";
+const URL_UPDATE_ELEMENT    = "api_randos_groupes_update";
+const TEXT_CREATE           = "Ajouter le groupe";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
-export function RecipeFormulaire ({ context, element })
+export function GroupeFormulaire ({ context, element })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -29,14 +30,16 @@ export function RecipeFormulaire ({ context, element })
         context={context}
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
-        status={element ? Formulaire.setValue(element.status) : 0}
-        imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
+        isVisible={element ? Formulaire.setValue(element.isVisible ? 1 : 0) : 0}
+        level={element ? Formulaire.setValue(element.level) : 0}
+        description={element ? Formulaire.setValue(element.description) : ""}
+        imageFile={""}
     />
 
     return <div className="formulaire">{form}</div>;
 }
 
-RecipeFormulaire.propTypes = {
+GroupeFormulaire.propTypes = {
     context: PropTypes.string.isRequired,
     element: PropTypes.object
 }
@@ -45,9 +48,13 @@ class Form extends Component {
     constructor(props) {
         super(props);
 
+        let description = props.description ? props.description : "";
+
         this.state = {
             name: props.name,
-            status: props.status,
+            isVisible: props.isVisible,
+            level: props.level,
+            description: { value: description, html: description },
             errors: [],
         }
 
@@ -56,17 +63,23 @@ class Form extends Component {
 
     handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
 
-    handleSubmit = (e, stay = false) => {
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
+
+    handleSubmit = (e) => {
         e.preventDefault();
 
-        const { context, url } = this.props;
-        const { name, status } = this.state;
+        const { url } = this.props;
+        const { name, isVisible, level, description } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
             {type: "text",  id: 'name', value: name},
-            {type: "text",  id: 'status', value: status},
+            {type: "text",  id: 'isVisible', value: isVisible},
+            {type: "text",  id: 'level', value: level},
+            {type: "text",  id: 'description', value: description.html},
         ];
 
         let validate = Validateur.validateur(paramsToValidate)
@@ -86,17 +99,8 @@ class Form extends Component {
 
             axios({ method: "POST", url: url, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
                 .then(function (response) {
-                    if(!stay){
-                        location.href = Routing.generate(URL_INDEX_PAGE, {'slug': response.data.slug});
-                    }else{
-                        toastr.info('Données enregistrées.');
-
-                        if(context === "create"){
-                            location.href = Routing.generate(URL_INDEX_PAGE, {'slug': response.data.slug});
-                        }else{
-                            Formulaire.loader(false);
-                        }
-                    }
+                    toastr.info('Données enregistrées.');
+                    location.href = Routing.generate(URL_INDEX_PAGE, {'slug': response.data.slug});
                 })
                 .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
@@ -105,13 +109,22 @@ class Form extends Component {
 
     render () {
         const { context, imageFile } = this.props;
-        const { errors,  name, status } = this.state;
+        const { errors, name, isVisible, level, description } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
 
-        let statusItems = [
-            { value: 0, label: 'Hors ligne', identifiant: 'status-0' },
-            { value: 1, label: 'En ligne',   identifiant: 'status-1' },
+        let isVisibleItems = [
+            { value: 0, label: 'Aux membres', identifiant: 'visible-0' },
+            { value: 1, label: 'Par tous',    identifiant: 'visible-1' },
+        ]
+
+        let levelItems = [
+            { value: 0, label: 'Aucun',             identifiant: 'level-0' },
+            { value: 1, label: 'Facile',            identifiant: 'level-1' },
+            { value: 2, label: 'Moyen',             identifiant: 'level-2' },
+            { value: 3, label: 'Difficile',         identifiant: 'level-3' },
+            { value: 4, label: 'Très difficile',    identifiant: 'level-4' },
+            { value: 5, label: 'Extrême',           identifiant: 'level-5' },
         ]
 
         return <>
@@ -121,23 +134,32 @@ class Form extends Component {
                         <div className="line-col-1">
                             <div className="title">Informations générales</div>
                             <div className="subtitle">
-                                Le contenu de la recette sera rempli dans la prochaine étape.
+                                Vous pourrez ajouter les membres du groupe après avoir créé le groupe de randonnées
                             </div>
                         </div>
                         <div className="line-col-2">
                             <div className="line line-fat-box">
-                                <Radiobox items={statusItems} identifiant="status" valeur={status} {...params}>
+                                <Radiobox items={isVisibleItems} identifiant="isVisible" valeur={isVisible} {...params}>
                                     Visibilité *
                                 </Radiobox>
                             </div>
                             <div className="line">
-                                <Input identifiant="name" valeur={name} {...params}>Intitulé *</Input>
+                                <Input identifiant="name" valeur={name} {...params}>Nom du groupe *</Input>
+                            </div>
+                            <div className="line line-fat-box">
+                                <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}>
+                                    Niveau *
+                                </Radiobox>
                             </div>
                             <div className="line">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
                                            placeholder="Glissez et déposer une image" {...params}>
                                     Illustration
                                 </InputFile>
+                            </div>
+                            <div className="line">
+                                <TinyMCE type={6} identifiant='description' valeur={description.value}
+                                         errors={errors} onUpdateData={this.handleChangeTinyMCE} />
                             </div>
                         </div>
                     </div>
@@ -155,6 +177,7 @@ Form.propTypes = {
     context: PropTypes.string.isRequired,
     url: PropTypes.node.isRequired,
     name: PropTypes.string.isRequired,
-    status: PropTypes.number.isRequired,
-    imageFile: PropTypes.string.isRequired,
+    isVisible: PropTypes.number.isRequired,
+    level: PropTypes.number.isRequired,
+    description: PropTypes.string.isRequired,
 }

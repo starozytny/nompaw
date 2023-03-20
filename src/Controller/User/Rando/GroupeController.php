@@ -29,6 +29,19 @@ class GroupeController extends AbstractController
         return $this->render('user/pages/randos/index.html.twig', ['groupes' => $groupes]);
     }
 
+    #[Route('/groupe/{slug}', name: 'read', options: ['expose' => true])]
+    public function read($slug, RaGroupeRepository $repository,  SerializerInterface $serializer): Response
+    {
+        $obj   = $repository->findOneBy(['slug' => $slug]);
+
+        $elem  = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::READ]);
+
+        return $this->render('user/pages/randos/groupe/read.html.twig', [
+            'elem' => $obj,
+            'element' => $elem,
+        ]);
+    }
+
     #[Route('/ajouter', name: 'create')]
     public function create(): Response
     {
@@ -46,7 +59,7 @@ class GroupeController extends AbstractController
 
         $element = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::FORM]);
 
-        return $this->render('user/pages/randos/groupe//update.html.twig', [
+        return $this->render('user/pages/randos/groupe/update.html.twig', [
             'elem' => $obj,
             'element' => $element,
         ]);

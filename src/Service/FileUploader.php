@@ -11,6 +11,7 @@ use App\Entity\Main\Agenda\AgEvent;
 use App\Entity\Main\Changelog;
 use App\Entity\Main\Help\HeQuestion;
 use App\Entity\Main\Image;
+use App\Entity\Rando\RaGroupe;
 use App\Repository\Main\ImageRepository;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -113,6 +114,7 @@ class FileUploader
                 ImageType::Question => HeQuestion::FOLDER,
                 ImageType::Recipe => CoRecipe::FOLDER,
                 ImageType::Commentary => CoCommentary::FOLDER,
+                ImageType::Groupe => RaGroupe::FOLDER,
             };
 
             $fileName = $this->replaceFile($file, $folder);

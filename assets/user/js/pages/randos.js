@@ -3,8 +3,8 @@ import '../../css/pages/randos.scss';
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { RecipeRead } from "@userPages/Recipes/RecipeRead";
-import { RecipeFormulaire } from "@userPages/Recipes/RecipeForm";
 import { RecipeDelete } from "@userPages/Recipes/RecipeDelete";
+import { GroupeFormulaire } from "@userPages/Randos/Groupe/GroupeForm";
 
 let el = document.getElementById("recipes_read");
 if(el){
@@ -15,14 +15,14 @@ if(el){
                                       coms={JSON.parse(el.dataset.coms)} />)
 }
 
-el = document.getElementById("recipes_update");
+el = document.getElementById("groupes_update");
 if(el){
-    createRoot(el).render(<RecipeFormulaire context="update" element={JSON.parse(el.dataset.element)} />)
+    createRoot(el).render(<GroupeFormulaire context="update" element={JSON.parse(el.dataset.element)} />)
 }
 
-el = document.getElementById("recipes_create");
+el = document.getElementById("groupes_create");
 if(el){
-    createRoot(el).render(<RecipeFormulaire context="create" element={null} />)
+    createRoot(el).render(<GroupeFormulaire context="create" element={null} />)
 }
 
 let deletes = document.querySelectorAll('.delete-groupe');

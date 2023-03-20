@@ -25,8 +25,6 @@ export class Commentary extends Component {
             loadData: false,
             data: props.coms
         }
-
-        this.editorMsg = React.createRef();
     }
 
     handleChangeTinyMCE = (name, html) => {
@@ -69,7 +67,7 @@ export class Commentary extends Component {
         return <>
             <div className="form">
                 <div className="line">
-                    <TinyMCE ref={this.editorMsg} type={5} identifiant='message' valeur={message.value} params={{'id': recipe.id}}
+                    <TinyMCE type={5} identifiant='message' valeur={message.value} params={{'id': recipe.id}}
                              errors={errors} onUpdateData={this.handleChangeTinyMCE} key={loadData} />
                 </div>
                 <div className="line-buttons">

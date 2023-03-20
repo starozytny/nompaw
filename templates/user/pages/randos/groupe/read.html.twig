@@ -1,0 +1,72 @@
+{% extends 'user/pages/randos/template.html.twig' %}
+
+{% set author = elem.author %}
+
+{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
+{% set page_title_alone %}{{ elem.name }}{% endset %}
+{% set page_subtitle %}Groupe de randonnée : {{ elem.name }}{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([
+        { text: page_title_alone, url: path('user_recipes_read', {'slug': elem.name})  },
+    ]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block main_content %}
+    {% set force_user = app.request.get('force_user') %}
+    {% if app.user.id == elem.author.id %}
+        <div class="page-actions">
+            {% if force_user == null %}
+                {% set url = path('user_randos_groupe_read', {'slug': elem.slug, 'force_user': true}) %}
+            {% else %}
+                {% set url = path('user_randos_groupe_read', {'slug': elem.slug}) %}
+            {% endif %}
+
+            <div>Vue actuel : <span class="txt-danger">{{ force_user == null ? "Auteur" : "Utilisateur" }}</span></div>
+
+            <a href="{{ url }}" class="btn btn-default">
+                <span class="icon-vision"></span>
+                <span>Activer le vue {{ force_user == null ? "utilisateur" : "auteur" }}</span>
+            </a>
+        </div>
+    {% endif %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_randos_groupe_index') }}" class="btn btn-outline-default">
+                <span class="icon-left-arrow"></span>
+                <span>Retourner aux recettes</span>
+            </a>
+        </div>
+        <div class="col-2">
+            {% if app.user.id == elem.author.id and force_user != true %}
+                <a href="{{ path('user_randos_groupe_update', {'slug': elem.slug}) }}" class="btn btn-warning">
+                    <span class="icon-pencil"></span>
+                    <span>Modifier</span>
+                </a>
+                <div class="delete-groupe"
+                     data-context="read"
+                     data-id="{{ elem.id }}"
+                     data-name="{{ elem.name }}"
+                >
+                    <button class="btn btn-danger btn-loader-without-text">
+                        <span class="icon-chart-3"></span>
+                        <span>Supprimer</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="page-default">
+        <div id="recipes_read"
+             data-element="{{ element }}"
+             data-steps="{{ steps }}"
+             data-ingre="{{ ingre }}"
+             data-coms="{{ coms }}"
+             data-mode="{{ app.user.id == elem.author.id and force_user != true }}"
+        >
+            {% include "layout/components/loader.html.twig" %}
+        </div>
+    </div>
+{% endblock %}
