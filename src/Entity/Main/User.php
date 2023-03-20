@@ -6,6 +6,7 @@ use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
+use App\Entity\Rando\RoLink;
 use App\Repository\Main\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -104,6 +105,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoFavorite::class)]
     private Collection $coFavorites;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: RoLink::class)]
+    private Collection $roLinks;
+
     /**
      * @throws Exception
      */
@@ -114,6 +118,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->coRecipes = new ArrayCollection();
         $this->coCommentaries = new ArrayCollection();
         $this->coFavorites = new ArrayCollection();
+        $this->roLinks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -477,6 +482,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($coFavorite->getUser() === $this) {
                 $coFavorite->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RoLink>
+     */
+    public function getRoLinks(): Collection
+    {
+        return $this->roLinks;
+    }
+
+    public function addRoLink(RoLink $roLink): self
+    {
+        if (!$this->roLinks->contains($roLink)) {
+            $this->roLinks->add($roLink);
+            $roLink->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoLink(RoLink $roLink): self
+    {
+        if ($this->roLinks->removeElement($roLink)) {
+            // set the owning side to null (unless already changed)
+            if ($roLink->getUser() === $this) {
+                $roLink->setUser(null);
             }
         }
 
