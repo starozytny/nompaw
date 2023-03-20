@@ -14,7 +14,7 @@ import { Button }           from "@commonComponents/Elements/Button";
 import { LoaderTxt }        from "@commonComponents/Elements/Loader";
 import { StepFormulaire }   from "@userPages/Recipes/StepForm";
 
-const URL_UPDATE_ELEMENT = "api_instructions_update";
+const URL_UPDATE_ELEMENT = "api_cook_instructions_update";
 
 export class Instructions extends Component {
     constructor(props) {

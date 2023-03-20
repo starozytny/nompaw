@@ -24,7 +24,7 @@ import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
 import {Commentary} from "@userPages/Recipes/Commentary";
 
-const URL_UPDATE_DATA = 'api_recipes_update_data';
+const URL_UPDATE_DATA = 'api_cook_recipes_update_data';
 
 const menu = [
     { label: 'Instructions', value: 'instructions' },

@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/ingredients', name: 'api_ingredients_')]
+#[Route('/api/cook/ingredients', name: 'api_cook_ingredients_')]
 class IngredientController extends AbstractController
 {
     public function submitForm($type, CoIngredientRepository $repository, CoIngredient $obj, Request $request, ApiResponse $apiResponse,

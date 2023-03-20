@@ -11,9 +11,9 @@ import { ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input } from "@commonComponents/Elements/Fields";
 import { ModalDelete } from "@commonComponents/Shortcut/Modal";
 
-const URL_CREATE_ELEMENT = 'api_ingredients_create';
-const URL_UPDATE_ELEMENT = 'api_ingredients_update';
-const URL_DELETE_ELEMENT = 'api_ingredients_delete';
+const URL_CREATE_ELEMENT = 'api_cook_ingredients_create';
+const URL_UPDATE_ELEMENT = 'api_cook_ingredients_update';
+const URL_DELETE_ELEMENT = 'api_cook_ingredients_delete';
 
 export class Ingredients extends Component
 {
