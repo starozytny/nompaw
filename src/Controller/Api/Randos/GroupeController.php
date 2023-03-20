@@ -3,6 +3,8 @@
 namespace App\Controller\Api\Randos;
 
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaLink;
+use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
 use App\Service\ApiResponse;
@@ -19,7 +21,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class GroupeController extends AbstractController
 {
     public function submitForm($type, RaGroupeRepository $repository, RaGroupe $obj, Request $request, ApiResponse $apiResponse,
-                               ValidatorService $validator, DataRandos $dataEntity, FileUploader $fileUploader): JsonResponse
+                               ValidatorService $validator, DataRandos $dataEntity, FileUploader $fileUploader,
+                               RaLinkRepository $linkRepository, UserRepository $userRepository): JsonResponse
     {
         $data = json_decode($request->get('data'));
         if ($data === null) {
@@ -37,6 +40,29 @@ class GroupeController extends AbstractController
             return $apiResponse->apiJsonResponseValidationFailed($noErrors);
         }
 
+        if($type == "update"){
+            foreach($linkRepository->findBy(['groupe' => $obj->getId()]) as $link){
+                $linkRepository->remove($link);
+            }
+        }
+
+        $users = $userRepository->findAll();
+        foreach($data->members as $member){
+            $newMember = null;
+            foreach($users as $user){
+                if($user->getId() == $member) $newMember = $user;
+            }
+
+            if($newMember){
+                $link = (new RaLink())
+                    ->setGroupe($obj)
+                    ->setUser($newMember)
+                ;
+
+                $linkRepository->save($link);
+            }
+        }
+
         $file = $request->files->get('image');
         if ($file) {
             $fileName = $fileUploader->replaceFile($file, RaGroupe::FOLDER_ILLU, $obj->getImage());
@@ -49,16 +75,20 @@ class GroupeController extends AbstractController
 
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataRandos $dataEntity, RaGroupeRepository $repository, FileUploader $fileUploader): Response
+                           DataRandos $dataEntity, RaGroupeRepository $repository, FileUploader $fileUploader,
+                           RaLinkRepository $linkRepository, UserRepository $userRepository): Response
     {
-        return $this->submitForm("create", $repository, new RaGroupe(), $request, $apiResponse, $validator, $dataEntity, $fileUploader);
+        return $this->submitForm("create", $repository, new RaGroupe(), $request, $apiResponse, $validator, $dataEntity,
+            $fileUploader, $linkRepository, $userRepository);
     }
 
     #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'POST')]
     public function update(Request $request, RaGroupe $obj, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataRandos $dataEntity, RaGroupeRepository $repository, FileUploader $fileUploader): Response
+                           DataRandos $dataEntity, RaGroupeRepository $repository, FileUploader $fileUploader,
+                           RaLinkRepository $linkRepository, UserRepository $userRepository): Response
     {
-        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $fileUploader);
+        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity,
+            $fileUploader, $linkRepository, $userRepository);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

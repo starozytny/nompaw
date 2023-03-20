@@ -1,7 +1,7 @@
 @import "../vars/vars";
 
 @import "./components/form";
-
+@import "./components/randos/form";
 
 .delete-groupe{
   @include flex(row, center, center);

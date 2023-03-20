@@ -5,6 +5,7 @@ namespace App\Entity\Rando;
 use App\Entity\Main\User;
 use App\Repository\Rando\RaLinkRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RaLinkRepository::class)]
 class RaLink
@@ -14,11 +15,11 @@ class RaLink
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'roLinks')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'roLinks')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'links')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'links')]
     #[ORM\JoinColumn(nullable: false)]
     private ?RaGroupe $groupe = null;
 

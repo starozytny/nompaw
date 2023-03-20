@@ -79,7 +79,7 @@ export class Commentary extends Component {
                 {data.map((elem, index) => {
                     return <div className="commentary" key={index}>
                         <div className="commentary-avatar avatar">
-                            {elem.avatarFile
+                            {elem.user.avatarFile
                                 ? <img src={elem.user.avatarFile} alt={`avatar de ${elem.user.username}`}/>
                                 : <div className="avatar-letter">{elem.user.lastname.slice(0,1) + elem.user.firstname.slice(0,1)}</div>
                             }

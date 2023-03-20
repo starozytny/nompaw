@@ -11,11 +11,11 @@
 {% block main_content %}
     <div class="page-actions">
         <div class="col-1">
-            <a href="{{ path('user_randos_groupe_index') }}" class="btn btn-outline-default">
+            <a href="{{ path('user_randos_groupes_index') }}" class="btn btn-outline-default">
                 <span class="icon-left-arrow"></span>
                 <span>Retourner à liste</span>
             </a>
-            <a href="{{ path('user_recipes_read', {'slug': elem.slug}) }}" target="_blank" class="btn btn-outline-default">
+            <a href="{{ path('user_randos_groupes_read', {'slug': elem.slug}) }}" target="_blank" class="btn btn-outline-default">
                 <span class="icon-left-arrow"></span>
                 <span>Voir le groupe</span>
             </a>
@@ -25,6 +25,8 @@
 
     <div id="groupes_update"
          data-element="{{ element }}"
+         data-users="{{ users }}"
+         data-members="{{ members }}"
     >
         {% include "layout/components/loader.html.twig" %}
     </div>

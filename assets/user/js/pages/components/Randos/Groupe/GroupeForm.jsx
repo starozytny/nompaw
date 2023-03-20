@@ -12,13 +12,13 @@ import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 
-const URL_INDEX_PAGE        = "user_randos_groupe_read";
+const URL_INDEX_PAGE        = "user_randos_groupes_read";
 const URL_CREATE_ELEMENT    = "api_randos_groupes_create";
 const URL_UPDATE_ELEMENT    = "api_randos_groupes_update";
 const TEXT_CREATE           = "Ajouter le groupe";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
-export function GroupeFormulaire ({ context, element })
+export function GroupeFormulaire ({ context, element, users, members })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -33,7 +33,10 @@ export function GroupeFormulaire ({ context, element })
         isVisible={element ? Formulaire.setValue(element.isVisible ? 1 : 0) : 0}
         level={element ? Formulaire.setValue(element.level) : 0}
         description={element ? Formulaire.setValue(element.description) : ""}
-        imageFile={""}
+        imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
+
+        members={members}
+        users={users}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -41,7 +44,9 @@ export function GroupeFormulaire ({ context, element })
 
 GroupeFormulaire.propTypes = {
     context: PropTypes.string.isRequired,
-    element: PropTypes.object
+    users: PropTypes.array.isRequired,
+    members: PropTypes.array.isRequired,
+    element: PropTypes.object,
 }
 
 class Form extends Component {
@@ -55,6 +60,7 @@ class Form extends Component {
             isVisible: props.isVisible,
             level: props.level,
             description: { value: description, html: description },
+            members: props.members,
             errors: [],
         }
 
@@ -65,6 +71,24 @@ class Form extends Component {
 
     handleChangeTinyMCE = (name, html) => {
         this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
+
+    handleClickUser = (userId) => {
+        const { members } = this.state;
+
+        let find = false;
+        members.forEach(member => {
+            if(member === userId) find = true;
+        })
+        let nMembers;
+        if(find){
+            nMembers = members.filter(m => { return m !== userId });
+        }else{
+            nMembers = members;
+            nMembers.push(userId);
+        }
+
+        this.setState({ members: nMembers });
     }
 
     handleSubmit = (e) => {
@@ -108,8 +132,8 @@ class Form extends Component {
     }
 
     render () {
-        const { context, imageFile } = this.props;
-        const { errors, name, isVisible, level, description } = this.state;
+        const { context, imageFile, users } = this.props;
+        const { errors, name, isVisible, level, description, members } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
 
@@ -133,9 +157,6 @@ class Form extends Component {
                     <div className="line">
                         <div className="line-col-1">
                             <div className="title">Informations générales</div>
-                            <div className="subtitle">
-                                Vous pourrez ajouter les membres du groupe après avoir créé le groupe de randonnées
-                            </div>
                         </div>
                         <div className="line-col-2">
                             <div className="line line-fat-box">
@@ -146,12 +167,10 @@ class Form extends Component {
                             <div className="line">
                                 <Input identifiant="name" valeur={name} {...params}>Nom du groupe *</Input>
                             </div>
-                            <div className="line line-fat-box">
+                            <div className="line line-2 line-fat-box">
                                 <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}>
                                     Niveau *
                                 </Radiobox>
-                            </div>
-                            <div className="line">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
                                            placeholder="Glissez et déposer une image" {...params}>
                                     Illustration
@@ -159,7 +178,40 @@ class Form extends Component {
                             </div>
                             <div className="line">
                                 <TinyMCE type={6} identifiant='description' valeur={description.value}
-                                         errors={errors} onUpdateData={this.handleChangeTinyMCE} />
+                                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                                    Description du groupe
+                                </TinyMCE>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="line">
+                        <div className="line-col-1">
+                            <div className="title">Membres du groupe</div>
+                            <div className="subtitle">
+                                Sélectionnez les membres du groupe de randonnées
+                            </div>
+                        </div>
+                        <div className="line-col-2">
+                            <div className="users-select">
+                                {users.map(user => {
+                                    let selected = false;
+                                    members.forEach(member => {
+                                        if(member === user.id) selected = true;
+                                    })
+
+                                    return <div className={`user-select${selected ? " active" : ""}`} key={user.id}
+                                                onClick={() => this.handleClickUser(user.id)}>
+                                        <div className="avatar">
+                                            {user.avatarFile
+                                                ? <img src={user.avatarFile} alt={`avatar de ${user.username}`}/>
+                                                : <div className="avatar-letter">{user.lastname.slice(0,1) + user.firstname.slice(0,1)}</div>
+                                            }
+                                        </div>
+                                        <div className="username">{user.username}</div>
+                                        {selected && <div className="item-selected"><span className="icon-check-1" /></div>}
+                                    </div>
+                                })}
                             </div>
                         </div>
                     </div>
@@ -180,4 +232,7 @@ Form.propTypes = {
     isVisible: PropTypes.number.isRequired,
     level: PropTypes.number.isRequired,
     description: PropTypes.string.isRequired,
+    imageFile: PropTypes.string.isRequired,
+    users: PropTypes.array.isRequired,
+    members: PropTypes.array.isRequired,
 }
