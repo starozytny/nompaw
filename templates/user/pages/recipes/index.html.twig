@@ -14,11 +14,25 @@
     <div class="page-default">
         <div class="recipes">
             {% for elem in recipes %}
+
+                {% set isFav = 0 %}
+                {% for fav in favorites %}
+                    {% if fav.identifiant == el.id %}
+                        {% set isFav = 1 %}
+                    {% endif %}
+                {% endfor %}
+
                 <div class="card">
                     <div class="card-header">
                         <div class="name">
                             <div>{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}</div>
                             <span class="difficulty">{{ elem.difficultyString }}</span>
+                        </div>
+                        <div class="favorite"
+                             data-id="{{ el.id }}"
+                             data-is-fav="{{ isFav }}"
+                        >
+                            <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
                         </div>
                     </div>
                     <a

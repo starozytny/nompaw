@@ -3,12 +3,14 @@
 namespace App\Controller\User\Cook;
 
 use App\Entity\Cook\CoCommentary;
+use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoIngredient;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\Cook\CoStep;
 use App\Entity\Enum\Cook\CookStatut;
 use App\Entity\Main\User;
 use App\Repository\Cook\CoCommentaryRepository;
+use App\Repository\Cook\CoFavoriteRepository;
 use App\Repository\Cook\CoIngredientRepository;
 use App\Repository\Cook\CoRecipeRepository;
 use App\Repository\Cook\CoStepRepository;
@@ -23,7 +25,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class RecipeController extends AbstractController
 {
     #[Route('/', name: 'index', options: ['expose' => true])]
-    public function list(CoRecipeRepository $repository): Response
+    public function list(CoRecipeRepository $repository, CoFavoriteRepository $favoriteRepository): Response
     {
         $recipes = [];
         foreach($repository->findAll() as $obj){
@@ -36,18 +38,21 @@ class RecipeController extends AbstractController
             }
         }
 
-        return $this->render('user/pages/recipes/index.html.twig', ['recipes' => $recipes]);
+        $favorites = $favoriteRepository->findBy(['user' => $this->getUser()]);
+
+        return $this->render('user/pages/recipes/index.html.twig', ['recipes' => $recipes, 'favorites' => $favorites]);
     }
 
     #[Route('/recette/{slug}', name: 'read', options: ['expose' => true])]
     public function read($slug, CoRecipeRepository $repository, CoStepRepository $stepRepository,
                          CoIngredientRepository $ingredientRepository, CoCommentaryRepository $commentaryRepository,
-                         SerializerInterface $serializer): Response
+                         CoFavoriteRepository $favoriteRepository, SerializerInterface $serializer): Response
     {
         $obj   = $repository->findOneBy(['slug' => $slug]);
         $steps = $stepRepository->findBy(['recipe' => $obj]);
         $ingre = $ingredientRepository->findBy(['recipe' => $obj]);
         $coms  = $commentaryRepository->findBy(['recipe' => $obj]);
+        $fav   = $favoriteRepository->findOneBy(['user' => $this->getUser(), 'identifiant' => $obj->getId()]);
 
         $elem  = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::READ]);
         $steps = $serializer->serialize($steps, 'json', ['groups' => CoStep::FORM]);
@@ -60,6 +65,7 @@ class RecipeController extends AbstractController
             'steps' => $steps,
             'ingre' => $ingre,
             'coms' => $coms,
+            'isFav' => (bool)$fav,
             'stepsObject' => $stepRepository->findBy(['recipe' => $obj])
         ]);
     }
