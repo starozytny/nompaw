@@ -92,13 +92,17 @@ class GroupeController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(RaGroupe $obj, RaGroupeRepository $repository, RaLinkRepository $linkRepository, ApiResponse $apiResponse): Response
+    public function delete(RaGroupe $obj, RaGroupeRepository $repository, RaLinkRepository $linkRepository,
+                           ApiResponse $apiResponse, FileUploader $fileUploader): Response
     {
         foreach($obj->getLinks() as $link){
             $linkRepository->remove($link);
         }
+        $image = $obj->getImage();
 
         $repository->remove($obj, true);
+
+        $fileUploader->deleteFile($image, RaGroupe::FOLDER_ILLU);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }

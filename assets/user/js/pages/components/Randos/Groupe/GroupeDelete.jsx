@@ -41,7 +41,7 @@ export function GroupeDelete ({ context, id, name })
     </>
 }
 
-RecipeDelete.propTypes = {
+GroupeDelete.propTypes = {
     context: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,

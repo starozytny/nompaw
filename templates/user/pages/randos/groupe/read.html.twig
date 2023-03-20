@@ -13,33 +13,18 @@
     {{ parent() }}
 {% endblock %}
 
+{% set half_width = true %}
+
 {% block main_content %}
-    {% set force_user = app.request.get('force_user') %}
-    {% if app.user.id == elem.author.id %}
-        <div class="page-actions">
-            {% if force_user == null %}
-                {% set url = path('user_randos_groupes_read', {'slug': elem.slug, 'force_user': true}) %}
-            {% else %}
-                {% set url = path('user_randos_groupes_read', {'slug': elem.slug}) %}
-            {% endif %}
-
-            <div>Vue actuel : <span class="txt-danger">{{ force_user == null ? "Auteur" : "Utilisateur" }}</span></div>
-
-            <a href="{{ url }}" class="btn btn-default">
-                <span class="icon-vision"></span>
-                <span>Activer le vue {{ force_user == null ? "utilisateur" : "auteur" }}</span>
-            </a>
-        </div>
-    {% endif %}
     <div class="page-actions">
         <div class="col-1">
             <a href="{{ path('user_randos_groupes_index') }}" class="btn btn-outline-default">
                 <span class="icon-left-arrow"></span>
-                <span>Retourner aux recettes</span>
+                <span>Retourner aux groupes</span>
             </a>
         </div>
         <div class="col-2">
-            {% if app.user.id == elem.author.id and force_user != true %}
+            {% if app.user.id == elem.author.id %}
                 <a href="{{ path('user_randos_groupes_update', {'slug': elem.slug}) }}" class="btn btn-warning">
                     <span class="icon-pencil"></span>
                     <span>Modifier</span>
@@ -59,11 +44,36 @@
     </div>
 
     <div class="page-default">
-        <div id="recipes_read"
-             data-element="{{ element }}"
-             data-mode="{{ app.user.id == elem.author.id and force_user != true }}"
-        >
-            {% include "layout/components/loader.html.twig" %}
+        <div class="groupe-read">
+            <div class="groupe-line-0">
+                <div class="next-rando">
+                    <div class="col-1">
+                        <h2>Prochaine randonnée !</h2>
+                        <div class="subtitle">Apprenez rapidement à prendre en main c !</div>
+                    </div>
+
+                    <div class="col-2">
+                        <img src="{{ asset(elem.imageFile) }}" alt="logo {{ elem.name }}">
+                        <div class="cta">
+                            <a href="https://pitch.com/public/b49ac20a-d322-4a29-b8a4-2d9db07766fb" target="_blank" class="btn btn-primary">
+                                <span>Démarrer</span>
+                                <span class="icon-right-arrow"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="next-creator">
+                    <h2><span class="icon-user-octagon"></span> {{ elem.author.username }}</h2>
+                    <div class="subtitle">Référent.e du groupe de randonnée</div>
+                </div>
+            </div>
+
+            <div class="groupe-line-1">
+                <div class="groupe-line-title">
+                    <h2>Anciennes randonnées</h2>
+                    <div class="subtitle">En dev.</div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

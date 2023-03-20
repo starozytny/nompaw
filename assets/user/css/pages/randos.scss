@@ -2,6 +2,7 @@
 
 @import "./components/form";
 @import "./components/randos/form";
+@import "./components/randos/groupe/read";
 
 .delete-groupe{
   @include flex(row, center, center);
