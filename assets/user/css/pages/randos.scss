@@ -62,11 +62,11 @@
     }
 
     .card-body{
+      @include flex(column, flex-start, space-between, var(--espaceEls));
       min-height: 140px;
       max-width: 321px;
 
       .level{
-        margin-top: var(--espaceEls);
         opacity: 0.8;
         font-size: 14px;
       }
