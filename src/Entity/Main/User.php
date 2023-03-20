@@ -3,6 +3,7 @@
 namespace App\Entity\Main;
 
 use App\Entity\Cook\CoCommentary;
+use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Repository\Main\UserRepository;
@@ -100,6 +101,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoCommentary::class)]
     private Collection $coCommentaries;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoFavorite::class)]
+    private Collection $coFavorites;
+
     /**
      * @throws Exception
      */
@@ -109,6 +113,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->token = $this->initToken();
         $this->coRecipes = new ArrayCollection();
         $this->coCommentaries = new ArrayCollection();
+        $this->coFavorites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -442,6 +447,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($coCommentary->getUser() === $this) {
                 $coCommentary->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoFavorite>
+     */
+    public function getCoFavorites(): Collection
+    {
+        return $this->coFavorites;
+    }
+
+    public function addCoFavorite(CoFavorite $coFavorite): self
+    {
+        if (!$this->coFavorites->contains($coFavorite)) {
+            $this->coFavorites->add($coFavorite);
+            $coFavorite->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCoFavorite(CoFavorite $coFavorite): self
+    {
+        if ($this->coFavorites->removeElement($coFavorite)) {
+            // set the owning side to null (unless already changed)
+            if ($coFavorite->getUser() === $this) {
+                $coFavorite->setUser(null);
             }
         }
 
