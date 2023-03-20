@@ -2,19 +2,19 @@
 
 namespace App\Controller\User\Rando;
 
-use App\Entity\Cook\CoRecipe;
 use App\Entity\Main\User;
 use App\Entity\Rando\RaGroupe;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
+use App\Repository\Rando\RaRandoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/espace-membre/randonnees', name: 'user_randos_groupes_')]
+#[Route('/espace-membre/randonnees/groupes', name: 'user_randos_groupes_')]
 class GroupeController extends AbstractController
 {
     #[Route('/', name: 'index', options: ['expose' => true])]
@@ -38,15 +38,13 @@ class GroupeController extends AbstractController
     }
 
     #[Route('/groupe/{slug}', name: 'read', options: ['expose' => true])]
-    public function read($slug, RaGroupeRepository $repository, SerializerInterface $serializer): Response
+    public function read($slug, RaGroupeRepository $repository, RaRandoRepository $randoRepository): Response
     {
-        $obj   = $repository->findOneBy(['slug' => $slug]);
-
-        $elem  = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::READ]);
-
+        $obj = $repository->findOneBy(['slug' => $slug]);
         return $this->render('user/pages/randos/groupe/read.html.twig', [
             'elem' => $obj,
-            'element' => $elem
+            'randos' => $randoRepository->findBy(['isNext' => false]),
+            'next' => $randoRepository->findOneBy(['isNext' => true])
         ]);
     }
 

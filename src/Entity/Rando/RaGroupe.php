@@ -56,9 +56,13 @@ class RaGroupe extends DataEntity
     #[Groups(['ragrp_form'])]
     private ?string $image = null;
 
+    #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: RaRando::class)]
+    private Collection $randos;
+
     public function __construct()
     {
         $this->links = new ArrayCollection();
+        $this->randos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -190,5 +194,35 @@ class RaGroupe extends DataEntity
     public function getImageFile()
     {
         return $this->getFileOrDefault($this->getImage(), self::FOLDER_ILLU);
+    }
+
+    /**
+     * @return Collection<int, RaRando>
+     */
+    public function getRandos(): Collection
+    {
+        return $this->randos;
+    }
+
+    public function addRando(RaRando $rando): self
+    {
+        if (!$this->randos->contains($rando)) {
+            $this->randos->add($rando);
+            $rando->setGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRando(RaRando $rando): self
+    {
+        if ($this->randos->removeElement($rando)) {
+            // set the owning side to null (unless already changed)
+            if ($rando->getGroupe() === $this) {
+                $rando->setGroupe(null);
+            }
+        }
+
+        return $this;
     }
 }

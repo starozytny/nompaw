@@ -8,6 +8,7 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaLink;
+use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -113,6 +114,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaGroupe::class)]
     private Collection $roGroupes;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaRando::class)]
+    private Collection $raRandos;
+
     /**
      * @throws Exception
      */
@@ -125,6 +129,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->coFavorites = new ArrayCollection();
         $this->roLinks = new ArrayCollection();
         $this->roGroupes = new ArrayCollection();
+        $this->raRandos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -548,6 +553,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($roGroupe->getAuthor() === $this) {
                 $roGroupe->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaRando>
+     */
+    public function getRaRandos(): Collection
+    {
+        return $this->raRandos;
+    }
+
+    public function addRaRando(RaRando $raRando): self
+    {
+        if (!$this->raRandos->contains($raRando)) {
+            $this->raRandos->add($raRando);
+            $raRando->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRaRando(RaRando $raRando): self
+    {
+        if ($this->raRandos->removeElement($raRando)) {
+            // set the owning side to null (unless already changed)
+            if ($raRando->getAuthor() === $this) {
+                $raRando->setAuthor(null);
             }
         }
 

@@ -10,7 +10,10 @@
         path: path('user_recipes_index'), matchRoute: ['user_recipes_index', 'user_recipes_read', 'user_recipes_create', 'user_recipes_update']
     },
     { name: "Randonnées", icon: "map",
-        path: path('user_randos_groupes_index'), matchRoute: ['user_randos_groupes_index', 'user_randos_groupes_read', 'user_randos_groupes_create', 'user_randos_groupes_update']
+        path: path('user_randos_groupes_index'), matchRoute: [
+            'user_randos_groupes_index', 'user_randos_groupes_read', 'user_randos_groupes_create', 'user_randos_groupes_update',
+            'user_randos_rando_read', 'user_randos_rando_create', 'user_randos_rando_update'
+        ]
     },
     { name: "Mon profil", icon: "user-octagon",
         path: path('user_profil_index'), matchRoute: ['user_profil_index', 'user_profil_update']

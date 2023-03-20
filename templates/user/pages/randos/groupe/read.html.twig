@@ -47,24 +47,62 @@
         <div class="groupe-read">
             <div class="groupe-line-0">
                 <div class="next-rando">
-                    <div class="col-1">
-                        <h2>Prochaine randonnée !</h2>
-                        <div class="subtitle">Apprenez rapidement à prendre en main c !</div>
-                    </div>
+                    {% if next %}
+                        <div class="col-1">
+                            <div>
+                                <h2>{{ next.name }}</h2>
+                                <div class="subtitle">Prochaine randonnée !</div>
+                            </div>
+                            <div class="actions">
+                                <a class="btn-icon btn-icon-warning">
+                                    <span class="icon-pencil"></span>
+                                    <span class="tooltip">Modifier</span>
+                                </a>
 
-                    <div class="col-2">
-                        <img src="{{ asset(elem.imageFile) }}" alt="logo {{ elem.name }}">
-                        <div class="cta">
-                            <a href="https://pitch.com/public/b49ac20a-d322-4a29-b8a4-2d9db07766fb" target="_blank" class="btn btn-primary">
-                                <span>Démarrer</span>
-                                <span class="icon-right-arrow"></span>
-                            </a>
+                                <a class="btn-icon btn-icon-danger">
+                                    <span class="icon-trash"></span>
+                                    <span class="tooltip">Supprimer</span>
+                                </a>
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="col-2">
+                            <div class="status status-{{ next.status }}">
+                                <span>{{ next.status }}</span>
+                            </div>
+                            <div class="cta">
+                                <a href="{{ path('user_randos_rando_read', {'slug': next.slug}) }}" class="btn btn-primary">
+                                    <span>Voir la rando</span>
+                                    <span class="icon-right-arrow"></span>
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-1">
+                            <div>
+                                <h2>Aucune randonnée de prévu.</h2>
+                                <div class="subtitle">Préparer la prochaine randonnée en cliquant sur <i>Créer une randonnée</i></div>
+                            </div>
+                        </div>
+
+                        <div class="col-2">
+                            <img src="{{ asset(elem.imageFile) }}" alt="logo {{ elem.name }}">
+                            <div class="cta">
+                                <a href="{{ path('user_randos_rando_create', {'g_slug': elem.slug}) }}" class="btn btn-primary">
+                                    <span class="icon-add"></span>
+                                    <span>Créer une rando</span>
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="next-creator">
-                    <h2><span class="icon-user-octagon"></span> {{ elem.author.username }}</h2>
+                    <h2><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ elem.author.username }}</h2>
                     <div class="subtitle">Référent.e du groupe de randonnée</div>
+                    {% if next %}
+                        <h2 style="margin-top: 12px;"><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ next.author.username }}</h2>
+                        <div class="subtitle">Référent.e de la prochaine randonnée</div>
+                    {% endif %}
                 </div>
             </div>
 

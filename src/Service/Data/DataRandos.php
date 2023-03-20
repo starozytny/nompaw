@@ -3,6 +3,7 @@
 namespace App\Service\Data;
 
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaRando;
 use App\Service\SanitizeData;
 
 class DataRandos
@@ -18,6 +19,15 @@ class DataRandos
             ->setSlug($this->sanitizeData->slugString($data->name))
             ->setLevel((int) $data->level)
             ->setIsVisible((int) $data->isVisible)
+            ->setDescription($this->sanitizeData->trimData($data->description->html))
+        ;
+    }
+
+    public function setDataRando(RaRando $obj, $data): RaRando
+    {
+        return ($obj)
+            ->setName($this->sanitizeData->trimData($data->name))
+            ->setSlug($this->sanitizeData->slugString($data->name))
             ->setDescription($this->sanitizeData->trimData($data->description->html))
         ;
     }
