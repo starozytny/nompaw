@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class CoRecipe extends DataEntity
 {
     const FOLDER = "images/editor/recipes";
-    const FOLDER_ILLU = 'recipes';
+    const FOLDER_ILLU = 'images/entity/recipes';
 
     const LIST = ['recipe_list'];
     const FORM = ['recipe_form'];

@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class RaGroupe extends DataEntity
 {
     const FOLDER = "images/editor/groupes";
-    const FOLDER_ILLU = 'groupes';
+    const FOLDER_ILLU = 'images/entity/groupes';
 
     const FORM = ['ragrp_form'];
 
