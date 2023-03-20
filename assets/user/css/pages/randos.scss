@@ -1,21 +1,13 @@
 @import "../vars/vars";
 
 @import "./components/form";
-@import "./components/recipes/list";
-@import "./components/recipes/read";
 
-.line-tuto-step{
-  label{
-    @include flex(row, center, space-between, var(--espaceEls));
-    width: 100%;
-  }
-}
 
-.delete-recipe{
+.delete-groupe{
   @include flex(row, center, center);
 }
 
-.recipes{
+.groupes{
   @include flex(row, flex-start, flex-start, var(--espaceDiv));
   flex-wrap: wrap;
 

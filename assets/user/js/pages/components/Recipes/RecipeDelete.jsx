@@ -10,7 +10,7 @@ import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 
 const URL_INDEX_ELEMENTS = 'user_recipes_index';
-const URL_DELETE_ELEMENT = 'api_recipes_delete';
+const URL_DELETE_ELEMENT = 'api_cook_recipes_delete';
 
 export function RecipeDelete ({ context, id, name })
 {

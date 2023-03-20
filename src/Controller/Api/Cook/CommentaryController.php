@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/commentaries', name: 'api_commentaries_')]
+#[Route('/api/cook/commentaries', name: 'api_cook_commentaries_')]
 class CommentaryController extends AbstractController
 {
     public function submitForm(CoCommentaryRepository $repository, CoRecipe $recipe, Request $request, ApiResponse $apiResponse,
@@ -40,7 +40,7 @@ class CommentaryController extends AbstractController
         $repository->save($commentary, true);
         return $apiResponse->apiJsonResponse($commentary, CoCommentary::READ);
     }
-    
+
     #[Route('/recipe/{recipe}/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, CoRecipe $recipe, ApiResponse $apiResponse, ValidatorService $validator,
                            CoCommentaryRepository $repository): Response

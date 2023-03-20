@@ -13,7 +13,7 @@ import Sort       from "@commonFunctions/sort";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 import { Button }  from "@commonComponents/Elements/Button";
 
-const URL_CREATE_ELEMENT = 'api_commentaries_create';
+const URL_CREATE_ELEMENT = 'api_cook_commentaries_create';
 
 export class Commentary extends Component {
     constructor(props) {

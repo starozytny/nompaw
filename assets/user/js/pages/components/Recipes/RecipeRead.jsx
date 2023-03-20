@@ -24,7 +24,7 @@ import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
 import {Commentary} from "@userPages/Recipes/Commentary";
 
-const URL_UPDATE_DATA = 'api_recipes_update_data';
+const URL_UPDATE_DATA = 'api_cook_recipes_update_data';
 
 const menu = [
     { label: 'Instructions', value: 'instructions' },
@@ -45,6 +45,7 @@ export class RecipeRead extends Component {
         let description = elem.content ? elem.content : "";
 
         this.state = {
+            isMobile: !window.matchMedia("(min-width: 1280px)").matches,
             context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'instructions',
             elem: elem,
             nbPerson: Formulaire.setValue(elem.nbPerson),
@@ -57,7 +58,7 @@ export class RecipeRead extends Component {
         }
     }
 
-    handleChangeContext = (e) => { console.log(e); this.setState({ context: e.target.value }) }
+    handleChangeContext = (e) => { this.setState({ context: e.target.value }) }
 
     handleChange = (e) => {
         let name = e.currentTarget.name;
@@ -112,7 +113,7 @@ export class RecipeRead extends Component {
 
     render () {
         const { mode, elem, steps, ingre, coms } = this.props;
-        const { context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare, description } = this.state;
+        const { isMobile, context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare, description } = this.state;
 
         let content;
         switch (context){
@@ -123,7 +124,7 @@ export class RecipeRead extends Component {
                 content = <Ingredients mode={mode} recipe={elem} ingre={ingre} />
                 break;
             default:
-                content = <Instructions mode={mode} recipe={elem} steps={steps} />
+                content = isMobile ? <Instructions mode={mode} recipe={elem} steps={steps} /> : null
                 break;
         }
 
@@ -139,7 +140,7 @@ export class RecipeRead extends Component {
             <div className="col-1">
                 <img alt="example" src={elem.imageFile} style={{ height: 260, objectFit: 'cover' }}/>
                 <div className="recipe-instructions">
-                    {(mode || elem.content) && <p className="recipe-description">
+                    {(mode || elem.content) && <div className="recipe-description">
                         {mode
                             ? <div className="form-input">
                                 <TinyMCE type={4} identifiant='description' valeur={description.value} params={{'id': elem.id}}
@@ -154,16 +155,19 @@ export class RecipeRead extends Component {
                             </div>
                             : parse(elem.content)
                         }
-                    </p>}
+                    </div>}
                     <div className="rating">
                         {/*<Rate disabled defaultValue={elem.rate} />*/}
                         <Rate disabled defaultValue={3} />
                     </div>
 
-                    <div className="instructions">
-                        <h2>Instructions</h2>
-                        <Instructions mode={mode} recipe={elem} steps={steps} />
-                    </div>
+                    {!isMobile
+                        ? <div className="instructions">
+                            <h2>Instructions</h2>
+                            <Instructions mode={mode} recipe={elem} steps={steps} />
+                        </div>
+                        : null
+                    }
                 </div>
             </div>
             <div className="col-2">

@@ -55,6 +55,12 @@
                     </button>
                 </div>
             {% endif %}
+            <div class="favorite"
+                 data-id="{{ elem.id }}"
+                 data-is-fav="{{ isFav ? 1 : 0 }}"
+            >
+                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
+            </div>
         </div>
     </div>
 

@@ -12,8 +12,8 @@ import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 
 const URL_INDEX_PAGE        = "user_recipes_read";
-const URL_CREATE_ELEMENT    = "api_recipes_create";
-const URL_UPDATE_ELEMENT    = "api_recipes_update";
+const URL_CREATE_ELEMENT    = "api_cook_recipes_create";
+const URL_UPDATE_ELEMENT    = "api_cook_recipes_update";
 const TEXT_CREATE           = "Ajouter le produit";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 

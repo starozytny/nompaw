@@ -3,8 +3,11 @@
 namespace App\Entity\Main;
 
 use App\Entity\Cook\CoCommentary;
+use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
+use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaLink;
 use App\Repository\Main\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -100,6 +103,15 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoCommentary::class)]
     private Collection $coCommentaries;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoFavorite::class)]
+    private Collection $coFavorites;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: RaLink::class)]
+    private Collection $roLinks;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaGroupe::class)]
+    private Collection $roGroupes;
+
     /**
      * @throws Exception
      */
@@ -109,6 +121,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->token = $this->initToken();
         $this->coRecipes = new ArrayCollection();
         $this->coCommentaries = new ArrayCollection();
+        $this->coFavorites = new ArrayCollection();
+        $this->roLinks = new ArrayCollection();
+        $this->roGroupes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -442,6 +457,96 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($coCommentary->getUser() === $this) {
                 $coCommentary->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoFavorite>
+     */
+    public function getCoFavorites(): Collection
+    {
+        return $this->coFavorites;
+    }
+
+    public function addCoFavorite(CoFavorite $coFavorite): self
+    {
+        if (!$this->coFavorites->contains($coFavorite)) {
+            $this->coFavorites->add($coFavorite);
+            $coFavorite->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCoFavorite(CoFavorite $coFavorite): self
+    {
+        if ($this->coFavorites->removeElement($coFavorite)) {
+            // set the owning side to null (unless already changed)
+            if ($coFavorite->getUser() === $this) {
+                $coFavorite->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaLink>
+     */
+    public function getRoLinks(): Collection
+    {
+        return $this->roLinks;
+    }
+
+    public function addRoLink(RaLink $roLink): self
+    {
+        if (!$this->roLinks->contains($roLink)) {
+            $this->roLinks->add($roLink);
+            $roLink->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoLink(RaLink $roLink): self
+    {
+        if ($this->roLinks->removeElement($roLink)) {
+            // set the owning side to null (unless already changed)
+            if ($roLink->getUser() === $this) {
+                $roLink->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaGroupe>
+     */
+    public function getRoGroupes(): Collection
+    {
+        return $this->roGroupes;
+    }
+
+    public function addRoGroupe(RaGroupe $roGroupe): self
+    {
+        if (!$this->roGroupes->contains($roGroupe)) {
+            $this->roGroupes->add($roGroupe);
+            $roGroupe->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoGroupe(RaGroupe $roGroupe): self
+    {
+        if ($this->roGroupes->removeElement($roGroupe)) {
+            // set the owning side to null (unless already changed)
+            if ($roGroupe->getAuthor() === $this) {
+                $roGroupe->setAuthor(null);
             }
         }
 

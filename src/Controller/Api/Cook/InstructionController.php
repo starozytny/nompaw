@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/instructions', name: 'api_instructions_')]
+#[Route('/api/cook/instructions', name: 'api_cook_instructions_')]
 class InstructionController extends AbstractController
 {
     public function submitForm(CoRecipeRepository $repository, CoRecipe $recipe, Request $request, ApiResponse $apiResponse,
@@ -54,7 +54,7 @@ class InstructionController extends AbstractController
         $repository->save($recipe, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
-    
+
     #[Route('/recipe/{recipe}/update', name: 'update', options: ['expose' => true], methods: 'PUT')]
     public function update(Request $request, CoRecipe $recipe, ApiResponse $apiResponse, ValidatorService $validator,
                            CoRecipeRepository $repository, CoStepRepository $stepRepository): Response
