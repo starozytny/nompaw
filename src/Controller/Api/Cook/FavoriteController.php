@@ -3,6 +3,7 @@
 namespace App\Controller\Api\Cook;
 
 use App\Entity\Cook\CoFavorite;
+use App\Entity\Cook\CoRecipe;
 use App\Service\ApiResponse;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +18,7 @@ class FavoriteController extends AbstractController
     {
         $em = $registry->getManager();
 
-        $obj = $em->getRepository(CoFavorite::class)->findOneBy(['id' => $id]);
+        $obj = $em->getRepository(CoRecipe::class)->findOneBy(['id' => $id]);
         if(!$obj){
             return $apiResponse->apiJsonResponseBadRequest('Objet introuvable');
         }
