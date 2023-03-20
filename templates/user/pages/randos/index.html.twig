@@ -12,20 +12,23 @@
         </div>
     </div>
     <div class="page-default">
-        <div class="recipes">
+        <div class="groupes">
             {% for elem in groupes %}
-
                 <div class="card">
                     <div class="card-header">
+                        <div class="image">
+                            <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}">
+                        </div>
                         <div class="name">
                             <div>{{ elem.name }}</div>
                         </div>
                     </div>
                     <div class="card-body">
-                        {{ elem.description | raw }}
+                        <div>{{ elem.description | raw }}</div>
+                        <span class="level">Niveau : {{ elem.levelString }}</span>
                     </div>
-                    {% if app.user.id == elem.author.id %}
-                        <div class="card-footer">
+                    <div class="card-footer">
+                        {% if app.user.id == elem.author.id %}
                             <a
                                     href="{{ path('user_randos_groupe_update', {'slug': elem.slug}) }}"
                                     class="btn-icon"
@@ -40,8 +43,15 @@
                             >
                                 <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
                             </div>
-                        </div>
-                    {% endif %}
+                        {% endif %}
+                        <a
+                                href="{{ path('user_randos_groupe_read', {'slug': elem.slug}) }}"
+                                class="btn-icon"
+                        >
+                            <span class="icon-right-arrow"></span>
+                            <span class="tooltip" style="width: 118px;">Accéder à la page</span>
+                        </a>
+                    </div>
                 </div>
             {% endfor %}
         </div>

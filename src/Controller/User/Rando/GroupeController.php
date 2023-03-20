@@ -3,7 +3,7 @@
 namespace App\Controller\User\Rando;
 
 use App\Entity\Cook\CoRecipe;
-use App\Repository\Cook\CoRecipeRepository;
+use App\Entity\Rando\RaGroupe;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +19,12 @@ class GroupeController extends AbstractController
     public function list(RaGroupeRepository $repository, RaLinkRepository $linkRepository): Response
     {
         $groupes = $repository->findBy(['isVisible' => true]);
+
+        foreach($repository->findBy(['author' => $this->getUser()]) as $grp){
+            if(!in_array($grp, $groupes)){
+                $groupes[] = $grp;
+            }
+        }
 
         foreach($linkRepository->findBy(['user' => $this->getUser()]) as $link){
             if(!in_array($link->getGroupe(), $groupes)){
@@ -49,7 +55,7 @@ class GroupeController extends AbstractController
     }
 
     #[Route('/modifier/{slug}', name: 'update', options: ['expose' => true])]
-    public function update($slug, CoRecipeRepository $repository, SerializerInterface $serializer): Response
+    public function update($slug, RaGroupeRepository $repository, SerializerInterface $serializer): Response
     {
         $obj   = $repository->findOneBy(['slug' => $slug]);
 
@@ -57,7 +63,7 @@ class GroupeController extends AbstractController
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
-        $element = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::FORM]);
+        $element = $serializer->serialize($obj,   'json', ['groups' => RaGroupe::FORM]);
 
         return $this->render('user/pages/randos/groupe/update.html.twig', [
             'elem' => $obj,
