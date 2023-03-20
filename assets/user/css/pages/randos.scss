@@ -7,6 +7,19 @@
   @include flex(row, center, center);
 }
 
+.members{
+  @include flex(row, flex-start, flex-start);
+
+  & > .member{
+    position: relative;
+    box-shadow: 0 4px 8px var(--color0Opacity4);
+
+    & + .member{
+      margin-left: -12px;
+    }
+  }
+}
+
 .groupes{
   @include flex(row, flex-start, flex-start, var(--espaceDiv));
   flex-wrap: wrap;
@@ -41,6 +54,10 @@
           @include fontSemibold();
           font-size: 20px;
         }
+      }
+
+      .members{
+        margin-top: 12px;
       }
     }
 

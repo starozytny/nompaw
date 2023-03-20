@@ -20,7 +20,32 @@
                             <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}">
                         </div>
                         <div class="name">
-                            <div>{{ elem.name }}</div>
+                            <div class="semibold">{{ elem.name }}</div>
+                            <div class="members">
+                                {% set totalMembers = 1 %}
+                                {% for member in elem.links %}
+                                    {% if loop.index < 8 %}
+                                        <div class="member">
+                                            <div class="avatar">
+                                                {% if member.user.avatarFile %}
+                                                    <img src="{{ member.user.avatarFile }}" alt="Avatar utilisateur">
+                                                {% else %}
+                                                    <div class="avatar-letter">{{ member.user.lastname | slice(0, 1) }}{{ member.user.firstname | slice(0,1) }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <span class="tooltip">{{ member.user.username }} {{ loop.index }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% set totalMembers = totalMembers + 1 %}
+                                {% endfor %}
+                                {% if totalMembers >= 8 %}
+                                    <div class="member">
+                                        <div class="avatar">
+                                            <div class="avatar-letter">+ {{ totalMembers - 7 }}</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
