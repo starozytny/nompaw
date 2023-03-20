@@ -17,7 +17,7 @@
 
                 {% set isFav = 0 %}
                 {% for fav in favorites %}
-                    {% if fav.identifiant == el.id %}
+                    {% if fav.identifiant == elem.id %}
                         {% set isFav = 1 %}
                     {% endif %}
                 {% endfor %}
