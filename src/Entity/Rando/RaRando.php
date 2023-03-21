@@ -17,6 +17,7 @@ class RaRando
     const FOLDER = "images/editor/randos";
 
     const FORM = ['rando_form'];
+    const READ = ['rando_read'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -45,6 +46,7 @@ class RaRando
     private ?bool $isNext = false;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['rando_form'])]
     private ?string $slug = null;
 
     #[ORM\ManyToOne(inversedBy: 'randos')]

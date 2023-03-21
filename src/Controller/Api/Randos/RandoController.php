@@ -46,7 +46,7 @@ class RandoController extends AbstractController
         }
 
         $repository->save($obj, true);
-        return $apiResponse->apiJsonResponse($obj, RaGroupe::FORM);
+        return $apiResponse->apiJsonResponse($obj, RaRando::FORM);
     }
 
     #[Route('/groupe/{groupe}/create', name: 'create', options: ['expose' => true], methods: 'POST')]

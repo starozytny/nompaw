@@ -6,6 +6,7 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\Main\User;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaPropalDate;
+use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
@@ -48,7 +49,7 @@ class RandoController extends AbstractController
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
-        $element = $serializer->serialize($obj, 'json', ['groups' => RaGroupe::FORM]);
+        $element = $serializer->serialize($obj, 'json', ['groups' => RaRando::FORM]);
 
         return $this->render('user/pages/randos/rando/update.html.twig', [
             'elem' => $obj,
