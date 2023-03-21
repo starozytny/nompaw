@@ -67,9 +67,18 @@
                         </div>
 
                         <div class="col-2">
-                            <div class="status status-{{ next.status }}">
-                                <span>{{ next.status }}</span>
+                            <div class="steps">
+                                <div class="status status-0 {{- next.status == 0 ? ' active' : ''  -}}">
+                                    <span>en proposition</span>
+                                </div>
+                                <div class="status status-1 {{- next.status == 1 ? ' active' : '' -}}">
+                                    <span>validée</span>
+                                </div>
+                                <div class="status status-2 {{- next.status == 2 ? ' active' : '' -}}">
+                                    <span>terminée</span>
+                                </div>
                             </div>
+
                             <div class="cta">
                                 <a href="{{ path('user_randos_rando_read', {'slug': next.slug}) }}" class="btn btn-primary">
                                     <span>Voir la rando</span>

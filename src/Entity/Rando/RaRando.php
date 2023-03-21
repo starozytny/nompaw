@@ -106,6 +106,16 @@ class RaRando
         return $this;
     }
 
+    public function getStatusString(): string
+    {
+        return match($this->status){
+            StatusType::Propal => 'en proposition',
+            StatusType::Validate => 'validée',
+            StatusType::End => 'terminée',
+            default => 'erreur',
+        };
+    }
+
     public function getDescription(): ?string
     {
         return $this->description;
