@@ -102,6 +102,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Column(nullable: true)]
     private ?string $googleId = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?string $facebookId = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $googleAccessToken = null;
 
@@ -601,18 +604,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-    public function getGoogleId(): ?string
-    {
-        return $this->googleId;
-    }
-
-    public function setGoogleId(?string $googleId): self
-    {
-        $this->googleId = $googleId;
-
-        return $this;
-    }
-
     public function getGoogleAccessToken(): ?string
     {
         return $this->googleAccessToken;
@@ -645,6 +636,30 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setGoogleTokenExpiresAt(?\DateTime $googleTokenExpiresAt): self
     {
         $this->googleTokenExpiresAt = $googleTokenExpiresAt;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getFacebookId(): ?string
+    {
+        return $this->facebookId;
+    }
+
+    public function setFacebookId(?string $facebookId): self
+    {
+        $this->facebookId = $facebookId;
 
         return $this;
     }

@@ -14,6 +14,7 @@ use App\Entity\Main\Image;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\ImageRepository;
+use Exception;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -137,5 +138,31 @@ class FileUploader
         }
 
         return new JsonResponse(['success' => false,]);
+    }
+
+    /**
+     * @param $file
+     * @param $folder
+     * @param $oldFile
+     * @return string|null
+     */
+    public function downloadImgURL($file, $folder, $oldFile): ?string
+    {
+        try{
+            if(!is_dir($folder)){
+                mkdir($folder);
+            }
+            if($oldFile){
+                $this->deleteFile($oldFile, $folder);
+            }
+            $current = file_get_contents($file);
+            $filename = substr($file, strripos($file, "/")+1 , strlen($file));
+            $file = $folder.'/'.$filename;
+            file_put_contents($file, $current);
+
+            return $filename;
+        }catch (Exception $e){
+            return  null;
+        }
     }
 }

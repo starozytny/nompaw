@@ -8,7 +8,7 @@ use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
-use League\OAuth2\Client\Provider\GoogleUser;
+use League\OAuth2\Client\Provider\FacebookUser;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +19,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
-class GoogleAuthenticator extends OAuth2Authenticator
+class FacebookAuthenticator extends OAuth2Authenticator
 {
     private ClientRegistry $clientRegistry;
     private EntityManagerInterface $entityManager;
@@ -40,45 +40,42 @@ class GoogleAuthenticator extends OAuth2Authenticator
     public function supports(Request $request): ?bool
     {
         // continue ONLY if the current ROUTE matches the check ROUTE
-        return $request->attributes->get('_route') === 'connect_google_check';
+        return $request->attributes->get('_route') === 'connect_facebook_check';
     }
 
     public function authenticate(Request $request): SelfValidatingPassport
     {
-        $client = $this->clientRegistry->getClient('google');
+        $client = $this->clientRegistry->getClient('facebook');
         $accessToken = $this->fetchAccessToken($client);
 
         return new SelfValidatingPassport(
             new UserBadge($accessToken->getToken(), function () use ($accessToken, $client) {
-                /** @var GoogleUser $user */
+                /** @var FacebookUser $user */
                 $user = $client->fetchUserFromToken($accessToken);
 
-                $email = $user->getEmail();
+                $username = $user->getEmail();
+                $id = $user->getId();
 
                 $society = $this->entityManager->getRepository(Society::class)->findOneBy(['code' => 999]);
 
                 // have they logged in with Google before? Easy!
-                $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $user->getId()]);
+                $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['facebookId' => $id]);
                 $oldAvatar = $existingUser ? $existingUser->getAvatar() : null;
-
                 //User doesnt exist, we create it !
                 if (!$existingUser) {
                     $existingUser = (new User())
-                        ->setUsername($email)
-                        ->setEmail($email)
-                        ->setGoogleId($user->getId())
-                        ->setFirstname($user->getFirstName() ?: 'Google')
-                        ->setLastname($user->getLastName() ?: $user->getName())
-                        ->setGoogleAccessToken($accessToken->getToken())
-                        ->setGoogleRefreshToken($accessToken->getRefreshToken())
-                        ->setGoogleTokenExpiresAt((new \DateTime())->setTimestamp($accessToken->getExpires()))
+                        ->setUsername($username)
+                        ->setEmail($username)
+                        ->setFacebookId($id)
+                        ->setFirstname($user->getFirstName() ?: 'Facebook')
+                        ->setLastname($user->getLastName() ?: ($user->getName() ?: 'Facebook'))
                         ->setSociety($society)
                     ;
                     $existingUser->setPassword($this->passwordHasher->hashPassword($existingUser, uniqid()));
                     $this->entityManager->persist($existingUser);
                 }
-                if($user->getAvatar()){
-                    $fileName = $this->fileUploader->downloadImgURL($user->getAvatar(), User::FOLDER, $oldAvatar);
+                if($user->getPictureUrl()){
+                    $fileName = $this->fileUploader->downloadImgURL($user->getPictureUrl().'/picture', User::FOLDER, $oldAvatar);
                     if($fileName){
                         $existingUser->setAvatar($fileName);
                     }
@@ -92,14 +89,9 @@ class GoogleAuthenticator extends OAuth2Authenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): RedirectResponse
     {
-
-        // change "app_dashboard" to some route in your app
         return new RedirectResponse(
             $this->router->generate('app_login')
         );
-
-        // or, on success, let the request continue to be handled by the controller
-        //return null;
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
@@ -108,15 +100,4 @@ class GoogleAuthenticator extends OAuth2Authenticator
 
         return new Response($message, Response::HTTP_FORBIDDEN);
     }
-
-//    public function start(Request $request, AuthenticationException $authException = null): Response
-//    {
-//        /*
-//         * If you would like this class to control what happens when an anonymous user accesses a
-//         * protected page (e.g. redirect to /login), uncomment this method and make this class
-//         * implement Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface.
-//         *
-//         * For more details, see https://symfony.com/doc/current/security/experimental_authenticators.html#configuring-the-authentication-entry-point
-//         */
-//    }
 }
