@@ -1,5 +1,7 @@
 @import "../../../../vars/vars";
 
+@import "js-datepicker/src/datepicker.scss";
+
 .rando-read{
   .rando-meta{
     @include flex(row, center, space-between, var(--espaceEls));
@@ -20,6 +22,29 @@
 
   .rando-content{
     padding: var(--espaceLayout) 0;
+  }
+}
+
+.rando-card{
+  .rando-card-header, .rando-card-body, .rando-card-footer{
+    padding: var(--espaceDiv);
+  }
+
+  .rando-card-header{
+    background-color: var(--color0Opacity6);
+    border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
+
+    .name{
+      @include fontSemibold();
+    }
+  }
+  .rando-card-body {
+    background-color: var(--color0Opacity4);
+  }
+
+  .rando-card-footer{
+    background-color: var(--color0Opacity6);
+    border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
   }
 }
 

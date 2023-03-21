@@ -65,7 +65,12 @@
             </div>
 
             <div class="rando-content">
-                <div>Hello world</div>
+                <div id="rando_date"
+                     data-start-at="{{ elem.startAt }}"
+                     data-mode="{{ app.user.id == elem.author.id }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
             </div>
         </div>
     </div>
