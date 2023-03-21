@@ -2,23 +2,31 @@
 
 namespace App\Controller\User\Rando;
 
-use App\Entity\Cook\CoRecipe;
-use App\Repository\Cook\CoRecipeRepository;
+use App\Entity\Main\User;
+use App\Entity\Rando\RaGroupe;
+use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
+use App\Repository\Rando\RaRandoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/espace-membre/randonnees', name: 'user_randos_groupe_')]
+#[Route('/espace-membre/randonnees/groupes', name: 'user_randos_groupes_')]
 class GroupeController extends AbstractController
 {
     #[Route('/', name: 'index', options: ['expose' => true])]
     public function list(RaGroupeRepository $repository, RaLinkRepository $linkRepository): Response
     {
         $groupes = $repository->findBy(['isVisible' => true]);
+
+        foreach($repository->findBy(['author' => $this->getUser()]) as $grp){
+            if(!in_array($grp, $groupes)){
+                $groupes[] = $grp;
+            }
+        }
 
         foreach($linkRepository->findBy(['user' => $this->getUser()]) as $link){
             if(!in_array($link->getGroupe(), $groupes)){
@@ -29,14 +37,27 @@ class GroupeController extends AbstractController
         return $this->render('user/pages/randos/index.html.twig', ['groupes' => $groupes]);
     }
 
-    #[Route('/ajouter', name: 'create')]
-    public function create(): Response
+    #[Route('/groupe/{slug}', name: 'read', options: ['expose' => true])]
+    public function read($slug, RaGroupeRepository $repository, RaRandoRepository $randoRepository): Response
     {
-        return $this->render('user/pages/randos/groupe/create.html.twig');
+        $obj = $repository->findOneBy(['slug' => $slug]);
+        return $this->render('user/pages/randos/groupe/read.html.twig', [
+            'elem' => $obj,
+            'randos' => $randoRepository->findBy(['isNext' => false]),
+            'next' => $randoRepository->findOneBy(['isNext' => true])
+        ]);
+    }
+
+    #[Route('/ajouter', name: 'create')]
+    public function create(UserRepository $userRepository, SerializerInterface $serializer): Response
+    {
+        $users = $userRepository->findAll();
+        $users = $serializer->serialize($users, 'json', ['groups' => User::SELECT]);
+        return $this->render('user/pages/randos/groupe/create.html.twig', ['users' => $users]);
     }
 
     #[Route('/modifier/{slug}', name: 'update', options: ['expose' => true])]
-    public function update($slug, CoRecipeRepository $repository, SerializerInterface $serializer): Response
+    public function update($slug, RaGroupeRepository $repository, RaLinkRepository $linkRepository, UserRepository $userRepository, SerializerInterface $serializer): Response
     {
         $obj   = $repository->findOneBy(['slug' => $slug]);
 
@@ -44,11 +65,22 @@ class GroupeController extends AbstractController
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
-        $element = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::FORM]);
+        $users = $userRepository->findAll();
+        $links = $linkRepository->findBy(['groupe' => $obj]);
+        $members = [];
+        foreach($links as $link){
+            $members[] = $link->getUser()->getId();
+        }
 
-        return $this->render('user/pages/randos/groupe//update.html.twig', [
+        $element = $serializer->serialize($obj,   'json', ['groups' => RaGroupe::FORM]);
+        $users = $serializer->serialize($users, 'json', ['groups' => User::SELECT]);
+        $members = json_encode($members);
+
+        return $this->render('user/pages/randos/groupe/update.html.twig', [
             'elem' => $obj,
             'element' => $element,
+            'users' => $users,
+            'members' => $members,
         ]);
     }
 }

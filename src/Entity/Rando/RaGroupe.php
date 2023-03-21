@@ -2,31 +2,43 @@
 
 namespace App\Entity\Rando;
 
+use App\Entity\DataEntity;
 use App\Entity\Main\User;
 use App\Repository\Rando\RaGroupeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RaGroupeRepository::class)]
-class RaGroupe
+class RaGroupe extends DataEntity
 {
+    const FOLDER = "images/editor/groupes";
+    const FOLDER_ILLU = 'images/entity/groupes';
+
+    const FORM = ['ragrp_form'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['ragrp_form'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ragrp_form'])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['ragrp_form'])]
     private ?bool $isVisible = null;
 
     #[ORM\Column]
+    #[Groups(['ragrp_form'])]
     private ?int $level = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['ragrp_form'])]
     private ?string $description = null;
 
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: RaLink::class)]
@@ -37,11 +49,20 @@ class RaGroupe
     private ?User $author = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ragrp_form'])]
     private ?string $slug = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['ragrp_form'])]
+    private ?string $image = null;
+
+    #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: RaRando::class)]
+    private Collection $randos;
 
     public function __construct()
     {
         $this->links = new ArrayCollection();
+        $this->randos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -83,6 +104,12 @@ class RaGroupe
         $this->level = $level;
 
         return $this;
+    }
+
+    public function getLevelString(): string
+    {
+        $values = ['Aucun', 'Facile', 'Moyen', 'Difficile', 'Très difficile', 'Extrême'];
+        return $values[$this->level];
     }
 
     public function getDescription(): ?string
@@ -147,6 +174,54 @@ class RaGroupe
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    #[Groups(['ragrp_form'])]
+    public function getImageFile()
+    {
+        return $this->getFileOrDefault($this->getImage(), self::FOLDER_ILLU);
+    }
+
+    /**
+     * @return Collection<int, RaRando>
+     */
+    public function getRandos(): Collection
+    {
+        return $this->randos;
+    }
+
+    public function addRando(RaRando $rando): self
+    {
+        if (!$this->randos->contains($rando)) {
+            $this->randos->add($rando);
+            $rando->setGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRando(RaRando $rando): self
+    {
+        if ($this->randos->removeElement($rando)) {
+            // set the owning side to null (unless already changed)
+            if ($rando->getGroupe() === $this) {
+                $rando->setGroupe(null);
+            }
+        }
 
         return $this;
     }

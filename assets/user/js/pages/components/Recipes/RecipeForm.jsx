@@ -38,8 +38,7 @@ export function RecipeFormulaire ({ context, element })
 
 RecipeFormulaire.propTypes = {
     context: PropTypes.string.isRequired,
-    element: PropTypes.object,
-    steps: PropTypes.array,
+    element: PropTypes.object
 }
 
 class Form extends Component {
@@ -122,7 +121,7 @@ class Form extends Component {
                         <div className="line-col-1">
                             <div className="title">Informations générales</div>
                             <div className="subtitle">
-                                La content doit être très courte pour décrire rapidement à quoi sert cette documentation
+                                Le contenu de la recette sera rempli dans la prochaine étape.
                             </div>
                         </div>
                         <div className="line-col-2">

@@ -21,6 +21,9 @@ security:
                 enable_csrf: true
             logout:
                 path: app_logout
+            custom_authenticators:
+                - App\Security\GoogleAuthenticator
+                - App\Security\FacebookAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

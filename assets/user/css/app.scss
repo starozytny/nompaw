@@ -53,6 +53,10 @@ hr{
   width: 65%;
 }
 
+.semibold{
+  @include fontSemibold();
+}
+
 #toast-container{
   .toast{
     .toast-title{

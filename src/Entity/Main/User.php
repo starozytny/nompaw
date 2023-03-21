@@ -8,6 +8,7 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaLink;
+use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -22,8 +23,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 {
     const FOLDER = "avatars";
 
-    const LIST = ['user_list'];
-    const FORM = ['user_form'];
+    const LIST   = ['user_list'];
+    const FORM   = ['user_form'];
+    const SELECT = ['user_select'];
 
     const CODE_ROLE_USER = 0;
     const CODE_ROLE_DEVELOPER = 1;
@@ -32,11 +34,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form', 'com_read'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user_list', 'user_form', 'com_read'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
     private ?string $username = null;
 
     #[ORM\Column]
@@ -54,11 +56,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -97,6 +99,21 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups(['user_list'])]
     private ?bool $blocked = false;
 
+    #[ORM\Column(nullable: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $facebookId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleAccessToken = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleRefreshToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $googleTokenExpiresAt = null;
+
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: CoRecipe::class)]
     private Collection $coRecipes;
 
@@ -112,6 +129,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaGroupe::class)]
     private Collection $roGroupes;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaRando::class)]
+    private Collection $raRandos;
+
     /**
      * @throws Exception
      */
@@ -124,6 +144,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->coFavorites = new ArrayCollection();
         $this->roLinks = new ArrayCollection();
         $this->roGroupes = new ArrayCollection();
+        $this->raRandos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -356,7 +377,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-    #[Groups(['user_list', 'user_form', 'com_read'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
     public function getAvatarFile(): ?string
     {
         return $this->getFileOrDefault($this->avatar, self::FOLDER, null);
@@ -549,6 +570,96 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
                 $roGroupe->setAuthor(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaRando>
+     */
+    public function getRaRandos(): Collection
+    {
+        return $this->raRandos;
+    }
+
+    public function addRaRando(RaRando $raRando): self
+    {
+        if (!$this->raRandos->contains($raRando)) {
+            $this->raRandos->add($raRando);
+            $raRando->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRaRando(RaRando $raRando): self
+    {
+        if ($this->raRandos->removeElement($raRando)) {
+            // set the owning side to null (unless already changed)
+            if ($raRando->getAuthor() === $this) {
+                $raRando->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getGoogleAccessToken(): ?string
+    {
+        return $this->googleAccessToken;
+    }
+
+    public function setGoogleAccessToken(?string $googleAccessToken): self
+    {
+        $this->googleAccessToken = $googleAccessToken;
+
+        return $this;
+    }
+
+    public function getGoogleRefreshToken(): ?string
+    {
+        return $this->googleRefreshToken;
+    }
+
+    public function setGoogleRefreshToken(?string $googleRefreshToken): self
+    {
+        $this->googleRefreshToken = $googleRefreshToken;
+
+        return $this;
+    }
+
+    public function getGoogleTokenExpiresAt(): ?\DateTime
+    {
+        return $this->googleTokenExpiresAt;
+    }
+
+    public function setGoogleTokenExpiresAt(?\DateTime $googleTokenExpiresAt): self
+    {
+        $this->googleTokenExpiresAt = $googleTokenExpiresAt;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getFacebookId(): ?string
+    {
+        return $this->facebookId;
+    }
+
+    public function setFacebookId(?string $facebookId): self
+    {
+        $this->facebookId = $facebookId;
 
         return $this;
     }
