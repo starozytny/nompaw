@@ -99,6 +99,18 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups(['user_list'])]
     private ?bool $blocked = false;
 
+    #[ORM\Column(nullable: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleAccessToken = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleRefreshToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $googleTokenExpiresAt = null;
+
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: CoRecipe::class)]
     private Collection $coRecipes;
 
@@ -585,6 +597,54 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
                 $raRando->setAuthor(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): self
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getGoogleAccessToken(): ?string
+    {
+        return $this->googleAccessToken;
+    }
+
+    public function setGoogleAccessToken(?string $googleAccessToken): self
+    {
+        $this->googleAccessToken = $googleAccessToken;
+
+        return $this;
+    }
+
+    public function getGoogleRefreshToken(): ?string
+    {
+        return $this->googleRefreshToken;
+    }
+
+    public function setGoogleRefreshToken(?string $googleRefreshToken): self
+    {
+        $this->googleRefreshToken = $googleRefreshToken;
+
+        return $this;
+    }
+
+    public function getGoogleTokenExpiresAt(): ?\DateTime
+    {
+        return $this->googleTokenExpiresAt;
+    }
+
+    public function setGoogleTokenExpiresAt(?\DateTime $googleTokenExpiresAt): self
+    {
+        $this->googleTokenExpiresAt = $googleTokenExpiresAt;
 
         return $this;
     }
