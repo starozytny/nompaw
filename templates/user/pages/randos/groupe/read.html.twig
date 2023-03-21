@@ -52,6 +52,10 @@
                             <div>
                                 <h2>{{ next.name }}</h2>
                                 <div class="subtitle">Prochaine randonnée !</div>
+                                <div class="subtitle sub-icon" style="margin-top: 4px;">
+                                    <span class="icon-calendar"></span>
+                                    <span>{{ next.startAt ? next.startAt | date('D, d M Y') : 'Date indéfinie' }}</span>
+                                </div>
                             </div>
                             <div class="actions">
                                 <a class="btn-icon btn-icon-warning">
