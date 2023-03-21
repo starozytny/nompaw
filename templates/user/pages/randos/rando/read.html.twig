@@ -1,14 +1,14 @@
 {% extends 'user/pages/randos/template.html.twig' %}
 
+{% set groupe = elem.groupe %}
 {% set author = elem.author %}
 
 {% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
 {% set page_title_alone %}{{ elem.name }}{% endset %}
-{% set page_subtitle %}Groupe de randonnée : {{ elem.name }}{% endset %}
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
-        { text: page_title_alone, url: path('user_randos_groupes_read', {'slug': elem.slug})  },
+        { text: page_title_alone, url: path('user_randos_rando_read', {'slug': elem.slug})  },
     ]) %}
     {{ parent() }}
 {% endblock %}
@@ -18,21 +18,22 @@
 {% block main_content %}
     <div class="page-actions">
         <div class="col-1">
-            <a href="{{ path('user_randos_groupes_index') }}" class="btn btn-outline-default">
+            <a href="{{ path('user_randos_groupes_read', {'slug': groupe.slug}) }}" class="btn btn-outline-default">
                 <span class="icon-left-arrow"></span>
-                <span>Retourner aux groupes</span>
+                <span>Retourner au groupe</span>
             </a>
         </div>
         <div class="col-2">
             {% if app.user.id == elem.author.id %}
-                <a href="{{ path('user_randos_groupes_update', {'slug': elem.slug}) }}" class="btn btn-warning">
+                <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" class="btn btn-warning">
                     <span class="icon-pencil"></span>
                     <span>Modifier</span>
                 </a>
-                <div class="delete-groupe"
+                <div class="delete-rando"
                      data-context="read"
                      data-id="{{ elem.id }}"
                      data-name="{{ elem.name }}"
+                     data-groupe-slug="{{ groupe.slug }}"
                 >
                     <button class="btn btn-danger btn-loader-without-text">
                         <span class="icon-chart-3"></span>
@@ -58,19 +59,15 @@
                                 </div>
                             </div>
                             <div class="actions">
-                                <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" class="btn-icon btn-icon-warning">
+                                <a class="btn-icon btn-icon-warning">
                                     <span class="icon-pencil"></span>
                                     <span class="tooltip">Modifier</span>
                                 </a>
 
-                                <div class="delete-rando"
-                                     data-context="randos"
-                                     data-id="{{ next.id }}"
-                                     data-name="{{ next.name }}"
-                                     data-groupe-slug="{{ elem.slug }}"
-                                >
-                                    <button class="btn-icon btn-icon-danger btn-loader-without-text"><span class="icon-chart-3"></span></button>
-                                </div>
+                                <a class="btn-icon btn-icon-danger">
+                                    <span class="icon-trash"></span>
+                                    <span class="tooltip">Supprimer</span>
+                                </a>
                             </div>
                         </div>
 

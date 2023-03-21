@@ -9,10 +9,10 @@ import Formulaire from "@commonFunctions/formulaire";
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 
-const URL_INDEX_ELEMENTS = 'user_randos_groupes_index';
-const URL_DELETE_ELEMENT = 'api_randos_groupes_delete';
+const URL_READ_GROUPE = 'user_randos_groupes_read';
+const URL_DELETE_ELEMENT = 'api_randos_rando_delete';
 
-export function GroupeDelete ({ context, id, name })
+export function RandoDelete ({ context, id, name, groupeSlug })
 {
     let modalRef = useRef(null);
 
@@ -24,7 +24,7 @@ export function GroupeDelete ({ context, id, name })
         modalRef.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
         axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': id}), data: {} })
             .then(function (response) {
-                location.href = Routing.generate(URL_INDEX_ELEMENTS);
+                location.href = Routing.generate(URL_READ_GROUPE, {'slug': groupeSlug});
             })
             .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
         ;
@@ -33,16 +33,17 @@ export function GroupeDelete ({ context, id, name })
     return <>
         {context === "read"
             ? <Button icon="trash" type="danger" onClick={handleClick}>Supprimer</Button>
-            : <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
+            : <ButtonIcon icon="trash" type="danger" onClick={handleClick}>Supprimer</ButtonIcon>
         }
-        <Modal ref={modalRef} identifiant={`delete-groupe-${id}`} maxWidth={414} title="Supprimer le groupe"
-               content={<p>Etes-vous sûr de vouloir supprimer le groupe de randonnée : <b>{name}</b> ?</p>}
+        <Modal ref={modalRef} identifiant={`delete-rando-${id}`} maxWidth={414} title="Supprimer la randonnée"
+               content={<p>Etes-vous sûr de vouloir supprimer la randonnée : <b>{name}</b> ?</p>}
                footer={<Button type="danger" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
     </>
 }
 
-GroupeDelete.propTypes = {
+RandoDelete.propTypes = {
     context: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
+    groupeSlug: PropTypes.string.isRequired,
 }

@@ -4,7 +4,7 @@
 @import "./components/randos/form";
 @import "./components/randos/groupe/read";
 
-.delete-groupe{
+.delete-groupe, .delete-rando{
   @include flex(row, center, center);
 }
 

@@ -18,14 +18,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/espace-membre/randonnees/rando', name: 'user_randos_rando_')]
 class RandoController extends AbstractController
 {
-    #[Route('/{slug}', name: 'read')]
-    public function read($slug, RaGroupeRepository $repository, RaRandoRepository $randoRepository): Response
+    #[Route('/{slug}', name: 'read', options: ['expose' => true])]
+    public function read($slug, RaRandoRepository $repository): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
-        return $this->render('user/pages/randos/groupe/read.html.twig', [
+        return $this->render('user/pages/randos/rando/read.html.twig', [
             'elem' => $obj,
-            'randos' => $randoRepository->findBy(['isNext' => false]),
-            'next' => $randoRepository->findOneBy(['isNext' => true])
         ]);
     }
 
