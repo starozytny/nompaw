@@ -70,4 +70,13 @@ class RandoController extends AbstractController
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
+
+    #[Route('/cancel/date/{id}', name: 'cancel_date', options: ['expose' => true], methods: 'PUT')]
+    public function cancelDate(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
+    {
+        $obj->setStartAt(null);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
 }

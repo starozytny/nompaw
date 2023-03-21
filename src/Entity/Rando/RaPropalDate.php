@@ -31,8 +31,9 @@ class RaPropalDate
     #[ORM\JoinColumn(nullable: false)]
     private ?RaRando $rando = null;
 
-    #[ORM\ManyToOne(inversedBy: 'raPropalDates')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'raPropalDates')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['pr_date_list'])]
     private ?User $author = null;
     public function getId(): ?int
     {

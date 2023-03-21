@@ -67,7 +67,7 @@
             <div class="rando-content">
                 <div id="rando_date"
                      data-rando-id="{{ elem.id }}"
-                     data-start-at="{{ elem.startAt }}"
+                     data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
                      data-propals="{{ propalDates }}"
                      data-user-id="{{ app.user.id }}"
                      data-mode="{{ app.user.id == elem.author.id }}"

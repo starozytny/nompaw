@@ -30,11 +30,6 @@
     padding: var(--espaceDiv);
   }
 
-  .propal-add{
-    @include flex(row);
-    padding: 12px var(--espaceDiv);
-  }
-
   .rando-card-header{
     background-color: var(--color0Opacity6);
     border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
@@ -45,11 +40,28 @@
   }
   .rando-card-body {
     background-color: var(--color0Opacity4);
+
+    &.selected{
+      background-color: var(--primaryOpacity1);
+      border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
+    }
   }
 
   .rando-card-footer{
-    background-color: var(--color0Opacity6);
+    @include flex();
+    background-color: var(--primary);
     border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 0.2s ease-in-out;
+
+    &:hover{
+      opacity: 1;
+    }
+  }
+
+  .rando-card-footer-danger{
+    background-color: var(--danger);
   }
 }
 
@@ -65,7 +77,15 @@
 
     $widthSelector: 20px;
     $widthCounter: 48px;
-    $widthActions: 60px;
+    $widthActions: 96px;
+
+    &.selected{
+      color: var(--primary);
+      @include fontBold();
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
 
     .selector{
       position: relative;
@@ -99,7 +119,7 @@
     }
 
     .propal-body{
-      width: calc(100% - $widthSelector - $widthCounter - $widthActions);
+      width: calc(100% - $widthSelector - $widthCounter - $widthActions - 25px);
 
       .name{
         cursor: pointer;
@@ -111,6 +131,7 @@
       width: $widthCounter; height: 30px;
       background-color: var(--color1);
       border-radius: var(--radius);
+      cursor: pointer;
     }
 
     .propal-actions{

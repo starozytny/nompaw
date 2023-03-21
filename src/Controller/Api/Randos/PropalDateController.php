@@ -5,6 +5,7 @@ namespace App\Controller\Api\Randos;
 use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaPropalDateRepository;
+use App\Repository\Rando\RaRandoRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataRandos;
 use App\Service\ValidatorService;
@@ -106,5 +107,20 @@ class PropalDateController extends AbstractController
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponse($obj, RaPropalDate::LIST);
+    }
+
+    #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
+    public function end(RaPropalDate $obj, ApiResponse $apiResponse, ValidatorService $validator, RaRandoRepository $repository): Response
+    {
+        $rando = $obj->getRando();
+        $rando->setStartAt($obj->getDateAt());
+
+        $noErrors = $validator->validate($rando);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($rando, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 }
