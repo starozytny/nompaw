@@ -5,10 +5,12 @@
 
 {% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
 {% set page_title_alone %}{{ elem.name }}{% endset %}
+{% set page_subtitle %}Groupe de randonnée : {{ groupe.name }}{% endset %}
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
-        { text: page_title_alone, url: path('user_randos_rando_read', {'slug': elem.slug})  },
+        { text: groupe.name, url: path('user_randos_groupes_read', {'slug': groupe.slug}) },
+        { text: page_title_alone, url: path('user_randos_rando_read', {'slug': elem.slug}) },
     ]) %}
     {{ parent() }}
 {% endblock %}
@@ -45,86 +47,25 @@
     </div>
 
     <div class="page-default">
-        <div class="groupe-read">
-            <div class="groupe-line-0">
-                <div class="next-rando">
-                    {% if next %}
-                        <div class="col-1">
-                            <div>
-                                <h2>{{ next.name }}</h2>
-                                <div class="subtitle">Prochaine randonnée !</div>
-                                <div class="subtitle sub-icon" style="margin-top: 4px;">
-                                    <span class="icon-calendar"></span>
-                                    <span>{{ next.startAt ? next.startAt | date('D, d M Y') : 'Date indéfinie' }}</span>
-                                </div>
-                            </div>
-                            <div class="actions">
-                                <a class="btn-icon btn-icon-warning">
-                                    <span class="icon-pencil"></span>
-                                    <span class="tooltip">Modifier</span>
-                                </a>
-
-                                <a class="btn-icon btn-icon-danger">
-                                    <span class="icon-trash"></span>
-                                    <span class="tooltip">Supprimer</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="col-2">
-                            <div class="steps">
-                                <div class="status status-0 {{- next.status == 0 ? ' active' : ''  -}}">
-                                    <span>en proposition</span>
-                                </div>
-                                <div class="status status-1 {{- next.status == 1 ? ' active' : '' -}}">
-                                    <span>validée</span>
-                                </div>
-                                <div class="status status-2 {{- next.status == 2 ? ' active' : '' -}}">
-                                    <span>terminée</span>
-                                </div>
-                            </div>
-
-                            <div class="cta">
-                                <a href="{{ path('user_randos_rando_read', {'slug': next.slug}) }}" class="btn btn-primary">
-                                    <span>Voir la rando</span>
-                                    <span class="icon-right-arrow"></span>
-                                </a>
-                            </div>
-                        </div>
-                    {% else %}
-                        <div class="col-1">
-                            <div>
-                                <h2>Aucune randonnée de prévu.</h2>
-                                <div class="subtitle">Préparer la prochaine randonnée en cliquant sur <i>Créer une randonnée</i></div>
-                            </div>
-                        </div>
-
-                        <div class="col-2">
-                            <img src="{{ asset(elem.imageFile) }}" alt="logo {{ elem.name }}">
-                            <div class="cta">
-                                <a href="{{ path('user_randos_rando_create', {'g_slug': elem.slug}) }}" class="btn btn-primary">
-                                    <span class="icon-add"></span>
-                                    <span>Créer une rando</span>
-                                </a>
-                            </div>
-                        </div>
-                    {% endif %}
+        <div class="rando-read">
+            <div class="rando-meta">
+                <div class="features">
+                    <div class="ra-status active">
+                        <span>{{ elem.statusString }}</span>
+                    </div>
                 </div>
-                <div class="next-creator">
-                    <h2><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ elem.author.username }}</h2>
-                    <div class="subtitle">Référent.e du groupe de randonnée</div>
-                    {% if next %}
-                        <h2 style="margin-top: 12px;"><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ next.author.username }}</h2>
-                        <div class="subtitle">Référent.e de la prochaine randonnée</div>
-                    {% endif %}
+                <div class="author">
+                    <div class="user">
+                        <div class="name">{{ author.firstname }}</div>
+                        <div class="avatar">
+                            <div class="avatar-letter">{{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="groupe-line-1">
-                <div class="groupe-line-title">
-                    <h2>Anciennes randonnées</h2>
-                    <div class="subtitle">En dev.</div>
-                </div>
+            <div class="rando-content">
+                <div>Hello world</div>
             </div>
         </div>
     </div>
