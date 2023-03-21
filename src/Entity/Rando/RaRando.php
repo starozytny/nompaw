@@ -5,6 +5,8 @@ namespace App\Entity\Rando;
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Main\User;
 use App\Repository\Rando\RaRandoRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -52,6 +54,14 @@ class RaRando
     #[ORM\ManyToOne(inversedBy: 'raRandos')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
+
+    #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalDate::class)]
+    private Collection $propalDates;
+
+    public function __construct()
+    {
+        $this->propalDates = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -172,6 +182,36 @@ class RaRando
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaPropalDate>
+     */
+    public function getPropalDates(): Collection
+    {
+        return $this->propalDates;
+    }
+
+    public function addPropalDate(RaPropalDate $propalDate): self
+    {
+        if (!$this->propalDates->contains($propalDate)) {
+            $this->propalDates->add($propalDate);
+            $propalDate->setRando($this);
+        }
+
+        return $this;
+    }
+
+    public function removePropalDate(RaPropalDate $propalDate): self
+    {
+        if ($this->propalDates->removeElement($propalDate)) {
+            // set the owning side to null (unless already changed)
+            if ($propalDate->getRando() === $this) {
+                $propalDate->setRando(null);
+            }
+        }
 
         return $this;
     }

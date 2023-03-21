@@ -8,6 +8,7 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaLink;
+use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -132,6 +133,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaRando::class)]
     private Collection $raRandos;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaPropalDate::class)]
+    private Collection $raPropalDates;
+
     /**
      * @throws Exception
      */
@@ -145,6 +149,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->roLinks = new ArrayCollection();
         $this->roGroupes = new ArrayCollection();
         $this->raRandos = new ArrayCollection();
+        $this->raPropalDates = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -660,6 +665,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setFacebookId(?string $facebookId): self
     {
         $this->facebookId = $facebookId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaPropalDate>
+     */
+    public function getRaPropalDates(): Collection
+    {
+        return $this->raPropalDates;
+    }
+
+    public function addRaPropalDate(RaPropalDate $raPropalDate): self
+    {
+        if (!$this->raPropalDates->contains($raPropalDate)) {
+            $this->raPropalDates->add($raPropalDate);
+            $raPropalDate->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRaPropalDate(RaPropalDate $raPropalDate): self
+    {
+        if ($this->raPropalDates->removeElement($raPropalDate)) {
+            // set the owning side to null (unless already changed)
+            if ($raPropalDate->getAuthor() === $this) {
+                $raPropalDate->setAuthor(null);
+            }
+        }
 
         return $this;
     }

@@ -26,8 +26,13 @@
 }
 
 .rando-card{
-  .rando-card-header, .rando-card-body, .rando-card-footer{
+  .rando-card-header, .rando-card-footer{
     padding: var(--espaceDiv);
+  }
+
+  .propal-add{
+    @include flex(row);
+    padding: 12px var(--espaceDiv);
   }
 
   .rando-card-header{
@@ -45,6 +50,67 @@
   .rando-card-footer{
     background-color: var(--color0Opacity6);
     border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
+  }
+}
+
+.propals{
+  @include flex(column, flex-start, flex-start, var(--espaceEls));
+  padding: calc(var(--espaceDiv) /2) 0;
+
+  .propal{
+    @include flex(row, flex-start, flex-start, 8px);
+    width: 100%;
+    padding:  calc(var(--espaceDiv) / 2) var(--espaceDiv);
+    transition: background-color 0.2s ease-in-out;
+
+    $widthSelector: 20px;
+    $widthCounter: 48px;
+    $widthActions: 60px;
+
+    .selector{
+      position: relative;
+      width: $widthSelector; height: $widthSelector;
+      border-radius: var(--radius);
+      background-color: var(--alpha);
+      cursor: pointer;
+
+      &:before{
+        content: '';
+        display: block;
+        position: absolute;
+        width: 16px; height: 16px;
+        top: 2px; left: 2px;
+        border-radius: var(--radius);
+      }
+    }
+
+    &:hover{
+      background-color: var(--color0Opacity1);
+
+      .selector:before{
+        background-color: var(--primaryOpacity4);
+      }
+    }
+
+    .propal-body{
+      width: calc(100% - $widthSelector - $widthCounter - $widthActions);
+
+      .name{
+        cursor: pointer;
+      }
+    }
+
+    .propal-counter{
+      @include flex();
+      width: $widthCounter; height: 30px;
+      background-color: var(--color1);
+      border-radius: var(--radius);
+    }
+
+    .propal-actions{
+      @include flex(row, flex-start, flex-start, 4px);
+      width: $widthActions;
+    }
   }
 }
 
