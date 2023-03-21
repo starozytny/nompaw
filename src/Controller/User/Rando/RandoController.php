@@ -5,9 +5,12 @@ namespace App\Controller\User\Rando;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\Main\User;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaPropalDate;
+use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
+use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,14 +21,16 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/espace-membre/randonnees/rando', name: 'user_randos_rando_')]
 class RandoController extends AbstractController
 {
-    #[Route('/{slug}', name: 'read')]
-    public function read($slug, RaGroupeRepository $repository, RaRandoRepository $randoRepository): Response
+    #[Route('/{slug}', name: 'read', options: ['expose' => true])]
+    public function read($slug, RaRandoRepository $repository, RaPropalDateRepository $propalDateRepository, SerializerInterface $serializer): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
-        return $this->render('user/pages/randos/groupe/read.html.twig', [
+        $propalDates = $propalDateRepository->findBy(['rando' => $obj]);
+
+        $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);
+        return $this->render('user/pages/randos/rando/read.html.twig', [
             'elem' => $obj,
-            'randos' => $randoRepository->findBy(['isNext' => false]),
-            'next' => $randoRepository->findOneBy(['isNext' => true])
+            'propalDates' => $propalDates
         ]);
     }
 
@@ -44,7 +49,7 @@ class RandoController extends AbstractController
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
-        $element = $serializer->serialize($obj, 'json', ['groups' => RaGroupe::FORM]);
+        $element = $serializer->serialize($obj, 'json', ['groups' => RaRando::FORM]);
 
         return $this->render('user/pages/randos/rando/update.html.twig', [
             'elem' => $obj,

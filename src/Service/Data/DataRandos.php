@@ -3,6 +3,7 @@
 namespace App\Service\Data;
 
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Service\SanitizeData;
 
@@ -29,6 +30,13 @@ class DataRandos
             ->setName($this->sanitizeData->trimData($data->name))
             ->setSlug($this->sanitizeData->slugString($data->name))
             ->setDescription($this->sanitizeData->trimData($data->description->html))
+        ;
+    }
+
+    public function setDataPropalDate(RaPropalDate $obj, $data): RaPropalDate
+    {
+        return ($obj)
+            ->setDateAt($this->sanitizeData->createDatePicker($data->dateAt))
         ;
     }
 }

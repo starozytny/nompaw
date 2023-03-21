@@ -43,6 +43,10 @@
     width: 32px;
   }
 
+  .steps{
+    @include flex(column, flex-start, flex-start, 6px);
+  }
+
   .actions{
     @include flex(row, flex-start, flex-start, 8px);
     margin-top: var(--espaceDiv);

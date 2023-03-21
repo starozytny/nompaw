@@ -1,0 +1,80 @@
+{% extends 'user/pages/randos/template.html.twig' %}
+
+{% set groupe = elem.groupe %}
+{% set author = elem.author %}
+
+{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
+{% set page_title_alone %}{{ elem.name }}{% endset %}
+{% set page_subtitle %}Groupe de randonnée : {{ groupe.name }}{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([
+        { text: groupe.name, url: path('user_randos_groupes_read', {'slug': groupe.slug}) },
+        { text: page_title_alone, url: path('user_randos_rando_read', {'slug': elem.slug}) },
+    ]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% set half_width = true %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_randos_groupes_read', {'slug': groupe.slug}) }}" class="btn btn-outline-default">
+                <span class="icon-left-arrow"></span>
+                <span>Retourner au groupe</span>
+            </a>
+        </div>
+        <div class="col-2">
+            {% if app.user.id == elem.author.id %}
+                <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" class="btn btn-warning">
+                    <span class="icon-pencil"></span>
+                    <span>Modifier</span>
+                </a>
+                <div class="delete-rando"
+                     data-context="read"
+                     data-id="{{ elem.id }}"
+                     data-name="{{ elem.name }}"
+                     data-groupe-slug="{{ groupe.slug }}"
+                >
+                    <button class="btn btn-danger btn-loader-without-text">
+                        <span class="icon-chart-3"></span>
+                        <span>Supprimer</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="page-default">
+        <div class="rando-read">
+            <div class="rando-meta">
+                <div class="features">
+                    <div class="ra-status active">
+                        <span>{{ elem.statusString }}</span>
+                    </div>
+                </div>
+                <div class="author">
+                    <div class="user">
+                        <div class="name">{{ author.firstname }}</div>
+                        <div class="avatar">
+                            <div class="avatar-letter">{{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rando-content">
+                <div id="rando_date"
+                     data-rando-id="{{ elem.id }}"
+                     data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                     data-propals="{{ propalDates }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-mode="{{ app.user.id == elem.author.id }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -8,6 +8,7 @@ export class Modal extends Component {
         super(props);
 
         this.state = {
+            titleUpdate: null,
             contentUpdated: null,
             footer: props.footer,
             closeTxt: props.closeTxt ? props.closeTxt : "Fermer"
@@ -47,13 +48,14 @@ export class Modal extends Component {
         modal.style.display = "none"
     }
 
+    handleUpdateTitle = (content) => { this.setState({ titleUpdated: content }) }
     handleUpdateContent = (content) => { this.setState({ contentUpdated: content }) }
     handleUpdateFooter = (footer) => { this.setState({ footer }) }
     handleUpdateCloseTxt = (closeTxt) => { this.setState({ closeTxt }) }
 
     render () {
         const { content, identifiant, title, maxWidth, margin=15, showClose=true, isForm=false } = this.props;
-        const { contentUpdated, footer, closeTxt } = this.state;
+        const { titleUpdate, contentUpdated, footer, closeTxt } = this.state;
 
         let divStyle = maxWidth ? {
             maxWidth: maxWidth + "px",
@@ -65,10 +67,15 @@ export class Modal extends Component {
             nContent = <div dangerouslySetInnerHTML={{__html: nContent}} />;
         }
 
+        let nTitle = titleUpdate ? titleUpdate : title;
+        if(typeof nTitle === "string"){
+            nTitle = <div dangerouslySetInnerHTML={{__html: nTitle}} />;
+        }
+
         return <div id={identifiant} className="modal">
             <div className="modal-content" style={divStyle}>
                 <div className="modal-header">
-                    <div className="title">{title ? title : ""}</div>
+                    <div className="title">{nTitle ? nTitle : ""}</div>
                     <div className="close-modal"><span className="icon-cancel" /></div>
                 </div>
                 {isForm

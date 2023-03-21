@@ -106,9 +106,10 @@ function toFormatCalendar(value, retour = "") {
     return retour;
 }
 
-function toDateFormat(date, format = 'LLL', retour = "") {
+function toDateFormat(date, format = 'LLL', retour = "", useUtc = true) {
     if(date === null) return retour;
-    return moment(date).utc().format(format).replace(':', 'h');
+    date = useUtc ? moment(date).utc() : moment(date);
+    return date.format(format).replace(':', 'h');
 }
 
 function toFormatDuration(value){

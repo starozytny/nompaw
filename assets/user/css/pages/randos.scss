@@ -3,9 +3,38 @@
 @import "./components/form";
 @import "./components/randos/form";
 @import "./components/randos/groupe/read";
+@import "./components/randos/rando/read";
 
-.delete-groupe{
+.delete-groupe, .delete-rando{
   @include flex(row, center, center);
+}
+
+.ra-status{
+  border-radius: calc(var(--radius) * 2);
+  padding: 2px 8px;
+  font-size: 14px;
+  opacity: 0.8;
+  background-color: var(--grey3Opacity1);
+  color: var(--grey3);
+
+  &:before{
+    content: '';
+    width: 8px; height: 8px;
+    display: inline-block;
+    border-radius: var(--radius);
+    margin-right: 4px;
+    background-color: var(--grey3);
+  }
+
+  &.active{
+    opacity: 1;
+    background-color: var(--warningOpacity1);
+    color: var(--warning);
+
+    &:before{
+      background-color: var(--warning);
+    }
+  }
 }
 
 .members{

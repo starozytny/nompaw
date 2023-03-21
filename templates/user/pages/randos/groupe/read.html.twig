@@ -8,7 +8,7 @@
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
-        { text: page_title_alone, url: path('user_randos_groupes_read', {'slug': elem.name})  },
+        { text: page_title_alone, url: path('user_randos_groupes_read', {'slug': elem.slug})  },
     ]) %}
     {{ parent() }}
 {% endblock %}
@@ -52,24 +52,41 @@
                             <div>
                                 <h2>{{ next.name }}</h2>
                                 <div class="subtitle">Prochaine randonnée !</div>
+                                <div class="subtitle sub-icon" style="margin-top: 4px;">
+                                    <span class="icon-calendar"></span>
+                                    <span>{{ next.startAt ? next.startAt | date('D, d M Y') : 'Date indéfinie' }}</span>
+                                </div>
                             </div>
                             <div class="actions">
-                                <a class="btn-icon btn-icon-warning">
+                                <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" class="btn-icon btn-icon-warning">
                                     <span class="icon-pencil"></span>
                                     <span class="tooltip">Modifier</span>
                                 </a>
 
-                                <a class="btn-icon btn-icon-danger">
-                                    <span class="icon-trash"></span>
-                                    <span class="tooltip">Supprimer</span>
-                                </a>
+                                <div class="delete-rando"
+                                     data-context="randos"
+                                     data-id="{{ next.id }}"
+                                     data-name="{{ next.name }}"
+                                     data-groupe-slug="{{ elem.slug }}"
+                                >
+                                    <button class="btn-icon btn-icon-danger btn-loader-without-text"><span class="icon-chart-3"></span></button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="col-2">
-                            <div class="status status-{{ next.status }}">
-                                <span>{{ next.status }}</span>
+                            <div class="steps">
+                                <div class="ra-status {{- next.status == 0 ? ' active' : ''  -}}">
+                                    <span>en proposition</span>
+                                </div>
+                                <div class="ra-status {{- next.status == 1 ? ' active' : '' -}}">
+                                    <span>validée</span>
+                                </div>
+                                <div class="ra-status {{- next.status == 2 ? ' active' : '' -}}">
+                                    <span>terminée</span>
+                                </div>
                             </div>
+
                             <div class="cta">
                                 <a href="{{ path('user_randos_rando_read', {'slug': next.slug}) }}" class="btn btn-primary">
                                     <span>Voir la rando</span>

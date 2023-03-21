@@ -46,7 +46,7 @@ class RandoController extends AbstractController
         }
 
         $repository->save($obj, true);
-        return $apiResponse->apiJsonResponse($obj, RaGroupe::FORM);
+        return $apiResponse->apiJsonResponse($obj, RaRando::FORM);
     }
 
     #[Route('/groupe/{groupe}/create', name: 'create', options: ['expose' => true], methods: 'POST')]
@@ -69,5 +69,14 @@ class RandoController extends AbstractController
         $repository->remove($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
+    }
+
+    #[Route('/cancel/date/{id}', name: 'cancel_date', options: ['expose' => true], methods: 'PUT')]
+    public function cancelDate(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
+    {
+        $obj->setStartAt(null);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 }

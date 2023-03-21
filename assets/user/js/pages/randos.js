@@ -5,6 +5,8 @@ import { createRoot } from "react-dom/client";
 import { GroupeFormulaire } from "@userPages/Randos/Groupe/GroupeForm";
 import { GroupeDelete } from "@userPages/Randos/Groupe/GroupeDelete";
 import { RandoFormulaire } from "@userPages/Randos/Rando/RandoForm";
+import { RandoDelete } from "@userPages/Randos/Rando/RandoDelete";
+import {RandoDate} from "@userPages/Randos/Rando/RandoDate";
 
 let el = document.getElementById("groupes_update");
 if(el){
@@ -20,10 +22,10 @@ if(el){
                                             members={[]} />)
 }
 
-let deletes = document.querySelectorAll('.delete-groupe');
-if(deletes){
-    deletes.forEach(elem => {
-        createRoot(elem).render(<GroupeDelete context="groupe" {...elem.dataset} />)
+let deletesGroupes = document.querySelectorAll('.delete-groupe');
+if(deletesGroupes){
+    deletesGroupes.forEach(elem => {
+        createRoot(elem).render(<GroupeDelete {...elem.dataset} />)
     })
 }
 
@@ -37,4 +39,16 @@ el = document.getElementById("randos_create");
 if(el){
     createRoot(el).render(<RandoFormulaire context="create" element={null}
                                            groupeId={parseInt(el.dataset.groupeId)} />)
+}
+
+let deletesRandos = document.querySelectorAll('.delete-rando');
+if(deletesRandos){
+    deletesRandos.forEach(elem => {
+        createRoot(elem).render(<RandoDelete {...elem.dataset} />)
+    })
+}
+
+let randoDate = document.getElementById("rando_date");
+if(randoDate){
+    createRoot(randoDate).render(<RandoDate {...randoDate.dataset} mode={randoDate.dataset.mode === "1"} />)
 }

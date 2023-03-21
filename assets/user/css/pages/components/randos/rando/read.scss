@@ -1,0 +1,168 @@
+@import "../../../../vars/vars";
+
+@import "js-datepicker/src/datepicker.scss";
+
+.rando-read{
+  .rando-meta{
+    @include flex(row, center, space-between, var(--espaceEls));
+    border-top: 1px solid var(--color2);
+    border-bottom: 1px solid var(--color2);
+    padding: var(--espaceLayout) 0;
+  }
+
+  .features{
+    @include flex(column, flex-start, flex-start, 4px);
+  }
+  .author{
+    .user{
+      @include flex(row, center, flex-start, 4px);
+      @include fontSemibold();
+    }
+  }
+
+  .rando-content{
+    padding: var(--espaceLayout) 0;
+  }
+}
+
+.rando-card{
+  .rando-card-header, .rando-card-footer{
+    padding: var(--espaceDiv);
+  }
+
+  .rando-card-header{
+    background-color: var(--color0Opacity6);
+    border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
+
+    .name{
+      @include fontSemibold();
+    }
+  }
+  .rando-card-body {
+    background-color: var(--color0Opacity4);
+
+    &.selected{
+      background-color: var(--primaryOpacity1);
+      border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
+    }
+  }
+
+  .rando-card-footer{
+    @include flex();
+    background-color: var(--primary);
+    border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 0.2s ease-in-out;
+
+    &:hover{
+      opacity: 1;
+    }
+  }
+
+  .rando-card-footer-danger{
+    background-color: var(--danger);
+  }
+}
+
+.propals{
+  @include flex(column, flex-start, flex-start, var(--espaceEls));
+  padding: calc(var(--espaceDiv) /2) 0;
+
+  .propal{
+    @include flex(row, flex-start, flex-start, 8px);
+    width: 100%;
+    padding:  calc(var(--espaceDiv) / 2) var(--espaceDiv);
+    transition: background-color 0.2s ease-in-out;
+
+    $widthSelector: 20px;
+    $widthCounter: 48px;
+    $widthActions: 96px;
+
+    &.selected{
+      color: var(--primary);
+      @include fontBold();
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .selector{
+      position: relative;
+      width: $widthSelector; height: $widthSelector;
+      border-radius: var(--radius);
+      background-color: var(--alpha);
+      cursor: pointer;
+
+      &.active{
+        &:before{
+          background-color: var(--primary);
+        }
+      }
+
+      &:before{
+        content: '';
+        display: block;
+        position: absolute;
+        width: 15px; height: 16px;
+        top: 2px; left: 2px;
+        border-radius: var(--radius);
+      }
+    }
+
+    &:hover{
+      background-color: var(--color0Opacity1);
+
+      .selector:not(.active):before{
+        background-color: var(--primaryOpacity4);
+      }
+    }
+
+    .propal-body{
+      width: calc(100% - $widthSelector - $widthCounter - $widthActions - 25px);
+
+      .name{
+        cursor: pointer;
+      }
+    }
+
+    .propal-counter{
+      @include flex();
+      width: $widthCounter; height: 30px;
+      background-color: var(--color1);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .propal-actions{
+      @include flex(row, flex-start, flex-start, 4px);
+      width: $widthActions;
+    }
+  }
+}
+
+//                      __   _ ____  ___   ___    __
+//                     | _| / |___ \( _ ) / _ \  |_ |
+//    _____ _____ _____| |  | | __) / _ \| | | |  | |_____ _____ _____
+//   |_____|_____|_____| |  | |/ __/ (_) | |_| |  | |_____|_____|_____|
+//                     | |  |_|_____\___/ \___/   | |
+//                     |__|                      |__|
+@media (min-width:1280px) {
+  .rando-read{
+    .steps{
+      &:before{
+        left: 23px;
+      }
+
+      .number{
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+      }
+
+      .content{
+        width: calc(100% - 48px);
+      }
+    }
+  }
+}

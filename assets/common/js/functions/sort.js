@@ -40,6 +40,10 @@ function compareCity(a,b){
     return compareWithoutAccent(a.city, b.city);
 }
 
+function compareDateAt(a, b){
+    return comparison(a.dateAt, b.dateAt);
+}
+
 function compareWithoutAccent(aVal, bVal) {
     let aName = Sanitaze.removeAccents(aVal);
     let bName = Sanitaze.removeAccents(bVal);
@@ -87,4 +91,5 @@ module.exports = {
     compareCode,
     compareRankThenLabel,
     compareLabel,
+    compareDateAt,
 }
