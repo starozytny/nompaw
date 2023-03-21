@@ -69,6 +69,7 @@
                      data-rando-id="{{ elem.id }}"
                      data-start-at="{{ elem.startAt }}"
                      data-propals="{{ propalDates }}"
+                     data-user-id="{{ app.user.id }}"
                      data-mode="{{ app.user.id == elem.author.id }}"
                 >
                     {% include "layout/components/loader.html.twig" %}

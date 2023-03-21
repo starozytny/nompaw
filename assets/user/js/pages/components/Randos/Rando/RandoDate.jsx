@@ -20,6 +20,7 @@ import { Input }    from "@commonComponents/Elements/Fields";
 const URL_CREATE_PROPAL = 'api_randos_propal_date_create';
 const URL_UPDATE_PROPAL = 'api_randos_propal_date_update';
 const URL_DELETE_PROPAL = 'api_randos_propal_date_delete';
+const URL_VOTE_PROPAL   = 'api_randos_propal_date_vote';
 
 export class RandoDate extends Component{
     constructor(props) {
@@ -30,7 +31,8 @@ export class RandoDate extends Component{
             propal: null,
             dateAt: '',
             errors: [],
-            data: JSON.parse(props.propals)
+            data: JSON.parse(props.propals),
+            loadData: false,
         }
 
         this.formPropal = React.createRef();
@@ -121,13 +123,37 @@ export class RandoDate extends Component{
         ;
     }
 
-    handleVote = (userId) => {
+    handleVote = (propal) => {
+        const { userId } = this.props;
+        const { loadData, data } = this.state;
+
+        if(!loadData){
+            this.setState({ loadData: true });
+
+            let self = this;
+            axios({ method: "PUT", url: Routing.generate(URL_VOTE_PROPAL, {'id': propal.id}), data: {userId: userId} })
+                .then(function (response) {
+                    let nData = [];
+                    data.forEach(d => {
+                        if(d.id === response.data.id){
+                            d = response.data;
+                        }
+                        nData.push(d);
+                    })
+
+                    self.setState({ data: nData });
+                })
+                .catch(function (error) { console.log(error); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+                .then(function () { self.setState({ loadData: false }); })
+            ;
+        }
+
 
     }
 
     render() {
-        const { mode, startAt } = this.props;
-        const { errors, dateAt, data } = this.state;
+        const { mode, startAt, userId } = this.props;
+        const { errors, loadData, dateAt, data } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -144,12 +170,29 @@ export class RandoDate extends Component{
                         : <>
                             <div className="propals">
                                 {data.map((el, index) => {
+
+                                    let onVote = () => this.handleVote(el);
+
+                                    let active = "";
+                                    el.votes.forEach(v => {
+                                        if(v === userId){
+                                            active = " active"
+                                        }
+                                    })
+
+                                    console.log(active)
+
                                     return <div className="propal" key={index}>
-                                        <div className="selector"></div>
-                                        <div className="propal-body">
+                                        <div className={`selector${active}`} onClick={onVote}></div>
+                                        <div className="propal-body" onClick={onVote}>
                                             <div className="name">{Sanitaze.toDateFormat(el.dateAt, 'LL')}</div>
                                         </div>
-                                        <div className="propal-counter">+ {el.votes.length}</div>
+                                        <div className="propal-counter" onClick={onVote}>
+                                            {loadData
+                                                ? <span className="icon-chart-3"/>
+                                                : `+ ${el.votes.length}`
+                                            }
+                                        </div>
                                         <div className="propal-actions">
                                             <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
                                             <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
@@ -184,6 +227,9 @@ export class RandoDate extends Component{
 
 RandoDate.propTypes = {
     mode: PropTypes.bool.isRequired,
+    userId: PropTypes.string.isRequired,
+    randoId: PropTypes.string.isRequired,
+    propals: PropTypes.string.isRequired,
     startAt: PropTypes.string
 }
 

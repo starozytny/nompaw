@@ -73,4 +73,38 @@ class PropalDateController extends AbstractController
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
+
+    #[Route('/vote/{id}', name: 'vote', options: ['expose' => true], methods: 'PUT')]
+    public function vote(Request $request, RaPropalDate $obj, ApiResponse $apiResponse, ValidatorService $validator, RaPropalDateRepository $repository): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $votes = $obj->getVotes();
+
+        $find = false; $nVotes = [];
+        foreach($votes as $vote){
+            if($vote == $data->userId){
+                $find = true;
+            }else{
+                $nVotes[] = $vote;
+            }
+        }
+
+        if(!$find){
+            $nVotes[] = $data->userId;
+        }
+
+        $obj->setVotes($nVotes);
+
+        $noErrors = $validator->validate($obj);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, RaPropalDate::LIST);
+    }
 }

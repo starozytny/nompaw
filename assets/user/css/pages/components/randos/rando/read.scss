@@ -74,11 +74,17 @@
       background-color: var(--alpha);
       cursor: pointer;
 
+      &.active{
+        &:before{
+          background-color: var(--primary);
+        }
+      }
+
       &:before{
         content: '';
         display: block;
         position: absolute;
-        width: 16px; height: 16px;
+        width: 15px; height: 16px;
         top: 2px; left: 2px;
         border-radius: var(--radius);
       }
@@ -87,7 +93,7 @@
     &:hover{
       background-color: var(--color0Opacity1);
 
-      .selector:before{
+      .selector:not(.active):before{
         background-color: var(--primaryOpacity4);
       }
     }
