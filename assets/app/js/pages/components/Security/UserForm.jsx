@@ -22,6 +22,7 @@ export function UserFormulaire ()
         username=""
         firstname=""
         lastname=""
+        displayName=""
         email=""
     />;
 }
@@ -35,6 +36,7 @@ class Form extends Component {
             username: props.username,
             firstname: props.firstname,
             lastname: props.lastname,
+            displayName: props.displayName,
             email: props.email,
             password: '',
             password2: '',
@@ -49,7 +51,7 @@ class Form extends Component {
         e.preventDefault();
 
         const { url } = this.props;
-        const { username, firstname, lastname, password, password2, email, critere } = this.state;
+        const { username, firstname, lastname, displayName, password, password2, email, critere } = this.state;
 
         this.setState({ errors: [] });
 
@@ -57,11 +59,12 @@ class Form extends Component {
             toastr.error("Une erreur est survenue. Veuillez rafraichir la page.")
         }else{
             let paramsToValidate = [
-                {type: "text",      id: 'username',  value: username},
-                {type: "text",      id: 'firstname', value: firstname},
-                {type: "text",      id: 'lastname',  value: lastname},
-                {type: "email",     id: 'email',     value: email},
-                {type: "password",  id: 'password',  value: password, idCheck: 'password2', valueCheck: password2}
+                {type: "text",      id: 'username',     value: username},
+                {type: "text",      id: 'firstname',    value: firstname},
+                {type: "text",      id: 'lastname',     value: lastname},
+                {type: "text",      id: 'displayName',  value: displayName},
+                {type: "email",     id: 'email',        value: email},
+                {type: "password",  id: 'password',     value: password, idCheck: 'password2', valueCheck: password2}
             ];
 
             let validate = Validateur.validateur(paramsToValidate);
@@ -85,7 +88,7 @@ class Form extends Component {
     }
 
     render () {
-        const { errors, username, firstname, lastname, email, password, password2 } = this.state;
+        const { errors, username, firstname, lastname, displayName, email, password, password2 } = this.state;
 
         let params = { errors: errors }
         let paramsInput0 = {...params, ...{ onChange: this.handleChange }}
@@ -99,6 +102,9 @@ class Form extends Component {
                 <div className="line line-2">
                     <Input identifiant="firstname"  valeur={firstname}  {...paramsInput0}>Prénom</Input>
                     <Input identifiant="lastname"   valeur={lastname}   {...paramsInput0}>Nom</Input>
+                </div>
+                <div className="line">
+                    <Input identifiant="displayName"   valeur={displayName}   {...paramsInput0}>Nom à afficher</Input>
                 </div>
 
                 <Password template="col" password={password} password2={password2} params={paramsInput0} />
