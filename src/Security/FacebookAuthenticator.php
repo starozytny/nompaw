@@ -64,7 +64,7 @@ class FacebookAuthenticator extends OAuth2Authenticator
                 //User doesnt exist, we create it !
                 if (!$existingUser) {
                     $existingUser = (new User())
-                        ->setUsername($user->getLastName() ?: ($user->getName() ?: $username))
+                        ->setUsername($user->getName() ?: ($user->getLastName() ?: $username))
                         ->setEmail($username)
                         ->setFacebookId($id)
                         ->setFirstname($user->getFirstName() ?: 'Facebook')
