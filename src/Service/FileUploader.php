@@ -155,8 +155,10 @@ class FileUploader
             if($oldFile){
                 $this->deleteFile($oldFile, $folder);
             }
+            $size = getimagesize($file);
+            $extension = image_type_to_extension($size[2]);
             $current = file_get_contents($file);
-            $filename = substr($file, strripos($file, "/")+1 , strlen($file));
+            $filename = uniqid() . $extension;
             $file = $folder.'/'.$filename;
             file_put_contents($file, $current);
 
