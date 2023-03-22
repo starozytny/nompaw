@@ -33,7 +33,7 @@
                                                     <div class="avatar-letter">{{ member.user.lastname | slice(0, 1) }}{{ member.user.firstname | slice(0,1) }}</div>
                                                 {% endif %}
                                             </div>
-                                            <span class="tooltip">{{ member.user.username }} {{ loop.index }}</span>
+                                            <span class="tooltip">{{ member.user.displayName }}</span>
                                         </div>
                                     {% endif %}
                                     {% set totalMembers = totalMembers + 1 %}

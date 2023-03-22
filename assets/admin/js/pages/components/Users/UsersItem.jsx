@@ -66,6 +66,8 @@ export function UsersItem ({ elem, highlight, onModal })
                 <div className="col-2">
                     <div>{elem.username}</div>
                     <div className="sub">{elem.email}</div>
+                    {elem.googleId && <div className="sub">Google ID : {elem.googleId}</div>}
+                    {elem.facebookId && <div className="sub">Facebook ID : {elem.facebookId}</div>}
                 </div>
                 <div className="col-3">
                     <div className={"badge badge-user-" + (elem.blocked ? "blocked" : elem.highRoleCode)}>{elem.highRole}</div>

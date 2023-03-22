@@ -39,6 +39,7 @@ export function UserFormulaire ({ context, element, page = 'user' })
         username={element ? Formulaire.setValue(element.username) : ""}
         firstname={element ? Formulaire.setValue(element.firstname) : ""}
         lastname={element ? Formulaire.setValue(element.lastname) : ""}
+        displayName={element ? Formulaire.setValue(element.displayName) : ""}
         email={element ? Formulaire.setValue(element.email) : ""}
         avatarFile={element ? Formulaire.setValue(element.avatarFile) : null}
         roles={element ? Formulaire.setValue(element.roles, []) : []}
@@ -63,6 +64,7 @@ class Form extends Component {
             username: props.username,
             firstname: props.firstname,
             lastname: props.lastname,
+            displayName: props.displayName,
             email: props.email,
             roles: props.roles,
             password: '',
@@ -119,17 +121,18 @@ class Form extends Component {
         e.preventDefault();
 
         const { context, page, url } = this.props;
-        const { username, firstname, lastname, password, password2, email, roles, society } = this.state;
+        const { username, firstname, lastname, password, password2, email, roles, society, displayName } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
-            {type: "text",  id: 'username',  value: username},
-            {type: "text",  id: 'firstname', value: firstname},
-            {type: "text",  id: 'lastname',  value: lastname},
-            {type: "email", id: 'email',     value: email},
-            {type: "array", id: 'roles',     value: roles},
-            {type: "text",  id: 'society',    value: society}
+            {type: "text",  id: 'username',     value: username},
+            {type: "text",  id: 'firstname',    value: firstname},
+            {type: "text",  id: 'lastname',     value: lastname},
+            {type: "text",  id: 'displayName',  value: displayName},
+            {type: "email", id: 'email',        value: email},
+            {type: "array", id: 'roles',        value: roles},
+            {type: "text",  id: 'society',      value: society}
         ];
         if(context === "create"){
             if(password !== ""){
@@ -169,7 +172,7 @@ class Form extends Component {
 
     render () {
         const { context, page, avatarFile } = this.props;
-        const { errors, username, firstname, lastname, email, password, password2, roles, societyName, loadData } = this.state;
+        const { errors, username, firstname, lastname, email, password, password2, roles, societyName, loadData, displayName } = this.state;
 
         let rolesItems = [
             { value: 'ROLE_ADMIN',      label: 'Admin',          identifiant: 'admin' },
@@ -211,6 +214,10 @@ class Form extends Component {
                             <div className="title">Profil utilisateur</div>
                         </div>
                         <div className="line-col-2">
+                            <div className="line line-2">
+                                <Input identifiant="displayName"  valeur={displayName}  {...paramsInput0}>Nom à afficher</Input>
+                                <div className="form-group" />
+                            </div>
                             {page !== "profil"
                                 ? <>
                                     <div className="line line-fat-box">
