@@ -79,7 +79,7 @@
             </div>
 
             <div class="rando-content">
-                <div class="rando-col-propals">
+                <div class="rando-col-propals {{- elem.startAt and elem.adventure ? ' to-line' : '' -}}">
                     <div id="rando_date"
                          data-rando-id="{{ elem.id }}"
                          data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
