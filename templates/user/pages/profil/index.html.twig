@@ -13,10 +13,6 @@
 {% block main_content %}
     <div class="page-actions">
         <div class="col-1">
-            <a href="{{ path('admin_users_index', {'h': app.user.id}) }}" class="btn btn-outline-default">
-                <span class="icon-left-arrow"></span>
-                <span>Retourner à la liste</span>
-            </a>
         </div>
         <div class="col-2">
             <a href="{{ path('user_profil_update', {'username': app.user.username}) }}" class="btn btn-primary">
