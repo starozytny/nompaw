@@ -79,35 +79,99 @@
             </div>
 
             <div class="rando-content">
-                <div class="rando-col-propals {{- elem.startAt and elem.adventure ? ' to-line' : '' -}}">
-                    <div id="rando_date"
-                         data-rando-id="{{ elem.id }}"
-                         data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
-                         data-propals="{{ propalDates }}"
-                         data-user-id="{{ app.user.id }}"
-                         data-mode="{{ app.user.id == elem.author.id }}"
-                    >
-                        {% include "layout/components/loader.html.twig" %}
-                    </div>
-
-                    {% if elem.startAt %}
-                        <div id="rando_adventures"
+                {% if app.user.id == elem.author.id or (elem.startAt == null and elem.adventure == null) %}
+                    <div class="rando-col-propals {{- elem.startAt and elem.adventure ? ' to-line' : '' -}}">
+                        <div id="rando_date"
                              data-rando-id="{{ elem.id }}"
+                             data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                             data-propals="{{ propalDates }}"
                              data-user-id="{{ app.user.id }}"
-                             data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
-                             data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
-                             data-adv-url="{{ elem.adventure ? elem.adventure.url : '' }}"
-                             data-adv-votes="{{ elem.adventure ? elem.adventure.votes | json_encode : '[]' }}"
-                             data-adv-duration="{{ elem.adventure and elem.adventure.duration ? elem.adventure.duration | date('H\\hi') : '' }}"
-                             data-propals="{{ propalAdvs }}"
-                             data-users="{{ users }}"
                              data-mode="{{ app.user.id == elem.author.id }}"
                         >
                             {% include "layout/components/loader.html.twig" %}
                         </div>
-                    {% endif %}
-                </div>
 
+                        {% if elem.startAt %}
+                            <div id="rando_adventures"
+                                 data-rando-id="{{ elem.id }}"
+                                 data-user-id="{{ app.user.id }}"
+                                 data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
+                                 data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
+                                 data-propals="{{ propalAdvs }}"
+                                 data-mode="{{ app.user.id == elem.author.id }}"
+                            >
+                                {% include "layout/components/loader.html.twig" %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% set trans_day_hash = {
+                    "Monday": "Lundi",
+                    "Tuesday": "Mardi",
+                    "Wednesday": "Mercredi",
+                    "Thursday": "Jeudi",
+                    "Friday": "Vendredi",
+                    "Saturday": "Samedi",
+                    "Sunday": "Dimanche"
+                }
+                %}
+
+                {% if elem.startAt and elem.adventure %}
+                    {% set adventure = elem.adventure %}
+
+                    <div class="rando-details">
+                        <div class="rando-card">
+                            <div class="rando-card-header">
+                                <div class="name">{{ adventure.name }}</div>
+                                <div class="date">{{ trans_day_hash[elem.startAt | date('l')] ~ elem.startAt | date(' d M Y') }}</div>
+                            </div>
+                            <div class="rando-card-body selected">
+                                <div class="rando-card-meta">
+                                    {% if adventure.duration %}
+                                        <div class="sub-icon">
+                                            <span class="icon-time"></span>
+                                            <span>{{ adventure.duration | date('H\\hi') | duration }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if adventure.url %}
+                                        <div class="sub-icon">
+                                            <span class="icon-link"></span>
+                                            <span><a href="{{ adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="members">
+                                        {% for v in adventure.votes %}
+
+                                            {% set participant = null %}
+                                            {% for u in users %}
+                                                {% if u.id == v %} {% set participant = u %} {% endif %}
+                                            {% endfor %}
+
+                                            <div class="member">
+                                                <div class="avatar">
+                                                    {% if participant.avatarFile %}
+                                                        <img src="{{ asset(participant.avatarFile) }}" alt="Avatar utilisateur">
+                                                    {% else %}
+                                                        <div class="avatar-letter">{{ participant.lastname | slice(0, 1) }}{{ participant.firstname | slice(0,1) }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                <span class="tooltip">{{ participant.displayName }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="rando-card-meta">
+                                    <div>Topo...</div>
+                                    <div>Image topo</div>
+                                </div>
+                                <div class="rando-card-content">
+                                    <div>ok</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

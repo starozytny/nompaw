@@ -68,20 +68,20 @@
                                     <span>{{ next.startAt ? trans_day_hash[next.startAt | date('l')] ~ next.startAt | date(' d M Y') : 'Date indéfinie' }}</span>
                                 </div>
                                 {% if next.adventure %}
-                                    <div class="subtitle sub-icon" style="margin-top: 4px;">
-                                        <span class="icon-book"></span>
+                                    <div class="subtitle sub-icon" style="margin-top: 8px;">
+                                        <span class="icon-book-1"></span>
                                         <span>{{ next.adventure.name }}</span>
                                     </div>
                                     {% if next.adventure.duration %}
-                                        <div class="subtitle sub-icon">
+                                        <div class="subtitle sub-icon" style="margin-top: 6px;">
                                             <span class="icon-time"></span>
                                             <span>{{ next.adventure.duration | date('H\\hi') }}</span>
                                         </div>
                                     {% endif %}
                                     {% if next.adventure.url %}
-                                        <div class="subtitle sub-icon">
+                                        <div class="subtitle sub-icon" style="margin-top: 6px;">
                                             <span class="icon-link"></span>
-                                            <span><a href="{{ next.adventure.url }}" target="_blank">Lien du topo</a></span>
+                                            <span><a href="{{ next.adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
                                         </div>
                                     {% endif %}
                                 {% endif %}

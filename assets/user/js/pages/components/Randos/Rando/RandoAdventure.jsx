@@ -185,14 +185,10 @@ export class RandoAdventure extends Component {
     }
 
     render() {
-        const { mode, haveAdventure, advName, advDuration, advUrl, advVotes, users, userId } = this.props;
+        const { mode, haveAdventure, advName, userId } = this.props;
         const { errors, loadData, name, duration, url, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
-
-        let nUsers = JSON.parse(users);
-
-        console.log();
 
         return <div className="rando-card">
             <div className="rando-card-header">
@@ -201,37 +197,7 @@ export class RandoAdventure extends Component {
             <div className={`rando-card-body${haveAdventure ? " selected" : ""}`}>
                 {haveAdventure
                     ? <div className="propals">
-                        <div className="propal selected">
-                            {advName} {advDuration ? " - " + Sanitaze.toFormatDuration(advDuration) : null}
-                            {advUrl ? " - " : null}
-                            {advUrl ? <a href={advUrl} className="url-topo" target="_blank">
-                                <span className="icon-link"></span>
-                                <span className="tooltip">Topo</span>
-                            </a> : null}
-                        </div>
-                        <div className="propal">
-                            <div className="members">
-                                {JSON.parse(advVotes).map((v, index) => {
-
-                                    let member = null;
-                                    nUsers.forEach(u => {
-                                        if(u.id === parseInt(v)){
-                                            member = u;
-                                        }
-                                    })
-
-                                    return <div class="member" key={index}>
-                                        <div class="avatar">
-                                            {member.avatarFile
-                                                ? <img src={location.origin + member.avatarFile} alt="Avatar utilisateur" />
-                                                : <div class="avatar-letter">{member.lastname.slice(0,1)}{member.firstname.slice(0,1)}</div>
-                                            }
-                                        </div>
-                                        <span class="tooltip">{member.displayName}</span>
-                                    </div>
-                                })}
-                            </div>
-                        </div>
+                        <div className="propal selected">{advName}</div>
                     </div>
                     : <>
                         <div className="propals">
@@ -328,12 +294,8 @@ RandoAdventure.propTypes = {
     mode: PropTypes.bool.isRequired,
     haveAdventure: PropTypes.bool.isRequired,
     advName: PropTypes.string.isRequired,
-    advDuration: PropTypes.string.isRequired,
-    advUrl: PropTypes.string.isRequired,
-    advVotes: PropTypes.string.isRequired,
     userId: PropTypes.string.isRequired,
     randoId: PropTypes.string.isRequired,
-    users: PropTypes.string.isRequired,
 }
 
 function modalFormPropal (self) {
