@@ -208,7 +208,7 @@ class Form extends Component {
                                                 : <div className="avatar-letter">{user.lastname.slice(0,1) + user.firstname.slice(0,1)}</div>
                                             }
                                         </div>
-                                        <div className="username">{user.username}</div>
+                                        <div className="username">{user.displayName}</div>
                                         {selected && <div className="item-selected"><span className="icon-check-1" /></div>}
                                     </div>
                                 })}

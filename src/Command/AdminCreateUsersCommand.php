@@ -66,19 +66,19 @@ class AdminCreateUsersCommand extends Command
 
         $users = [
             [
-                'username' => 'shanbo',
+                'username' => 'shanbo', 'displayName' => 'Shanbora',
                 'firstname' => 'Dev', 'lastname' => 'Shanbora',
                 'email' => 'chanbora.chhun@outlook.fr',
                 'roles' => ['ROLE_USER','ROLE_ADMIN', 'ROLE_DEVELOPER']
             ],
             [
-                'username' => 'staro',
+                'username' => 'staro', 'displayName' => 'Starozytny',
                 'firstname' => 'Admin', 'lastname' => 'Starozytny',
                 'email' => 'starozytny@hotmail.fr',
                 'roles' => ['ROLE_USER','ROLE_ADMIN']
             ],
             [
-                'username' => 'shanks',
+                'username' => 'shanks', 'displayName' => 'Shanks',
                 'firstname' => 'User', 'lastname' => 'Shanks',
                 'email' => 'shanks@hotmail.fr',
                 'roles' => ['ROLE_USER']
@@ -107,7 +107,7 @@ class AdminCreateUsersCommand extends Command
             $fake = Factory::create();
             for($i=0; $i<200 ; $i++) {
                 $user =  [
-                    'username' => $i . $fake->userName,
+                    'username' => $i . $fake->userName, 'displayName' => $fake->lastName,
                     'firstname' => $fake->firstName, 'lastname' => $fake->lastName,
                     'email' => $fake->email,
                     'roles' => ['ROLE_USER']

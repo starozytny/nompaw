@@ -8,6 +8,7 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaLink;
+use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
@@ -41,6 +42,10 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Column(length: 180, unique: true)]
     #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
     private ?string $username = null;
+
+    #[ORM\Column(length: 180)]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    private ?string $displayName = null;
 
     #[ORM\Column]
     #[Groups(['user_form'])]
@@ -136,6 +141,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaPropalDate::class)]
     private Collection $raPropalDates;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaPropalAdventure::class)]
+    private Collection $raPropalAdventures;
+
     /**
      * @throws Exception
      */
@@ -150,6 +158,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->roGroupes = new ArrayCollection();
         $this->raRandos = new ArrayCollection();
         $this->raPropalDates = new ArrayCollection();
+        $this->raPropalAdventures = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -165,6 +174,18 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setUsername(string $username): self
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(string $displayName): self
+    {
+        $this->displayName = $displayName;
 
         return $this;
     }
@@ -693,6 +714,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($raPropalDate->getAuthor() === $this) {
                 $raPropalDate->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaPropalAdventure>
+     */
+    public function getRaPropalAdventures(): Collection
+    {
+        return $this->raPropalAdventures;
+    }
+
+    public function addRaPropalAdventure(RaPropalAdventure $raPropalAdventure): self
+    {
+        if (!$this->raPropalAdventures->contains($raPropalAdventure)) {
+            $this->raPropalAdventures->add($raPropalAdventure);
+            $raPropalAdventure->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRaPropalAdventure(RaPropalAdventure $raPropalAdventure): self
+    {
+        if ($this->raPropalAdventures->removeElement($raPropalAdventure)) {
+            // set the owning side to null (unless already changed)
+            if ($raPropalAdventure->getAuthor() === $this) {
+                $raPropalAdventure->setAuthor(null);
             }
         }
 

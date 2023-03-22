@@ -7,6 +7,7 @@ import { GroupeDelete } from "@userPages/Randos/Groupe/GroupeDelete";
 import { RandoFormulaire } from "@userPages/Randos/Rando/RandoForm";
 import { RandoDelete } from "@userPages/Randos/Rando/RandoDelete";
 import {RandoDate} from "@userPages/Randos/Rando/RandoDate";
+import {RandoAdventure} from "@userPages/Randos/Rando/RandoAdventure";
 
 let el = document.getElementById("groupes_update");
 if(el){
@@ -51,4 +52,11 @@ if(deletesRandos){
 let randoDate = document.getElementById("rando_date");
 if(randoDate){
     createRoot(randoDate).render(<RandoDate {...randoDate.dataset} mode={randoDate.dataset.mode === "1"} />)
+}
+
+let randoAdventure = document.getElementById("rando_adventures");
+if(randoAdventure){
+    createRoot(randoAdventure).render(<RandoAdventure {...randoAdventure.dataset}
+                                                      mode={randoAdventure.dataset.mode === "1"}
+                                                      haveAdventure={randoAdventure.dataset.haveAdventure === "1"} />)
 }

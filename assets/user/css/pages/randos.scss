@@ -9,6 +9,15 @@
   @include flex(row, center, center);
 }
 
+.url-topo{
+  position: relative;
+  color: var(--primary);
+}
+
+.sub-icon{
+  @include flex(row, flex-start, flex-start, 4px);
+}
+
 .ra-status{
   border-radius: calc(var(--radius) * 2);
   padding: 2px 8px;
@@ -42,7 +51,11 @@
 
   & > .member{
     position: relative;
-    box-shadow: 0 4px 8px var(--color0Opacity4);
+
+    .avatar{
+      box-shadow: 0 4px 8px var(--color0Opacity4);
+      background-color: transparent;
+    }
 
     & + .member{
       margin-left: -12px;

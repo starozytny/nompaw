@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api\Randos;
 
+use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaRandoRepository;
@@ -75,6 +76,16 @@ class RandoController extends AbstractController
     public function cancelDate(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
     {
         $obj->setStartAt(null);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/cancel/adventure/{id}', name: 'cancel_adventure', options: ['expose' => true], methods: 'PUT')]
+    public function cancelAdventure(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
+    {
+        $obj->setAdventure(null);
+        $obj->setStatus(StatusType::Propal);
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');

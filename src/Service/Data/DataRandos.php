@@ -3,6 +3,7 @@
 namespace App\Service\Data;
 
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Service\SanitizeData;
@@ -37,6 +38,17 @@ class DataRandos
     {
         return ($obj)
             ->setDateAt($this->sanitizeData->createDatePicker($data->dateAt))
+        ;
+    }
+
+    public function setDataPropalAdventure(RaPropalAdventure $obj, $data): RaPropalAdventure
+    {
+        $duration = $data->duration ? str_replace('h', ':', $data->duration) : null;
+
+        return ($obj)
+            ->setName($this->sanitizeData->trimData($data->name))
+            ->setDuration($this->sanitizeData->createTime($duration))
+            ->setUrl($this->sanitizeData->trimData($data->url))
         ;
     }
 }

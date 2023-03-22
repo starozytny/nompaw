@@ -28,12 +28,12 @@
                                         <div class="member">
                                             <div class="avatar">
                                                 {% if member.user.avatarFile %}
-                                                    <img src="{{ member.user.avatarFile }}" alt="Avatar utilisateur">
+                                                    <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur">
                                                 {% else %}
                                                     <div class="avatar-letter">{{ member.user.lastname | slice(0, 1) }}{{ member.user.firstname | slice(0,1) }}</div>
                                                 {% endif %}
                                             </div>
-                                            <span class="tooltip">{{ member.user.username }} {{ loop.index }}</span>
+                                            <span class="tooltip">{{ member.user.displayName }}</span>
                                         </div>
                                     {% endif %}
                                     {% set totalMembers = totalMembers + 1 %}

@@ -11,27 +11,28 @@ import Formulaire   from "@commonFunctions/formulaire";
 import Validateur   from "@commonFunctions/validateur";
 import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
-import Sort         from "@commonFunctions/sort";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal }    from "@commonComponents/Elements/Modal";
 import { Input }    from "@commonComponents/Elements/Fields";
 
-const URL_CREATE_PROPAL = 'api_randos_propal_date_create';
-const URL_UPDATE_PROPAL = 'api_randos_propal_date_update';
-const URL_DELETE_PROPAL = 'api_randos_propal_date_delete';
-const URL_VOTE_PROPAL   = 'api_randos_propal_date_vote';
-const URL_END_PROPAL    = 'api_randos_propal_date_end';
-const URL_CANCEL_DATE   = 'api_randos_rando_cancel_date';
+const URL_CREATE_PROPAL = 'api_randos_propal_adventure_create';
+const URL_UPDATE_PROPAL = 'api_randos_propal_adventure_update';
+const URL_DELETE_PROPAL = 'api_randos_propal_adventure_delete';
+const URL_VOTE_PROPAL   = 'api_randos_propal_adventure_vote';
+const URL_END_PROPAL    = 'api_randos_propal_adventure_end';
+const URL_CANCEL_DATE   = 'api_randos_rando_cancel_adventure';
 
-export class RandoDate extends Component{
+export class RandoAdventure extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
             context: 'create',
             propal: null,
-            dateAt: '',
+            name: '',
+            duration: '',
+            url: 'https://',
             errors: [],
             data: JSON.parse(props.propals),
             loadData: false,
@@ -40,30 +41,31 @@ export class RandoDate extends Component{
         this.formPropal = React.createRef();
         this.deletePropal = React.createRef();
         this.endPropal = React.createRef();
-        this.cancelDate = React.createRef();
+        this.cancelAdventure = React.createRef();
     }
-
-    componentDidMount = () => { Inputs.initDateInput(this.handleChangeDate, this.handleChange, "") }
 
     handleChange = (e, picker) => {
         let name  = e.currentTarget.name;
         let value = e.currentTarget.value;
 
-        if(name === "dateAt"){
-            value = Inputs.dateInput(e, picker, this.state[name]);
+        if(name === "duration"){
+            value = Inputs.timeInput(e, this.state[name]);
         }
 
         this.setState({[name]: value})
     }
 
-    handleChangeDate = (name, value) => { this.setState({ [name]: value }) }
-
     handleModal = (identifiant, context, propal) => {
         modalFormPropal(this);
         modalDeletePropal(this);
         modalEndPropal(this);
-        modalCancelDate(this);
-        this.setState({ context: context, propal: propal, dateAt: propal ? moment(propal.dateAt).utc().format('DD/MM/Y') : "" })
+        modalCancelAdventure(this);
+        this.setState({
+            context: context, propal: propal,
+            name: propal ? propal.name : "",
+            duration: propal  && propal.duration ? moment(propal.duration).utc().format('LT').replace(':', 'h') : "",
+            url: propal ? propal.url : "https://",
+        })
         this[identifiant].current.handleClick();
     }
 
@@ -71,27 +73,28 @@ export class RandoDate extends Component{
         e.preventDefault();
 
         const { randoId } = this.props;
-        const { context, propal, dateAt, data } = this.state;
+        const { context, propal, name, duration, url, data } = this.state;
 
         this.setState({ errors: [] });
 
-        let paramsToValidate = [
-            {type: "text",  id: 'dateAt', value: dateAt},
-            {type: "date",  id: 'dateAt', value: dateAt},
-        ];
+        let paramsToValidate = [{type: "text",  id: 'name', value: name}];
+
+        if(duration !== ""){
+            paramsToValidate = [...paramsToValidate, ...[{type: "time", id: 'duration', value: duration}]];
+        }
 
         let validate = Validateur.validateur(paramsToValidate)
         if(!validate.code){
             Formulaire.showErrors(this, validate);
         }else {
-            let method = context === "create" ? "POST" : "PUT";
-            let url    = context === "create"
+            let method  = context === "create" ? "POST" : "PUT";
+            let urlForm = context === "create"
                 ? Routing.generate(URL_CREATE_PROPAL, {'rando': randoId})
                 : Routing.generate(URL_UPDATE_PROPAL, {'rando': randoId, 'id': propal.id})
 
             const self = this;
             this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
-            axios({ method: method, url: url, data: {dateAt: dateAt} })
+            axios({ method: method, url: urlForm, data: {name: name, duration: duration, url: url} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
 
@@ -114,10 +117,10 @@ export class RandoDate extends Component{
             ;
         }
     }
-    
+
     handleDeletePropal = () => {
         const { propal, data } = this.state;
-        
+
         let self = this;
         this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
         axios({ method: "DELETE", url: Routing.generate(URL_DELETE_PROPAL, {'id': propal.id}), data: {} })
@@ -168,37 +171,33 @@ export class RandoDate extends Component{
         ;
     }
 
-    handleCancelDate = () => {
+    handleCancelAdventure = () => {
         const { randoId } = this.props;
 
         let self = this;
-        this.cancelDate.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
+        this.cancelAdventure.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
         axios({ method: "PUT", url: Routing.generate(URL_CANCEL_DATE, {'id': randoId}), data: {} })
             .then(function (response) {
                 location.reload();
             })
-            .catch(function (error) { modalCancelDate(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+            .catch(function (error) { modalCancelAdventure(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
         ;
     }
 
     render() {
-        const { mode, startAt, userId } = this.props;
-        const { errors, loadData, dateAt, data, propal } = this.state;
+        const { mode, haveAdventure, advName, userId } = this.props;
+        const { errors, loadData, name, duration, url, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
-        data.sort(Sort.compareDateAt);
-
         return <div className="rando-card">
             <div className="rando-card-header">
-                <div className="name">{startAt ? "Date de la randonnée" : "Proposition de dates"}</div>
+                <div className="name">{haveAdventure ? "Aventure sélectionnée" : "Proposition d'aventures"}</div>
             </div>
-            <div className={`rando-card-body${startAt ? " selected" : ""}`}>
-                {startAt
+            <div className={`rando-card-body${haveAdventure ? " selected" : ""}`}>
+                {haveAdventure
                     ? <div className="propals">
-                        <div className="propal selected">
-                            {Sanitaze.toDateFormat(startAt, 'LL', '', false)}
-                        </div>
+                        <div className="propal selected">{advName}</div>
                     </div>
                     : <>
                         <div className="propals">
@@ -215,8 +214,17 @@ export class RandoDate extends Component{
 
                                 return <div className="propal" key={index}>
                                     <div className={`selector${active}`} onClick={onVote}></div>
-                                    <div className="propal-body" onClick={onVote}>
-                                        <div className="name">{Sanitaze.toDateFormat(el.dateAt, 'LL')}</div>
+                                    <div className="propal-body">
+                                        <div className="name">
+                                            <span onClick={onVote}>{el.name}</span>
+                                            {el.url && <a href={el.url} className="url-topo" target="_blank">
+                                                <span className="icon-link"></span>
+                                                <span className="tooltip">Topo</span>
+                                            </a>}
+                                        </div>
+                                        <div className="duration" onClick={onVote}>
+                                            {Sanitaze.toFormatDuration(Sanitaze.toDateFormat(el.duration, 'LT').replace(':', 'h'))}
+                                        </div>
                                     </div>
                                     <div className="propal-actions">
                                         {mode || el.author.id === parseInt(userId)
@@ -240,48 +248,54 @@ export class RandoDate extends Component{
                     </>
                 }
             </div>
-            {startAt === ""
-                ? <div className="rando-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-                    <div style={{display: 'flex', gap: '4px'}}>
-                        <span className="icon-add"></span>
-                        <span>Proposer une date</span>
-                    </div>
-                </div>
-                :  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+            {haveAdventure
+                ?  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
                     <div style={{display: 'flex', gap: '4px'}}>
                         <span className="icon-close"></span>
-                        <span>Annuler la date sélectionnée</span>
+                        <span>Annuler l'aventure sélectionnée</span>
+                    </div>
+                </div>
+                : <div className="rando-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
+                    <div style={{display: 'flex', gap: '4px'}}>
+                        <span className="icon-add"></span>
+                        <span>Proposer une aventure</span>
                     </div>
                 </div>
             }
 
-            <Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
-                   content={<div className="line">
-                       <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
-                   </div>}
+            <Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une aventure"
+                   content={<>
+                       <div className="line line-2">
+                           <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
+                           <Input identifiant="duration" valeur={duration} placeholder="00h00" {...params}>Horaire du début</Input>
+                       </div>
+                       <div className="line">
+                           <Input identifiant="url" valeur={url} {...params}>Lien du topo</Input>
+                       </div>
+                   </>}
                    footer={null} closeTxt="Annuler" />
 
-            <Modal ref={this.deletePropal} identifiant='delete-propal-date' maxWidth={414} title="Supprimer la date"
-                   content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> ?</p>}
+            <Modal ref={this.deletePropal} identifiant='delete-propal-adventure' maxWidth={414} title="Supprimer l'aventure"
+                   content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? propal.name : ""}</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
 
-            <Modal ref={this.endPropal} identifiant='end-propal-date' maxWidth={414} title="Sélectionner la date finale"
-                   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
+            <Modal ref={this.endPropal} identifiant='end-propal-adventure' maxWidth={414} title="Sélectionner l'aventure finale"
+                   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? propal.name : ""}</b> comme étant l'aventure <b>FINALE</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
 
-            <Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"
-                   content={<p>Etes-vous sûr de vouloir revenir sur les propositions de dates ?</p>}
+            <Modal ref={this.cancelAdventure} identifiant='cancel-adventure' maxWidth={414} title="Annuler l'aventure sélectionnée"
+                   content={<p>Etes-vous sûr de vouloir revenir sur les propositions des aventures ?</p>}
                    footer={null} closeTxt="Annuler" />
         </div>
     }
 }
 
-RandoDate.propTypes = {
+RandoAdventure.propTypes = {
     mode: PropTypes.bool.isRequired,
+    haveAdventure: PropTypes.bool.isRequired,
+    advName: PropTypes.string.isRequired,
     userId: PropTypes.string.isRequired,
     randoId: PropTypes.string.isRequired,
-    propals: PropTypes.string.isRequired,
-    startAt: PropTypes.string
 }
 
 function modalFormPropal (self) {
@@ -293,6 +307,6 @@ function modalDeletePropal (self) {
 function modalEndPropal (self) {
     self.endPropal.current.handleUpdateFooter(<Button type="success" onClick={self.handleEndPropal}>Clôturer</Button>)
 }
-function modalCancelDate (self) {
-    self.cancelDate.current.handleUpdateFooter(<Button type="danger" onClick={self.handleCancelDate}>Confirmer l'annulation</Button>)
+function modalCancelAdventure (self) {
+    self.cancelAdventure.current.handleUpdateFooter(<Button type="danger" onClick={self.handleCancelAdventure}>Confirmer l'annulation</Button>)
 }

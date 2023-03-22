@@ -30,6 +30,7 @@ class DataMain
             ->setUsername($this->sanitizeData->fullSanitize($data->username))
             ->setFirstname($this->sanitizeData->sanitizeString($data->firstname))
             ->setLastname($this->sanitizeData->sanitizeString($data->lastname))
+            ->setDisplayName($this->sanitizeData->sanitizeString($data->displayName))
             ->setEmail($data->email)
         ;
     }

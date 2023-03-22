@@ -13,6 +13,11 @@
   .features{
     @include flex(column, flex-start, flex-start, 4px);
   }
+
+  .members{
+    margin-top: 8px;
+  }
+
   .author{
     .user{
       @include flex(row, center, flex-start, 4px);
@@ -21,11 +26,25 @@
   }
 
   .rando-content{
+    @include flex(column, flex-start, flex-start, var(--espaceLayout));
     padding: var(--espaceLayout) 0;
+
+    & > *{
+      width: 100%;
+    }
+  }
+}
+
+.rando-col-propals{
+  @include flex(column, flex-start, flex-start, var(--espaceLayout));
+
+  & > *{
+    width: 100%;
   }
 }
 
 .rando-card{
+
   .rando-card-header, .rando-card-footer{
     padding: var(--espaceDiv);
   }
@@ -63,6 +82,28 @@
   .rando-card-footer-danger{
     background-color: var(--danger);
   }
+}
+
+.rando-details{
+  .name{
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .date{
+    font-size: 17px;
+  }
+}
+
+.rando-card-meta{
+  @include flex(column, flex-start, flex-start, var(--espaceEls));
+  padding: var(--espaceDiv) 0;
+  margin: 0 var(--espaceDiv);
+  border-bottom: 1px solid var(--color1Opacity4);
+}
+
+.rando-card-content{
+  padding: var(--espaceDiv);
 }
 
 .propals{
@@ -104,7 +145,7 @@
         content: '';
         display: block;
         position: absolute;
-        width: 15px; height: 16px;
+        width: 16px; height: 16px;
         top: 2px; left: 2px;
         border-radius: var(--radius);
       }
@@ -122,6 +163,14 @@
       width: calc(100% - $widthSelector - $widthCounter - $widthActions - 25px);
 
       .name{
+        @include flex(row, flex-start, flex-start, 8px);
+        cursor: pointer;
+      }
+
+      .duration{
+        font-size: 14px;
+        opacity: 0.8;
+        margin-top: 4px;
         cursor: pointer;
       }
     }
@@ -137,6 +186,20 @@
     .propal-actions{
       @include flex(row, flex-start, flex-start, 4px);
       width: $widthActions;
+    }
+  }
+}
+
+//                      __   _____ __    ___    __
+//                     | _| |___  / /_  ( _ )  |_ |
+//    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
+//   |_____|_____|_____| |    / /| (_) | (_) |  | |_____|_____|_____|
+//                     | |   /_/  \___/ \___/   | |
+//                     |__|                    |__|
+@media (min-width:768px) {
+  .rando-read{
+    .to-line{
+      flex-direction: row;
     }
   }
 }
@@ -163,6 +226,10 @@
       .content{
         width: calc(100% - 48px);
       }
+    }
+
+    .rando-col-propals{
+      flex-direction: row;
     }
   }
 }
