@@ -121,25 +121,6 @@ function timeInput (e, source) {
     return value;
 }
 
-function timeInput (e, source) {
-    let value = e.currentTarget.value;
-
-    if(value.length > 5){
-        return source;
-    }
-
-    if(value.length === 3){
-        let hours = value.slice(0,2);
-        let minutes = value.slice(2,4);
-
-        if(minutes !== "h"){
-            return hours + "h" + minutes;
-        }
-    }
-
-    return value;
-}
-
 function textAlphaInput (e, source) {
     let value = e.currentTarget.value;
 

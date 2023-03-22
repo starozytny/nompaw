@@ -77,6 +77,11 @@
   .rando-card-footer-danger{
     background-color: var(--danger);
   }
+
+  .url-topo{
+    position: relative;
+    color: var(--primary);
+  }
 }
 
 .propals{
@@ -138,11 +143,6 @@
       .name{
         @include flex(row, flex-start, flex-start, 8px);
         cursor: pointer;
-
-        a{
-          position: relative;
-          color: var(--primary);
-        }
       }
 
       .duration{

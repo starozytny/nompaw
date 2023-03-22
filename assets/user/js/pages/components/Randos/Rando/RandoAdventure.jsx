@@ -186,7 +186,7 @@ export class RandoAdventure extends Component {
     }
 
     render() {
-        const { mode, haveAdventure, advName, advDuration, userId } = this.props;
+        const { mode, haveAdventure, advName, advDuration, advUrl, userId } = this.props;
         const { errors, loadData, name, duration, url, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -199,7 +199,11 @@ export class RandoAdventure extends Component {
                 {haveAdventure
                     ? <div className="propals">
                         <div className="propal selected">
-                            {advName} - {Sanitaze.toFormatDuration(advDuration)}
+                            {advName} - {Sanitaze.toFormatDuration(advDuration)} -
+                            {advUrl && <a href={advUrl} className="url-topo" target="_blank">
+                                <span className="icon-link"></span>
+                                <span className="tooltip">Topo</span>
+                            </a>}
                         </div>
                     </div>
                     : <>
@@ -220,7 +224,7 @@ export class RandoAdventure extends Component {
                                     <div className="propal-body">
                                         <div className="name">
                                             <span onClick={onVote}>{el.name}</span>
-                                            {el.url && <a href={el.url} target="_blank">
+                                            {el.url && <a href={el.url} className="url-topo" target="_blank">
                                                 <span className="icon-link"></span>
                                                 <span className="tooltip">Topo</span>
                                             </a>}
