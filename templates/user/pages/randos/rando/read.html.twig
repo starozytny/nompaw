@@ -53,10 +53,24 @@
                     <div class="ra-status active">
                         <span>{{ elem.statusString }}</span>
                     </div>
+                    <div class="members">
+                        {% for member in groupe.links %}
+                            <div class="member">
+                                <div class="avatar">
+                                    {% if member.user.avatarFile %}
+                                        <img src="{{ member.user.avatarFile }}" alt="Avatar utilisateur">
+                                    {% else %}
+                                        <div class="avatar-letter">{{ member.user.lastname | slice(0, 1) }}{{ member.user.firstname | slice(0,1) }}</div>
+                                    {% endif %}
+                                </div>
+                                <span class="tooltip">{{ member.user.displayName }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
                 <div class="author">
                     <div class="user">
-                        <div class="name">{{ author.firstname }}</div>
+                        <div class="name">{{ author.displayName }}</div>
                         <div class="avatar">
                             <div class="avatar-letter">{{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}</div>
                         </div>

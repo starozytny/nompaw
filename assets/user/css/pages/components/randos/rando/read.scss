@@ -13,6 +13,11 @@
   .features{
     @include flex(column, flex-start, flex-start, 4px);
   }
+
+  .members{
+    margin-top: 8px;
+  }
+
   .author{
     .user{
       @include flex(row, center, flex-start, 4px);
