@@ -189,92 +189,89 @@ export class RandoDate extends Component{
 
         data.sort(Sort.compareDateAt);
 
-        return <div>
-            <div className="rando-card">
-                <div className="rando-card-header">
-                    <div className="name">{startAt ? "Date de la randonnée" : "Proposition de dates"}</div>
-                </div>
-                <div className={`rando-card-body${startAt ? " selected" : ""}`}>
-                    {startAt
-                        ? <div className="propals">
-                            <div className="propal selected">
-                                {Sanitaze.toDateFormat(startAt, 'LL', '', false)}
-                            </div>
-                        </div>
-                        : <>
-                            <div className="propals">
-                                {data.map((el, index) => {
-
-                                    let onVote = () => this.handleVote(el);
-
-                                    let active = "";
-                                    el.votes.forEach(v => {
-                                        if(v === userId){
-                                            active = " active"
-                                        }
-                                    })
-
-                                    return <div className="propal" key={index}>
-                                        <div className={`selector${active}`} onClick={onVote}></div>
-                                        <div className="propal-body" onClick={onVote}>
-                                            <div className="name">{Sanitaze.toDateFormat(el.dateAt, 'LL')}</div>
-                                        </div>
-                                        <div className="propal-actions">
-                                            {mode || el.author.id === parseInt(userId)
-                                                ? <>
-                                                    <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-                                                    <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-                                                    {mode && <ButtonIcon icon="check1" type="success" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon> }
-                                                </>
-                                                : null
-                                            }
-                                        </div>
-                                        <div className="propal-counter" onClick={onVote}>
-                                            {loadData
-                                                ? <span className="icon-chart-3"/>
-                                                : `+ ${el.votes.length}`
-                                            }
-                                        </div>
-                                    </div>
-                                })}
-                            </div>
-                        </>
-                    }
-                </div>
-                {startAt === ""
-                    ? <div className="rando-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-                        <div style={{display: 'flex', gap: '4px'}}>
-                            <span className="icon-add"></span>
-                            <span>Proposer une date</span>
-                        </div>
-                    </div>
-                    :  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-                        <div style={{display: 'flex', gap: '4px'}}>
-                            <span className="icon-close"></span>
-                            <span>Annuler la date sélectionnée</span>
-                        </div>
-                    </div>
-                }
-
-                <Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
-                       content={<div className="line">
-                           <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
-                       </div>}
-                       footer={null} closeTxt="Annuler" />
-
-                <Modal ref={this.deletePropal} identifiant='delete-propal-date' maxWidth={414} title="Supprimer la date"
-                       content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> ?</p>}
-                       footer={null} closeTxt="Annuler" />
-
-                <Modal ref={this.endPropal} identifiant='end-propal-date' maxWidth={414} title="Sélectionner la date finale"
-                       content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
-                       footer={null} closeTxt="Annuler" />
-
-                <Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"
-                       content={<p>Etes-vous sûr de vouloir revenir sur les propositions de dates ?</p>}
-                       footer={null} closeTxt="Annuler" />
+        return <div className="rando-card">
+            <div className="rando-card-header">
+                <div className="name">{startAt ? "Date de la randonnée" : "Proposition de dates"}</div>
             </div>
+            <div className={`rando-card-body${startAt ? " selected" : ""}`}>
+                {startAt
+                    ? <div className="propals">
+                        <div className="propal selected">
+                            {Sanitaze.toDateFormat(startAt, 'LL', '', false)}
+                        </div>
+                    </div>
+                    : <>
+                        <div className="propals">
+                            {data.map((el, index) => {
 
+                                let onVote = () => this.handleVote(el);
+
+                                let active = "";
+                                el.votes.forEach(v => {
+                                    if(v === userId){
+                                        active = " active"
+                                    }
+                                })
+
+                                return <div className="propal" key={index}>
+                                    <div className={`selector${active}`} onClick={onVote}></div>
+                                    <div className="propal-body" onClick={onVote}>
+                                        <div className="name">{Sanitaze.toDateFormat(el.dateAt, 'LL')}</div>
+                                    </div>
+                                    <div className="propal-actions">
+                                        {mode || el.author.id === parseInt(userId)
+                                            ? <>
+                                                <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+                                                <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                                {mode && <ButtonIcon icon="check1" type="success" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon> }
+                                            </>
+                                            : null
+                                        }
+                                    </div>
+                                    <div className="propal-counter" onClick={onVote}>
+                                        {loadData
+                                            ? <span className="icon-chart-3"/>
+                                            : `+ ${el.votes.length}`
+                                        }
+                                    </div>
+                                </div>
+                            })}
+                        </div>
+                    </>
+                }
+            </div>
+            {startAt === ""
+                ? <div className="rando-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
+                    <div style={{display: 'flex', gap: '4px'}}>
+                        <span className="icon-add"></span>
+                        <span>Proposer une date</span>
+                    </div>
+                </div>
+                :  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+                    <div style={{display: 'flex', gap: '4px'}}>
+                        <span className="icon-close"></span>
+                        <span>Annuler la date sélectionnée</span>
+                    </div>
+                </div>
+            }
+
+            <Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
+                   content={<div className="line">
+                       <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
+                   </div>}
+                   footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.deletePropal} identifiant='delete-propal-date' maxWidth={414} title="Supprimer la date"
+                   content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> ?</p>}
+                   footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.endPropal} identifiant='end-propal-date' maxWidth={414} title="Sélectionner la date finale"
+                   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
+                   footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"
+                   content={<p>Etes-vous sûr de vouloir revenir sur les propositions de dates ?</p>}
+                   footer={null} closeTxt="Annuler" />
         </div>
     }
 }

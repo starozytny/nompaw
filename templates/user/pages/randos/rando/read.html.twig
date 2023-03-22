@@ -79,15 +79,28 @@
             </div>
 
             <div class="rando-content">
-                <div id="rando_date"
-                     data-rando-id="{{ elem.id }}"
-                     data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
-                     data-propals="{{ propalDates }}"
-                     data-user-id="{{ app.user.id }}"
-                     data-mode="{{ app.user.id == elem.author.id }}"
-                >
-                    {% include "layout/components/loader.html.twig" %}
+                <div class="rando-col-propals">
+                    <div id="rando_date"
+                         data-rando-id="{{ elem.id }}"
+                         data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                         data-propals="{{ propalDates }}"
+                         data-user-id="{{ app.user.id }}"
+                         data-mode="{{ app.user.id == elem.author.id }}"
+                    >
+                        {% include "layout/components/loader.html.twig" %}
+                    </div>
+
+                    {% if elem.startAt %}
+                        <div id="rando_adventures"
+                             data-rando-id="{{ elem.id }}"
+                             data-user-id="{{ app.user.id }}"
+                             data-mode="{{ app.user.id == elem.author.id }}"
+                        >
+                            {% include "layout/components/loader.html.twig" %}
+                        </div>
+                    {% endif %}
                 </div>
+
             </div>
         </div>
     </div>

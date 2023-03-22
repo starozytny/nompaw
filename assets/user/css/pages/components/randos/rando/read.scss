@@ -30,7 +30,16 @@
   }
 }
 
+.rando-col-propals{
+  @include flex(column, flex-start, flex-start, var(--espaceLayout));
+
+  & > *{
+    width: 100%;
+  }
+}
+
 .rando-card{
+
   .rando-card-header, .rando-card-footer{
     padding: var(--espaceDiv);
   }
