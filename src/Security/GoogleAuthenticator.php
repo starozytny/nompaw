@@ -64,7 +64,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
                 //User doesnt exist, we create it !
                 if (!$existingUser) {
                     $existingUser = (new User())
-                        ->setUsername($user->getName())
+                        ->setUsername($user->getId())
                         ->setEmail($email)
                         ->setGoogleId($user->getId())
                         ->setFirstname($user->getFirstName() ?: 'Google')
@@ -72,6 +72,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
                         ->setGoogleAccessToken($accessToken->getToken())
                         ->setGoogleRefreshToken($accessToken->getRefreshToken())
                         ->setGoogleTokenExpiresAt((new \DateTime())->setTimestamp($accessToken->getExpires()))
+                        ->setDisplayName($user->getName())
                         ->setSociety($society)
                     ;
                     $existingUser->setPassword($this->passwordHasher->hashPassword($existingUser, uniqid()));
