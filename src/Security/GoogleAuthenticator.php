@@ -78,7 +78,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
                     $this->entityManager->persist($existingUser);
                 }
                 if($user->getAvatar()){
-                    $fileName = $this->fileUploader->replaceFile($user->getAvatar(), User::FOLDER, $oldAvatar);
+                    $fileName = $this->fileUploader->downloadImgURL($user->getAvatar(), User::FOLDER, $oldAvatar);
                     if($fileName){
                         $existingUser->setAvatar($fileName);
                     }
