@@ -149,7 +149,7 @@ export class RandoDate extends Component{
 
                     self.setState({ data: nData });
                 })
-                .catch(function (error) { console.log(error); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
                 .then(function () { self.setState({ loadData: false }); })
             ;
         }

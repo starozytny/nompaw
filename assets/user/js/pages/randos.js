@@ -58,5 +58,5 @@ let randoAdventure = document.getElementById("rando_adventures");
 if(randoAdventure){
     createRoot(randoAdventure).render(<RandoAdventure {...randoAdventure.dataset}
                                                       mode={randoAdventure.dataset.mode === "1"}
-                                                      haveAdventure={randoAdventure.dataset.haveAdventure !== null} />)
+                                                      haveAdventure={randoAdventure.dataset.haveAdventure === "1"} />)
 }

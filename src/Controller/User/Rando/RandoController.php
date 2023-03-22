@@ -5,11 +5,13 @@ namespace App\Controller\User\Rando;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\Main\User;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
+use App\Repository\Rando\RaPropalAdventureRepository;
 use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,15 +24,19 @@ use Symfony\Component\Serializer\SerializerInterface;
 class RandoController extends AbstractController
 {
     #[Route('/{slug}', name: 'read', options: ['expose' => true])]
-    public function read($slug, RaRandoRepository $repository, RaPropalDateRepository $propalDateRepository, SerializerInterface $serializer): Response
+    public function read($slug, RaRandoRepository $repository, RaPropalDateRepository $propalDateRepository,
+                         RaPropalAdventureRepository $adventureRepository, SerializerInterface $serializer): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
         $propalDates = $propalDateRepository->findBy(['rando' => $obj]);
+        $propalAdvs  = $adventureRepository->findBy(['rando' => $obj]);
 
         $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);
+        $propalAdvs  = $serializer->serialize($propalAdvs,  'json', ['groups' => RaPropalAdventure::LIST]);
         return $this->render('user/pages/randos/rando/read.html.twig', [
             'elem' => $obj,
-            'propalDates' => $propalDates
+            'propalDates' => $propalDates,
+            'propalAdvs' => $propalAdvs,
         ]);
     }
 

@@ -79,4 +79,13 @@ class RandoController extends AbstractController
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
+
+    #[Route('/cancel/adventure/{id}', name: 'cancel_adventure', options: ['expose' => true], methods: 'PUT')]
+    public function cancelAdventure(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
+    {
+        $obj->setAdventure(null);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
 }

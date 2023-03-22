@@ -60,9 +60,16 @@ class RaRando
     #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalDate::class)]
     private Collection $propalDates;
 
+    #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalAdventure::class)]
+    private Collection $propalAdventures;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?RaPropalAdventure $adventure = null;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
+        $this->propalAdventures = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -214,6 +221,48 @@ class RaRando
                 $propalDate->setRando(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaPropalAdventure>
+     */
+    public function getPropalAdventures(): Collection
+    {
+        return $this->propalAdventures;
+    }
+
+    public function addPropalAdventure(RaPropalAdventure $propalAdventure): self
+    {
+        if (!$this->propalAdventures->contains($propalAdventure)) {
+            $this->propalAdventures->add($propalAdventure);
+            $propalAdventure->setRando($this);
+        }
+
+        return $this;
+    }
+
+    public function removePropalAdventure(RaPropalAdventure $propalAdventure): self
+    {
+        if ($this->propalAdventures->removeElement($propalAdventure)) {
+            // set the owning side to null (unless already changed)
+            if ($propalAdventure->getRando() === $this) {
+                $propalAdventure->setRando(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getAdventure(): ?RaPropalAdventure
+    {
+        return $this->adventure;
+    }
+
+    public function setAdventure(?RaPropalAdventure $adventure): self
+    {
+        $this->adventure = $adventure;
 
         return $this;
     }

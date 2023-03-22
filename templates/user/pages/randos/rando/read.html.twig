@@ -94,6 +94,10 @@
                         <div id="rando_adventures"
                              data-rando-id="{{ elem.id }}"
                              data-user-id="{{ app.user.id }}"
+                             data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
+                             data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
+                             data-adv-duration="{{ elem.adventure ? elem.adventure.duration | date('H\\hi') : '' }}"
+                             data-propals="{{ propalAdvs }}"
                              data-mode="{{ app.user.id == elem.author.id }}"
                         >
                             {% include "layout/components/loader.html.twig" %}
