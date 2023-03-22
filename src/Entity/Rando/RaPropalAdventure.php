@@ -40,6 +40,10 @@ class RaPropalAdventure
     #[Groups(['pr_adv_list'])]
     private ?\DateTimeInterface $duration = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['pr_adv_list'])]
+    private ?string $url = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -101,6 +105,18 @@ class RaPropalAdventure
     public function setRando(?RaRando $rando): self
     {
         $this->rando = $rando;
+
+        return $this;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(?string $url): self
+    {
+        $this->url = $url;
 
         return $this;
     }

@@ -48,6 +48,7 @@ class DataRandos
         return ($obj)
             ->setName($this->sanitizeData->trimData($data->name))
             ->setDuration($this->sanitizeData->createTime($duration))
+            ->setUrl($this->sanitizeData->trimData($data->url))
         ;
     }
 }

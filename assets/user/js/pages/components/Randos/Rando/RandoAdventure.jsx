@@ -33,6 +33,7 @@ export class RandoAdventure extends Component {
             propal: null,
             name: '',
             duration: '',
+            url: 'https://',
             errors: [],
             data: JSON.parse(props.propals),
             loadData: false,
@@ -63,7 +64,8 @@ export class RandoAdventure extends Component {
         this.setState({
             context: context, propal: propal,
             name: propal ? propal.name : "",
-            duration: propal ? moment(propal.duration).utc().format('LT').replace(':', 'h') : ""
+            duration: propal ? moment(propal.duration).utc().format('LT').replace(':', 'h') : "",
+            url: propal ? propal.url : "https://",
         })
         this[identifiant].current.handleClick();
     }
@@ -72,7 +74,7 @@ export class RandoAdventure extends Component {
         e.preventDefault();
 
         const { randoId } = this.props;
-        const { context, propal, name, duration, data } = this.state;
+        const { context, propal, name, duration, url, data } = this.state;
 
         this.setState({ errors: [] });
 
@@ -86,14 +88,14 @@ export class RandoAdventure extends Component {
         if(!validate.code){
             Formulaire.showErrors(this, validate);
         }else {
-            let method = context === "create" ? "POST" : "PUT";
-            let url    = context === "create"
+            let method  = context === "create" ? "POST" : "PUT";
+            let urlForm = context === "create"
                 ? Routing.generate(URL_CREATE_PROPAL, {'rando': randoId})
                 : Routing.generate(URL_UPDATE_PROPAL, {'rando': randoId, 'id': propal.id})
 
             const self = this;
             this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
-            axios({ method: method, url: url, data: {name: name, duration: duration} })
+            axios({ method: method, url: urlForm, data: {name: name, duration: duration, url: url} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
 
@@ -185,7 +187,7 @@ export class RandoAdventure extends Component {
 
     render() {
         const { mode, haveAdventure, advName, advDuration, userId } = this.props;
-        const { errors, loadData, name, duration, data, propal } = this.state;
+        const { errors, loadData, name, duration, url, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -215,9 +217,15 @@ export class RandoAdventure extends Component {
 
                                 return <div className="propal" key={index}>
                                     <div className={`selector${active}`} onClick={onVote}></div>
-                                    <div className="propal-body" onClick={onVote}>
-                                        <div className="name">{el.name}</div>
-                                        <div className="duration">
+                                    <div className="propal-body">
+                                        <div className="name">
+                                            <span onClick={onVote}>{el.name}</span>
+                                            {el.url && <a href={el.url} target="_blank">
+                                                <span className="icon-link"></span>
+                                                <span className="tooltip">Topo</span>
+                                            </a>}
+                                        </div>
+                                        <div className="duration" onClick={onVote}>
                                             {Sanitaze.toFormatDuration(Sanitaze.toDateFormat(el.duration, 'LT').replace(':', 'h'))}
                                         </div>
                                     </div>
@@ -259,10 +267,15 @@ export class RandoAdventure extends Component {
             }
 
             <Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une aventure"
-                   content={<div className="line line-2">
-                       <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
-                       <Input identifiant="duration" valeur={duration} placeholder="00h00" {...params}>Horaire du début</Input>
-                   </div>}
+                   content={<>
+                       <div className="line line-2">
+                           <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
+                           <Input identifiant="duration" valeur={duration} placeholder="00h00" {...params}>Horaire du début</Input>
+                       </div>
+                       <div className="line">
+                           <Input identifiant="url" valeur={url} {...params}>Lien du topo</Input>
+                       </div>
+                   </>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.deletePropal} identifiant='delete-propal-adventure' maxWidth={414} title="Supprimer l'aventure"
