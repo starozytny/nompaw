@@ -58,7 +58,7 @@
                             <div class="member">
                                 <div class="avatar">
                                     {% if member.user.avatarFile %}
-                                        <img src="{{ member.user.avatarFile }}" alt="Avatar utilisateur">
+                                        <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur">
                                     {% else %}
                                         <div class="avatar-letter">{{ member.user.lastname | slice(0, 1) }}{{ member.user.firstname | slice(0,1) }}</div>
                                     {% endif %}
@@ -97,8 +97,10 @@
                              data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
                              data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
                              data-adv-url="{{ elem.adventure ? elem.adventure.url : '' }}"
+                             data-adv-votes="{{ elem.adventure ? elem.adventure.votes | json_encode : '[]' }}"
                              data-adv-duration="{{ elem.adventure and elem.adventure.duration ? elem.adventure.duration | date('H\\hi') : '' }}"
                              data-propals="{{ propalAdvs }}"
+                             data-users="{{ users }}"
                              data-mode="{{ app.user.id == elem.author.id }}"
                         >
                             {% include "layout/components/loader.html.twig" %}

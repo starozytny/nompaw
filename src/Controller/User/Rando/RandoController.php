@@ -25,18 +25,23 @@ class RandoController extends AbstractController
 {
     #[Route('/{slug}', name: 'read', options: ['expose' => true])]
     public function read($slug, RaRandoRepository $repository, RaPropalDateRepository $propalDateRepository,
-                         RaPropalAdventureRepository $adventureRepository, SerializerInterface $serializer): Response
+                         RaPropalAdventureRepository $adventureRepository, UserRepository $userRepository,
+                         SerializerInterface $serializer): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
         $propalDates = $propalDateRepository->findBy(['rando' => $obj]);
         $propalAdvs  = $adventureRepository->findBy(['rando' => $obj]);
+        $users = $userRepository->findAll();
 
         $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);
         $propalAdvs  = $serializer->serialize($propalAdvs,  'json', ['groups' => RaPropalAdventure::LIST]);
+        $users       = $serializer->serialize($users, 'json', ['groups' => User::SELECT]);
+
         return $this->render('user/pages/randos/rando/read.html.twig', [
             'elem' => $obj,
             'propalDates' => $propalDates,
             'propalAdvs' => $propalAdvs,
+            'users' => $users,
         ]);
     }
 

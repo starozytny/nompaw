@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api\Randos;
 
+use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaPropalAdventureRepository;
@@ -114,6 +115,7 @@ class PropalAdventureController extends AbstractController
     {
         $rando = $obj->getRando();
         $rando->setAdventure($obj);
+        $rando->setStatus(StatusType::Validate);
 
         $noErrors = $validator->validate($rando);
         if ($noErrors !== true) {
