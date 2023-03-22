@@ -43,6 +43,17 @@
         </div>
     </div>
 
+    {% set trans_day_hash = {
+            "Monday": "Lundi",
+            "Tuesday": "Mardi",
+            "Wednesday": "Mercredi",
+            "Thursday": "Jeudi",
+            "Friday": "Vendredi",
+            "Saturday": "Samedi",
+            "Sunday": "Dimanche"
+        }
+    %}
+
     <div class="page-default">
         <div class="groupe-read">
             <div class="groupe-line-0">
@@ -51,14 +62,32 @@
                         <div class="col-1">
                             <div>
                                 <h2>{{ next.name }}</h2>
-                                <div class="subtitle">Prochaine randonnée !</div>
+                                <div class="subtitle">{{ next.description | raw }}</div>
                                 <div class="subtitle sub-icon" style="margin-top: 4px;">
                                     <span class="icon-calendar"></span>
-                                    <span>{{ next.startAt ? next.startAt | date('D, d M Y') : 'Date indéfinie' }}</span>
+                                    <span>{{ next.startAt ? trans_day_hash[next.startAt | date('l')] ~ next.startAt | date(' d M Y') : 'Date indéfinie' }}</span>
                                 </div>
+                                {% if next.adventure %}
+                                    <div class="subtitle sub-icon" style="margin-top: 4px;">
+                                        <span class="icon-book"></span>
+                                        <span>{{ next.adventure.name }}</span>
+                                    </div>
+                                    {% if next.adventure.duration %}
+                                        <div class="subtitle sub-icon">
+                                            <span class="icon-time"></span>
+                                            <span>{{ next.adventure.duration | date('H\\hi') }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if next.adventure.url %}
+                                        <div class="subtitle sub-icon">
+                                            <span class="icon-link"></span>
+                                            <span><a href="{{ next.adventure.url }}" target="_blank">Lien du topo</a></span>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                             <div class="actions">
-                                <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" class="btn-icon btn-icon-warning">
+                                <a href="{{ path('user_randos_rando_update', {'slug': next.slug}) }}" class="btn-icon btn-icon-warning">
                                     <span class="icon-pencil"></span>
                                     <span class="tooltip">Modifier</span>
                                 </a>

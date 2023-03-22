@@ -97,7 +97,7 @@
                              data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
                              data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
                              data-adv-url="{{ elem.adventure ? elem.adventure.url : '' }}"
-                             data-adv-duration="{{ elem.adventure ? elem.adventure.duration | date('H\\hi') : '' }}"
+                             data-adv-duration="{{ elem.adventure and elem.adventure.duration ? elem.adventure.duration | date('H\\hi') : '' }}"
                              data-propals="{{ propalAdvs }}"
                              data-mode="{{ app.user.id == elem.author.id }}"
                         >

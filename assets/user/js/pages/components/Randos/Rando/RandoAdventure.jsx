@@ -63,7 +63,7 @@ export class RandoAdventure extends Component {
         this.setState({
             context: context, propal: propal,
             name: propal ? propal.name : "",
-            duration: propal ? moment(propal.duration).utc().format('LT').replace(':', 'h') : "",
+            duration: propal  && propal.duration ? moment(propal.duration).utc().format('LT').replace(':', 'h') : "",
             url: propal ? propal.url : "https://",
         })
         this[identifiant].current.handleClick();
@@ -77,11 +77,11 @@ export class RandoAdventure extends Component {
 
         this.setState({ errors: [] });
 
-        let paramsToValidate = [
-            {type: "text",  id: 'name',     value: name},
-            {type: "text",  id: 'duration', value: duration},
-            {type: "time",  id: 'duration', value: duration},
-        ];
+        let paramsToValidate = [{type: "text",  id: 'name', value: name}];
+
+        if(duration !== ""){
+            paramsToValidate = [...paramsToValidate, ...[{type: "time", id: 'duration', value: duration}]];
+        }
 
         let validate = Validateur.validateur(paramsToValidate)
         if(!validate.code){
@@ -198,11 +198,12 @@ export class RandoAdventure extends Component {
                 {haveAdventure
                     ? <div className="propals">
                         <div className="propal selected">
-                            {advName} - {Sanitaze.toFormatDuration(advDuration)} -
-                            {advUrl && <a href={advUrl} className="url-topo" target="_blank">
+                            {advName} {advDuration ? " - " + Sanitaze.toFormatDuration(advDuration) : null}
+                            {advUrl ? " - " : null}
+                            {advUrl ? <a href={advUrl} className="url-topo" target="_blank">
                                 <span className="icon-link"></span>
                                 <span className="tooltip">Topo</span>
-                            </a>}
+                            </a> : null}
                         </div>
                     </div>
                     : <>
