@@ -17,7 +17,7 @@ class ImageController extends AbstractController
     public function upload(Request $request, $type, ApiResponse $apiResponse,
                            FileUploader $fileUploader, ImageRepository $repository): Response
     {
-        $accepted_origins = array("https://127.0.0.1:8000", "https://nompaw.chanbora-chhun.fr");
+        $accepted_origins = array("https://127.0.0.1:8000", "https://nompaw.fr");
 
         if (isset($_SERVER['HTTP_ORIGIN'])) {
             // same-origin requests won't set an origin. If the origin is set, it must be valid.
