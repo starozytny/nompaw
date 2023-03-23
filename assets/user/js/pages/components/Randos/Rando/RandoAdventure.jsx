@@ -185,7 +185,7 @@ export class RandoAdventure extends Component {
     }
 
     render() {
-        const { mode, haveAdventure, advName, userId } = this.props;
+        const { mode, haveAdventure, advName, userId, status } = this.props;
         const { errors, loadData, name, duration, url, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -249,12 +249,15 @@ export class RandoAdventure extends Component {
                 }
             </div>
             {haveAdventure
-                ?  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
-                    <div style={{display: 'flex', gap: '4px'}}>
-                        <span className="icon-close"></span>
-                        <span>Annuler l'aventure sélectionnée</span>
+                ? (status !== "2"
+                    ?  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
+                        <div style={{display: 'flex', gap: '4px'}}>
+                            <span className="icon-close"></span>
+                            <span>Annuler l'aventure sélectionnée</span>
+                        </div>
                     </div>
-                </div>
+                    : null
+                )
                 : <div className="rando-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
                     <div style={{display: 'flex', gap: '4px'}}>
                         <span className="icon-add"></span>
@@ -296,6 +299,7 @@ RandoAdventure.propTypes = {
     advName: PropTypes.string.isRequired,
     userId: PropTypes.string.isRequired,
     randoId: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
 }
 
 function modalFormPropal (self) {

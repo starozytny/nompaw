@@ -182,7 +182,7 @@ export class RandoDate extends Component{
     }
 
     render() {
-        const { mode, startAt, userId } = this.props;
+        const { mode, startAt, userId, status } = this.props;
         const { errors, loadData, dateAt, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -247,12 +247,14 @@ export class RandoDate extends Component{
                         <span>Proposer une date</span>
                     </div>
                 </div>
-                :  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-                    <div style={{display: 'flex', gap: '4px'}}>
-                        <span className="icon-close"></span>
-                        <span>Annuler la date sélectionnée</span>
-                    </div>
-                </div>
+                : (status !== "2"
+                    ? <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+                                <div style={{display: 'flex', gap: '4px'}}>
+                                    <span className="icon-close"></span>
+                                    <span>Annuler la date sélectionnée</span>
+                                </div>
+                            </div>
+                    : null)
             }
 
             <Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
@@ -281,6 +283,7 @@ RandoDate.propTypes = {
     userId: PropTypes.string.isRequired,
     randoId: PropTypes.string.isRequired,
     propals: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
     startAt: PropTypes.string
 }
 
