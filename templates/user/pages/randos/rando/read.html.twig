@@ -140,9 +140,26 @@
                                             <span><a href="{{ adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
                                         </div>
                                     {% endif %}
+                                    {% if elem.distance %}
+                                        <div class="sub-icon">
+                                            <span class="icon-box"></span>
+                                            <span>Distance : {{ elem.distance }} km</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if elem.devPlus %}
+                                        <div class="sub-icon">
+                                            <span class="icon-box"></span>
+                                            <span>D+ : {{ elem.devPlus }} m</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if elem.altitude %}
+                                        <div class="sub-icon">
+                                            <span class="icon-box"></span>
+                                            <span>Altitude : {{ elem.altitude }} m</span>
+                                        </div>
+                                    {% endif %}
                                     <div class="members">
                                         {% for v in adventure.votes %}
-
                                             {% set participant = null %}
                                             {% for u in users %}
                                                 {% if u.id == v %} {% set participant = u %} {% endif %}

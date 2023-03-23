@@ -31,6 +31,10 @@ class DataRandos
             ->setName($this->sanitizeData->trimData($data->name))
             ->setSlug($this->sanitizeData->slugString($data->name))
             ->setDescription($this->sanitizeData->trimData($data->description->html))
+            ->setLevel($this->sanitizeData->setIntValue($data->level))
+            ->setDistance($this->sanitizeData->setFloatValue($data->distance))
+            ->setDevPlus($this->sanitizeData->setIntValue($data->devPlus))
+            ->setAltitude($this->sanitizeData->setIntValue($data->altitude))
         ;
     }
 

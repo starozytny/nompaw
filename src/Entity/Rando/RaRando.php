@@ -64,7 +64,7 @@ class RaRando
     #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalAdventure::class)]
     private Collection $propalAdventures;
 
-    #[ORM\OneToOne(fetch: 'EAGER', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
     #[Groups(['rando_form'])]
     private ?RaPropalAdventure $adventure = null;
 
