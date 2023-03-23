@@ -31,6 +31,22 @@ class GroupeController extends AbstractController
 
         $obj = $dataEntity->setDataGroupe($obj, $data);
 
+        $slug = $obj->getSlug();
+        $i = 1; $free = false;
+        do{
+            if($existe = $repository->findOneBy(['slug' => $slug])){
+                if($type == "create" || ($type == "update" && $existe->getId() != $obj->getId())){
+                    $slug = $obj->getSlug() . '-' . $i;
+                }else{
+                    $free = true;
+                }
+            }else{
+                $free = true;
+            }
+        }while(!$free);
+
+        $obj->setSlug($slug);
+
         if($type == "create") {
             $obj->setAuthor($this->getUser());
         }
