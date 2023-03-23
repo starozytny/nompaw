@@ -32,8 +32,9 @@ class RandoController extends AbstractController
         $obj = $dataEntity->setDataRando($obj, $data);
 
         $slug = $obj->getSlug();
-        $i = 1; $free = false;
+        $i = 0; $free = false;
         do{
+            $i++;
             if($existe = $repository->findOneBy(['slug' => $slug])){
                 if($type == "create" || ($type == "update" && $existe->getId() != $obj->getId())){
                     $slug = $obj->getSlug() . '-' . $i;
