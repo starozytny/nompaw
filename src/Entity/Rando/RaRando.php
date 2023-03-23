@@ -15,6 +15,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class RaRando
 {
     const FOLDER = "images/editor/randos";
+    const FOLDER_IMAGES = "images/entity/randos/images";
+    const FOLDER_THUMBS = "images/entity/randos/thumbs";
 
     const FORM = ['rando_form'];
     const READ = ['rando_read'];
@@ -36,6 +38,7 @@ class RaRando
     private ?\DateTimeInterface $endAt = null;
 
     #[ORM\Column]
+    #[Groups(['rando_form'])]
     private ?int $status = StatusType::Propal;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -63,13 +66,34 @@ class RaRando
     #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalAdventure::class)]
     private Collection $propalAdventures;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[Groups(['rando_form'])]
     private ?RaPropalAdventure $adventure = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?int $level = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?int $altitude = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?int $devPlus = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?float $distance = null;
+
+    #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaImage::class)]
+    private Collection $images;
 
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
         $this->propalAdventures = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -263,6 +287,84 @@ class RaRando
     public function setAdventure(?RaPropalAdventure $adventure): self
     {
         $this->adventure = $adventure;
+
+        return $this;
+    }
+
+    public function getLevel(): ?int
+    {
+        return $this->level;
+    }
+
+    public function setLevel(?int $level): self
+    {
+        $this->level = $level;
+
+        return $this;
+    }
+
+    public function getAltitude(): ?int
+    {
+        return $this->altitude;
+    }
+
+    public function setAltitude(?int $altitude): self
+    {
+        $this->altitude = $altitude;
+
+        return $this;
+    }
+
+    public function getDevPlus(): ?int
+    {
+        return $this->devPlus;
+    }
+
+    public function setDevPlus(?int $devPlus): self
+    {
+        $this->devPlus = $devPlus;
+
+        return $this;
+    }
+
+    public function getDistance(): ?float
+    {
+        return $this->distance;
+    }
+
+    public function setDistance(?float $distance): self
+    {
+        $this->distance = $distance;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaImage>
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(RaImage $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setRando($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(RaImage $image): self
+    {
+        if ($this->images->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getRando() === $this) {
+                $image->setRando(null);
+            }
+        }
 
         return $this;
     }

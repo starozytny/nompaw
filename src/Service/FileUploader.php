@@ -15,6 +15,9 @@ use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\ImageRepository;
 use Exception;
+use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
+use PHPImageWorkshop\Exception\ImageWorkshopException;
+use PHPImageWorkshop\ImageWorkshop;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -46,7 +49,7 @@ class FileUploader
 
             if($directory){
                 if(!is_dir($directory)){
-                    mkdir($directory);
+                    mkdir($directory, 0777, true);
                 }
             }
 
@@ -54,6 +57,30 @@ class FileUploader
         } catch (FileException $e) {
             return false;
         }
+
+        return $fileName;
+    }
+
+    /**
+     * @throws ImageWorkshopLayerException
+     * @throws ImageWorkshopException
+     */
+    public function thumbs($fileName, $folderImages, $folderThumbs): string
+    {
+        if($folderThumbs){
+            if(!is_dir($folderThumbs)){
+                mkdir($folderThumbs, 0777, true);
+            }
+        }
+
+        $fileOri = $folderImages . "/" . $fileName;
+
+        $layer = ImageWorkshop::initFromPath($fileOri);
+        $layer->resizeInPixel(null, 360, true);
+
+        $fileName = "thumbs-" . $fileName;
+
+        $layer->save($folderThumbs, $fileName);
 
         return $fileName;
     }

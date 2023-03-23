@@ -26,7 +26,7 @@
             </a>
         </div>
         <div class="col-2">
-            {% if app.user.id == elem.author.id %}
+            {% if app.user.id == elem.author.id or app.user.admin %}
                 <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" class="btn btn-warning">
                     <span class="icon-pencil"></span>
                     <span>Modifier</span>
@@ -79,7 +79,7 @@
             </div>
 
             <div class="rando-content">
-                {% if app.user.id == elem.author.id or (elem.startAt == null and elem.adventure == null) %}
+                {% if app.user.id == elem.author.id or (elem.startAt == null and elem.adventure == null) or app.user.admin %}
                     <div class="rando-col-propals {{- elem.startAt and elem.adventure ? ' to-line' : '' -}}">
                         <div id="rando_date"
                              data-rando-id="{{ elem.id }}"
@@ -140,9 +140,26 @@
                                             <span><a href="{{ adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
                                         </div>
                                     {% endif %}
+                                    {% if elem.distance %}
+                                        <div class="sub-icon">
+                                            <span class="icon-box"></span>
+                                            <span>Distance : {{ elem.distance }} km</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if elem.devPlus %}
+                                        <div class="sub-icon">
+                                            <span class="icon-box"></span>
+                                            <span>D+ : {{ elem.devPlus }} m</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if elem.altitude %}
+                                        <div class="sub-icon">
+                                            <span class="icon-box"></span>
+                                            <span>Altitude : {{ elem.altitude }} m</span>
+                                        </div>
+                                    {% endif %}
                                     <div class="members">
                                         {% for v in adventure.votes %}
-
                                             {% set participant = null %}
                                             {% for u in users %}
                                                 {% if u.id == v %} {% set participant = u %} {% endif %}
@@ -161,15 +178,29 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-                                <div class="rando-card-meta">
-                                    <div>Topo...</div>
-                                    <div>Image topo</div>
-                                </div>
-                                <div class="rando-card-content">
-                                    <div>ok</div>
-                                </div>
+{#                                <div class="rando-card-meta">#}
+{#                                </div>#}
+{#                                <div class="rando-card-content">#}
+{#                                    <div>ok</div>#}
+{#                                </div>#}
                             </div>
+                            {% if app.user.id == elem.author.id or app.user.admin %}
+                                <div class="rando-card-footer">
+                                    <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" style="color: white">
+                                        <span class="icon-add"></span>
+                                        <span>Ajouter des informations</span>
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
+                    </div>
+
+                    <div id="rando_images"
+                         data-rando-id="{{ elem.id }}"
+                         data-user-id="{{ app.user.id }}"
+                         data-images="{{ images }}"
+                    >
+                        {% include "layout/components/loader.html.twig" %}
                     </div>
                 {% endif %}
             </div>

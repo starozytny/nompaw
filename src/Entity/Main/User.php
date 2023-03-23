@@ -7,6 +7,7 @@ use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaLink;
 use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaPropalDate;
@@ -36,15 +37,15 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list', 'ra_img_list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $displayName = null;
 
     #[ORM\Column]
@@ -62,11 +63,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -144,6 +145,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaPropalAdventure::class)]
     private Collection $raPropalAdventures;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaImage::class)]
+    private Collection $raImages;
+
     /**
      * @throws Exception
      */
@@ -159,6 +163,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->raRandos = new ArrayCollection();
         $this->raPropalDates = new ArrayCollection();
         $this->raPropalAdventures = new ArrayCollection();
+        $this->raImages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -403,7 +408,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     public function getAvatarFile(): ?string
     {
         return $this->getFileOrDefault($this->avatar, self::FOLDER, null);
@@ -744,6 +749,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($raPropalAdventure->getAuthor() === $this) {
                 $raPropalAdventure->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaImage>
+     */
+    public function getRaImages(): Collection
+    {
+        return $this->raImages;
+    }
+
+    public function addRaImage(RaImage $raImage): self
+    {
+        if (!$this->raImages->contains($raImage)) {
+            $this->raImages->add($raImage);
+            $raImage->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRaImage(RaImage $raImage): self
+    {
+        if ($this->raImages->removeElement($raImage)) {
+            // set the owning side to null (unless already changed)
+            if ($raImage->getAuthor() === $this) {
+                $raImage->setAuthor(null);
             }
         }
 

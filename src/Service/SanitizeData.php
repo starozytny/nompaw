@@ -78,4 +78,22 @@ class SanitizeData
 
         return $return;
     }
+
+    public function setIntValue($value, $return = null)
+    {
+        if($value != "" && $value != null){
+            return (int) $value;
+        }
+
+        return $return;
+    }
+
+    public function setFloatValue($value, $return = null)
+    {
+        if($value != "" && $value != null){
+            return (float) $value;
+        }
+
+        return $return;
+    }
 }

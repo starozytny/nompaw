@@ -16,11 +16,11 @@ class RaPropalAdventure
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['pr_adv_list'])]
+    #[Groups(['pr_adv_list', 'rando_form'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['pr_adv_list'])]
+    #[Groups(['pr_adv_list', 'rando_form'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::ARRAY)]

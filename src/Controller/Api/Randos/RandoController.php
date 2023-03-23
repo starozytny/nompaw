@@ -5,6 +5,9 @@ namespace App\Controller\Api\Randos;
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaRando;
+use App\Repository\Rando\RaImageRepository;
+use App\Repository\Rando\RaPropalAdventureRepository;
+use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataRandos;
@@ -65,10 +68,21 @@ class RandoController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(RaRando $obj, RaRandoRepository $repository, ApiResponse $apiResponse): Response
+    public function delete(RaRando $obj, RaRandoRepository $repository, ApiResponse $apiResponse,
+                           RaPropalDateRepository $dateRepository, RaPropalAdventureRepository $adventureRepository,
+                           RaImageRepository $imageRepository): Response
     {
-        $repository->remove($obj, true);
+        foreach($dateRepository->findBy(['rando' => $obj]) as $item){
+            $dateRepository->remove($item);
+        }
+        foreach($adventureRepository->findBy(['rando' => $obj]) as $item){
+            $adventureRepository->remove($item);
+        }
+        foreach($imageRepository->findBy(['rando' => $obj]) as $item){
+            $imageRepository->remove($item);
+        }
 
+        $repository->remove($obj, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
 

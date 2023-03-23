@@ -5,7 +5,7 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input }            from "@commonComponents/Elements/Fields";
+import {Input, InputView, Radiobox} from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 
@@ -31,6 +31,12 @@ export function RandoFormulaire ({ context, element, groupeId })
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
         description={element ? Formulaire.setValue(element.description) : ""}
+        status={element ? Formulaire.setValue(element.status) : 0}
+        level={element ? Formulaire.setValue(element.level) : ""}
+        altitude={element ? Formulaire.setValue(element.altitude) : ""}
+        devPlus={element ? Formulaire.setValue(element.devPlus) : ""}
+        distance={element ? Formulaire.setValue(element.distance) : ""}
+        adventure={element ? element.adventure : null}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -51,6 +57,10 @@ class Form extends Component {
         this.state = {
             name: props.name,
             description: { value: description, html: description },
+            level: props.level,
+            altitude: props.altitude,
+            devPlus: props.devPlus,
+            distance: props.distance,
             errors: [],
         }
     }
@@ -88,10 +98,20 @@ class Form extends Component {
     }
 
     render () {
-        const { context } = this.props;
-        const { errors, name, description } = this.state;
+        const { context, status, adventure } = this.props;
+        const { errors, name, description, level, altitude, devPlus, distance } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
+
+
+        let levelItems = [
+            { value: 0, label: 'Aucun',             identifiant: 'level-0' },
+            { value: 1, label: 'Facile',            identifiant: 'level-1' },
+            { value: 2, label: 'Moyen',             identifiant: 'level-2' },
+            { value: 3, label: 'Difficile',         identifiant: 'level-3' },
+            { value: 4, label: 'Très difficile',    identifiant: 'level-4' },
+            { value: 5, label: 'Extrême',           identifiant: 'level-5' },
+        ]
 
         return <>
             <form onSubmit={this.handleSubmit}>
@@ -113,6 +133,31 @@ class Form extends Component {
                             </div>
                         </div>
                     </div>
+
+                    {status !== 0 && <div className="line">
+                        <div className="line-col-1">
+                            <div className="title">Informations complémentaire</div>
+                            <div className="subtitle">Ajouter des informations complémentaires à propos de l'aventure sélectionnée.</div>
+                        </div>
+                        <div className="line-col-2">
+                            <div className="line">
+                                <div className="form-group">
+                                    <label>Nom de l'aventure sélectionnée</label>
+                                    <div>{adventure.name}</div>
+                                </div>
+                            </div>
+                            <div className="line line-3">
+                                <Input type="number" identifiant="distance" valeur={distance} {...params}>Distance</Input>
+                                <Input type="number" identifiant="devPlus" valeur={devPlus} {...params}>Dénivelé +</Input>
+                                <Input type="number" identifiant="altitude" valeur={altitude} {...params}>Altitude</Input>
+                            </div>
+                            <div className="line line-fat-box">
+                                <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}>
+                                    Niveau *
+                                </Radiobox>
+                            </div>
+                        </div>
+                    </div>}
                 </div>
 
                 <div className="line-buttons">
@@ -128,4 +173,10 @@ Form.propTypes = {
     url: PropTypes.node.isRequired,
     name: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
+    status: PropTypes.number.isRequired,
+    level: PropTypes.node,
+    altitude: PropTypes.node,
+    devPlus: PropTypes.node,
+    distance: PropTypes.node,
+    adventure: PropTypes.object,
 }
