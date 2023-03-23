@@ -521,7 +521,7 @@ export class InputFile extends Component {
         const file = e.target.files[0];
         if(file){
             if(type === "simple"){
-                if (file.size > 5330000) {
+                if (file.size > 15330000) {
                     toastr.error("Le fichier est trop volumineux.")
                 }else{
                     this.setState({ files: [file] })
