@@ -104,4 +104,14 @@ class RandoController extends AbstractController
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
+
+    #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
+    public function end(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
+    {
+        $obj->setStatus(StatusType::End);
+        $obj->setIsNext(false);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
 }

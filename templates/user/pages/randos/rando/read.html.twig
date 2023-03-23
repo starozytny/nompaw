@@ -31,17 +31,32 @@
                     <span class="icon-pencil"></span>
                     <span>Modifier</span>
                 </a>
-                <div class="delete-rando"
-                     data-context="read"
-                     data-id="{{ elem.id }}"
-                     data-name="{{ elem.name }}"
-                     data-groupe-slug="{{ groupe.slug }}"
-                >
-                    <button class="btn btn-danger btn-loader-without-text">
-                        <span class="icon-chart-3"></span>
-                        <span>Supprimer</span>
-                    </button>
-                </div>
+                {% if elem.status != 2 %}
+                    <div class="delete-rando"
+                         data-context="read"
+                         data-id="{{ elem.id }}"
+                         data-name="{{ elem.name }}"
+                         data-groupe-slug="{{ groupe.slug }}"
+                    >
+                        <button class="btn btn-danger btn-loader-without-text">
+                            <span class="icon-chart-3"></span>
+                            <span>Supprimer</span>
+                        </button>
+                    </div>
+                    {% if elem.startAt != null and elem.adventure != null %}
+                        <div class="end-rando"
+                             data-context="read"
+                             data-id="{{ elem.id }}"
+                             data-name="{{ elem.name }}"
+                             data-groupe-slug="{{ groupe.slug }}"
+                        >
+                            <button class="btn btn-success btn-loader-without-text">
+                                <span class="icon-chart-3"></span>
+                                <span>Terminer</span>
+                            </button>
+                        </div>
+                    {% endif %}
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -87,6 +102,7 @@
                              data-propals="{{ propalDates }}"
                              data-user-id="{{ app.user.id }}"
                              data-mode="{{ app.user.id == elem.author.id }}"
+                             data-status="{{ elem.status }}"
                         >
                             {% include "layout/components/loader.html.twig" %}
                         </div>
@@ -99,6 +115,7 @@
                                  data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
                                  data-propals="{{ propalAdvs }}"
                                  data-mode="{{ app.user.id == elem.author.id }}"
+                                 data-status="{{ elem.status }}"
                             >
                                 {% include "layout/components/loader.html.twig" %}
                             </div>
