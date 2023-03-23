@@ -71,6 +71,7 @@ export class RandoImages extends Component{
     handleDeleteImage = () => {
         const { image } = this.state;
 
+        Formulaire.loader(true);
         let self = this;
         this.deleteImage.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
         axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, {'id': image.id}), data: {} })
