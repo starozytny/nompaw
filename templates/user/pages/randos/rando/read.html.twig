@@ -186,7 +186,7 @@
                             </div>
                             {% if app.user.id == elem.author.id or app.user.admin %}
                                 <div class="rando-card-footer">
-                                    <a href="" style="color: white">
+                                    <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" style="color: white">
                                         <span class="icon-add"></span>
                                         <span>Ajouter des informations</span>
                                     </a>
