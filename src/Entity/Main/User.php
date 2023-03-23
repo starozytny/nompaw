@@ -37,15 +37,15 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list', 'ra_img_list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $displayName = null;
 
     #[ORM\Column]
@@ -63,11 +63,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -408,7 +408,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
     public function getAvatarFile(): ?string
     {
         return $this->getFileOrDefault($this->avatar, self::FOLDER, null);

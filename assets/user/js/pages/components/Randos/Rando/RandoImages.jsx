@@ -5,13 +5,17 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"
+
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button } from "@commonComponents/Elements/Button";
+import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { InputFile } from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
 
-const URL_UPLOAD_IMAGES = "api_randos_rando_upload_images";
+const URL_UPLOAD_IMAGES  = "api_randos_image_upload_images";
+const URL_DELETE_IMAGE   = "api_randos_image_delete";
+const URL_DOWNLOAD_IMAGE = "api_randos_image_download";
 
 export class RandoImages extends Component{
     constructor(props) {
@@ -20,18 +24,22 @@ export class RandoImages extends Component{
         this.state = {
             files: "",
             data: JSON.parse(props.images),
-            errors: []
+            errors: [],
+            image: null
         }
 
         this.files = React.createRef();
         this.formFiles = React.createRef();
+        this.deleteImage = React.createRef();
     }
 
     handleChange = (e) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
 
-    handleModal = () => {
+    handleModal = (identifiant, image) => {
         modalForm(this);
-        this.formFiles.current.handleClick();
+        modalDeleteImage(this);
+        this.setState({ image: image })
+        this[identifiant].current.handleClick();
     }
 
     handleSubmit = (e) => {
@@ -60,20 +68,67 @@ export class RandoImages extends Component{
         ;
     }
 
+    handleDeleteImage = () => {
+        const { image } = this.state;
+
+        let self = this;
+        this.deleteImage.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+        axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, {'id': image.id}), data: {} })
+            .then(function (response) {
+                toastr.info('Photo supprimée.');
+                location.reload();
+            })
+            .catch(function (error) { modalDeleteImage(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
+    }
+
     render () {
+        const { userId } = this.props;
         const { errors, files, data } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
         return <div>
-            <Button type="primary" onClick={this.handleModal}>Ajouter des photos</Button>
+            <Button type="warning" outline={true} onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
 
             <div className="rando-images">
-                {data.map((elem, index) => {
-                    return <div className="image" key={index}>
-                        <img src={elem.thumbsFile} alt=""/>
-                    </div>
-                })}
+                <ResponsiveMasonry
+                    columnsCountBreakPoints={{320: 2, 768: 2, 900: 3}}
+                >
+                    <Masonry gutter={'1.2rem'}>
+                        {data.map((elem, index) => {
+                            return <div className="rando-image" key={index}>
+                                <div className="image-data">
+                                    <div className="action-top">
+                                        {parseInt(userId) === elem.author.id &&
+                                            <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
+                                                Supprimer
+                                            </ButtonIcon>
+                                        }
+                                    </div>
+                                    <div className="action-bottom">
+                                        <div className="image-author">
+                                            <div className="avatar">
+                                                {elem.author.avatarFile
+                                                    ? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`}/>
+                                                    : <div className="avatar-letter">{elem.author.lastname.slice(0,1) + elem.author.firstname.slice(0,1)}</div>
+                                                }
+                                            </div>
+                                            <div className="username">{elem.author.displayName}</div>
+                                        </div>
+                                        <div className="image-download">
+                                            <ButtonIcon icon="download" element="a" download={true}
+                                                        onClick={Routing.generate(URL_DOWNLOAD_IMAGE, {'id': elem.id})}>
+                                                Télécharger
+                                            </ButtonIcon>
+                                        </div>
+                                    </div>
+                                </div>
+                                <img src={elem.thumbsFile} alt=""/>
+                            </div>
+                        })}
+                    </Masonry>
+                </ResponsiveMasonry>
             </div>
 
             <Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} title="Ajouter des photos"
@@ -85,6 +140,10 @@ export class RandoImages extends Component{
                            </InputFile>
                        </div>
                    </>}
+                   footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.deleteImage} identifiant='delete-image' maxWidth={414} title="Supprimer cette photo"
+                   content={<p>Etes-vous sûr de vouloir supprimer cette image ?</p>}
                    footer={null} closeTxt="Annuler" />
         </div>
     }
@@ -98,4 +157,7 @@ RandoImages.propTypes = {
 
 function modalForm (self) {
     self.formFiles.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmit}>Confirmer</Button>)
+}
+function modalDeleteImage (self) {
+    self.deleteImage.current.handleUpdateFooter(<Button type="danger" onClick={self.handleDeleteImage}>Confirmer la suppression</Button>)
 }
