@@ -529,7 +529,7 @@ export class InputFile extends Component {
             }else{
                 let nFiles = [];
                 Object.entries(e.target.files).forEach(([key, file]) => {
-                    if (file.size > 5330000){
+                    if (file.size > 15330000){
                         toastr.error("Le fichier est trop volumineux.")
                     }else if(files.length + nFiles.length >= max){
                         toastr.error("Le nombre maximal de fichiers envoyés a été atteint.")
