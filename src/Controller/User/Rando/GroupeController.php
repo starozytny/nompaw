@@ -43,8 +43,8 @@ class GroupeController extends AbstractController
         $obj = $repository->findOneBy(['slug' => $slug]);
         return $this->render('user/pages/randos/groupe/read.html.twig', [
             'elem' => $obj,
-            'randos' => $randoRepository->findBy(['isNext' => false, 'groupe' => $obj]),
-            'next' => $randoRepository->findOneBy(['isNext' => true, 'groupe' => $obj])
+            'randos' => $randoRepository->findBy(['isNext' => false, 'groupe' => $obj], ['startAt' => 'DESC']),
+            'next' => $randoRepository->findOneBy(['isNext' => true, 'groupe' => $obj], ['startAt' => 'DESC'])
         ]);
     }
 
