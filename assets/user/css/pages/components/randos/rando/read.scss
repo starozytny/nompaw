@@ -190,6 +190,16 @@
   }
 }
 
+.rando-images{
+  @include flex(row, flex-start, flex-start, var(--espaceEls));
+  flex-wrap: wrap;
+  margin-top: var(--espaceDiv);
+
+  & > *{
+    width: calc(50% - 4px);
+  }
+}
+
 //                      __   _____ __    ___    __
 //                     | _| |___  / /_  ( _ )  |_ |
 //    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
@@ -200,6 +210,12 @@
   .rando-read{
     .to-line{
       flex-direction: row;
+    }
+  }
+
+  .rando-images{
+    & > *{
+      width: calc(33% - 4px);
     }
   }
 }

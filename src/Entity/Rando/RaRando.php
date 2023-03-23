@@ -15,6 +15,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class RaRando
 {
     const FOLDER = "images/editor/randos";
+    const FOLDER_IMAGES = "images/entity/randos/images";
+    const FOLDER_THUMBS = "images/entity/randos/thumbs";
 
     const FORM = ['rando_form'];
     const READ = ['rando_read'];
@@ -84,10 +86,14 @@ class RaRando
     #[Groups(['rando_form'])]
     private ?float $distance = null;
 
+    #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaImage::class)]
+    private Collection $images;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
         $this->propalAdventures = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -329,6 +335,36 @@ class RaRando
     public function setDistance(?float $distance): self
     {
         $this->distance = $distance;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RaImage>
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(RaImage $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setRando($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(RaImage $image): self
+    {
+        if ($this->images->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getRando() === $this) {
+                $image->setRando(null);
+            }
+        }
 
         return $this;
     }

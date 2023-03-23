@@ -194,6 +194,14 @@
                             {% endif %}
                         </div>
                     </div>
+
+                    <div id="rando_images"
+                         data-rando-id="{{ elem.id }}"
+                         data-user-id="{{ app.user.id }}"
+                         data-images="{{ images }}"
+                    >
+                        {% include "layout/components/loader.html.twig" %}
+                    </div>
                 {% endif %}
             </div>
         </div>

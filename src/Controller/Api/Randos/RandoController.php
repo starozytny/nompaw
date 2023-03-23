@@ -4,11 +4,18 @@ namespace App\Controller\Api\Randos;
 
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
+use App\Repository\Rando\RaImageRepository;
+use App\Repository\Rando\RaPropalAdventureRepository;
+use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataRandos;
+use App\Service\FileUploader;
 use App\Service\ValidatorService;
+use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
+use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -65,10 +72,21 @@ class RandoController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(RaRando $obj, RaRandoRepository $repository, ApiResponse $apiResponse): Response
+    public function delete(RaRando $obj, RaRandoRepository $repository, ApiResponse $apiResponse,
+                           RaPropalDateRepository $dateRepository, RaPropalAdventureRepository $adventureRepository,
+                           RaImageRepository $imageRepository): Response
     {
-        $repository->remove($obj, true);
+        foreach($dateRepository->findBy(['rando' => $obj]) as $item){
+            $dateRepository->remove($item);
+        }
+        foreach($adventureRepository->findBy(['rando' => $obj]) as $item){
+            $adventureRepository->remove($item);
+        }
+        foreach($imageRepository->findBy(['rando' => $obj]) as $item){
+            $imageRepository->remove($item);
+        }
 
+        $repository->remove($obj, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
 
@@ -88,6 +106,35 @@ class RandoController extends AbstractController
         $obj->setStatus(StatusType::Propal);
 
         $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    /**
+     * @throws ImageWorkshopException
+     * @throws ImageWorkshopLayerException
+     */
+    #[Route('/upload/photos/{id}', name: 'upload_images', options: ['expose' => true], methods: 'POST')]
+    public function upload(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository,
+                           FileUploader $fileUploader, RaImageRepository $imageRepository): Response
+    {
+        if($request->files){
+            foreach($request->files as $file){
+                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES);
+                $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES, RaRando::FOLDER_THUMBS);
+
+                $image = (new RaImage())
+                    ->setFile($filenameImage)
+                    ->setThumbs($filenameThumb)
+                    ->setAuthor($this->getUser())
+                    ->setRando($obj)
+                ;
+
+                $imageRepository->save($image);
+            }
+
+            $repository->save($obj, true);
+        }
+
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 }

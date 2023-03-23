@@ -6,8 +6,9 @@ import { GroupeFormulaire } from "@userPages/Randos/Groupe/GroupeForm";
 import { GroupeDelete } from "@userPages/Randos/Groupe/GroupeDelete";
 import { RandoFormulaire } from "@userPages/Randos/Rando/RandoForm";
 import { RandoDelete } from "@userPages/Randos/Rando/RandoDelete";
-import {RandoDate} from "@userPages/Randos/Rando/RandoDate";
-import {RandoAdventure} from "@userPages/Randos/Rando/RandoAdventure";
+import { RandoDate } from "@userPages/Randos/Rando/RandoDate";
+import { RandoAdventure } from "@userPages/Randos/Rando/RandoAdventure";
+import { RandoImages } from "@userPages/Randos/Rando/RandoImages";
 
 let el = document.getElementById("groupes_update");
 if(el){
@@ -59,4 +60,9 @@ if(randoAdventure){
     createRoot(randoAdventure).render(<RandoAdventure {...randoAdventure.dataset}
                                                       mode={randoAdventure.dataset.mode === "1"}
                                                       haveAdventure={randoAdventure.dataset.haveAdventure === "1"} />)
+}
+
+let randoImages = document.getElementById("rando_images");
+if(randoImages){
+    createRoot(randoImages).render(<RandoImages {...randoImages.dataset} />)
 }
