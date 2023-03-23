@@ -28,7 +28,7 @@ class ImageController extends AbstractController
     {
         if($request->files){
             foreach($request->files as $file){
-                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES);
+                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES, true, true);
                 $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES, RaRando::FOLDER_THUMBS);
 
                 $image = (new RaImage())

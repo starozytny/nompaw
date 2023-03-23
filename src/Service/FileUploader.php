@@ -37,7 +37,7 @@ class FileUploader
         $this->slugger = $slugger;
     }
 
-    public function upload(UploadedFile $file, $folder=null, $isPublic=true): string
+    public function upload(UploadedFile $file, $folder=null, $isPublic=true, $reduce=false): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
@@ -54,7 +54,20 @@ class FileUploader
             }
 
             $file->move($directory, $fileName);
-        } catch (FileException $e) {
+
+            $fileOri = $directory . "/" . $fileName;
+
+            $layer = ImageWorkshop::initFromPath($fileOri);
+
+            if($reduce){
+                $layer->resizeInPixel(null, 500, true);
+            }else if($layer->getHeight() > 1080){
+                $layer->resizeInPixel(null, 1080, true);
+            }
+
+            $layer->save($directory, $fileName);
+
+        } catch (FileException|ImageWorkshopException|ImageWorkshopLayerException $e) {
             return false;
         }
 
@@ -76,7 +89,7 @@ class FileUploader
         $fileOri = $folderImages . "/" . $fileName;
 
         $layer = ImageWorkshop::initFromPath($fileOri);
-        $layer->resizeInPixel(null, 360, true);
+        $layer->resizeInPixel(null, 500, true);
 
         $fileName = "thumbs-" . $fileName;
 
