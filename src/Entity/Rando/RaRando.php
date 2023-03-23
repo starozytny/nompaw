@@ -36,6 +36,7 @@ class RaRando
     private ?\DateTimeInterface $endAt = null;
 
     #[ORM\Column]
+    #[Groups(['rando_form'])]
     private ?int $status = StatusType::Propal;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -63,8 +64,25 @@ class RaRando
     #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalAdventure::class)]
     private Collection $propalAdventures;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(fetch: 'EAGER', cascade: ['persist', 'remove'])]
+    #[Groups(['rando_form'])]
     private ?RaPropalAdventure $adventure = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?int $level = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?int $altitude = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?int $devPlus = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?float $distance = null;
 
     public function __construct()
     {
@@ -263,6 +281,54 @@ class RaRando
     public function setAdventure(?RaPropalAdventure $adventure): self
     {
         $this->adventure = $adventure;
+
+        return $this;
+    }
+
+    public function getLevel(): ?int
+    {
+        return $this->level;
+    }
+
+    public function setLevel(?int $level): self
+    {
+        $this->level = $level;
+
+        return $this;
+    }
+
+    public function getAltitude(): ?int
+    {
+        return $this->altitude;
+    }
+
+    public function setAltitude(?int $altitude): self
+    {
+        $this->altitude = $altitude;
+
+        return $this;
+    }
+
+    public function getDevPlus(): ?int
+    {
+        return $this->devPlus;
+    }
+
+    public function setDevPlus(?int $devPlus): self
+    {
+        $this->devPlus = $devPlus;
+
+        return $this;
+    }
+
+    public function getDistance(): ?float
+    {
+        return $this->distance;
+    }
+
+    public function setDistance(?float $distance): self
+    {
+        $this->distance = $distance;
 
         return $this;
     }

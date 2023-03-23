@@ -5,7 +5,7 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input }            from "@commonComponents/Elements/Fields";
+import {Input, InputView} from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 
@@ -31,6 +31,8 @@ export function RandoFormulaire ({ context, element, groupeId })
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
         description={element ? Formulaire.setValue(element.description) : ""}
+        status={element ? Formulaire.setValue(element.status) : 0}
+        adventure={element ? element.adventure : null}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -88,7 +90,7 @@ class Form extends Component {
     }
 
     render () {
-        const { context } = this.props;
+        const { context, status, adventure } = this.props;
         const { errors, name, description } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
@@ -113,6 +115,23 @@ class Form extends Component {
                             </div>
                         </div>
                     </div>
+
+                    {status !== 0 && <div className="line">
+                        <div className="line-col-1">
+                            <div className="title">Informations complémentaire</div>
+                            <div className="subtitle">Ajouter des informations complémentaires à propos de l'aventure sélectionnée.</div>
+                        </div>
+                        <div className="line-col-2">
+                            <div className="line">
+                                <div className="form-group">
+                                    <label>Nom de l'aventure sélectionnée</label>
+                                    <div>{adventure.name}</div>
+                                </div>
+                            </div>
+                            <div className="line">
+                            </div>
+                        </div>
+                    </div>}
                 </div>
 
                 <div className="line-buttons">
@@ -128,4 +147,6 @@ Form.propTypes = {
     url: PropTypes.node.isRequired,
     name: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
+    status: PropTypes.number.isRequired,
+    adventure: PropTypes.object,
 }

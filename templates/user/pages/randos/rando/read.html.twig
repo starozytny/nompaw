@@ -26,7 +26,7 @@
             </a>
         </div>
         <div class="col-2">
-            {% if app.user.id == elem.author.id %}
+            {% if app.user.id == elem.author.id or app.user.admin %}
                 <a href="{{ path('user_randos_rando_update', {'slug': elem.slug}) }}" class="btn btn-warning">
                     <span class="icon-pencil"></span>
                     <span>Modifier</span>
@@ -79,7 +79,7 @@
             </div>
 
             <div class="rando-content">
-                {% if app.user.id == elem.author.id or (elem.startAt == null and elem.adventure == null) %}
+                {% if app.user.id == elem.author.id or (elem.startAt == null and elem.adventure == null) or app.user.admin %}
                     <div class="rando-col-propals {{- elem.startAt and elem.adventure ? ' to-line' : '' -}}">
                         <div id="rando_date"
                              data-rando-id="{{ elem.id }}"
@@ -161,14 +161,20 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-                                <div class="rando-card-meta">
-                                    <div>Topo...</div>
-                                    <div>Image topo</div>
-                                </div>
-                                <div class="rando-card-content">
-                                    <div>ok</div>
-                                </div>
+{#                                <div class="rando-card-meta">#}
+{#                                </div>#}
+{#                                <div class="rando-card-content">#}
+{#                                    <div>ok</div>#}
+{#                                </div>#}
                             </div>
+                            {% if app.user.id == elem.author.id or app.user.admin %}
+                                <div class="rando-card-footer">
+                                    <a href="" style="color: white">
+                                        <span class="icon-add"></span>
+                                        <span>Ajouter des informations</span>
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 {% endif %}
