@@ -56,8 +56,8 @@ RewriteCond %{REQUEST_FILENAME}.gz -f
 #All conditions met so add .gz to URL filename (invisibly)
 RewriteRule ^(.+) $1.gz [QSA,L]
 
-RewriteCond %{HTTP_HOST} ^www.nompaw$
-RewriteRule ^(.*) http://nompaw/$1 [QSA,L,R=301]
+RewriteCond %{HTTP_HOST} ^www.nompaw.fr$
+RewriteRule ^(.*) http://nompaw.fr/$1 [QSA,L,R=301]
 
 RewriteCond %{HTTPS} off
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
