@@ -185,7 +185,7 @@ export class RandoAdventure extends Component {
     }
 
     render() {
-        const { mode, haveAdventure, advName, userId, status } = this.props;
+        const { mode, haveAdventure, advName, userId, status, authorId } = this.props;
         const { errors, loadData, name, duration, url, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -249,7 +249,7 @@ export class RandoAdventure extends Component {
                 }
             </div>
             {haveAdventure
-                ? (status !== "2"
+                ? (status !== "2" && (mode || authorId === parseInt(userId))
                     ?  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
                         <div style={{display: 'flex', gap: '4px'}}>
                             <span className="icon-close"></span>

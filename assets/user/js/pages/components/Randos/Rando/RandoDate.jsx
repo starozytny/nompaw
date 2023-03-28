@@ -182,7 +182,7 @@ export class RandoDate extends Component{
     }
 
     render() {
-        const { mode, startAt, userId, status } = this.props;
+        const { mode, startAt, userId, status, authorId } = this.props;
         const { errors, loadData, dateAt, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -247,7 +247,7 @@ export class RandoDate extends Component{
                         <span>Proposer une date</span>
                     </div>
                 </div>
-                : (status !== "2"
+                : (status !== "2" && (mode || authorId === parseInt(userId))
                     ? <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
                                 <div style={{display: 'flex', gap: '4px'}}>
                                     <span className="icon-close"></span>
