@@ -66,7 +66,7 @@ class RandoController extends AbstractController
         $obj   = $repository->findOneBy(['slug' => $slug]);
         $users = $userRepository->findAll();
 
-        if($obj->getAuthor()->getId() != $this->getUser()->getId()){
+        if($obj->getAuthor()->getId() != $this->getUser()->getId() && !$this->isGranted('ROLE_ADMIN')){
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
