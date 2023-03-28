@@ -50,25 +50,33 @@ class RandoController extends AbstractController
     }
 
     #[Route('/groupe/{g_slug}/ajouter', name: 'create')]
-    public function create($g_slug, RaGroupeRepository $groupeRepository): Response
+    public function create($g_slug, RaGroupeRepository $groupeRepository, UserRepository $userRepository, SerializerInterface $serializer): Response
     {
-        return $this->render('user/pages/randos/rando/create.html.twig', ['groupe' => $groupeRepository->findOneBy(['slug' => $g_slug])]);
+        $users = $userRepository->findAll();
+        $users = $serializer->serialize($users, 'json', ['groups' => User::SELECT]);
+        return $this->render('user/pages/randos/rando/create.html.twig', [
+            'groupe' => $groupeRepository->findOneBy(['slug' => $g_slug]),
+            'users' => $users
+        ]);
     }
 
     #[Route('/modifier/{slug}', name: 'update')]
-    public function update($slug, RaRandoRepository $repository, SerializerInterface $serializer): Response
+    public function update($slug, RaRandoRepository $repository, UserRepository $userRepository, SerializerInterface $serializer): Response
     {
-        $obj = $repository->findOneBy(['slug' => $slug]);
+        $obj   = $repository->findOneBy(['slug' => $slug]);
+        $users = $userRepository->findAll();
 
         if($obj->getAuthor()->getId() != $this->getUser()->getId()){
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
-        $element = $serializer->serialize($obj, 'json', ['groups' => RaRando::FORM]);
+        $element = $serializer->serialize($obj,   'json', ['groups' => RaRando::FORM]);
+        $users   = $serializer->serialize($users, 'json', ['groups' => User::SELECT]);
 
         return $this->render('user/pages/randos/rando/update.html.twig', [
             'elem' => $obj,
-            'element' => $element
+            'element' => $element,
+            'users' => $users,
         ]);
     }
 }

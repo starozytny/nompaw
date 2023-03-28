@@ -2,6 +2,7 @@
 
 namespace App\Entity\Rando;
 
+use App\Entity\DataEntity;
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Main\User;
 use App\Repository\Rando\RaRandoRepository;
@@ -12,14 +13,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RaRandoRepository::class)]
-class RaRando
+class RaRando extends DataEntity
 {
     const FOLDER = "images/editor/randos";
     const FOLDER_IMAGES = "images/entity/randos/images";
     const FOLDER_THUMBS = "images/entity/randos/thumbs";
 
     const FORM = ['rando_form'];
-    const READ = ['rando_read'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -88,6 +88,9 @@ class RaRando
 
     #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaImage::class)]
     private Collection $images;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cover = null;
 
     public function __construct()
     {
@@ -367,5 +370,22 @@ class RaRando
         }
 
         return $this;
+    }
+
+    public function getCover(): ?string
+    {
+        return $this->cover;
+    }
+
+    public function setCover(?string $cover): self
+    {
+        $this->cover = $cover;
+
+        return $this;
+    }
+
+    public function getCoverFile()
+    {
+        return $this->getFileOrDefault($this->cover, RaRando::FOLDER_THUMBS);
     }
 }
