@@ -5,6 +5,7 @@ namespace App\Controller\Api\Randos;
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaRando;
+use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaImageRepository;
 use App\Repository\Rando\RaPropalAdventureRepository;
 use App\Repository\Rando\RaPropalDateRepository;
@@ -22,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class RandoController extends AbstractController
 {
     public function submitForm($type, RaRandoRepository $repository, RaRando $obj, Request $request, ApiResponse $apiResponse,
-                               ValidatorService $validator, DataRandos $dataEntity, RaGroupe $groupe): JsonResponse
+                               ValidatorService $validator, DataRandos $dataEntity, RaGroupe $groupe, UserRepository $userRepository): JsonResponse
     {
         $data = json_decode($request->getContent());
         if ($data === null) {
@@ -48,9 +49,17 @@ class RandoController extends AbstractController
 
         $obj->setSlug($slug);
 
+        $author = $this->getUser();
+        if($data->referent){
+            if($referent = $userRepository->find($data->referent)){
+                $author = $referent;
+            }
+        }
+
+        $obj->setAuthor($author);
+
         if($type == "create") {
             $obj = ($obj)
-                ->setAuthor($this->getUser())
                 ->setIsNext(true)
                 ->setGroupe($groupe)
             ;
@@ -72,16 +81,16 @@ class RandoController extends AbstractController
 
     #[Route('/groupe/{groupe}/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, RaGroupe $groupe, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataRandos $dataEntity, RaRandoRepository $repository): Response
+                           DataRandos $dataEntity, RaRandoRepository $repository, UserRepository $userRepository): Response
     {
-        return $this->submitForm("create", $repository, new RaRando(), $request, $apiResponse, $validator, $dataEntity, $groupe);
+        return $this->submitForm("create", $repository, new RaRando(), $request, $apiResponse, $validator, $dataEntity, $groupe, $userRepository);
     }
 
     #[Route('/groupe/{groupe}/update/{id}', name: 'update', options: ['expose' => true], methods: 'PUT')]
     public function update(Request $request, RaGroupe $groupe, RaRando $obj, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataRandos $dataEntity, RaRandoRepository $repository): Response
+                           DataRandos $dataEntity, RaRandoRepository $repository, UserRepository $userRepository): Response
     {
-        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $groupe);
+        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $groupe, $userRepository);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

@@ -35,12 +35,16 @@ if(deletesGroupes){
 el = document.getElementById("randos_update");
 if(el){
     createRoot(el).render(<RandoFormulaire context="update" element={JSON.parse(el.dataset.element)}
+                                           users={JSON.parse(el.dataset.users)}
+                                           userId={parseInt(el.dataset.userId)}
                                            groupeId={parseInt(el.dataset.groupeId)} />)
 }
 
 el = document.getElementById("randos_create");
 if(el){
     createRoot(el).render(<RandoFormulaire context="create" element={null}
+                                           users={JSON.parse(el.dataset.users)}
+                                           userId={parseInt(el.dataset.userId)}
                                            groupeId={parseInt(el.dataset.groupeId)} />)
 }
 

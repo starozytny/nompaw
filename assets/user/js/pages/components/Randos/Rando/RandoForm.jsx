@@ -5,7 +5,7 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import {Input, InputView, Radiobox} from "@commonComponents/Elements/Fields";
+import {Input, InputView, Radiobox, Select} from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 
@@ -18,7 +18,7 @@ const URL_UPDATE_ELEMENT    = "api_randos_rando_update";
 const TEXT_CREATE           = "Ajouter la randonnée";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
-export function RandoFormulaire ({ context, element, groupeId })
+export function RandoFormulaire ({ context, element, groupeId, users, userId })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT, {'groupe': groupeId});
 
@@ -37,6 +37,9 @@ export function RandoFormulaire ({ context, element, groupeId })
         devPlus={element ? Formulaire.setValue(element.devPlus) : ""}
         distance={element ? Formulaire.setValue(element.distance) : ""}
         adventure={element ? element.adventure : null}
+        referent={element ? Formulaire.setValue(element.author) : userId}
+
+        users={users}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -45,6 +48,7 @@ export function RandoFormulaire ({ context, element, groupeId })
 RandoFormulaire.propTypes = {
     context: PropTypes.string.isRequired,
     groupeId: PropTypes.number.isRequired,
+    users: PropTypes.array.isRequired,
     element: PropTypes.object,
 }
 
@@ -61,6 +65,7 @@ class Form extends Component {
             altitude: props.altitude,
             devPlus: props.devPlus,
             distance: props.distance,
+            referent: props.referent,
             errors: [],
         }
     }
@@ -98,11 +103,10 @@ class Form extends Component {
     }
 
     render () {
-        const { context, status, adventure } = this.props;
-        const { errors, name, description, level, altitude, devPlus, distance } = this.state;
+        const { context, status, adventure, users } = this.props;
+        const { errors, name, description, level, altitude, devPlus, distance, referent } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
-
 
         let levelItems = [
             { value: 0, label: 'Aucun',             identifiant: 'level-0' },
@@ -113,6 +117,11 @@ class Form extends Component {
             { value: 5, label: 'Extrême',           identifiant: 'level-5' },
         ]
 
+        let referentsItem = [];
+        users.forEach(us => {
+            referentsItem.push({ value: us.id, label: us.displayName, identifiant: 'us-' + us.id })
+        })
+
         return <>
             <form onSubmit={this.handleSubmit}>
                 <div className="line-container">
@@ -122,6 +131,9 @@ class Form extends Component {
                             <div className="subtitle">La personnalisation se fera après cette étape.</div>
                         </div>
                         <div className="line-col-2">
+                            <Select identifiant="referent" valeur={referent} items={referentsItem} noEmpty={true} noErrors={true} {...params}>
+                                Référent
+                            </Select>
                             <div className="line">
                                 <Input identifiant="name" valeur={name} {...params}>Nom de la randonnée *</Input>
                             </div>
@@ -169,6 +181,7 @@ class Form extends Component {
 }
 
 Form.propTypes = {
+    users: PropTypes.array.isRequired,
     context: PropTypes.string.isRequired,
     url: PropTypes.node.isRequired,
     name: PropTypes.string.isRequired,
@@ -179,4 +192,5 @@ Form.propTypes = {
     devPlus: PropTypes.node,
     distance: PropTypes.node,
     adventure: PropTypes.object,
+    referent: PropTypes.node,
 }

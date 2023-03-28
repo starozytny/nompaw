@@ -14,7 +14,11 @@
 {% block main_content %}
     {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_randos_groupes_read', {'slug': groupe.slug}) } %}
 
-    <div id="randos_create" data-groupe-id="{{ groupe.id }}">
+    <div id="randos_create"
+         data-users="{{ users }}"
+         data-user-id="{{ app.user.id }}"
+         data-groupe-id="{{ groupe.id }}"
+    >
         {% include "layout/components/loader.html.twig" %}
     </div>
 {% endblock %}
