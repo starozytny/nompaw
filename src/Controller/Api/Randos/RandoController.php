@@ -140,4 +140,15 @@ class RandoController extends AbstractController
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
+
+    #[Route('/cover/{id}', name: 'cover', options: ['expose' => true], methods: 'PUT')]
+    public function cover(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
+    {
+        $data = json_decode($request->getContent());
+
+        $obj->setCover($data->image);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
 }

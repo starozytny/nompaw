@@ -16,6 +16,7 @@ import { Modal } from "@commonComponents/Elements/Modal";
 const URL_UPLOAD_IMAGES  = "api_randos_image_upload_images";
 const URL_DELETE_IMAGE   = "api_randos_image_delete";
 const URL_DOWNLOAD_IMAGE = "api_randos_image_download";
+const URL_COVER_IMAGE    = "api_randos_rando_cover";
 
 export class RandoImages extends Component{
     constructor(props) {
@@ -83,6 +84,20 @@ export class RandoImages extends Component{
         ;
     }
 
+    handleCover = (image) => {
+        const { randoId } = this.props;
+
+        Formulaire.loader(true);
+        let self = this;
+        axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, {'id': randoId}), data: {image: image.thumbs} })
+            .then(function (response) {
+                toastr.info('Photo de couverture modifiée.');
+            })
+            .catch(function (error) { Formulaire.displayErrors(self, error); })
+            .then(function() { Formulaire.loader(false); })
+        ;
+    }
+
     render () {
         const { userId } = this.props;
         const { errors, files, data } = this.state;
@@ -101,11 +116,14 @@ export class RandoImages extends Component{
                             return <div className="rando-image" key={index}>
                                 <div className="image-data">
                                     <div className="action-top">
-                                        {parseInt(userId) === elem.author.id &&
+                                        {parseInt(userId) === elem.author.id && <>
+                                            <ButtonIcon icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
+                                                Image de couverture
+                                            </ButtonIcon>
                                             <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
                                                 Supprimer
                                             </ButtonIcon>
-                                        }
+                                        </>}
                                     </div>
                                     <div className="action-bottom">
                                         <div className="image-author">

@@ -156,27 +156,20 @@
                 <div class="groupe-line-title">
                     <h2>Anciennes randonnées</h2>
                     {% if randos | length > 0 %}
-                        <div class="groupes">
+                        <div class="old-randos">
                             {% for rando in randos %}
-                                <div class="card">
+                                <a class="card" href="{{ path('user_randos_rando_read', {'slug': rando.slug}) }}">
                                     <div class="card-header">
-                                        <div class="name">
-                                            <div class="semibold">{{ rando.name }}</div>
+                                        <div class="image">
+                                            <img src="{{ asset(rando.coverFile) }}" alt="Cover rando">
                                         </div>
                                     </div>
-                                    <div class="card-body">
-                                        <div>{{ rando.description | raw }}</div>
-                                    </div>
                                     <div class="card-footer">
-                                        <a
-                                                href="{{ path('user_randos_rando_read', {'slug': rando.slug}) }}"
-                                                class="btn-icon"
-                                        >
-                                            <span class="icon-right-arrow"></span>
-                                            <span class="tooltip" style="width: 118px;">Accéder à la rando</span>
-                                        </a>
+                                        <div class="btn-icon">
+                                            <span class="semibold name">{{ rando.name }}</span>
+                                        </div>
                                     </div>
-                                </div>
+                                </a>
                             {% endfor %}
                         </div>
                     {% else %}

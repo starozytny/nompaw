@@ -158,3 +158,52 @@
     }
   }
 }
+
+.old-randos{
+  @include flex(row, flex-start, flex-start, var(--espaceDiv));
+  flex-wrap: wrap;
+  margin-top: var(--espaceDiv);
+
+  .card{
+    background-color: var(--color0);
+    border-radius: calc(var(--radius) * 2);
+    width: 100%;
+    max-width: 321px;
+
+    .card-header{
+      @include flex(row, flex-start, flex-start);
+
+      .image{
+        width: 100%; height: 100%;
+        border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
+        overflow: hidden;
+
+        img{
+          object-fit: cover;
+          height: 100%;
+        }
+      }
+    }
+
+    .card-footer{
+      @include flex(row, flex-start, flex-end);
+
+      .name{
+        & > span:first-child{
+          @include fontSemibold();
+          font-size: 20px;
+        }
+      }
+
+      .btn-icon{
+        color: var(--alpha);
+      }
+
+      & > *{
+        position: relative;
+        width: 100%;
+        min-height: 48px;
+      }
+    }
+  }
+}
