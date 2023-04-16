@@ -2,5 +2,5 @@ when@dev:
   framework:
     mailer:
       envelope:
-        sender: 'starozytny@hotmail.fr'
+        sender: 'web@chanbora-chhun.fr'
         recipients: ['%env(MAILER_DELIVERY)%']
