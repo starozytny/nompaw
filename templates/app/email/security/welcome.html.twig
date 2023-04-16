@@ -1,0 +1,11 @@
+{% extends 'app/email/template/template_classique.html.twig' %}
+
+{% block preheader %}Bienvenue sur nompaw.fr{% endblock %}
+
+{% block title %}Bienvenue{% endblock %}
+
+{% block body %}
+    <div>
+        <div>Voici ton nom d'utilisateur : {{ user.username }}</div>
+    </div>
+{% endblock %}

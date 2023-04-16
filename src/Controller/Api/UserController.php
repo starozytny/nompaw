@@ -43,7 +43,7 @@ class UserController extends AbstractController
 
     public function submitForm($type, UserRepository $repository, User $obj, Request $request, ApiResponse $apiResponse,
                                ValidatorService $validator, DataMain $dataEntity, ObjectManager $em,
-                               UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader): JsonResponse
+                               UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader, MailerService $mailerService): JsonResponse
     {
         $data = json_decode($request->get('data'));
         if ($data === null) {
@@ -89,28 +89,42 @@ class UserController extends AbstractController
         }
 
         $repository->save($obj, true);
+
+        if(!$mailerService->sendMail(
+            [$obj->getEmail()],
+            "Bienvenue sur Nompaw.fr",
+            "Message de bienvenue.",
+            'app/email/security/welcome.html.twig',
+            ['user' => $obj]))
+        {
+            return $apiResponse->apiJsonResponseValidationFailed([[
+                'name' => 'username',
+                'message' => "Ton compte a été créé mais le mail de bienvenue n\'a pas pu être délivré. Ton nom d'utilisateur est " . $obj->getUsername() . " !"
+            ]]);
+        }
+
         return $apiResponse->apiJsonResponse($obj, User::LIST);
     }
 
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, ManagerRegistry $doctrine, ApiResponse $apiResponse,
                            ValidatorService $validator, DataMain$dataEntity, UserRepository $repository,
-                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader): Response
+                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader, MailerService $mailerService): Response
     {
         $em = $doctrine->getManager();
         return $this->submitForm("create", $repository, new User(), $request, $apiResponse, $validator, $dataEntity,
-            $em, $passwordHasher, $fileUploader);
+            $em, $passwordHasher, $fileUploader, $mailerService);
     }
 
     #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'POST')]
     #[IsGranted('ROLE_USER')]
     public function update(Request $request, User $obj, ManagerRegistry $doctrine, ApiResponse $apiResponse,
                            ValidatorService $validator, DataMain$dataEntity, UserRepository $repository,
-                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader): Response
+                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader, MailerService $mailerService): Response
     {
         $em = $doctrine->getManager();
         return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity,
-            $em, $passwordHasher, $fileUploader);
+            $em, $passwordHasher, $fileUploader, $mailerService);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
