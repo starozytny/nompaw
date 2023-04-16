@@ -175,6 +175,12 @@
                                             <span>Altitude : {{ elem.altitude }} m</span>
                                         </div>
                                     {% endif %}
+                                    {% if elem.description %}
+                                        <div class="sub-icon">
+                                            <span class="icon-file"></span>
+                                            <span>Description : {{ elem.description | raw }}</span>
+                                        </div>
+                                    {% endif %}
                                     <div class="members">
                                         {% for v in adventure.votes %}
                                             {% set participant = null %}
