@@ -168,21 +168,32 @@
                     {% if randos | length > 0 %}
                         <div class="old-randos">
                             {% for rando in randos %}
-                                <a class="card" href="{{ path('user_aventures_randos_read', {'slug': rando.slug}) }}">
-                                    <div class="card-header">
+                                <div class="card">
+                                    <a class="card-header" href="{{ path('user_aventures_randos_read', {'slug': rando.slug}) }}">
                                         <div class="image">
                                             <img src="{{ asset(rando.coverFile) }}" alt="Cover rando">
                                         </div>
-                                    </div>
-                                    <div class="card-footer">
+                                    </a>
+                                    <a class="card-footer" href="{{ path('user_aventures_randos_read', {'slug': rando.slug}) }}">
                                         <div class="btn-icon" style="flex-direction: column;">
                                             <span class="semibold name">{{ rando.name }}</span>
                                             <span class="sub">
                                                 {{ rando.startAt | format_datetime(locale='fr', timeFormat="none") }}
                                             </span>
                                         </div>
-                                    </div>
-                                </a>
+                                    </a>
+                                    {% if rando.googlePhotos %}
+                                        <div class="link-google-photos">
+                                            <a href="{{ rando.googlePhotos }}" class="btn-icon btn-icon-default" target="_blank">
+                                                <span class="icon-google">
+                                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                                                    <span class="path4"></span><span class="path5"></span><span class="path6"></span>
+                                                </span>
+                                                <span class="tooltip" style="width: 104px">Google Photos</span>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
                             {% endfor %}
                         </div>
                     {% else %}
