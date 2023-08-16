@@ -103,6 +103,8 @@
                          data-author-id="{{ elem.author.id }}"
                          data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
                          data-status="{{ elem.status }}"
+                         data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : "" }}"
+                         data-adventure-id="{{ elem.adventure ? elem.adventure.id : "" }}"
                     >
                         {% include "layout/components/loader.html.twig" %}
                     </div>
@@ -151,7 +153,7 @@
                                             <span>{{ adventure.duration | date('H\\hi') | duration }}</span>
                                         </div>
                                     {% endif %}
-                                    {% if adventure.url %}
+                                    {% if adventure.url and adventure.url != "https://" %}
                                         <div class="sub-icon">
                                             <span class="icon-link"></span>
                                             <span><a href="{{ adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>

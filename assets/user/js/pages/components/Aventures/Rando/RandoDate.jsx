@@ -63,7 +63,7 @@ export class RandoDate extends Component{
         modalDeletePropal(this);
         modalEndPropal(this);
         modalCancelDate(this);
-        this.setState({ context: context, propal: propal, dateAt: propal ? moment(propal.dateAt).utc().format('DD/MM/Y') : "" })
+        this.setState({ context: context, propal: propal, dateAt: propal ? moment(propal.dateAt).format('DD/MM/Y') : "" })
         this[identifiant].current.handleClick();
     }
 
@@ -182,16 +182,25 @@ export class RandoDate extends Component{
     }
 
     render() {
-        const { mode, startAt, userId, status, authorId } = this.props;
+        const { mode, startAt, userId, status, authorId, dateId } = this.props;
         const { errors, loadData, dateAt, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
         data.sort(Sort.compareDateAt);
 
+        let propalSelected = null;
+        if(dateId){
+            data.forEach(d => {
+                if(d.id === parseInt(dateId)){
+                    propalSelected = d;
+                }
+            })
+        }
+
         return <div className="rando-card">
             <div className="rando-card-header">
-                <div className="name">{startAt ? "Date de la randonnée" : "Proposition de dates"}</div>
+                <div className="name">{startAt ? "Date de la sélectionnée" : "Proposition de dates"}</div>
             </div>
             <div className={`rando-card-body${startAt ? " selected" : ""}`}>
                 {startAt
@@ -216,7 +225,7 @@ export class RandoDate extends Component{
                                 return <div className="propal" key={index}>
                                     <div className={`selector${active}`} onClick={onVote}></div>
                                     <div className="propal-body" onClick={onVote}>
-                                        <div className="name">{Sanitaze.toDateFormat(el.dateAt, 'LL')}</div>
+                                        <div className="name">{Sanitaze.toDateFormat(el.dateAt, 'LL', "", false)}</div>
                                     </div>
                                     <div className="propal-actions">
                                         {mode || el.author.id === parseInt(userId)
@@ -257,6 +266,16 @@ export class RandoDate extends Component{
                     : null)
             }
 
+            {(mode || authorId === parseInt(userId)) && propalSelected
+                ? <div className="rando-card-footer rando-card-footer-warning" onClick={() => this.handleModal("formPropal", "update", propalSelected)}>
+                    <div style={{display: 'flex', gap: '4px'}}>
+                        <span className="icon-pencil"></span>
+                        <span>Modifier la date</span>
+                    </div>
+                </div>
+                : null
+            }
+
             <Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
                    content={<div className="line">
                        <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
@@ -264,11 +283,11 @@ export class RandoDate extends Component{
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.deletePropal} identifiant='delete-propal-date' maxWidth={414} title="Supprimer la date"
-                   content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> ?</p>}
+                   content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.endPropal} identifiant='end-propal-date' maxWidth={414} title="Sélectionner la date finale"
-                   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL') : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
+                   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"
