@@ -58,6 +58,7 @@ class RaRando extends DataEntity
 
     #[ORM\ManyToOne(inversedBy: 'raRandos')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['rando_form'])]
     private ?User $author = null;
 
     #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalDate::class)]
@@ -95,6 +96,10 @@ class RaRando extends DataEntity
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $cover = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?string $googlePhotos = null;
 
     public function __construct()
     {
@@ -403,5 +408,17 @@ class RaRando extends DataEntity
     public function getCoverFile()
     {
         return $this->getFileOrDefault($this->cover, RaRando::FOLDER_THUMBS);
+    }
+
+    public function getGooglePhotos(): ?string
+    {
+        return $this->googlePhotos;
+    }
+
+    public function setGooglePhotos(?string $googlePhotos): self
+    {
+        $this->googlePhotos = $googlePhotos;
+
+        return $this;
     }
 }

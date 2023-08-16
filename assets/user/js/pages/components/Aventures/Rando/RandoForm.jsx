@@ -37,7 +37,8 @@ export function RandoFormulaire ({ context, element, groupeId, users, userId })
         devPlus={element ? Formulaire.setValue(element.devPlus) : ""}
         distance={element ? Formulaire.setValue(element.distance) : ""}
         adventure={element ? element.adventure : null}
-        referent={element ? Formulaire.setValue(element.author) : userId}
+        referent={element ? Formulaire.setValue(element.author.id) : userId}
+        googlePhotos={element ? Formulaire.setValue(element.googlePhotos) : ""}
 
         users={users}
     />
@@ -66,6 +67,7 @@ class Form extends Component {
             devPlus: props.devPlus,
             distance: props.distance,
             referent: props.referent,
+            googlePhotos: props.googlePhotos,
             errors: [],
         }
     }
@@ -104,7 +106,7 @@ class Form extends Component {
 
     render () {
         const { context, status, adventure, users } = this.props;
-        const { errors, name, description, level, altitude, devPlus, distance, referent } = this.state;
+        const { errors, name, description, level, altitude, devPlus, distance, referent, googlePhotos } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
 
@@ -167,6 +169,11 @@ class Form extends Component {
                                 <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}>
                                     Niveau *
                                 </Radiobox>
+                            </div>
+                            <div className="line line-3">
+                                <Input identifiant="googlePhotos" valeur={googlePhotos} {...params}>Lien Google photos</Input>
+                                <div className="form-group" />
+                                <div className="form-group" />
                             </div>
                         </div>
                     </div>}
