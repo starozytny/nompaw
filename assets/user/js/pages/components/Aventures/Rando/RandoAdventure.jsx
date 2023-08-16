@@ -219,7 +219,7 @@ export class RandoAdventure extends Component {
                                     <div className="propal-body">
                                         <div className="name">
                                             <span onClick={onVote}>{el.name}</span>
-                                            {el.url && <a href={el.url} className="url-topo" target="_blank">
+                                            {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo" target="_blank">
                                                 <span className="icon-link"></span>
                                                 <span className="tooltip">Topo</span>
                                             </a>}
