@@ -258,19 +258,19 @@ export class RandoDate extends Component{
                 </div>
                 : (status !== "2" && (mode || authorId === parseInt(userId))
                     ? <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-                                <div style={{display: 'flex', gap: '4px'}}>
-                                    <span className="icon-close"></span>
-                                    <span>Annuler la date sélectionnée</span>
-                                </div>
-                            </div>
+                        <div style={{display: 'flex', gap: '4px'}}>
+                            <span className="icon-close"></span>
+                            <span>Annuler la date sélectionnée</span>
+                        </div>
+                    </div>
                     : null)
             }
 
             {(mode || authorId === parseInt(userId)) && propalSelected
-                ? <div className="rando-card-footer rando-card-footer-warning" onClick={() => this.handleModal("formPropal", "update", propalSelected)}>
+                ? <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
                     <div style={{display: 'flex', gap: '4px'}}>
-                        <span className="icon-pencil"></span>
-                        <span>Modifier la date</span>
+                        <span className="icon-close"></span>
+                        <span>Annuler la date sélectionnée</span>
                     </div>
                 </div>
                 : null

@@ -70,6 +70,11 @@ class PropalDateController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(RaPropalDate $obj, RaPropalDateRepository $repository, ApiResponse $apiResponse): Response
     {
+        $rando = $obj->getRando();
+        if($rando->getAdventureDate() == $obj->getId()){
+            $rando->setAdventureDate(null);
+        }
+
         $repository->remove($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
@@ -114,6 +119,7 @@ class PropalDateController extends AbstractController
     {
         $rando = $obj->getRando();
         $rando->setStartAt($obj->getDateAt());
+        $rando->setAdventureDate($obj);
 
         $noErrors = $validator->validate($rando);
         if ($noErrors !== true) {

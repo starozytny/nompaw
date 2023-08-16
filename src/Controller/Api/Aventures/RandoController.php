@@ -115,6 +115,7 @@ class RandoController extends AbstractController
     #[Route('/cancel/date/{id}', name: 'cancel_date', options: ['expose' => true], methods: 'PUT')]
     public function cancelDate(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
     {
+        $obj->setAdventureDate(null);
         $obj->setStartAt(null);
 
         $repository->save($obj, true);
