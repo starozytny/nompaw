@@ -63,7 +63,7 @@ export class RandoAdventure extends Component {
         this.setState({
             context: context, propal: propal,
             name: propal ? propal.name : "",
-            duration: propal  && propal.duration ? moment(propal.duration).utc().format('LT').replace(':', 'h') : "",
+            duration: propal  && propal.duration ? moment(propal.duration).format('LT').replace(':', 'h') : "",
             url: propal ? propal.url : "https://",
         })
         this[identifiant].current.handleClick();
@@ -190,6 +190,8 @@ export class RandoAdventure extends Component {
 
         let params = { errors: errors, onChange: this.handleChange }
 
+        console.log(haveAdventure);
+
         return <div className="rando-card">
             <div className="rando-card-header">
                 <div className="name">{haveAdventure ? "Aventure sélectionnée" : "Proposition d'aventures"}</div>
@@ -223,7 +225,7 @@ export class RandoAdventure extends Component {
                                             </a>}
                                         </div>
                                         <div className="duration" onClick={onVote}>
-                                            {Sanitaze.toFormatDuration(Sanitaze.toDateFormat(el.duration, 'LT').replace(':', 'h'))}
+                                            {Sanitaze.toFormatDuration(Sanitaze.toDateFormat(el.duration, 'LT', "", false).replace(':', 'h'))}
                                         </div>
                                     </div>
                                     <div className="propal-actions">
@@ -249,7 +251,7 @@ export class RandoAdventure extends Component {
                 }
             </div>
             {haveAdventure
-                ? (status !== "2" && (mode || authorId === parseInt(userId))
+                ? (mode || authorId === parseInt(userId)
                     ?  <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
                         <div style={{display: 'flex', gap: '4px'}}>
                             <span className="icon-close"></span>
