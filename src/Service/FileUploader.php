@@ -61,8 +61,8 @@ class FileUploader
 
             if($reduce){
                 $layer->resizeInPixel(null, 500, true);
-            }else if($layer->getHeight() > 1080){
-                $layer->resizeInPixel(null, 1080, true);
+            }else if($layer->getHeight() > 2160){
+                $layer->resizeInPixel(null, 2160, true);
             }
 
             $layer->save($directory, $fileName);

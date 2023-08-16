@@ -70,6 +70,10 @@ class RaRando extends DataEntity
     #[Groups(['rando_form'])]
     private ?RaPropalAdventure $adventure = null;
 
+    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[Groups(['rando_form'])]
+    private ?RaPropalDate $adventureDate = null;
+
     #[ORM\Column(nullable: true)]
     #[Groups(['rando_form'])]
     private ?int $level = null;
@@ -290,6 +294,18 @@ class RaRando extends DataEntity
     public function setAdventure(?RaPropalAdventure $adventure): self
     {
         $this->adventure = $adventure;
+
+        return $this;
+    }
+
+    public function getAdventureDate(): ?RaPropalDate
+    {
+        return $this->adventureDate;
+    }
+
+    public function setAdventureDate(?RaPropalDate $adventureDate): self
+    {
+        $this->adventureDate = $adventureDate;
 
         return $this;
     }
