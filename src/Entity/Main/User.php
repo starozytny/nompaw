@@ -37,7 +37,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list', 'ra_img_list', 'rando_form'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
