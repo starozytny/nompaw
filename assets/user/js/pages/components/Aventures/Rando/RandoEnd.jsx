@@ -10,7 +10,7 @@ import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 
 const URL_READ_GROUPE = 'user_aventures_groupes_read';
-const URL_END_ELEMENT = 'api_aventures_rando_end';
+const URL_END_ELEMENT = 'api_aventures_randos_end';
 
 export function RandoEnd ({ context, id, name, groupeSlug })
 {
