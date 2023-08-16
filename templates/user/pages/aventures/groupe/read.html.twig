@@ -155,6 +155,16 @@
             <div class="groupe-line-1">
                 <div class="groupe-line-title">
                     <h2>Anciennes randonnées</h2>
+                    {% set trans_day_hash = {
+                        "Monday": "Lundi",
+                        "Tuesday": "Mardi",
+                        "Wednesday": "Mercredi",
+                        "Thursday": "Jeudi",
+                        "Friday": "Vendredi",
+                        "Saturday": "Samedi",
+                        "Sunday": "Dimanche"
+                    }
+                    %}
                     {% if randos | length > 0 %}
                         <div class="old-randos">
                             {% for rando in randos %}
@@ -165,8 +175,11 @@
                                         </div>
                                     </div>
                                     <div class="card-footer">
-                                        <div class="btn-icon">
+                                        <div class="btn-icon" style="flex-direction: column;">
                                             <span class="semibold name">{{ rando.name }}</span>
+                                            <span class="sub">
+                                                {{ rando.startAt | format_datetime(locale='fr', timeFormat="none") }}
+                                            </span>
                                         </div>
                                     </div>
                                 </a>

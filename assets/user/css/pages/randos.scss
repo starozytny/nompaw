@@ -181,6 +181,7 @@
         img{
           object-fit: cover;
           height: 100%;
+          min-height: 230px;
           max-height: 230px;
         }
       }
