@@ -27,13 +27,11 @@ class ProjectController extends AbstractController
     }
 
     #[Route('/projet/{slug}', name: 'read', options: ['expose' => true])]
-    public function read($slug, RaGroupeRepository $repository, RaRandoRepository $randoRepository): Response
+    public function read($slug, HoProjectRepository $repository): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
         return $this->render('user/pages/holidays/projects/read.html.twig', [
             'elem' => $obj,
-            'randos' => $randoRepository->findBy(['isNext' => false, 'groupe' => $obj], ['startAt' => 'DESC']),
-            'next' => $randoRepository->findOneBy(['isNext' => true, 'groupe' => $obj])
         ]);
     }
 

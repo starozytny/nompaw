@@ -8,24 +8,30 @@ use App\Entity\Main\User;
 use App\Repository\Holiday\HoProjectRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: HoProjectRepository::class)]
 class HoProject extends DataEntity
 {
     const FOLDER = "images/entity/holidays/cover/";
 
+    const FORM = ['hopro_form'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['hopro_form'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hopro_form'])]
     private ?string $name = null;
 
     #[ORM\Column]
     private ?int $status = StatusType::Propal;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['hopro_form'])]
     private ?string $image = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -35,12 +41,15 @@ class HoProject extends DataEntity
     private ?\DateTimeInterface $endAt = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_form'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hopro_form'])]
     private ?string $slug = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['hopro_form'])]
     private ?string $code = null;
 
     #[ORM\ManyToOne(inversedBy: 'hoProjects')]
@@ -76,6 +85,16 @@ class HoProject extends DataEntity
         return $this;
     }
 
+    public function getStatusString(): string
+    {
+        return match($this->status){
+            StatusType::Propal => 'en proposition',
+            StatusType::Validate => 'validée',
+            StatusType::End => 'terminée',
+            default => 'erreur',
+        };
+    }
+
     public function getImage(): ?string
     {
         return $this->image;
@@ -88,6 +107,7 @@ class HoProject extends DataEntity
         return $this;
     }
 
+    #[Groups(['hopro_form'])]
     public function getImageFile()
     {
         return $this->getFileOrDefault($this->getImage(), self::FOLDER);
