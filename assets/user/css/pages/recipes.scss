@@ -15,6 +15,14 @@
   @include flex(row, center, center);
 }
 
+.favorite{
+  .btn-icon{
+    [class^="icon-"]{
+      color: var(--alpha);
+    }
+  }
+}
+
 .recipes{
   @include flex(row, flex-start, flex-start, var(--espaceDiv));
   flex-wrap: wrap;
