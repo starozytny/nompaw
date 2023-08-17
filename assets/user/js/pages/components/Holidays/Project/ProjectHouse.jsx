@@ -192,7 +192,7 @@ export class ProjectHouse extends Component{
                     ? <div className="propals">
                         <div className="propal selected" style={{ flexDirection: 'column' }}>
                             <div>{houseName}</div>
-                            {houseUrl ? <a href={houseUrl} className="txt-link">
+                            {houseUrl ? <a href={houseUrl} target="_blank" className="txt-link">
                                 <span>Lien de l'hébergement</span>
                                 <span className="icon-link" />
                             </a> : ""}
