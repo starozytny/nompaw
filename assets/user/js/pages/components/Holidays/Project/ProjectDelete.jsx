@@ -9,10 +9,10 @@ import Formulaire from "@commonFunctions/formulaire";
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 
-const URL_INDEX_ELEMENTS = 'user_recipes_index';
-const URL_DELETE_ELEMENT = 'api_cook_recipes_delete';
+const URL_INDEX_ELEMENTS = 'user_projects_index';
+const URL_DELETE_ELEMENT = 'api_projects_delete';
 
-export function RecipeDelete ({ context, id, name })
+export function ProjectDelete ({ context, id, name })
 {
     let modalRef = useRef(null);
 
@@ -35,13 +35,13 @@ export function RecipeDelete ({ context, id, name })
             ? <Button icon="trash" type="danger" onClick={handleClick}>Supprimer</Button>
             : <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
         }
-        <Modal ref={modalRef} identifiant={`delete-recipe-${id}`} maxWidth={414} title="Supprimer la recette"
-               content={<p>Etes-vous sûr de vouloir supprimer la recette : <b>{name}</b> ?</p>}
+        <Modal ref={modalRef} identifiant={`delete-proj-${id}`} maxWidth={414} title="Supprimer le projet"
+               content={<p>Etes-vous sûr de vouloir supprimer le projet : <b>{name}</b> ?</p>}
                footer={<Button type="danger" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
     </>
 }
 
-RecipeDelete.propTypes = {
+ProjectDelete.propTypes = {
     context: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,

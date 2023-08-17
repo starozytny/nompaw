@@ -3,6 +3,7 @@ import '../../css/pages/holidays.scss';
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
+import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
 
 let el = document.getElementById("projects_update");
 if(el){
@@ -12,4 +13,11 @@ if(el){
 el = document.getElementById("projects_create");
 if(el){
     createRoot(el).render(<ProjectFormulaire context="create" element={null} />)
+}
+
+let deletesProject = document.querySelectorAll('.delete-project');
+if(deletesProject){
+    deletesProject.forEach(elem => {
+        createRoot(elem).render(<ProjectDelete context="projects" {...elem.dataset} />)
+    })
 }
