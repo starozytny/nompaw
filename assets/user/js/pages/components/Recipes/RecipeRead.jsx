@@ -204,7 +204,7 @@ export class RecipeRead extends Component {
                                         </ButtonIcon>
                                     }
                                 </div>
-                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT'))} minutes de préparation</span>
+                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT', '', false))} de préparation</span>
                             }
                         </div> : null}
                         {(mode || elem.durationCooking) ? <div className="recipe-data-item">
@@ -220,7 +220,7 @@ export class RecipeRead extends Component {
                                         </ButtonIcon>
                                     }
                                 </div>
-                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT'))} minutes de cuisson</span>
+                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT', '', false))} de cuisson</span>
                             }
                         </div> : null}
                         {(mode || elem.nbPerson) ? <div className="recipe-data-item">
