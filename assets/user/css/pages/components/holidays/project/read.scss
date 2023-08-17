@@ -34,7 +34,6 @@
 }
 
 .project-card{
-
   .project-card-header, .project-card-footer{
     padding: var(--espaceDiv);
   }
@@ -75,5 +74,21 @@
 
   .project-card-footer-warning{
     background-color: var(--warning);
+  }
+}
+
+//                      __   _____ __    ___    __
+//                     | _| |___  / /_  ( _ )  |_ |
+//    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
+//   |_____|_____|_____| |    / /| (_) | (_) |  | |_____|_____|_____|
+//                     | |   /_/  \___/ \___/   | |
+//                     |__|                    |__|
+@media (min-width:768px) {
+  .project-header{
+    flex-direction: row;
+  }
+
+  .project-title, .project-propals{
+    width: 50%;
   }
 }
