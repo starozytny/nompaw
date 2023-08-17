@@ -12,22 +12,24 @@
         </div>
     </div>
     <div class="page-default">
-        <div class="groupes">
+        <div class="projects">
             {% for elem in projects %}
                 <div class="card">
                     <div class="card-header">
-                        <div class="image">
-                            <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}">
-                        </div>
                         <div class="name">
-                            <div class="semibold">{{ elem.name }}</div>
+                            <div>{{ elem.name }}</div>
+                            <span class="status">{{ elem.statusString }}</span>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div>{{ elem.description | raw }}</div>
-                    </div>
-                    <div class="card-footer">
-                        {% if app.user.id == elem.author.id %}
+                    <a
+                            href="{{ path('user_projects_read', {'slug': elem.slug}) }}"
+                            class="card-body"
+                            style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}"
+                    >
+                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
+                    </a>
+                    {% if app.user.id == elem.author.id %}
+                        <div class="card-footer">
                             <a
                                     href="{{ path('user_projects_update', {'slug': elem.slug}) }}"
                                     class="btn-icon"
@@ -35,22 +37,15 @@
                                 <span class="icon-pencil"></span>
                                 <span class="tooltip">Modifier</span>
                             </a>
-                            <div class="delete-groupe"
-                                 data-context="groupes"
+                            <div class="delete-project"
+                                 data-context="projects"
                                  data-id="{{ elem.id }}"
                                  data-name="{{ elem.name }}"
                             >
                                 <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
                             </div>
-                        {% endif %}
-                        <a
-                                href="{{ path('user_projects_read', {'slug': elem.slug}) }}"
-                                class="btn-icon"
-                        >
-                            <span class="icon-right-arrow"></span>
-                            <span class="tooltip" style="width: 118px;">Accéder à la page</span>
-                        </a>
-                    </div>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
