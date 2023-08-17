@@ -238,10 +238,12 @@
   }
 
   .commentaries{
+    @include flex(column, flex-start, flex-start, var(--espaceDiv));
     margin-top: var(--espaceLayout);
 
     .commentary{
       @include flex(row, flex-start, flex-start, var(--espaceDiv));
+      width: 100%;
 
       .commentary-body{
         width: calc(100% - 32px);
@@ -253,12 +255,14 @@
 
         .message{
           opacity: 0.9;
+          margin-top: 8px;
         }
 
         .date{
           text-align: right;
           font-size: 12px;
           font-style: italic;
+          margin-top: 4px;
         }
       }
     }

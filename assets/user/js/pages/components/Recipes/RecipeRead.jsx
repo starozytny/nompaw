@@ -157,7 +157,7 @@ export class RecipeRead extends Component {
                         }
                     </div>}
                     <div className="rating">
-                        <Rate defaultValue={elem.rate} />
+                        <Rate disabled defaultValue={elem.rate} />
                     </div>
 
                     {!isMobile
