@@ -4,7 +4,7 @@
 
 {% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
 {% set page_title_alone %}{{ elem.name }}{% endset %}
-{% set page_subtitle %}Groupe de randonnée : {{ elem.name }}{% endset %}
+{% set page_subtitle %}Groupe d'aventures : {{ elem.name }}{% endset %}
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
@@ -126,8 +126,8 @@
                     {% else %}
                         <div class="col-1">
                             <div>
-                                <h2>Aucune randonnée de prévu.</h2>
-                                <div class="subtitle">Préparer la prochaine randonnée en cliquant sur <i>Créer une randonnée</i></div>
+                                <h2>Aucune aventure de prévue.</h2>
+                                <div class="subtitle">Préparez la prochaine aventure en cliquant sur <i>Créer une aventure</i></div>
                             </div>
                         </div>
 
@@ -136,7 +136,7 @@
                             <div class="cta">
                                 <a href="{{ path('user_aventures_randos_create', {'g_slug': elem.slug}) }}" class="btn btn-primary">
                                     <span class="icon-add"></span>
-                                    <span>Créer une rando</span>
+                                    <span>Créer une aventure</span>
                                 </a>
                             </div>
                         </div>
@@ -144,17 +144,17 @@
                 </div>
                 <div class="next-creator">
                     <h2><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ elem.author.displayName }}</h2>
-                    <div class="subtitle">Référent.e du groupe de randonnée</div>
+                    <div class="subtitle">Référent.e du groupe d'aventures</div>
                     {% if next %}
                         <h2 style="margin-top: 12px;"><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ next.author.displayName }}</h2>
-                        <div class="subtitle">Référent.e de la prochaine randonnée</div>
+                        <div class="subtitle">Référent.e de la prochaine aventure</div>
                     {% endif %}
                 </div>
             </div>
 
             <div class="groupe-line-1">
                 <div class="groupe-line-title">
-                    <h2>Anciennes randonnées</h2>
+                    <h2>Anciennes aventures</h2>
                     {% set trans_day_hash = {
                         "Monday": "Lundi",
                         "Tuesday": "Mardi",
