@@ -9,6 +9,14 @@
             <a href="{{ path('user_recipes_create') }}" class="btn btn-primary">
                 <span>Ajouter une recette</span>
             </a>
+            <a href="{{ path('user_recipes_index', {'favorite': 1}) }}" class="btn btn-default">
+                <span class="icon-heart1"></span>
+                <span>Afficher mes favoris</span>
+            </a>
+            <a href="{{ path('user_recipes_index', {'mine': 1}) }}" class="btn btn-default">
+                <span class="icon-book-1"></span>
+                <span>Afficher mes recettes</span>
+            </a>
         </div>
     </div>
     <div class="page-default">

@@ -17,7 +17,7 @@
 
 .favorite{
   .btn-icon{
-    [class^="icon-"]{
+    .icon-heart{
       color: var(--alpha);
     }
   }
