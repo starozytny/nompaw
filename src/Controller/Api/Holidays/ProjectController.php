@@ -89,4 +89,15 @@ class ProjectController extends AbstractController
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
+
+    #[Route('/cancel/date/{id}', name: 'cancel_date', options: ['expose' => true], methods: 'PUT')]
+    public function cancelDate(HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository): Response
+    {
+        $obj->setPropalDate(null);
+        $obj->setStartAt(null);
+        $obj->setEndAt(null);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
 }

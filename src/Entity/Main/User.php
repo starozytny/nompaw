@@ -7,6 +7,7 @@ use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Entity\Holiday\HoProject;
+use App\Entity\Holiday\HoPropalDate;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaLink;
@@ -152,6 +153,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoProject::class)]
     private Collection $hoProjects;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalDate::class)]
+    private Collection $hoPropalDates;
+
     /**
      * @throws Exception
      */
@@ -169,6 +173,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->raPropalAdventures = new ArrayCollection();
         $this->raImages = new ArrayCollection();
         $this->hoProjects = new ArrayCollection();
+        $this->hoPropalDates = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -814,6 +819,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($hoProject->getAuthor() === $this) {
                 $hoProject->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalDate>
+     */
+    public function getHoPropalDates(): Collection
+    {
+        return $this->hoPropalDates;
+    }
+
+    public function addHoPropalDate(HoPropalDate $hoPropalDate): self
+    {
+        if (!$this->hoPropalDates->contains($hoPropalDate)) {
+            $this->hoPropalDates->add($hoPropalDate);
+            $hoPropalDate->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalDate(HoPropalDate $hoPropalDate): self
+    {
+        if ($this->hoPropalDates->removeElement($hoPropalDate)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalDate->getAuthor() === $this) {
+                $hoPropalDate->setAuthor(null);
             }
         }
 

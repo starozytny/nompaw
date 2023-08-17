@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Entity\Rando;
+namespace App\Entity\Holiday;
 
 use App\Entity\Main\User;
-use App\Repository\Rando\RaPropalDateRepository;
+use App\Repository\Holiday\HoPropalDateRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: RaPropalDateRepository::class)]
-class RaPropalDate
+#[ORM\Entity(repositoryClass: HoPropalDateRepository::class)]
+class HoPropalDate
 {
     const LIST = ["pr_date_list"];
 
@@ -21,7 +21,11 @@ class RaPropalDate
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['pr_date_list'])]
-    private ?\DateTimeInterface $dateAt = null;
+    private ?\DateTimeInterface $startAt = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['pr_date_list'])]
+    private ?\DateTimeInterface $endAt = null;
 
     #[ORM\Column(type: Types::ARRAY)]
     #[Groups(['pr_date_list'])]
@@ -29,9 +33,9 @@ class RaPropalDate
 
     #[ORM\ManyToOne(inversedBy: 'propalDates')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?RaRando $rando = null;
+    private ?HoProject $project = null;
 
-    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'raPropalDates')]
+    #[ORM\ManyToOne(inversedBy: 'hoPropalDates')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['pr_date_list'])]
     private ?User $author = null;
@@ -41,14 +45,26 @@ class RaPropalDate
         return $this->id;
     }
 
-    public function getDateAt(): ?\DateTimeInterface
+    public function getStartAt(): ?\DateTimeInterface
     {
-        return $this->dateAt;
+        return $this->startAt;
     }
 
-    public function setDateAt(\DateTimeInterface $dateAt): self
+    public function setStartAt(\DateTimeInterface $startAt): self
     {
-        $this->dateAt = $dateAt;
+        $this->startAt = $startAt;
+
+        return $this;
+    }
+
+    public function getEndAt(): ?\DateTimeInterface
+    {
+        return $this->endAt;
+    }
+
+    public function setEndAt(?\DateTimeInterface $endAt): self
+    {
+        $this->endAt = $endAt;
 
         return $this;
     }
@@ -65,14 +81,14 @@ class RaPropalDate
         return $this;
     }
 
-    public function getRando(): ?RaRando
+    public function getProject(): ?HoProject
     {
-        return $this->rando;
+        return $this->project;
     }
 
-    public function setRando(?RaRando $rando): self
+    public function setProject(?HoProject $project): self
     {
-        $this->rando = $rando;
+        $this->project = $project;
 
         return $this;
     }

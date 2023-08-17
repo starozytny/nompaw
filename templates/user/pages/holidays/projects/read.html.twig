@@ -28,68 +28,38 @@
                     <span class="icon-pencil"></span>
                     <span>Modifier</span>
                 </a>
-                {% if elem.status != 2 %}
-                    <div class="delete-rando"
-                         data-context="read"
-                         data-id="{{ elem.id }}"
-                         data-name="{{ elem.name }}"
-                    >
-                        <button class="btn btn-danger btn-loader-without-text">
-                            <span class="icon-chart-3"></span>
-                            <span>Supprimer</span>
-                        </button>
-                    </div>
-                    {% if elem.startAt != null %}
-                        <div class="end-rando"
-                             data-context="read"
-                             data-id="{{ elem.id }}"
-                             data-name="{{ elem.name }}"
-                        >
-                            <button class="btn btn-success btn-loader-without-text">
-                                <span class="icon-chart-3"></span>
-                                <span>Terminer</span>
-                            </button>
-                        </div>
-                    {% endif %}
-                {% endif %}
+                <div class="delete-project"
+                     data-context="read"
+                     data-id="{{ elem.id }}"
+                     data-name="{{ elem.name }}"
+                >
+                    <button class="btn btn-danger btn-loader-without-text">
+                        <span class="icon-chart-3"></span>
+                        <span>Supprimer</span>
+                    </button>
+                </div>
             {% endif %}
         </div>
     </div>
 
     <div class="page-default">
-        <div class="rando-read">
-            <div class="rando-meta">
-                <div class="features">
-                    <div class="ra-status active">
-                        <span>{{ elem.statusString }}</span>
-                    </div>
+        <div class="project-read">
+            <div class="project-header">
+                <div class="project-title" style="background-image: url({{ elem.imageFile }})">
+                    <h2>{{ elem.name }}</h2>
                 </div>
-                <div class="author">
-                    <div class="user">
-                        <div class="name">{{ author.displayName }}</div>
-                        <div class="avatar">
-                            <div class="avatar-letter">{{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rando-content">
-                <div class="rando-col-propals {{- elem.startAt ? ' to-line' : '' -}}">
-                    <div id="rando_date"
-                         data-rando-id="{{ elem.id }}"
-                         data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                <div class="project-propals">
+                    <div id="project_date"
+                         data-project-id="{{ elem.id }}"
+                         data-n-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                         data-propals="{{ propalDates }}"
                          data-user-id="{{ app.user.id }}"
                          data-author-id="{{ elem.author.id }}"
                          data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
-                         data-status="{{ elem.status }}"
                     >
                         {% include "layout/components/loader.html.twig" %}
                     </div>
                 </div>
-
-                {% if elem.startAt %}
-                {% endif %}
             </div>
         </div>
     </div>

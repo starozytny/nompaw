@@ -3,9 +3,10 @@
 namespace App\Entity\Holiday;
 
 use App\Entity\DataEntity;
-use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Main\User;
 use App\Repository\Holiday\HoProjectRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -26,9 +27,6 @@ class HoProject extends DataEntity
     #[ORM\Column(length: 255)]
     #[Groups(['hopro_form'])]
     private ?string $name = null;
-
-    #[ORM\Column]
-    private ?int $status = StatusType::Propal;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['hopro_form'])]
@@ -56,6 +54,18 @@ class HoProject extends DataEntity
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalDate::class)]
+    private Collection $propalDates;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[Groups(['hopro_form'])]
+    private ?HoPropalDate $propalDate = null;
+
+    public function __construct()
+    {
+        $this->propalDates = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -71,28 +81,6 @@ class HoProject extends DataEntity
         $this->name = $name;
 
         return $this;
-    }
-
-    public function getStatus(): ?int
-    {
-        return $this->status;
-    }
-
-    public function setStatus(int $status): self
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getStatusString(): string
-    {
-        return match($this->status){
-            StatusType::Propal => 'en proposition',
-            StatusType::Validate => 'validée',
-            StatusType::End => 'terminée',
-            default => 'erreur',
-        };
     }
 
     public function getImage(): ?string
@@ -181,6 +169,48 @@ class HoProject extends DataEntity
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalDate>
+     */
+    public function getPropalDates(): Collection
+    {
+        return $this->propalDates;
+    }
+
+    public function addPropalDate(HoPropalDate $propalDate): self
+    {
+        if (!$this->propalDates->contains($propalDate)) {
+            $this->propalDates->add($propalDate);
+            $propalDate->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removePropalDate(HoPropalDate $propalDate): self
+    {
+        if ($this->propalDates->removeElement($propalDate)) {
+            // set the owning side to null (unless already changed)
+            if ($propalDate->getProject() === $this) {
+                $propalDate->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getPropalDate(): ?HoPropalDate
+    {
+        return $this->propalDate;
+    }
+
+    public function setPropalDate(?HoPropalDate $propalDate): self
+    {
+        $this->propalDate = $propalDate;
 
         return $this;
     }

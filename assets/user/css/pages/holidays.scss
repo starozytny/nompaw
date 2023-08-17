@@ -1,6 +1,7 @@
 @import "../vars/vars";
 
 @import "./components/form";
+@import "./components/holidays/project/read";
 
 .delete-project{
   @include flex(row, center, center);
