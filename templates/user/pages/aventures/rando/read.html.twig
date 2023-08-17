@@ -214,12 +214,12 @@
                                 </div>
                             </div>
                             {% if app.user.id == elem.author.id or app.user.admin %}
-                                <div class="rando-card-footer">
-                                    <a href="{{ path('user_aventures_randos_update', {'slug': elem.slug}) }}" style="color: white">
+                                <a class="rando-card-footer" href="{{ path('user_aventures_randos_update', {'slug': elem.slug}) }}">
+                                    <div style="color: white">
                                         <span class="icon-add"></span>
                                         <span>Ajouter des informations</span>
-                                    </a>
-                                </div>
+                                    </div>
+                                </a>
                             {% endif %}
                         </div>
                     </div>
