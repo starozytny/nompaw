@@ -1,7 +1,7 @@
 {% extends 'user/pages/holidays/template.html.twig' %}
 
 {% set page_title %}Modifier : {{ elem.name }}{% endset %}
-{% set page_subtitle %}Modifiez les informations du groupe d'aventures : {{ elem.name }}.{% endset %}
+{% set page_subtitle %}Modifiez les informations du projet : {{ elem.name }}.{% endset %}
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([{ text: page_title }]) %}
@@ -11,23 +11,19 @@
 {% block main_content %}
     <div class="page-actions">
         <div class="col-1">
-            <a href="{{ path('user_aventures_groupes_index') }}" class="btn btn-outline-default">
+            <a href="{{ path('user_projects_index') }}" class="btn btn-outline-default">
                 <span class="icon-left-arrow"></span>
                 <span>Retourner à liste</span>
             </a>
-            <a href="{{ path('user_aventures_groupes_read', {'slug': elem.slug}) }}" class="btn btn-outline-default">
+            <a href="{{ path('user_projects_read', {'slug': elem.slug}) }}" class="btn btn-outline-default">
                 <span class="icon-left-arrow"></span>
-                <span>Voir le groupe</span>
+                <span>Voir le projet</span>
             </a>
         </div>
         <div class="col-2"></div>
     </div>
 
-    <div id="groupes_update"
-         data-element="{{ element }}"
-         data-users="{{ users }}"
-         data-members="{{ members }}"
-    >
+    <div id="projects_update" data-element="{{ element }}">
         {% include "layout/components/loader.html.twig" %}
     </div>
 {% endblock %}

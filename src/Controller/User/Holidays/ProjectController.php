@@ -2,6 +2,7 @@
 
 namespace App\Controller\User\Holidays;
 
+use App\Entity\Holiday\HoProject;
 use App\Entity\Main\User;
 use App\Entity\Rando\RaGroupe;
 use App\Repository\Holiday\HoProjectRepository;
@@ -42,30 +43,19 @@ class ProjectController extends AbstractController
     }
 
     #[Route('/modifier/{slug}', name: 'update', options: ['expose' => true])]
-    public function update($slug, RaGroupeRepository $repository, RaLinkRepository $linkRepository, UserRepository $userRepository, SerializerInterface $serializer): Response
+    public function update($slug, HoProjectRepository $repository, SerializerInterface $serializer): Response
     {
-        $obj   = $repository->findOneBy(['slug' => $slug]);
+        $obj = $repository->findOneBy(['slug' => $slug]);
 
         if($obj->getAuthor()->getId() != $this->getUser()->getId()){
             throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
-        $users = $userRepository->findAll();
-        $links = $linkRepository->findBy(['groupe' => $obj]);
-        $members = [];
-        foreach($links as $link){
-            $members[] = $link->getUser()->getId();
-        }
-
-        $element = $serializer->serialize($obj,   'json', ['groups' => RaGroupe::FORM]);
-        $users = $serializer->serialize($users, 'json', ['groups' => User::SELECT]);
-        $members = json_encode($members);
+        $element = $serializer->serialize($obj,   'json', ['groups' => HoProject::FORM]);
 
         return $this->render('user/pages/holidays/projects/update.html.twig', [
             'elem' => $obj,
             'element' => $element,
-            'users' => $users,
-            'members' => $members,
         ]);
     }
 }
