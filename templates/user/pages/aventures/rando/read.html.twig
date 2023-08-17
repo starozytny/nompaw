@@ -5,7 +5,7 @@
 
 {% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
 {% set page_title_alone %}{{ elem.name }}{% endset %}
-{% set page_subtitle %}Groupe de randonnée : {{ groupe.name }}{% endset %}
+{% set page_subtitle %}Groupe d'aventures : {{ groupe.name }}{% endset %}
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
@@ -125,17 +125,6 @@
                     {% endif %}
                 </div>
 
-                {% set trans_day_hash = {
-                    "Monday": "Lundi",
-                    "Tuesday": "Mardi",
-                    "Wednesday": "Mercredi",
-                    "Thursday": "Jeudi",
-                    "Friday": "Vendredi",
-                    "Saturday": "Samedi",
-                    "Sunday": "Dimanche"
-                }
-                %}
-
                 {% if elem.startAt and elem.adventure %}
                     {% set adventure = elem.adventure %}
 
@@ -143,7 +132,9 @@
                         <div class="rando-card">
                             <div class="rando-card-header">
                                 <div class="name">{{ adventure.name }}</div>
-                                <div class="date">{{ trans_day_hash[elem.startAt | date('l')] ~ elem.startAt | date(' d M Y') }}</div>
+                                <div class="date">
+                                    {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
+                                </div>
                             </div>
                             <div class="rando-card-body selected">
                                 <div class="rando-card-meta">
