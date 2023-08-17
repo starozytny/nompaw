@@ -1,0 +1,58 @@
+{% extends 'user/pages/holidays/template.html.twig' %}
+
+{% set page_title %}Projets{% endset %}
+{% set page_subtitle %}Liste des projets{% endset %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_projects_create') }}" class="btn btn-primary">
+                <span>Ajouter un projet</span>
+            </a>
+        </div>
+    </div>
+    <div class="page-default">
+        <div class="groupes">
+            {% for elem in projects %}
+                <div class="card">
+                    <div class="card-header">
+                        <div class="image">
+                            <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}">
+                        </div>
+                        <div class="name">
+                            <div class="semibold">{{ elem.name }}</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div>{{ elem.description | raw }}</div>
+                    </div>
+                    <div class="card-footer">
+                        {% if app.user.id == elem.author.id %}
+                            <a
+                                    href="{{ path('user_projects_update', {'slug': elem.slug}) }}"
+                                    class="btn-icon"
+                            >
+                                <span class="icon-pencil"></span>
+                                <span class="tooltip">Modifier</span>
+                            </a>
+                            <div class="delete-groupe"
+                                 data-context="groupes"
+                                 data-id="{{ elem.id }}"
+                                 data-name="{{ elem.name }}"
+                            >
+                                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
+                            </div>
+                        {% endif %}
+                        <a
+                                href="{{ path('user_projects_read', {'slug': elem.slug}) }}"
+                                class="btn-icon"
+                        >
+                            <span class="icon-right-arrow"></span>
+                            <span class="tooltip" style="width: 118px;">Accéder à la page</span>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

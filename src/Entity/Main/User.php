@@ -6,6 +6,7 @@ use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
+use App\Entity\Holiday\HoProject;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaLink;
@@ -148,6 +149,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaImage::class)]
     private Collection $raImages;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoProject::class)]
+    private Collection $hoProjects;
+
     /**
      * @throws Exception
      */
@@ -164,6 +168,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->raPropalDates = new ArrayCollection();
         $this->raPropalAdventures = new ArrayCollection();
         $this->raImages = new ArrayCollection();
+        $this->hoProjects = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -779,6 +784,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($raImage->getAuthor() === $this) {
                 $raImage->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoProject>
+     */
+    public function getHoProjects(): Collection
+    {
+        return $this->hoProjects;
+    }
+
+    public function addHoProject(HoProject $hoProject): self
+    {
+        if (!$this->hoProjects->contains($hoProject)) {
+            $this->hoProjects->add($hoProject);
+            $hoProject->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoProject(HoProject $hoProject): self
+    {
+        if ($this->hoProjects->removeElement($hoProject)) {
+            // set the owning side to null (unless already changed)
+            if ($hoProject->getAuthor() === $this) {
+                $hoProject->setAuthor(null);
             }
         }
 
