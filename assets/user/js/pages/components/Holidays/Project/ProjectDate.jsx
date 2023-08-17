@@ -187,7 +187,7 @@ export class ProjectDate extends Component{
     }
 
     render() {
-        const { mode, nStartAt, userId, authorId, dateId } = this.props;
+        const { mode, nStartAt, nEndAt, userId, authorId, dateId } = this.props;
         const { errors, loadData, startAt, endAt, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -212,6 +212,7 @@ export class ProjectDate extends Component{
                     ? <div className="propals">
                         <div className="propal selected">
                             {Sanitaze.toDateFormat(nStartAt, 'LL', '', false)}
+                            {nEndAt ? " au " + Sanitaze.toDateFormat(nEndAt, 'LL', "", false) : ""}
                         </div>
                     </div>
                     : <>
