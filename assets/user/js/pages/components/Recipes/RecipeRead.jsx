@@ -112,7 +112,7 @@ export class RecipeRead extends Component {
     }
 
     render () {
-        const { mode, elem, steps, ingre, coms } = this.props;
+        const { mode, elem, steps, ingre, coms, rate } = this.props;
         const { isMobile, context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare, description } = this.state;
 
         let content;
@@ -157,7 +157,7 @@ export class RecipeRead extends Component {
                         }
                     </div>}
                     <div className="rating">
-                        <Rate disabled defaultValue={elem.rate} />
+                        <Rate disabled allowHalf defaultValue={rate} />
                     </div>
 
                     {!isMobile
