@@ -34,7 +34,12 @@ export class Instructions extends Component {
         if(steps.length > 0){
             let self = this;
             steps.forEach((s, index) => {
-                self.setState({ [`step${index + 1}`]: { uid: uid(), value: s.content} })
+                self.setState({
+                    [`step${index + 1}`]: {
+                        uid: uid(), value: s.content,
+                        image0: s.image0File, image1: s.image1File, image2: s.image2File
+                    }
+                })
             })
         }else{
             this.setState({ step1: { uid: uid(), value: '' } })
@@ -75,14 +80,33 @@ export class Instructions extends Component {
         e.preventDefault();
 
         const { recipe } = this.props;
-        const { loadData } = this.state;
+        const { loadData, nbSteps } = this.state;
 
         this.setState({ errors: [] });
 
         if(!loadData){
             this.setState({ loadData: true })
             let self = this;
-            axios({ method: "PUT", url: Routing.generate(URL_UPDATE_ELEMENT, {'recipe': recipe.id}), data: this.state })
+            let url = Routing.generate(URL_UPDATE_ELEMENT, {'recipe': recipe.id});
+
+            let formData = new FormData();
+            formData.append("data", JSON.stringify(this.state));
+
+            for(let i = 1 ; i <= nbSteps ; i++){
+                for(let j = 0 ; j <= 2 ; j++){
+                    let name = 'image'+ j +'File-' + i;
+                    let stepsImage = document.getElementsByName(name);
+                    if(stepsImage){
+                        stepsImage.forEach(inputImg => {
+                            if(inputImg.files[0]){
+                                formData.append(name, inputImg.files[0]);
+                            }
+                        })
+                    }
+                }
+            }
+
+            axios({ method: "POST", url: url, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
                 .then(function (response) {
                     toastr.info('Recette mise à jour.');
                     self.setState({ loadData: false })
@@ -102,7 +126,7 @@ export class Instructions extends Component {
             steps.push(<div className="step" key={i}>
                 <div className="number">{i}</div>
                 {mode
-                    ? <StepFormulaire key={val.uid} content={val.value} step={i} recipe={recipe}
+                    ? <StepFormulaire key={val.uid} element={val} step={i} recipe={recipe}
                                      onUpdateData={this.handleUpdateContentStep}
                                      onRemoveStep={this.handleRemoveStep} />
                     : <div className="content">{parse(val.value)}</div>

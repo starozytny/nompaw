@@ -35,6 +35,14 @@
 
       .recipe-description{
         margin-bottom: 0.8rem;
+
+        .btn-icon{
+          width: 30px;
+        }
+
+        .form-group{
+          width: calc(100% - 30px);
+        }
       }
 
       .instructions{
@@ -199,9 +207,17 @@
       @include fontSemibold();
     }
 
+    .step-form{
+      width: calc(100% - 32px);
+    }
+
     .content{
       padding-top: 4px;
       width: calc(100% - 32px);
+    }
+
+    .line-tuto-step{
+      margin-bottom: 8px;
     }
   }
 
