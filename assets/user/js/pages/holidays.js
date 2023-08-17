@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
 import { ProjectDate } from "@userPages/Holidays/Project/ProjectDate";
+import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
 
 let el = document.getElementById("projects_update");
 if(el){
@@ -26,4 +27,9 @@ if(deletesProject){
 let projectDate = document.getElementById("project_date");
 if(projectDate){
     createRoot(projectDate).render(<ProjectDate {...projectDate.dataset} mode={projectDate.dataset.mode === "1"} />)
+}
+
+let projectHouse = document.getElementById("project_house");
+if(projectHouse){
+    createRoot(projectHouse).render(<ProjectHouse {...projectHouse.dataset} mode={projectHouse.dataset.mode === "1"} />)
 }

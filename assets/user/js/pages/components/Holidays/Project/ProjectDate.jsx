@@ -205,7 +205,7 @@ export class ProjectDate extends Component{
 
         return <div className="project-card">
             <div className="project-card-header">
-                <div className="name">{nStartAt ? "Date de la sélectionnée" : "Proposition de dates"}</div>
+                <div className="name">{nStartAt ? "Date sélectionnée" : "Proposition de dates"}</div>
             </div>
             <div className={`project-card-body${nStartAt ? " selected" : ""}`}>
                 {nStartAt

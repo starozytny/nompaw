@@ -4,6 +4,14 @@
 
 @import "../../propals.scss";
 
+.project-read{
+  @include flex(column, flex-start, flex-start, var(--espaceDiv));
+
+  & > div{
+    width: 100%;
+  }
+}
+
 .project-header{
   @include flex(column, flex-start, flex-start, var(--espaceDiv));
 }

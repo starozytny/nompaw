@@ -27,7 +27,7 @@ class RaPropalDate
     #[Groups(['pr_date_list'])]
     private array $votes = [];
 
-    #[ORM\ManyToOne(inversedBy: 'propalDates')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'propalDates')]
     #[ORM\JoinColumn(nullable: false)]
     private ?RaRando $rando = null;
 

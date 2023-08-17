@@ -61,9 +61,17 @@ class HoProject extends DataEntity
     #[Groups(['hopro_form'])]
     private ?HoPropalDate $propalDate = null;
 
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalHouse::class)]
+    private Collection $propalHouses;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[Groups(['hopro_form'])]
+    private ?HoPropalHouse $propalHouse = null;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
+        $this->propalHouses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -211,6 +219,48 @@ class HoProject extends DataEntity
     public function setPropalDate(?HoPropalDate $propalDate): self
     {
         $this->propalDate = $propalDate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalHouse>
+     */
+    public function getPropalHouses(): Collection
+    {
+        return $this->propalHouses;
+    }
+
+    public function addPropalHouse(HoPropalHouse $propalHouse): self
+    {
+        if (!$this->propalHouses->contains($propalHouse)) {
+            $this->propalHouses->add($propalHouse);
+            $propalHouse->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removePropalHouse(HoPropalHouse $propalHouse): self
+    {
+        if ($this->propalHouses->removeElement($propalHouse)) {
+            // set the owning side to null (unless already changed)
+            if ($propalHouse->getProject() === $this) {
+                $propalHouse->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getPropalHouse(): ?HoPropalHouse
+    {
+        return $this->propalHouse;
+    }
+
+    public function setPropalHouse(?HoPropalHouse $propalHouse): self
+    {
+        $this->propalHouse = $propalHouse;
 
         return $this;
     }

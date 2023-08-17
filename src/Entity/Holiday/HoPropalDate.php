@@ -31,11 +31,11 @@ class HoPropalDate
     #[Groups(['pr_date_list'])]
     private array $votes = [];
 
-    #[ORM\ManyToOne(inversedBy: 'propalDates')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'propalDates')]
     #[ORM\JoinColumn(nullable: false)]
     private ?HoProject $project = null;
 
-    #[ORM\ManyToOne(inversedBy: 'hoPropalDates')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'hoPropalDates')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['pr_date_list'])]
     private ?User $author = null;

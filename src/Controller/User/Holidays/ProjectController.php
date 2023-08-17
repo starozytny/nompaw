@@ -4,8 +4,10 @@ namespace App\Controller\User\Holidays;
 
 use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalDate;
+use App\Entity\Holiday\HoPropalHouse;
 use App\Repository\Holiday\HoProjectRepository;
 use App\Repository\Holiday\HoPropalDateRepository;
+use App\Repository\Holiday\HoPropalHouseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,17 +26,20 @@ class ProjectController extends AbstractController
     }
 
     #[Route('/projet/{slug}', name: 'read', options: ['expose' => true])]
-    public function read($slug, SerializerInterface $serializer,
-                         HoProjectRepository $repository, HoPropalDateRepository $propalDateRepository): Response
+    public function read($slug, SerializerInterface $serializer, HoProjectRepository $repository,
+                         HoPropalDateRepository $propalDateRepository, HoPropalHouseRepository $propalHouseRepository): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
-        $propalDates = $propalDateRepository->findBy(['project' => $obj]);
+        $propalDates  = $propalDateRepository->findBy(['project' => $obj]);
+        $propalHouses = $propalHouseRepository->findBy(['project' => $obj]);
 
-        $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => HoPropalDate::LIST]);
+        $propalDates  = $serializer->serialize($propalDates,  'json', ['groups' => HoPropalDate::LIST]);
+        $propalHouses = $serializer->serialize($propalHouses, 'json', ['groups' => HoPropalHouse::LIST]);
 
         return $this->render('user/pages/holidays/projects/read.html.twig', [
             'elem' => $obj,
             'propalDates' => $propalDates,
+            'propalHouses' => $propalHouses,
         ]);
     }
 

@@ -21,7 +21,7 @@ const URL_UPDATE_PROPAL = 'api_aventures_propals_adventure_update';
 const URL_DELETE_PROPAL = 'api_aventures_propals_adventure_delete';
 const URL_VOTE_PROPAL   = 'api_aventures_propals_adventure_vote';
 const URL_END_PROPAL    = 'api_aventures_propals_adventure_end';
-const URL_CANCEL_DATE   = 'api_aventures_randos_cancel_adventure';
+const URL_CANCEL_ADV    = 'api_aventures_randos_cancel_adventure';
 
 export class RandoAdventure extends Component {
     constructor(props) {
@@ -176,7 +176,7 @@ export class RandoAdventure extends Component {
 
         let self = this;
         this.cancelAdventure.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
-        axios({ method: "PUT", url: Routing.generate(URL_CANCEL_DATE, {'id': randoId}), data: {} })
+        axios({ method: "PUT", url: Routing.generate(URL_CANCEL_ADV, {'id': randoId}), data: {} })
             .then(function (response) {
                 location.reload();
             })
@@ -185,7 +185,7 @@ export class RandoAdventure extends Component {
     }
 
     render() {
-        const { mode, haveAdventure, advName, userId, status, authorId } = this.props;
+        const { mode, haveAdventure, advName, userId, authorId } = this.props;
         const { errors, loadData, name, duration, url, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }

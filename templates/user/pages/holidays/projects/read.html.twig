@@ -62,6 +62,21 @@
                     </div>
                 </div>
             </div>
+
+            <div class="project-content">
+                <div id="project_house"
+                     data-project-id="{{ elem.id }}"
+                     data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"
+                     data-house-url="{{ elem.propalHouse ? elem.propalHouse.url : '' }}"
+                     data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
+                     data-propals="{{ propalHouses }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-author-id="{{ elem.author.id }}"
+                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

@@ -100,4 +100,13 @@ class ProjectController extends AbstractController
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
+
+    #[Route('/cancel/house/{id}', name: 'cancel_house', options: ['expose' => true], methods: 'PUT')]
+    public function cancelHouse(HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository): Response
+    {
+        $obj->setPropalHouse(null);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
 }
