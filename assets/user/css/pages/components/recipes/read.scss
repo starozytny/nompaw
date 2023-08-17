@@ -211,13 +211,29 @@
       width: calc(100% - 32px);
     }
 
-    .content{
-      padding-top: 4px;
-      width: calc(100% - 32px);
-    }
-
     .line-tuto-step{
       margin-bottom: 8px;
+    }
+
+    .content{
+      padding-top: 4px;
+      width: 100%;
+    }
+
+    .images{
+      @include flex(row, flex-start, flex-start, var(--espaceEls));
+      margin-top: var(--espaceDiv);
+
+      .image{
+        min-height: 280px;
+        max-height: 280px;
+        overflow: hidden;
+
+        img{
+          width: 100%;
+          object-fit: cover;
+        }
+      }
     }
   }
 
@@ -243,6 +259,27 @@
           text-align: right;
           font-size: 12px;
           font-style: italic;
+        }
+      }
+    }
+  }
+
+  //                      __   _____ __    ___    __
+  //                     | _| |___  / /_  ( _ )  |_ |
+  //    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
+  //   |_____|_____|_____| |    / /| (_) | (_) |  | |_____|_____|_____|
+  //                     | |   /_/  \___/ \___/   | |
+  //                     |__|                    |__|
+  @media (min-width:768px) {
+    .steps{
+      .images{
+        .image{
+          width: 33%;
+          min-height: initial;
+
+          img{
+            height: 280px;
+          }
         }
       }
     }

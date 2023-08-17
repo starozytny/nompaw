@@ -37,7 +37,7 @@ class FileUploader
         $this->slugger = $slugger;
     }
 
-    public function upload(UploadedFile $file, $folder=null, $isPublic=true, $reduce=false): string
+    public function upload(UploadedFile $file, $folder=null, $isPublic=true, $reducePixel=false): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
@@ -59,8 +59,8 @@ class FileUploader
 
             $layer = ImageWorkshop::initFromPath($fileOri);
 
-            if($reduce){
-                $layer->resizeInPixel(null, 500, true);
+            if($reducePixel){
+                $layer->resizeInPixel(null, $reducePixel, true);
             }else if($layer->getHeight() > 2160){
                 $layer->resizeInPixel(null, 2160, true);
             }
@@ -108,7 +108,7 @@ class FileUploader
         }
     }
 
-    public function replaceFile($file, $folderName, $oldFileName = null, $isPublic = true): ?string
+    public function replaceFile($file, $folderName, $oldFileName = null, $isPublic = true, $reducePixel = false): ?string
     {
         if($file){
             if($oldFileName){
@@ -120,7 +120,7 @@ class FileUploader
                 }
             }
 
-            return $this->upload($file, $folderName, $isPublic);
+            return $this->upload($file, $folderName, $isPublic, $reducePixel);
         }
 
         return null;

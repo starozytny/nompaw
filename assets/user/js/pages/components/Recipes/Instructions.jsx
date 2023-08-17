@@ -129,7 +129,29 @@ export class Instructions extends Component {
                     ? <StepFormulaire key={val.uid} element={val} step={i} recipe={recipe}
                                      onUpdateData={this.handleUpdateContentStep}
                                      onRemoveStep={this.handleRemoveStep} />
-                    : <div className="content">{parse(val.value)}</div>
+                    : <div className="step-form">
+                        <div className="content">{parse(val.value)}</div>
+                        <div className="images">
+                            {val.image0
+                                ? <div className="image">
+                                    <img src={val.image0} alt={'etape-' + i + "-illustration"}/>
+                                </div>
+                                : null
+                            }
+                            {val.image1
+                                ? <div className="image">
+                                    <img src={val.image1} alt={'etape-' + i + "-illustration"}/>
+                                </div>
+                                : null
+                            }
+                            {val.image2
+                                ? <div className="image">
+                                    <img src={val.image2} alt={'etape-' + i + "-illustration"}/>
+                                </div>
+                                : null
+                            }
+                        </div>
+                    </div>
                 }
 
             </div>)

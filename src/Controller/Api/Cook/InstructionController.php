@@ -51,7 +51,8 @@ class InstructionController extends AbstractController
                             default => null,
                         };
 
-                        $fileName = $fileUploader->replaceFile($file, CoStep::FOLDER . '/' . $recipe->getSlug(), $oldFile);
+                        $folder = CoStep::FOLDER . '/' . $recipe->getSlug();
+                        $fileName = $fileUploader->replaceFile($file, $folder, $oldFile, true, 450);
 
                         $step = match ($j) {
                             0 => $step->setImage0($fileName),
