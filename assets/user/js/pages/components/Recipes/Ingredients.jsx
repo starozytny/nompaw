@@ -68,8 +68,6 @@ export class Ingredients extends Component
         this.setState({ errors: [] });
 
         let paramsToValidate = [
-            {type: "text",  id: 'ingreUnit', value: ingreUnit},
-            {type: "text",  id: 'ingreNombre', value: ingreNombre},
             {type: "text",  id: 'ingreName', value: ingreName},
         ];
 
