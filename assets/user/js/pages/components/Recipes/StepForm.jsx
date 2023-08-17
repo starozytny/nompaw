@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import axios from "axios";
+import toastr from "toastr";
+import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
+
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { LoaderTxt }  from "@commonComponents/Elements/Loader";
 import { TinyMCE }    from "@commonComponents/Elements/TinyMCE";
@@ -9,10 +13,10 @@ import { InputFile }  from "@commonComponents/Elements/Fields";
 
 import Formulaire   from "@commonFunctions/formulaire";
 
+const URL_DELETE_IMAGE = "api_cook_instructions_delete_image";
+
 export function StepFormulaire ({ step, recipe, element, onUpdateData, onRemoveStep })
 {
-    console.log(element)
-
     return <Form
         step={step}
         recipe={recipe}
@@ -40,11 +44,17 @@ class Form extends Component {
         this.state = {
             errors: [],
             loadData: true,
+            loadDelete: false,
             openImage1: !!props.image1File,
             openImage2: !!props.image2File,
+            image0File: props.image0File,
+            image1File: props.image1File,
+            image2File: props.image2File,
+            imageToDelete: null
         }
 
         this.delete = React.createRef();
+        this.deleteFile = React.createRef();
         this.file0 = React.createRef();
         this.file1 = React.createRef();
         this.file2 = React.createRef();
@@ -79,13 +89,42 @@ class Form extends Component {
         this.delete.current.handleClose();
     }
 
+    handleRemoveFile = () => {
+        const { step, recipe } = this.props;
+        const { imageToDelete, loadDelete } = this.state;
+
+        if(!loadDelete){
+            this.setState({ loadDelete: true })
+
+            let self = this;
+            axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, {'recipe': recipe.id, 'position': step, 'nb': imageToDelete}), data: {} })
+                .then(function (response) {
+                    toastr.info('Illustration supprimée.');
+
+                    let name = 'image' + imageToDelete + 'File';
+                    self.setState({ [name]: null })
+
+                    self.deleteFile.current.handleClose();
+                })
+                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+                .then(function () { self.setState({ loadDelete: false }) })
+            ;
+        }
+
+    }
+
     handleDelete = () => {
         this.delete.current.handleClick();
     }
 
+    handleDeleteFile = (nb) => {
+        this.setState({ imageToDelete: nb })
+        this.deleteFile.current.handleClick();
+    }
+
     render () {
-        const { step, recipe, image0File, image1File, image2File } = this.props;
-        const { errors, loadData, openImage1, openImage2 } = this.state;
+        const { step, recipe } = this.props;
+        const { errors, loadData, loadDelete, openImage1, openImage2, image0File, image1File, image2File } = this.state;
 
         let params  = { errors: errors, onCustomAction: this.handleFile };
 
@@ -102,31 +141,51 @@ class Form extends Component {
             </div>
 
             <div className="line line-3">
-                <InputFile ref={this.file0} type="simple" identifiant={"image0File-" + step} valeur={image0File}
-                           placeholder="Glissez et déposer une image" {...params}>
-                    Illustration 1
-                </InputFile>
-                {openImage1
-                    ? <InputFile ref={this.file1} type="simple" identifiant={"image1File-" + step} valeur={image1File}
-                                 placeholder="Glissez et déposer une image" {...params}>
-                        Illustration 2
+                <div className="form-group">
+                    <InputFile ref={this.file0} type="simple" identifiant={"image0File-" + step} valeur={image0File}
+                               placeholder="Glissez et déposer une image" {...params}>
+                        Illustration 1
                     </InputFile>
+                    {image0File
+                        ? <Button type="danger" onClick={() => this.handleDeleteFile(0)} isLoader={loadDelete}>Supprimer l'illustration 1</Button>
+                        : null
+                    }
+                </div>
+                {openImage1
+                    ? <div className="form-group">
+                        <InputFile ref={this.file1} type="simple" identifiant={"image1File-" + step} valeur={image1File}
+                                   placeholder="Glissez et déposer une image" {...params}>
+                            Illustration 2
+                        </InputFile>
+                        {image1File
+                            ? <Button type="danger" onClick={() => this.handleDeleteFile(1)} isLoader={loadDelete}>Supprimer l'illustration 2</Button>
+                            : null
+                        }
+                    </div>
                     : null
                 }
                 {openImage2
-                    ? <InputFile ref={this.file2} type="simple" identifiant={"image2File-" + step} valeur={image2File}
-                                 placeholder="Glissez et déposer une image" {...params}>
-                        Illustration 3
-                    </InputFile>
+                    ? <div className="form-group">
+                        <InputFile ref={this.file2} type="simple" identifiant={"image2File-" + step} valeur={image2File}
+                                   placeholder="Glissez et déposer une image" {...params}>
+                            Illustration 3
+                        </InputFile>
+                        {image2File
+                            ? <Button type="danger" onClick={() => this.handleDeleteFile(2)} isLoader={loadDelete}>Supprimer l'illustration 3</Button>
+                            : null
+                        }
+                    </div>
                     : null
                 }
             </div>
 
             <Modal ref={this.delete} identifiant={`delete-content-${step}`} maxWidth={414} title={`Supprimer l'étape ${step}`}
                    content={<p>Etes-vous sûr de vouloir supprimer cette étape ? <br/><br/> <b className="txt-primary">Valider les modifications</b> pour que la suppression soit prise en compte. </p>}
-                   footer={<>
-                       <Button onClick={this.handleRemove} type="danger">Confirmer la suppression</Button>
-                   </>} />
+                   footer={<Button onClick={this.handleRemove} type="danger">Confirmer la suppression</Button>} />
+
+            <Modal ref={this.deleteFile} identifiant={`delete-file-${step}`} maxWidth={568} title={`Supprimer l'illustration ${step}`}
+                   content={<p>Etes-vous sûr de vouloir supprimer cette illustration ? <br/><br/> Elle sera supprimé <b>directement après avoir </b><b className="txt-danger">Confirmé la suppression</b>.</p>}
+                   footer={<Button onClick={this.handleRemoveFile} type="danger">Confirmer la suppression</Button>} />
         </div>
     }
 }

@@ -40,7 +40,6 @@ class InstructionController extends AbstractController
 
             $name = 'step' . $i;
             if($dataArray[$name] != ""){
-
                 for($j = 0 ; $j <= 2 ; $j++){
                     $file = $request->files->get('image' . $j . 'File-' . $i);
                     if ($file) {
@@ -88,5 +87,42 @@ class InstructionController extends AbstractController
                            FileUploader $fileUploader, CoRecipeRepository $repository, CoStepRepository $stepRepository): Response
     {
         return $this->submitForm($repository, $recipe, $request, $apiResponse, $validator, $fileUploader, $stepRepository);
+    }
+
+    #[Route('/recipe/{recipe}/delete/{position}/{nb}', name: 'delete_image', options: ['expose' => true], methods: 'DELETE')]
+    public function deleteImage(CoRecipe $recipe, $position, $nb, ApiResponse $apiResponse, FileUploader $fileUploader,
+                                CoStepRepository $stepRepository): Response
+    {
+        $step = null;
+        foreach($recipe->getSteps() as $s){
+            if($s->getPosition() == $position){
+                $step = $s;
+            }
+        }
+
+        if(!$step){
+            return $apiResponse->apiJsonResponseBadRequest("Etape introuvable.");
+        }
+
+        $image = match ((int) $nb) {
+            0 => $step->getImage0(),
+            1 => $step->getImage1(),
+            2 => $step->getImage2(),
+            default => null,
+        };
+
+        $folder = CoStep::FOLDER . '/' . $recipe->getSlug();
+        $fileUploader->deleteFile($image, $folder);
+
+        $step = match ((int) $nb) {
+            0 => $step->setImage0(null),
+            1 => $step->setImage1(null),
+            2 => $step->setImage2(null),
+            default => null,
+        };
+
+        $stepRepository->save($step, true);
+
+        return $apiResponse->apiJsonResponseSuccessful("ok");
     }
 }

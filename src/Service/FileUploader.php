@@ -102,6 +102,7 @@ class FileUploader
     {
         if($fileName){
             $file = $this->getDirectory($isPublic) . $folderName . '/' . $fileName;
+            dump($file);
             if(file_exists($file)){
                 unlink($file);
             }
