@@ -29,17 +29,33 @@ class InstructionController extends AbstractController
         $steps = $stepRepository->findBy(['recipe' => $recipe]);
         $dataArray = (array) $data; $order = 1;
 
+        dump($data);
+
         for ($i = 1 ; $i <= $data->nbSteps ; $i++){
-
-            $step = new CoStep();
-            foreach($steps as $s){
-                if($s->getPosition() == $i){
-                    $step = $s;
-                }
-            }
-
             $name = 'step' . $i;
             if($dataArray[$name] != ""){
+                $step = new CoStep();
+                $oldStep = null;
+                foreach($steps as $s){
+                    if($s->getPosition() == $i){
+                        $step = $s;
+                    }
+
+                    if(isset($dataArray[$name]->oldPosition)){
+                        if($s->getPosition() == $dataArray[$name]->oldPosition){
+                            $oldStep = $s;
+                        }
+                    }
+                }
+
+                if($oldStep){
+                    $step->setImage0($oldStep->getImage0());
+                    $step->setImage1($oldStep->getImage1());
+                    $step->setImage2($oldStep->getImage2());
+
+                    $stepRepository->remove($oldStep);
+                }
+
                 for($j = 0 ; $j <= 2 ; $j++){
                     $file = $request->files->get('image' . $j . 'File-' . $i);
                     if ($file) {

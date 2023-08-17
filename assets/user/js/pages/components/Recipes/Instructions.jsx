@@ -69,7 +69,13 @@ export class Instructions extends Component {
         let newNbSteps = nbSteps - 1;
         if(step !== nbSteps){
             for(let i = step + 1; i <= nbSteps ; i++){
-                this.setState({ [`step${i - 1}`]: { uid: uid(), value: this.state[`step${i}`].value } })
+                let s = this.state[`step${i}`];
+                this.setState({
+                    [`step${i - 1}`]: {
+                        uid: uid(), value: s.value, oldPosition: i,
+                        image0: s.image0, image1: s.image1, image2: s.image2
+                    }
+                })
             }
         }
 

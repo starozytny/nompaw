@@ -114,7 +114,13 @@ class Form extends Component {
     }
 
     handleDelete = () => {
-        this.delete.current.handleClick();
+        const { image0File, image1File, image2File } = this.state;
+
+        if(image0File || image1File || image2File){
+            toastr.error('Veuillez supprimer les illustrations avant de supprimer l\'étape.');
+        }else{
+            this.delete.current.handleClick();
+        }
     }
 
     handleDeleteFile = (nb) => {
