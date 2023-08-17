@@ -67,7 +67,7 @@ export class ProjectDate extends Component{
         this.setState({
             context: context, propal: propal,
             startAt: propal ? moment(propal.startAt).format('DD/MM/Y') : "",
-            endAt: propal ? moment(propal.endAt).format('DD/MM/Y') : ""
+            endAt: propal && propal.endAt ? moment(propal.endAt).format('DD/MM/Y') : ""
         })
         this[identifiant].current.handleClick();
     }
@@ -230,7 +230,10 @@ export class ProjectDate extends Component{
                                 return <div className="propal" key={index}>
                                     <div className={`selector${active}`} onClick={onVote}></div>
                                     <div className="propal-body" onClick={onVote}>
-                                        <div className="name">{Sanitaze.toDateFormat(el.startAt, 'LL', "", false)}</div>
+                                        <div className="name">
+                                            {Sanitaze.toDateFormat(el.startAt, 'LL', "", false)}
+                                            {el.endAt ? " au " + Sanitaze.toDateFormat(el.endAt, 'LL', "", false) : ""}
+                                        </div>
                                     </div>
                                     <div className="propal-actions">
                                         {mode || el.author.id === parseInt(userId)
