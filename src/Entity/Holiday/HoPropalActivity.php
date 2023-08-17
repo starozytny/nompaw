@@ -2,47 +2,54 @@
 
 namespace App\Entity\Holiday;
 
+use App\Entity\DataEntity;
 use App\Entity\Main\User;
-use App\Repository\Holiday\HoPropalHouseRepository;
+use App\Repository\Holiday\HoPropalActivityRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: HoPropalHouseRepository::class)]
-class HoPropalHouse
+#[ORM\Entity(repositoryClass: HoPropalActivityRepository::class)]
+class HoPropalActivity extends DataEntity
 {
-    const LIST = ["pr_house_list"];
+    const FOLDER = "images/entity/holidays/activities/";
+
+    const LIST = ["pr_act_list"];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['pr_house_list'])]
+    #[Groups(['pr_act_list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['pr_house_list'])]
+    #[Groups(['pr_act_list'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::ARRAY)]
-    #[Groups(['pr_house_list'])]
+    #[Groups(['pr_act_list'])]
     private array $votes = [];
 
-    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'propalHouses')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'propalActivities')]
     #[ORM\JoinColumn(nullable: false)]
     private ?HoProject $project = null;
 
-    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'hoPropalHouses')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'hoPropalActivities')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['pr_house_list'])]
+    #[Groups(['pr_act_list'])]
     private ?User $author = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['pr_house_list'])]
+    #[Groups(['pr_act_list'])]
     private ?string $url = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['pr_house_list'])]
+    #[Groups(['pr_act_list'])]
     private ?float $price = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['pr_act_list'])]
+    private ?string $image = null;
 
     public function getId(): ?int
     {
@@ -119,5 +126,23 @@ class HoPropalHouse
         $this->price = $price;
 
         return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    #[Groups(['pr_act_list'])]
+    public function getImageFile()
+    {
+        return $this->getFileOrDefault($this->getImage(), self::FOLDER . $this->project->getId());
     }
 }

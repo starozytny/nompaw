@@ -3,10 +3,8 @@
 namespace App\Controller\Api\Holidays;
 
 use App\Entity\Holiday\HoProject;
-use App\Entity\Holiday\HoPropalDate;
 use App\Entity\Holiday\HoPropalHouse;
 use App\Repository\Holiday\HoProjectRepository;
-use App\Repository\Holiday\HoPropalDateRepository;
 use App\Repository\Holiday\HoPropalHouseRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataHolidays;

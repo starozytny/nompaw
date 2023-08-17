@@ -76,6 +76,15 @@
                 >
                     {% include "layout/components/loader.html.twig" %}
                 </div>
+                <div id="project_activities"
+                     data-project-id="{{ elem.id }}"
+                     data-propals="{{ propalActivities }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-author-id="{{ elem.author.id }}"
+                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
             </div>
         </div>
     </div>

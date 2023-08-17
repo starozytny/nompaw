@@ -68,10 +68,14 @@ class HoProject extends DataEntity
     #[Groups(['hopro_form'])]
     private ?HoPropalHouse $propalHouse = null;
 
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalActivity::class)]
+    private Collection $propalActivities;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
         $this->propalHouses = new ArrayCollection();
+        $this->propalActivities = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -261,6 +265,36 @@ class HoProject extends DataEntity
     public function setPropalHouse(?HoPropalHouse $propalHouse): self
     {
         $this->propalHouse = $propalHouse;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalActivity>
+     */
+    public function getPropalActivities(): Collection
+    {
+        return $this->propalActivities;
+    }
+
+    public function addPropalActivity(HoPropalActivity $propalActivity): self
+    {
+        if (!$this->propalActivities->contains($propalActivity)) {
+            $this->propalActivities->add($propalActivity);
+            $propalActivity->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removePropalActivity(HoPropalActivity $propalActivity): self
+    {
+        if ($this->propalActivities->removeElement($propalActivity)) {
+            // set the owning side to null (unless already changed)
+            if ($propalActivity->getProject() === $this) {
+                $propalActivity->setProject(null);
+            }
+        }
 
         return $this;
     }

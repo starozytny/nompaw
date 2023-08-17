@@ -7,6 +7,7 @@ use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
 use App\Entity\Holiday\HoProject;
+use App\Entity\Holiday\HoPropalActivity;
 use App\Entity\Holiday\HoPropalDate;
 use App\Entity\Holiday\HoPropalHouse;
 use App\Entity\Rando\RaGroupe;
@@ -40,7 +41,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list', 'pr_house_list', 'ra_img_list', 'rando_form'])]
+    #[Groups([
+        'user_list', 'user_form', 'com_read', 'user_select',
+        'pr_date_list', 'pr_house_list', 'pr_act_list',
+        'ra_img_list', 'rando_form'
+    ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -160,6 +165,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalHouse::class)]
     private Collection $hoPropalHouses;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalActivity::class)]
+    private Collection $hoPropalActivities;
+
     /**
      * @throws Exception
      */
@@ -179,6 +187,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->hoProjects = new ArrayCollection();
         $this->hoPropalDates = new ArrayCollection();
         $this->hoPropalHouses = new ArrayCollection();
+        $this->hoPropalActivities = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -884,6 +893,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($hoPropalHouse->getAuthor() === $this) {
                 $hoPropalHouse->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalActivity>
+     */
+    public function getHoPropalActivities(): Collection
+    {
+        return $this->hoPropalActivities;
+    }
+
+    public function addHoPropalActivity(HoPropalActivity $hoPropalActivity): self
+    {
+        if (!$this->hoPropalActivities->contains($hoPropalActivity)) {
+            $this->hoPropalActivities->add($hoPropalActivity);
+            $hoPropalActivity->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalActivity(HoPropalActivity $hoPropalActivity): self
+    {
+        if ($this->hoPropalActivities->removeElement($hoPropalActivity)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalActivity->getAuthor() === $this) {
+                $hoPropalActivity->setAuthor(null);
             }
         }
 

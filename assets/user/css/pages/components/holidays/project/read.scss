@@ -13,7 +13,7 @@
 }
 
 .project-header{
-  @include flex(column, flex-start, flex-start, var(--espaceDiv));
+  @include flex(column, stretch, flex-start, var(--espaceDiv));
 }
 
 .project-title{
@@ -61,6 +61,18 @@
       background-color: var(--primaryOpacity1);
       border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
     }
+
+    .image{
+      width: 120px;
+      max-height: 180px;
+      overflow: hidden;
+      cursor: pointer;
+
+      img{
+        object-fit: cover;
+        height: 100%;
+      }
+    }
   }
 
   .project-card-footer{
@@ -85,6 +97,27 @@
   }
 }
 
+.propals{
+  .propal{
+
+    .propal-body-with-image{
+      width: calc(100% - 40px - 64px - 25px);
+    }
+
+    .propal-actions-activities{
+      width: 64px;
+    }
+  }
+}
+
+.project-content{
+  @include flex(column, flex-start, flex-start, var(--espaceDiv));
+
+  & > div{
+    width: 100%;
+  }
+}
+
 //                      __   _____ __    ___    __
 //                     | _| |___  / /_  ( _ )  |_ |
 //    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
@@ -98,5 +131,18 @@
 
   .project-title, .project-propals{
     width: 50%;
+  }
+
+  .propals{
+    .propal{
+      .propal-body-with-image{
+        @include flex(row, flex-start, flex-start, var(--espaceEls));
+
+        .image{
+          width: 180px;
+          max-height: 240px;
+        }
+      }
+    }
   }
 }

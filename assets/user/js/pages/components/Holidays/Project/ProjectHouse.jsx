@@ -219,7 +219,7 @@ export class ProjectHouse extends Component{
                                             <span onClick={onVote}>{el.name}</span>
                                             {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo" target="_blank">
                                                 <span className="icon-link"></span>
-                                                <span className="tooltip">Topo</span>
+                                                <span className="tooltip">Lien externe</span>
                                             </a>}
                                         </div>
                                         <div className="duration" onClick={onVote}>
