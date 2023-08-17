@@ -51,7 +51,7 @@
                         <div class="col-1">
                             <div>
                                 <h2>{{ next.name }}</h2>
-                                <div class="subtitle">{{ next.description | raw }}</div>
+                                <div class="subtitle" style="margin-bottom: 12px;">{{ next.description | raw }}</div>
                                 <div class="subtitle sub-icon" style="margin-top: 4px;">
                                     <span class="icon-calendar"></span>
                                     <span>
@@ -69,7 +69,7 @@
                                             <span>{{ next.adventure.duration | date('H\\hi') }}</span>
                                         </div>
                                     {% endif %}
-                                    {% if next.adventure.url %}
+                                    {% if next.adventure.url and next.adventure.url != "https://" %}
                                         <div class="subtitle sub-icon" style="margin-top: 6px;">
                                             <span class="icon-link"></span>
                                             <span><a href="{{ next.adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
@@ -109,7 +109,7 @@
 
                             <div class="cta">
                                 <a href="{{ path('user_aventures_randos_read', {'slug': next.slug}) }}" class="btn btn-primary">
-                                    <span>Voir la rando</span>
+                                    <span>Voir l'aventure</span>
                                     <span class="icon-right-arrow"></span>
                                 </a>
                             </div>
