@@ -171,10 +171,14 @@
         @include flex(row, flex-start, flex-start, 8px);
       }
 
-      &.active,
-      &:hover{
+      &.active{
         .item-box{
-          background-color: var(--color0);
+          background-color: var(--primary);
+        }
+      }
+      &:not(.active):hover{
+        .item-box{
+          background-color: var(--primaryOpacity4);
         }
       }
     }
