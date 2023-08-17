@@ -190,8 +190,6 @@ export class RandoAdventure extends Component {
 
         let params = { errors: errors, onChange: this.handleChange }
 
-        console.log(haveAdventure);
-
         return <div className="rando-card">
             <div className="rando-card-header">
                 <div className="name">{haveAdventure ? "Aventure sélectionnée" : "Proposition d'aventures"}</div>
@@ -272,7 +270,7 @@ export class RandoAdventure extends Component {
                    content={<>
                        <div className="line line-2">
                            <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
-                           <Input identifiant="duration" valeur={duration} placeholder="00h00" {...params}>Horaire du début</Input>
+                           <Input identifiant="duration" valeur={duration} placeholder="00h00" {...params}>Durée</Input>
                        </div>
                        <div className="line">
                            <Input identifiant="url" valeur={url} {...params}>Lien du topo</Input>
