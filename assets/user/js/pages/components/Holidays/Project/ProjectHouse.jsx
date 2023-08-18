@@ -170,15 +170,13 @@ export class ProjectHouse extends Component{
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">🏠 Hébergement</div>
-                {(mode || authorId === parseInt(userId))
-                    ? <div className="actions">
-                        <ButtonIcon type="danger" icon="trash" text="Annuler l'hébergement"
-                                    onClick={() => this.handleModal('cancelHouse', 'delete', null)}
-                        />
-                    </div>
-                    : null
-                }
                 <div className="actions">
+                    {(mode || authorId === parseInt(userId))
+                        ? <ButtonIcon type="danger" icon="trash" text="Annuler l'hébergement"
+                                      onClick={() => this.handleModal('cancelHouse', 'delete', null)}
+                        />
+                        : null
+                    }
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
@@ -191,11 +189,14 @@ export class ProjectHouse extends Component{
                         : null
                     }
                     {houseName
-                        ? <div className="propal selected" style={{ flexDirection: 'column' }}>
-                            {houseUrl ? <a href={houseUrl} target="_blank" className="txt-link">
-                                <span>{houseName}</span>
-                                <span className="icon-link" />
-                            </a> : ""}
+                        ? <div className="propal" style={{ flexDirection: 'column' }}>
+                            {houseUrl
+                                ? <a href={houseUrl} target="_blank" className="txt-link">
+                                    <span>{houseName}</span>
+                                    <span className="icon-link" />
+                                </a>
+                                : <span>{houseName}</span>
+                            }
                         </div>
                         : <>
                             {data.map((el, index) => {

@@ -103,6 +103,14 @@
     .name{
       text-transform: uppercase;
     }
+
+    & > div{
+      width: 100%;
+    }
+
+    .actions{
+      @include flex(column, flex-end, flex-end, var(--espaceEls));
+    }
   }
 
   .project-card-footer-total{
@@ -111,5 +119,23 @@
     @include fontBold();
     font-size: 22px;
     color: var(--warning);
+  }
+}
+
+
+
+//                      __   _____ __    ___    __
+//                     | _| |___  / /_  ( _ )  |_ |
+//    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
+//   |_____|_____|_____| |    / /| (_) | (_) |  | |_____|_____|_____|
+//                     | |   /_/  \___/ \___/   | |
+//                     |__|                    |__|
+@media (min-width:768px) {
+  .project-card:not(.project-card-date){
+    .project-card-header{
+      .actions{
+        flex-direction: row;
+      }
+    }
   }
 }

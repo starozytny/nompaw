@@ -165,7 +165,7 @@ export class ProjectActivities extends Component{
             <div className="project-card-body">
                 <div className="propals">
                     {textActivities
-                        ? <div className="propal">
+                        ? <div className="propal propal-text">
                             <div dangerouslySetInnerHTML={{__html: textActivities}}></div>
                         </div>
                         : null

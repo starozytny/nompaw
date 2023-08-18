@@ -126,6 +126,7 @@ export class ProjectLifestyle extends Component{
         const { errors, name, unit, price, data, element, texteLifestyle, textLifestyle } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
+        let totalPrice = 0;
 
         return <div className="project-card">
             <div className="project-card-header">
@@ -137,12 +138,15 @@ export class ProjectLifestyle extends Component{
             <div className="project-card-body">
                 <div className="propals">
                     {textLifestyle
-                        ? <div className="propal">
+                        ? <div className="propal propal-text">
                             <div dangerouslySetInnerHTML={{__html: textLifestyle}}></div>
                         </div>
                         : null
                     }
                     {data.map((el, index) => {
+
+                        totalPrice += el.price ? el.price : 0;
+
                         return <div className="propal" key={index}>
                             <div className="propal-body propal-body-lifestyle">
                                 <div className="name">
@@ -152,7 +156,7 @@ export class ProjectLifestyle extends Component{
                                     {el.price ? Sanitaze.toFormatCurrency(el.price) : ""}
                                 </div>
                             </div>
-                            <div className="propal-actions propal-actions-activities">
+                            <div className="propal-actions propal-actions-lifestyle">
                                 <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
                                 <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
                             </div>
@@ -168,7 +172,7 @@ export class ProjectLifestyle extends Component{
 
             <div className="project-card-footer project-card-footer-total">
                 <div>
-                    Calcul
+                    {Sanitaze.toFormatCurrency(totalPrice)}
                 </div>
             </div>
 

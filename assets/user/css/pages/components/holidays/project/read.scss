@@ -121,6 +121,10 @@
     .propal-body-todos{
       width: calc(100% - 20px - 64px - 10px);
     }
+
+    .propal-actions-lifestyle, .propal-actions-todos{
+      width: 64px;
+    }
   }
 
   .propal-route{
@@ -130,7 +134,7 @@
 
   .propal-text{
     &:hover{
-      background: var(--color0Opacity4);
+      background: none;
     }
   }
 }
