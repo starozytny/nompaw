@@ -53,7 +53,7 @@ class HoPropalActivity extends DataEntity
 
     #[ORM\Column]
     #[Groups(['pr_act_list'])]
-    private ?bool $isSelected = null;
+    private ?bool $isSelected = false;
 
     public function getId(): ?int
     {
