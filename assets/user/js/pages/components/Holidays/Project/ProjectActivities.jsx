@@ -67,6 +67,7 @@ export class ProjectActivities extends Component{
 
     handleModal = (identifiant, context, propal) => {
         modalFormText(this);
+        modalFormPropal(this);
         modalDeletePropal(this);
         modalEndPropal(this);
         modalCancelPropal(this);

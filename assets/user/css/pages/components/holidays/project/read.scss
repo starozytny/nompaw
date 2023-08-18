@@ -109,6 +109,14 @@
   }
 }
 
+.project-content{
+  @include flex(column, flex-start, flex-start, var(--espaceLayout));
+
+  & > div{
+    width: 100%;
+  }
+}
+
 .propals{
   .propal{
 
@@ -144,14 +152,6 @@
     &.active{
       background-color: var(--primary);
     }
-  }
-}
-
-.project-content{
-  @include flex(column, flex-start, flex-start, var(--espaceDiv));
-
-  & > div{
-    width: 100%;
   }
 }
 
