@@ -7,6 +7,7 @@ use App\Repository\Holiday\HoProjectRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataHolidays;
 use App\Service\FileUploader;
+use App\Service\SanitizeData;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -76,6 +77,36 @@ class ProjectController extends AbstractController
                            DataHolidays $dataEntity, HoProjectRepository $repository, FileUploader $fileUploader): Response
     {
         return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $fileUploader);
+    }
+
+    #[Route('/texte/update/{type}/{id}', name: 'update_text', options: ['expose' => true], methods: 'PUT')]
+    public function updateTexte(Request $request, $type, HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository,
+                                ValidatorService $validator, SanitizeData $sanitizeData): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        switch ($type){
+            case "route":
+                $obj->setTextRoute($sanitizeData->trimData($data->texte->html));
+                $obj->setIframeRoute($sanitizeData->trimData($data->iframe));
+                break;
+            case "todos": $obj->setTextTodos($sanitizeData->trimData($data->texte->html)); break;
+            case "lifestyle": $obj->setTextLifestyle($sanitizeData->trimData($data->texte->html)); break;
+            case "activities": $obj->setTextActivities($sanitizeData->trimData($data->texte->html)); break;
+            case "house": $obj->setTextHouse($sanitizeData->trimData($data->texte->html)); break;
+            default: break;
+        }
+
+        $noErrors = $validator->validate($obj);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, HoProject::TEXTE);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

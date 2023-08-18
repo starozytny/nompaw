@@ -17,11 +17,12 @@ class HoProject extends DataEntity
     const FOLDER = "images/entity/holidays/cover/";
 
     const FORM = ['hopro_form'];
+    const TEXTE = ['hopro_text'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['hopro_form'])]
+    #[Groups(['hopro_form', 'hopro_route'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -71,11 +72,43 @@ class HoProject extends DataEntity
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalActivity::class)]
     private Collection $propalActivities;
 
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoTodo::class)]
+    private Collection $todos;
+
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoLifestyle::class)]
+    private Collection $lifestyles;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textRoute = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $iframeRoute = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textHouse = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textLifestyle = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textActivities = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textTodos = null;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
         $this->propalHouses = new ArrayCollection();
         $this->propalActivities = new ArrayCollection();
+        $this->todos = new ArrayCollection();
+        $this->lifestyles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -295,6 +328,138 @@ class HoProject extends DataEntity
                 $propalActivity->setProject(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoTodo>
+     */
+    public function getTodos(): Collection
+    {
+        return $this->todos;
+    }
+
+    public function addTodo(HoTodo $todo): self
+    {
+        if (!$this->todos->contains($todo)) {
+            $this->todos->add($todo);
+            $todo->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTodo(HoTodo $todo): self
+    {
+        if ($this->todos->removeElement($todo)) {
+            // set the owning side to null (unless already changed)
+            if ($todo->getProject() === $this) {
+                $todo->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoLifestyle>
+     */
+    public function getLifestyles(): Collection
+    {
+        return $this->lifestyles;
+    }
+
+    public function addLifestyle(HoLifestyle $lifestyle): self
+    {
+        if (!$this->lifestyles->contains($lifestyle)) {
+            $this->lifestyles->add($lifestyle);
+            $lifestyle->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLifestyle(HoLifestyle $lifestyle): self
+    {
+        if ($this->lifestyles->removeElement($lifestyle)) {
+            // set the owning side to null (unless already changed)
+            if ($lifestyle->getProject() === $this) {
+                $lifestyle->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getTextRoute(): ?string
+    {
+        return $this->textRoute;
+    }
+
+    public function setTextRoute(?string $textRoute): self
+    {
+        $this->textRoute = $textRoute;
+
+        return $this;
+    }
+
+    public function getIframeRoute(): ?string
+    {
+        return $this->iframeRoute;
+    }
+
+    public function setIframeRoute(?string $iframeRoute): self
+    {
+        $this->iframeRoute = $iframeRoute;
+
+        return $this;
+    }
+
+    public function getTextHouse(): ?string
+    {
+        return $this->textHouse;
+    }
+
+    public function setTextHouse(?string $textHouse): self
+    {
+        $this->textHouse = $textHouse;
+
+        return $this;
+    }
+
+    public function getTextLifestyle(): ?string
+    {
+        return $this->textLifestyle;
+    }
+
+    public function setTextLifestyle(?string $textLifestyle): self
+    {
+        $this->textLifestyle = $textLifestyle;
+
+        return $this;
+    }
+
+    public function getTextActivities(): ?string
+    {
+        return $this->textActivities;
+    }
+
+    public function setTextActivities(?string $textActivities): self
+    {
+        $this->textActivities = $textActivities;
+
+        return $this;
+    }
+
+    public function getTextTodos(): ?string
+    {
+        return $this->textTodos;
+    }
+
+    public function setTextTodos(?string $textTodos): self
+    {
+        $this->textTodos = $textTodos;
 
         return $this;
     }

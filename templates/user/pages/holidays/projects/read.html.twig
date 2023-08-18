@@ -64,6 +64,13 @@
             </div>
 
             <div class="project-content">
+                <div id="project_route"
+                     data-project-id="{{ elem.id }}"
+                     data-texte="{{ elem.textRoute }}"
+                     data-iframe="{{ elem.iframeRoute }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
                 <div id="project_house"
                      data-project-id="{{ elem.id }}"
                      data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"
@@ -73,6 +80,14 @@
                      data-user-id="{{ app.user.id }}"
                      data-author-id="{{ elem.author.id }}"
                      data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                     data-texte="{{ elem.textHouse }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
+                <div id="project_lifestyle"
+                     data-project-id="{{ elem.id }}"
+                     data-donnees="{{ lifestyles }}"
+                     data-texte="{{ elem.textLifestyle }}"
                 >
                     {% include "layout/components/loader.html.twig" %}
                 </div>
@@ -82,6 +97,14 @@
                      data-user-id="{{ app.user.id }}"
                      data-author-id="{{ elem.author.id }}"
                      data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                     data-texte="{{ elem.textActivities }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
+                <div id="project_todos"
+                     data-project-id="{{ elem.id }}"
+                     data-donnees="{{ todos }}"
+                     data-texte="{{ elem.textTodos }}"
                 >
                     {% include "layout/components/loader.html.twig" %}
                 </div>

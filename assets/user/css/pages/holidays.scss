@@ -97,3 +97,15 @@
     }
   }
 }
+
+.project-card:not(.project-card-date){
+  .project-card-header{
+    .name{
+      text-transform: uppercase;
+    }
+  }
+
+  .project-card-footer{
+    //background: var(--color2);
+  }
+}

@@ -8,10 +8,12 @@ import Formulaire   from "@commonFunctions/formulaire";
 import Validateur   from "@commonFunctions/validateur";
 import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
+import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal }    from "@commonComponents/Elements/Modal";
 import { Input }    from "@commonComponents/Elements/Fields";
+import { TinyMCE }  from "@commonComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'api_projects_propals_house_create';
 const URL_UPDATE_PROPAL = 'api_projects_propals_house_update';
@@ -19,6 +21,7 @@ const URL_DELETE_PROPAL = 'api_projects_propals_house_delete';
 const URL_VOTE_PROPAL   = 'api_projects_propals_house_vote';
 const URL_END_PROPAL    = 'api_projects_propals_house_end';
 const URL_CANCEL_HOUSE  = 'api_projects_cancel_house';
+const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
 export class ProjectHouse extends Component{
     constructor(props) {
@@ -30,18 +33,21 @@ export class ProjectHouse extends Component{
             name: '',
             url: 'https://',
             price: '',
+            texteHouse: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
+            textHouse: Formulaire.setValue(props.texte),
             errors: [],
             data: JSON.parse(props.propals),
             loadData: false,
         }
 
+        this.formText = React.createRef();
         this.formPropal = React.createRef();
         this.deletePropal = React.createRef();
         this.endPropal = React.createRef();
         this.cancelHouse = React.createRef();
     }
 
-    handleChange = (e, picker) => {
+    handleChange = (e) => {
         let name  = e.currentTarget.name;
         let value = e.currentTarget.value;
 
@@ -52,7 +58,12 @@ export class ProjectHouse extends Component{
         this.setState({[name]: value})
     }
 
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
+
     handleModal = (identifiant, context, propal) => {
+        modalFormText(this);
         modalFormPropal(this);
         modalDeletePropal(this);
         modalEndPropal(this);
@@ -60,8 +71,8 @@ export class ProjectHouse extends Component{
         this.setState({
             context: context, propal: propal,
             name: propal ? propal.name: "",
-            url: propal ? propal.url : "https://",
-            price: propal ? propal.price : "",
+            url: propal ? Formulaire.setValue(propal.url) : "https://",
+            price: propal ? Formulaire.setValue(propal.price) : "",
         })
         this[identifiant].current.handleClick();
     }
@@ -90,107 +101,97 @@ export class ProjectHouse extends Component{
             axios({ method: method, url: urlName, data: {name: name, url: url, price: price} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
-
-                    let nData = data;
-                    if(context === "create"){
-                        nData = [...data, ...[response.data]];
-                    }else if(context === "update"){
-                        nData = [];
-                        data.forEach(d => {
-                            if(d.id === response.data.id){
-                                d = response.data;
-                            }
-                            nData.push(d);
-                        })
-                    }
-
-                    self.setState({ data: nData })
+                    self.setState({ data: Propals.updateList(context, data, response) })
                 })
                 .catch(function (error) { modalFormPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
         }
     }
 
+    handleSubmitText = (e) => {
+        e.preventDefault();
+
+        const { projectId } = this.props;
+        const { texteHouse } = this.state;
+
+        const self = this;
+        this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        axios({
+            method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'house', 'id': projectId}),
+            data: {texte: texteHouse}
+        })
+            .then(function (response) {
+                self.formText.current.handleClose();
+
+                let data = response.data;
+                self.setState({
+                    texteHouse: {value: Formulaire.setValue(data.textHouse), html: Formulaire.setValue(data.textHouse)},
+                    textHouse: Formulaire.setValue(data.textHouse),
+                })
+            })
+            .catch(function (error) { modalFormText(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
+    }
+
     handleDeletePropal = () => {
         const { propal, data } = this.state;
 
-        let self = this;
         this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
-        axios({ method: "DELETE", url: Routing.generate(URL_DELETE_PROPAL, {'id': propal.id}), data: {} })
-            .then(function (response) {
-                self.deletePropal.current.handleClose();
-                self.setState({ data: data.filter(d => { return d.id !== propal.id }) })
-            })
-            .catch(function (error) { modalDeletePropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
     }
 
     handleVote = (propal) => {
         const { userId } = this.props;
         const { loadData, data } = this.state;
 
-        if(!loadData){
-            this.setState({ loadData: true });
-
-            let self = this;
-            axios({ method: "PUT", url: Routing.generate(URL_VOTE_PROPAL, {'id': propal.id}), data: {userId: userId} })
-                .then(function (response) {
-                    let nData = [];
-                    data.forEach(d => {
-                        if(d.id === response.data.id){
-                            d = response.data;
-                        }
-                        nData.push(d);
-                    })
-
-                    self.setState({ data: nData });
-                })
-                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-                .then(function () { self.setState({ loadData: false }); })
-            ;
-        }
+        Propals.vote(this, propal, data, userId, loadData, URL_VOTE_PROPAL);
     }
 
     handleEndPropal = () => {
         const { propal } = this.state;
 
-        let self = this;
         this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Clôturer</Button>);
-        axios({ method: "PUT", url: Routing.generate(URL_END_PROPAL, {'id': propal.id}), data: {} })
-            .then(function (response) {
-                location.reload();
-            })
-            .catch(function (error) { modalEndPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
     }
 
     handleCancelHouse = () => {
         const { projectId } = this.props;
 
-        let self = this;
         this.cancelHouse.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
-        axios({ method: "PUT", url: Routing.generate(URL_CANCEL_HOUSE, {'id': projectId}), data: {} })
-            .then(function (response) {
-                location.reload();
-            })
-            .catch(function (error) { modalCancelHouse(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.cancel(this, projectId, URL_CANCEL_HOUSE, modalCancelHouse);
     }
 
     render() {
         const { mode, houseName, houseUrl, housePrice, userId, authorId } = this.props;
-        const { errors, loadData, name, url, price, data, propal } = this.state;
+        const { errors, loadData, name, url, price, data, propal, texteHouse, textHouse } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
         return <div className="project-card">
             <div className="project-card-header">
-                <div className="name">Hébergement</div>
+                <div className="name">🏠 Hébergement</div>
+                {(mode || authorId === parseInt(userId))
+                    ? <div className="actions">
+                        <ButtonIcon type="danger" icon="trash" text="Annuler l'hébergement"
+                                    onClick={() => this.handleModal('cancelHouse', 'delete', null)}
+                        />
+                    </div>
+                    : null
+                }
+                <div className="actions">
+                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                </div>
             </div>
             <div className={`project-card-body${houseName ? " selected" : ""}`}>
-                {houseName
-                    ? <div className="propals">
-                        <div className="propal selected" style={{ flexDirection: 'column' }}>
+                <div className="propals">
+                    {textHouse
+                        ? <div className="propal">
+                            <div dangerouslySetInnerHTML={{__html: textHouse}}></div>
+                        </div>
+                        : null
+                    }
+                    {houseName
+                        ? <div className="propal selected" style={{ flexDirection: 'column' }}>
                             <div>{houseName}</div>
                             {houseUrl ? <a href={houseUrl} target="_blank" className="txt-link">
                                 <span>Lien de l'hébergement</span>
@@ -198,9 +199,7 @@ export class ProjectHouse extends Component{
                             </a> : ""}
                             {housePrice ? <div>{Sanitaze.toFormatCurrency(housePrice)}</div> : ""}
                         </div>
-                    </div>
-                    : <>
-                        <div className="propals">
+                        : <>
                             {data.map((el, index) => {
 
                                 let onVote = () => this.handleVote(el);
@@ -214,7 +213,7 @@ export class ProjectHouse extends Component{
 
                                 return <div className="propal" key={index}>
                                     <div className={`selector${active}`} onClick={onVote}></div>
-                                    <div className="propal-body" onClick={onVote}>
+                                    <div className="propal-body">
                                         <div className="name">
                                             <span onClick={onVote}>{el.name}</span>
                                             {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo" target="_blank">
@@ -244,26 +243,26 @@ export class ProjectHouse extends Component{
                                     </div>
                                 </div>
                             })}
-                        </div>
-                    </>
-                }
-            </div>
-            {houseName === ""
-                ? <div className="project-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-                    <div style={{display: 'flex', gap: '4px'}}>
-                        <span className="icon-add"></span>
-                        <span>Proposer un hébergement</span>
-                    </div>
+
+                            <div className="propal">
+                                <ButtonIcon type="primary" icon="add" text="Proposer un hébergement"
+                                            onClick={() => this.handleModal('formPropal', 'create', null)}
+                                />
+                            </div>
+                        </>
+                    }
                 </div>
-                : (mode || authorId === parseInt(userId)
-                    ? <div className="project-card-footer project-card-footer-danger" onClick={() => this.handleModal('cancelHouse', 'delete', null)}>
-                        <div style={{display: 'flex', gap: '4px'}}>
-                            <span className="icon-close"></span>
-                            <span>Annuler l'hébergement sélectionné</span>
-                        </div>
-                    </div>
-                    : null)
-            }
+            </div>
+
+            <Modal ref={this.formText} identifiant="form-house-text" maxWidth={768} title="Modifier le texte"
+                   content={<>
+                       <div className="line">
+                           <TinyMCE type={8} identifiant="texteHouse" valeur={texteHouse.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                               <span>Texte</span>
+                           </TinyMCE>
+                       </div>
+                   </>}
+                   footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.formPropal} identifiant="form-house" maxWidth={568} title="Proposer un hébergement"
                    content={<>
@@ -299,6 +298,9 @@ ProjectHouse.propTypes = {
     propals: PropTypes.string.isRequired,
 }
 
+function modalFormText (self) {
+    self.formText.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitText}>Confirmer</Button>)
+}
 function modalFormPropal (self) {
     self.formPropal.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitPropal}>Confirmer</Button>)
 }

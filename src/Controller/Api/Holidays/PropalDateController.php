@@ -8,6 +8,7 @@ use App\Repository\Holiday\HoProjectRepository;
 use App\Repository\Holiday\HoPropalDateRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataHolidays;
+use App\Service\Propals\PropalService;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -81,37 +82,10 @@ class PropalDateController extends AbstractController
     }
 
     #[Route('/vote/{id}', name: 'vote', options: ['expose' => true], methods: 'PUT')]
-    public function vote(Request $request, HoPropalDate $obj, ApiResponse $apiResponse, ValidatorService $validator, HoPropalDateRepository $repository): Response
+    public function vote(Request $request, ApiResponse $apiResponse, ValidatorService $validator,
+                         HoPropalDate $obj, HoPropalDateRepository $repository, PropalService $propalService): Response
     {
-        $data = json_decode($request->getContent());
-        if ($data === null) {
-            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
-        }
-
-        $votes = $obj->getVotes();
-
-        $find = false; $nVotes = [];
-        foreach($votes as $vote){
-            if($vote == $data->userId){
-                $find = true;
-            }else{
-                $nVotes[] = $vote;
-            }
-        }
-
-        if(!$find){
-            $nVotes[] = $data->userId;
-        }
-
-        $obj->setVotes($nVotes);
-
-        $noErrors = $validator->validate($obj);
-        if ($noErrors !== true) {
-            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
-        }
-
-        $repository->save($obj, true);
-        return $apiResponse->apiJsonResponse($obj, HoPropalDate::LIST);
+        return $propalService->vote($request, $apiResponse, $validator, $obj, $repository, HoPropalDate::LIST);
     }
 
     #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
