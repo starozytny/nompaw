@@ -33,6 +33,10 @@ class HoLifestyle
     #[ORM\JoinColumn(nullable: false)]
     private ?HoProject $project = null;
 
+    #[ORM\Column]
+    #[Groups(['ho_life_list'])]
+    private ?int $priceType = 0;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -82,6 +86,18 @@ class HoLifestyle
     public function setProject(?HoProject $project): self
     {
         $this->project = $project;
+
+        return $this;
+    }
+
+    public function getPriceType(): ?int
+    {
+        return $this->priceType;
+    }
+
+    public function setPriceType(int $priceType): self
+    {
+        $this->priceType = $priceType;
 
         return $this;
     }
