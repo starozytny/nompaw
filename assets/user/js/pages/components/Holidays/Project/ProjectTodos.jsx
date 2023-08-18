@@ -6,6 +6,7 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire   from "@commonFunctions/formulaire";
 import Validateur   from "@commonFunctions/validateur";
+import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal }    from "@commonComponents/Elements/Modal";
@@ -68,21 +69,7 @@ export class ProjectTodos extends Component{
             axios({ method: method, url: urlName, data: {name: name} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
-
-                    let nData = data;
-                    if(context === "create"){
-                        nData = [...data, ...[response.data]];
-                    }else if(context === "update"){
-                        nData = [];
-                        data.forEach(d => {
-                            if(d.id === response.data.id){
-                                d = response.data;
-                            }
-                            nData.push(d);
-                        })
-                    }
-
-                    self.setState({ data: nData })
+                    self.setState({ data: Propals.updateList(context, data, response) })
                 })
                 .catch(function (error) { modalFormPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
@@ -92,15 +79,8 @@ export class ProjectTodos extends Component{
     handleDeletePropal = () => {
         const { element, data } = this.state;
 
-        let self = this;
         this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
-        axios({ method: "DELETE", url: Routing.generate(URL_DELETE_PROPAL, {'id': element.id}), data: {} })
-            .then(function (response) {
-                self.deletePropal.current.handleClose();
-                self.setState({ data: data.filter(d => { return d.id !== element.id }) })
-            })
-            .catch(function (error) { modalDeletePropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.deletePropal(this, this.deletePropal, element, data, URL_DELETE_PROPAL, modalDeletePropal);
     }
 
     handleCheck = (name) => {

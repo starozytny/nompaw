@@ -23,6 +23,7 @@ Encore
         '@appFolder': path.resolve(__dirname, './assets/app/js'),
         '@adminPages': path.resolve(__dirname, './assets/admin/js/pages/components'),
         '@userPages': path.resolve(__dirname, './assets/user/js/pages/components'),
+        '@userFunctions': path.resolve(__dirname, './assets/user/js/functions'),
         '@nodeModulesFolder': path.resolve(__dirname, './node_modules'),
     })
 

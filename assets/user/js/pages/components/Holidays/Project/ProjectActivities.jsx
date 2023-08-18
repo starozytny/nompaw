@@ -8,6 +8,7 @@ import Formulaire   from "@commonFunctions/formulaire";
 import Validateur   from "@commonFunctions/validateur";
 import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
+import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input, InputFile } from "@commonComponents/Elements/Fields";
@@ -39,7 +40,7 @@ export class ProjectActivities extends Component{
         this.file = React.createRef();
     }
 
-    handleChange = (e, picker) => {
+    handleChange = (e) => {
         let name  = e.currentTarget.name;
         let value = e.currentTarget.value;
 
@@ -55,10 +56,10 @@ export class ProjectActivities extends Component{
         modalDeletePropal(this);
         this.setState({
             context: context, propal: propal,
-            name: propal ? propal.name: "",
-            url: propal ? propal.url : "https://",
-            price: propal ? propal.price : "",
-            imageFile: propal ? propal.imageFile : "",
+            name: propal ? propal.name : "",
+            url: propal ? Formulaire.setValue(propal.url) : "https://",
+            price: propal ? Formulaire.setValue(propal.price) : "",
+            imageFile: propal ? Formulaire.setValue(propal.imageFile) : "",
         })
         this[identifiant].current.handleClick();
     }
@@ -76,7 +77,7 @@ export class ProjectActivities extends Component{
         let validate = Validateur.validateur(paramsToValidate)
         if(!validate.code){
             Formulaire.showErrors(this, validate);
-        }else {;
+        }else {
             let urlName = context === "create"
                 ? Routing.generate(URL_CREATE_PROPAL, {'project': projectId})
                 : Routing.generate(URL_UPDATE_PROPAL, {'project': projectId, 'id': propal.id})
@@ -94,21 +95,7 @@ export class ProjectActivities extends Component{
             axios({ method: "POST", url: urlName, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
-
-                    let nData = data;
-                    if(context === "create"){
-                        nData = [...data, ...[response.data]];
-                    }else if(context === "update"){
-                        nData = [];
-                        data.forEach(d => {
-                            if(d.id === response.data.id){
-                                d = response.data;
-                            }
-                            nData.push(d);
-                        })
-                    }
-
-                    self.setState({ data: nData })
+                    self.setState({ data: Propals.updateList(context, data, response) })
                 })
                 .catch(function (error) { modalFormPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
@@ -118,45 +105,19 @@ export class ProjectActivities extends Component{
     handleDeletePropal = () => {
         const { propal, data } = this.state;
 
-        let self = this;
         this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
-        axios({ method: "DELETE", url: Routing.generate(URL_DELETE_PROPAL, {'id': propal.id}), data: {} })
-            .then(function (response) {
-                self.deletePropal.current.handleClose();
-                self.setState({ data: data.filter(d => { return d.id !== propal.id }) })
-            })
-            .catch(function (error) { modalDeletePropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
     }
 
     handleVote = (propal) => {
         const { userId } = this.props;
         const { loadData, data } = this.state;
 
-        if(!loadData){
-            this.setState({ loadData: true });
-
-            let self = this;
-            axios({ method: "PUT", url: Routing.generate(URL_VOTE_PROPAL, {'id': propal.id}), data: {userId: userId} })
-                .then(function (response) {
-                    let nData = [];
-                    data.forEach(d => {
-                        if(d.id === response.data.id){
-                            d = response.data;
-                        }
-                        nData.push(d);
-                    })
-
-                    self.setState({ data: nData });
-                })
-                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-                .then(function () { self.setState({ loadData: false }); })
-            ;
-        }
+        Propals.vote(this, propal, data, userId, loadData, URL_VOTE_PROPAL);
     }
 
     render() {
-        const { mode, userId, authorId } = this.props;
+        const { mode, userId } = this.props;
         const { errors, loadData, name, url, price, data, propal, imageFile } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }

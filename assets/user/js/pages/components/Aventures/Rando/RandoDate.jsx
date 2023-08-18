@@ -12,6 +12,7 @@ import Validateur   from "@commonFunctions/validateur";
 import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
 import Sort         from "@commonFunctions/sort";
+import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal }    from "@commonComponents/Elements/Modal";
@@ -94,21 +95,7 @@ export class RandoDate extends Component{
             axios({ method: method, url: url, data: {dateAt: dateAt} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
-
-                    let nData = data;
-                    if(context === "create"){
-                        nData = [...data, ...[response.data]];
-                    }else if(context === "update"){
-                        nData = [];
-                        data.forEach(d => {
-                            if(d.id === response.data.id){
-                                d = response.data;
-                            }
-                            nData.push(d);
-                        })
-                    }
-
-                    self.setState({ data: nData })
+                    self.setState({ data: Propals.updateList(context, data, response) })
                 })
                 .catch(function (error) { modalFormPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
             ;
@@ -118,71 +105,33 @@ export class RandoDate extends Component{
     handleDeletePropal = () => {
         const { propal, data } = this.state;
 
-        let self = this;
         this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
-        axios({ method: "DELETE", url: Routing.generate(URL_DELETE_PROPAL, {'id': propal.id}), data: {} })
-            .then(function (response) {
-                self.deletePropal.current.handleClose();
-                self.setState({ data: data.filter(d => { return d.id !== propal.id }) })
-            })
-            .catch(function (error) { modalDeletePropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
     }
 
     handleVote = (propal) => {
         const { userId } = this.props;
         const { loadData, data } = this.state;
 
-        if(!loadData){
-            this.setState({ loadData: true });
-
-            let self = this;
-            axios({ method: "PUT", url: Routing.generate(URL_VOTE_PROPAL, {'id': propal.id}), data: {userId: userId} })
-                .then(function (response) {
-                    let nData = [];
-                    data.forEach(d => {
-                        if(d.id === response.data.id){
-                            d = response.data;
-                        }
-                        nData.push(d);
-                    })
-
-                    self.setState({ data: nData });
-                })
-                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-                .then(function () { self.setState({ loadData: false }); })
-            ;
-        }
+        Propals.vote(this, propal, data, userId, loadData, URL_VOTE_PROPAL);
     }
 
     handleEndPropal = () => {
         const { propal } = this.state;
 
-        let self = this;
         this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Clôturer</Button>);
-        axios({ method: "PUT", url: Routing.generate(URL_END_PROPAL, {'id': propal.id}), data: {} })
-            .then(function (response) {
-                location.reload();
-            })
-            .catch(function (error) { modalEndPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
     }
 
     handleCancelDate = () => {
         const { randoId } = this.props;
 
-        let self = this;
         this.cancelDate.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
-        axios({ method: "PUT", url: Routing.generate(URL_CANCEL_DATE, {'id': randoId}), data: {} })
-            .then(function (response) {
-                location.reload();
-            })
-            .catch(function (error) { modalCancelDate(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-        ;
+        Propals.endPropal(this, randoId, URL_CANCEL_DATE, modalCancelDate);
     }
 
     render() {
-        const { mode, startAt, userId, status, authorId, dateId } = this.props;
+        const { mode, startAt, userId, authorId, dateId } = this.props;
         const { errors, loadData, dateAt, data, propal } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
