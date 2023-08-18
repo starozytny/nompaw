@@ -87,4 +87,22 @@ class PropalActivityController extends AbstractController
     {
         return $propalService->vote($request, $apiResponse, $validator, $obj, $repository, HoPropalActivity::LIST);
     }
+
+    #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
+    public function end(HoPropalActivity $obj, ApiResponse $apiResponse, HoPropalActivityRepository $repository): Response
+    {
+        $obj->setIsSelected(true);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/cancel/{id}', name: 'cancel', options: ['expose' => true], methods: 'PUT')]
+    public function cancel(HoPropalActivity $obj, ApiResponse $apiResponse, HoPropalActivityRepository $repository): Response
+    {
+        $obj->setIsSelected(false);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
 }

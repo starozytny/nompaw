@@ -164,7 +164,6 @@ export class ProjectTodos extends Component{
                         })
 
                         return <div className="propal" key={index}>
-                            <div className={`selector${active}`}></div>
                             <div className="propal-body propal-body-todos" onClick={onVote}>
                                 <div className="name">
                                     <span>{el.name}</span>
