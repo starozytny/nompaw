@@ -25,7 +25,7 @@ export class ProjectRoute extends Component{
             errors: [],
         }
 
-        this.formPropal = React.createRef();
+        this.formText = React.createRef();
     }
 
     handleChange = (e) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
@@ -35,24 +35,24 @@ export class ProjectRoute extends Component{
     }
 
     handleModal = (identifiant) => {
-        modalFormPropal(this);
+        modalFormText(this);
         this[identifiant].current.handleClick();
     }
 
-    handleSubmitPropal = (e) => {
+    handleSubmitText = (e) => {
         e.preventDefault();
 
         const { projectId } = this.props;
         const { texte, iframe } = this.state;
 
         const self = this;
-        this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
         axios({
             method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'route', 'id': projectId}),
             data: {texte: texte, iframe: iframe}
         })
             .then(function (response) {
-                self.formPropal.current.handleClose();
+                self.formText.current.handleClose();
 
                 let data = response.data;
                 self.setState({
@@ -62,7 +62,7 @@ export class ProjectRoute extends Component{
                     textRoute: Formulaire.setValue(data.textRoute),
                 })
             })
-            .catch(function (error) { modalFormPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+            .catch(function (error) { modalFormText(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
         ;
     }
 
@@ -75,7 +75,7 @@ export class ProjectRoute extends Component{
             <div className="project-card-header">
                 <div className="name">🚓 Trajet</div>
                 <div className="actions">
-                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formPropal")} />
+                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
             <div className="project-card-body selected">
@@ -87,7 +87,7 @@ export class ProjectRoute extends Component{
                 </div>
             </div>
 
-            <Modal ref={this.formPropal} identifiant="form-route" maxWidth={768} title="Modifier la partie Route"
+            <Modal ref={this.formText} identifiant="form-route" maxWidth={768} title="Modifier la partie Route"
                    content={<>
                        <div className="line">
                            <TinyMCE type={8} identifiant="texte" valeur={texte.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
@@ -107,6 +107,6 @@ ProjectRoute.propTypes = {
     projectId: PropTypes.string.isRequired
 }
 
-function modalFormPropal (self) {
-    self.formPropal.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitPropal}>Confirmer</Button>)
+function modalFormText (self) {
+    self.formText.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitText}>Confirmer</Button>)
 }

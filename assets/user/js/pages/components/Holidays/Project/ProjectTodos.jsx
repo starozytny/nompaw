@@ -185,21 +185,21 @@ export class ProjectTodos extends Component{
                 </div>
             </div>
 
-            <Modal ref={this.formPropal} identifiant="form-todos" maxWidth={414} title="Ajouter quelque chose"
-                   content={<>
-                       <div className="line">
-                           <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
-
-                       </div>
-                   </>}
-                   footer={null} closeTxt="Annuler" />
-
             <Modal ref={this.formText} identifiant="form-todos-text" maxWidth={768} title="Modifier le texte"
                    content={<>
                        <div className="line">
                            <TinyMCE type={8} identifiant="texteTodos" valeur={texteTodos.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                                <span>Texte</span>
                            </TinyMCE>
+                       </div>
+                   </>}
+                   footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.formPropal} identifiant="form-todos" maxWidth={414} title="Ajouter quelque chose"
+                   content={<>
+                       <div className="line">
+                           <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
+
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />

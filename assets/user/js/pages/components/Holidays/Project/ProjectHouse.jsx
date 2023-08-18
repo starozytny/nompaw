@@ -13,6 +13,7 @@ import Propals      from "@userFunctions/propals";
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal }    from "@commonComponents/Elements/Modal";
 import { Input }    from "@commonComponents/Elements/Fields";
+import { TinyMCE }  from "@commonComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'api_projects_propals_house_create';
 const URL_UPDATE_PROPAL = 'api_projects_propals_house_update';
@@ -20,6 +21,7 @@ const URL_DELETE_PROPAL = 'api_projects_propals_house_delete';
 const URL_VOTE_PROPAL   = 'api_projects_propals_house_vote';
 const URL_END_PROPAL    = 'api_projects_propals_house_end';
 const URL_CANCEL_HOUSE  = 'api_projects_cancel_house';
+const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
 export class ProjectHouse extends Component{
     constructor(props) {
@@ -31,18 +33,21 @@ export class ProjectHouse extends Component{
             name: '',
             url: 'https://',
             price: '',
+            texteHouse: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
+            textHouse: Formulaire.setValue(props.texte),
             errors: [],
             data: JSON.parse(props.propals),
             loadData: false,
         }
 
+        this.formText = React.createRef();
         this.formPropal = React.createRef();
         this.deletePropal = React.createRef();
         this.endPropal = React.createRef();
         this.cancelHouse = React.createRef();
     }
 
-    handleChange = (e, picker) => {
+    handleChange = (e) => {
         let name  = e.currentTarget.name;
         let value = e.currentTarget.value;
 
@@ -53,7 +58,12 @@ export class ProjectHouse extends Component{
         this.setState({[name]: value})
     }
 
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
+
     handleModal = (identifiant, context, propal) => {
+        modalFormText(this);
         modalFormPropal(this);
         modalDeletePropal(this);
         modalEndPropal(this);
@@ -98,6 +108,31 @@ export class ProjectHouse extends Component{
         }
     }
 
+    handleSubmitText = (e) => {
+        e.preventDefault();
+
+        const { projectId } = this.props;
+        const { texteHouse } = this.state;
+
+        const self = this;
+        this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        axios({
+            method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'house', 'id': projectId}),
+            data: {texte: texteHouse}
+        })
+            .then(function (response) {
+                self.formText.current.handleClose();
+
+                let data = response.data;
+                self.setState({
+                    texteHouse: {value: Formulaire.setValue(data.textHouse), html: Formulaire.setValue(data.textHouse)},
+                    textHouse: Formulaire.setValue(data.textHouse),
+                })
+            })
+            .catch(function (error) { modalFormText(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
+    }
+
     handleDeletePropal = () => {
         const { propal, data } = this.state;
 
@@ -128,7 +163,7 @@ export class ProjectHouse extends Component{
 
     render() {
         const { mode, houseName, houseUrl, housePrice, userId, authorId } = this.props;
-        const { errors, loadData, name, url, price, data, propal } = this.state;
+        const { errors, loadData, name, url, price, data, propal, texteHouse, textHouse } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -143,11 +178,20 @@ export class ProjectHouse extends Component{
                     </div>
                     : null
                 }
+                <div className="actions">
+                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                </div>
             </div>
             <div className={`project-card-body${houseName ? " selected" : ""}`}>
-                {houseName
-                    ? <div className="propals">
-                        <div className="propal selected" style={{ flexDirection: 'column' }}>
+                <div className="propals">
+                    {textHouse
+                        ? <div className="propal">
+                            <div dangerouslySetInnerHTML={{__html: textHouse}}></div>
+                        </div>
+                        : null
+                    }
+                    {houseName
+                        ? <div className="propal selected" style={{ flexDirection: 'column' }}>
                             <div>{houseName}</div>
                             {houseUrl ? <a href={houseUrl} target="_blank" className="txt-link">
                                 <span>Lien de l'hébergement</span>
@@ -155,9 +199,7 @@ export class ProjectHouse extends Component{
                             </a> : ""}
                             {housePrice ? <div>{Sanitaze.toFormatCurrency(housePrice)}</div> : ""}
                         </div>
-                    </div>
-                    : <>
-                        <div className="propals">
+                        : <>
                             {data.map((el, index) => {
 
                                 let onVote = () => this.handleVote(el);
@@ -207,10 +249,20 @@ export class ProjectHouse extends Component{
                                             onClick={() => this.handleModal('formPropal', 'create', null)}
                                 />
                             </div>
-                        </div>
-                    </>
-                }
+                        </>
+                    }
+                </div>
             </div>
+
+            <Modal ref={this.formText} identifiant="form-todos-text" maxWidth={768} title="Modifier le texte"
+                   content={<>
+                       <div className="line">
+                           <TinyMCE type={8} identifiant="texteHouse" valeur={texteHouse.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                               <span>Texte</span>
+                           </TinyMCE>
+                       </div>
+                   </>}
+                   footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.formPropal} identifiant="form-house" maxWidth={568} title="Proposer un hébergement"
                    content={<>
@@ -246,6 +298,9 @@ ProjectHouse.propTypes = {
     propals: PropTypes.string.isRequired,
 }
 
+function modalFormText (self) {
+    self.formText.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitText}>Confirmer</Button>)
+}
 function modalFormPropal (self) {
     self.formPropal.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitPropal}>Confirmer</Button>)
 }
