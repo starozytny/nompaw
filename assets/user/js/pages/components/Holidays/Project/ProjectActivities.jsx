@@ -13,11 +13,13 @@ import Propals      from "@userFunctions/propals";
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input, InputFile } from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
+import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'api_projects_propals_activity_create';
 const URL_UPDATE_PROPAL = 'api_projects_propals_activity_update';
 const URL_DELETE_PROPAL = 'api_projects_propals_activity_delete';
 const URL_VOTE_PROPAL   = 'api_projects_propals_activity_vote';
+const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
 export class ProjectActivities extends Component{
     constructor(props) {
@@ -30,11 +32,14 @@ export class ProjectActivities extends Component{
             url: 'https://',
             price: '',
             imageFile: '',
+            texteActivities: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
+            textActivities: Formulaire.setValue(props.texte),
             errors: [],
             data: JSON.parse(props.propals),
             loadData: false,
         }
 
+        this.formText = React.createRef();
         this.formPropal = React.createRef();
         this.deletePropal = React.createRef();
         this.file = React.createRef();
@@ -50,9 +55,12 @@ export class ProjectActivities extends Component{
 
         this.setState({[name]: value})
     }
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
 
     handleModal = (identifiant, context, propal) => {
-        modalFormPropal(this);
+        modalFormText(this);
         modalDeletePropal(this);
         this.setState({
             context: context, propal: propal,
@@ -102,6 +110,31 @@ export class ProjectActivities extends Component{
         }
     }
 
+    handleSubmitText = (e) => {
+        e.preventDefault();
+
+        const { projectId } = this.props;
+        const { texteActivities } = this.state;
+
+        const self = this;
+        this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        axios({
+            method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'activities', 'id': projectId}),
+            data: {texte: texteActivities}
+        })
+            .then(function (response) {
+                self.formText.current.handleClose();
+
+                let data = response.data;
+                self.setState({
+                    texteActivities: {value: Formulaire.setValue(data.textActivities), html: Formulaire.setValue(data.textActivities)},
+                    textActivities: Formulaire.setValue(data.textActivities),
+                })
+            })
+            .catch(function (error) { modalFormText(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
+    }
+
     handleDeletePropal = () => {
         const { propal, data } = this.state;
 
@@ -118,16 +151,25 @@ export class ProjectActivities extends Component{
 
     render() {
         const { mode, userId } = this.props;
-        const { errors, loadData, name, url, price, data, propal, imageFile } = this.state;
+        const { errors, loadData, name, url, price, data, propal, imageFile, texteActivities, textActivities } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">💡 Activités</div>
+                <div className="actions">
+                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                </div>
             </div>
             <div className="project-card-body selected">
                 <div className="propals">
+                    {textActivities
+                        ? <div className="propal">
+                            <div dangerouslySetInnerHTML={{__html: textActivities}}></div>
+                        </div>
+                        : null
+                    }
                     {data.map((el, index) => {
 
                         let onVote = () => this.handleVote(el);
@@ -183,6 +225,16 @@ export class ProjectActivities extends Component{
                 </div>
             </div>
 
+            <Modal ref={this.formText} identifiant="form-activities-text" maxWidth={768} title="Modifier le texte"
+                   content={<>
+                       <div className="line">
+                           <TinyMCE type={8} identifiant="texteActivities" valeur={texteActivities.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                               <span>Texte</span>
+                           </TinyMCE>
+                       </div>
+                   </>}
+                   footer={null} closeTxt="Annuler" />
+
             <Modal ref={this.formPropal} identifiant="form-activities" maxWidth={568} margin={10} title="Proposer une activité"
                    content={<>
                        <div className="line line-2">
@@ -215,6 +267,9 @@ ProjectActivities.propTypes = {
     propals: PropTypes.string.isRequired,
 }
 
+function modalFormText (self) {
+    self.formText.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitText}>Confirmer</Button>)
+}
 function modalFormPropal (self) {
     self.formPropal.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitPropal}>Confirmer</Button>)
 }

@@ -254,7 +254,7 @@ export class ProjectHouse extends Component{
                 </div>
             </div>
 
-            <Modal ref={this.formText} identifiant="form-todos-text" maxWidth={768} title="Modifier le texte"
+            <Modal ref={this.formText} identifiant="form-house-text" maxWidth={768} title="Modifier le texte"
                    content={<>
                        <div className="line">
                            <TinyMCE type={8} identifiant="texteHouse" valeur={texteHouse.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>

@@ -12,10 +12,12 @@ import Propals      from "@userFunctions/propals";
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 import { Input } from "@commonComponents/Elements/Fields";
+import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'api_projects_lifestyle_create';
 const URL_UPDATE_PROPAL = 'api_projects_lifestyle_update';
 const URL_DELETE_PROPAL = 'api_projects_lifestyle_delete';
+const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
 export class ProjectLifestyle extends Component{
     constructor(props) {
@@ -27,17 +29,25 @@ export class ProjectLifestyle extends Component{
             name: '',
             unit: '',
             price: '',
+            texteLifestyle: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
+            textLifestyle: Formulaire.setValue(props.texte),
             errors: [],
             data: JSON.parse(props.donnees),
         }
 
+        this.formText = React.createRef();
         this.formPropal = React.createRef();
         this.deletePropal = React.createRef();
     }
 
     handleChange = (e) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
 
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
+
     handleModal = (identifiant, context, element) => {
+        modalFormText(this);
         modalFormPropal(this);
         modalDeletePropal(this);
         this.setState({
@@ -80,6 +90,31 @@ export class ProjectLifestyle extends Component{
         }
     }
 
+    handleSubmitText = (e) => {
+        e.preventDefault();
+
+        const { projectId } = this.props;
+        const { texteLifestyle } = this.state;
+
+        const self = this;
+        this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        axios({
+            method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'lifestyle', 'id': projectId}),
+            data: {texte: texteLifestyle}
+        })
+            .then(function (response) {
+                self.formText.current.handleClose();
+
+                let data = response.data;
+                self.setState({
+                    texteLifestyle: {value: Formulaire.setValue(data.textLifestyle), html: Formulaire.setValue(data.textLifestyle)},
+                    textLifestyle: Formulaire.setValue(data.textLifestyle),
+                })
+            })
+            .catch(function (error) { modalFormText(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
+    }
+
     handleDeletePropal = () => {
         const { element, data } = this.state;
 
@@ -88,16 +123,25 @@ export class ProjectLifestyle extends Component{
     }
 
     render() {
-        const { errors, name, unit, price, data, element } = this.state;
+        const { errors, name, unit, price, data, element, texteLifestyle, textLifestyle } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">✨ Style de vie</div>
+                <div className="actions">
+                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                </div>
             </div>
             <div className="project-card-body selected">
                 <div className="propals">
+                    {textLifestyle
+                        ? <div className="propal">
+                            <div dangerouslySetInnerHTML={{__html: textLifestyle}}></div>
+                        </div>
+                        : null
+                    }
                     {data.map((el, index) => {
                         return <div className="propal" key={index}>
                             <div className="propal-body propal-body-lifestyle">
@@ -122,6 +166,16 @@ export class ProjectLifestyle extends Component{
                 </div>
             </div>
 
+            <Modal ref={this.formText} identifiant="form-lifestyle-text" maxWidth={768} title="Modifier le texte"
+                   content={<>
+                       <div className="line">
+                           <TinyMCE type={8} identifiant="texteLifestyle" valeur={texteLifestyle.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                               <span>Texte</span>
+                           </TinyMCE>
+                       </div>
+                   </>}
+                   footer={null} closeTxt="Annuler" />
+
             <Modal ref={this.formPropal} identifiant="form-lifestyle" maxWidth={568} title="Ajouter une dépense"
                    content={<>
                        <div className="line line-3">
@@ -144,6 +198,9 @@ ProjectLifestyle.propTypes = {
     donnees: PropTypes.string.isRequired,
 }
 
+function modalFormText (self) {
+    self.formText.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitText}>Confirmer</Button>)
+}
 function modalFormPropal (self) {
     self.formPropal.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitPropal}>Confirmer</Button>)
 }
