@@ -43,6 +43,10 @@ class CoCommentary extends DataEntity
     #[Groups(['com_read'])]
     private ?int $answerTo = null;
 
+    #[ORM\Column]
+    #[Groups(['com_read'])]
+    private ?int $rate = 1;
+
     public function __construct()
     {
         $this->createdAt = $this->initNewDateImmutable();
@@ -109,6 +113,18 @@ class CoCommentary extends DataEntity
     public function setAnswerTo(?int $answerTo): self
     {
         $this->answerTo = $answerTo;
+
+        return $this;
+    }
+
+    public function getRate(): ?int
+    {
+        return $this->rate;
+    }
+
+    public function setRate(int $rate): self
+    {
+        $this->rate = $rate;
 
         return $this;
     }

@@ -1,4 +1,4 @@
-import '../../css/pages/randos.scss';
+import '../../css/pages/aventures.scss';
 
 import React from "react";
 import { createRoot } from "react-dom/client";

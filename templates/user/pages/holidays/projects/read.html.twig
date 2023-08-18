@@ -1,0 +1,91 @@
+{% extends 'user/pages/holidays/template.html.twig' %}
+
+{% set author = elem.author %}
+
+{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
+{% set page_title_alone %}{{ elem.name }}{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([
+        { text: page_title_alone, url: path('user_projects_read', {'slug': elem.slug}) },
+    ]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% set half_width = true %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_projects_index') }}" class="btn btn-outline-default">
+                <span class="icon-left-arrow"></span>
+                <span>Retourner aux projets</span>
+            </a>
+        </div>
+        <div class="col-2">
+            {% if app.user.id == elem.author.id or app.user.admin %}
+                <a href="{{ path('user_projects_update', {'slug': elem.slug}) }}" class="btn btn-warning">
+                    <span class="icon-pencil"></span>
+                    <span>Modifier</span>
+                </a>
+                <div class="delete-project"
+                     data-context="read"
+                     data-id="{{ elem.id }}"
+                     data-name="{{ elem.name }}"
+                >
+                    <button class="btn btn-danger btn-loader-without-text">
+                        <span class="icon-chart-3"></span>
+                        <span>Supprimer</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="page-default">
+        <div class="project-read">
+            <div class="project-header">
+                <div class="project-title" style="background-image: url({{ elem.imageFile }})">
+                    <h2>{{ elem.name }}</h2>
+                </div>
+                <div class="project-propals">
+                    <div id="project_date"
+                         data-project-id="{{ elem.id }}"
+                         data-n-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                         data-n-end-at="{{ elem.endAt ? elem.endAt | date('Y-m-d') : "" }}"
+                         data-propals="{{ propalDates }}"
+                         data-user-id="{{ app.user.id }}"
+                         data-author-id="{{ elem.author.id }}"
+                         data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                    >
+                        {% include "layout/components/loader.html.twig" %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-content">
+                <div id="project_house"
+                     data-project-id="{{ elem.id }}"
+                     data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"
+                     data-house-url="{{ elem.propalHouse ? elem.propalHouse.url : '' }}"
+                     data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
+                     data-propals="{{ propalHouses }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-author-id="{{ elem.author.id }}"
+                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
+                <div id="project_activities"
+                     data-project-id="{{ elem.id }}"
+                     data-propals="{{ propalActivities }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-author-id="{{ elem.author.id }}"
+                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -200,7 +200,7 @@ export class RandoDate extends Component{
 
         return <div className="rando-card">
             <div className="rando-card-header">
-                <div className="name">{startAt ? "Date de la sélectionnée" : "Proposition de dates"}</div>
+                <div className="name">{startAt ? "Date sélectionnée" : "Proposition de dates"}</div>
             </div>
             <div className={`rando-card-body${startAt ? " selected" : ""}`}>
                 {startAt

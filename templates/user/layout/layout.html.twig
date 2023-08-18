@@ -12,8 +12,12 @@
     { name: "Aventures", icon: "map",
         path: path('user_aventures_groupes_index'), matchRoute: [
             'user_aventures_groupes_index', 'user_aventures_groupes_read', 'user_aventures_groupes_create', 'user_aventures_groupes_update',
-            'user_aventures_rando_read', 'user_aventures_rando_create', 'user_aventures_rando_update'
+            'user_aventures_randos_read', 'user_aventures_randos_create', 'user_aventures_randos_update'
         ]
+    },
+    { name: "Projets", icon: "calendar",
+        path: path('user_projects_index'), matchRoute: [
+            'user_projects_index', 'user_projects_read', 'user_projects_create', 'user_projects_update']
     },
     { name: "Mon profil", icon: "user-octagon",
         path: path('user_profil_index'), matchRoute: ['user_profil_index', 'user_profil_update']

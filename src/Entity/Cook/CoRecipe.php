@@ -35,10 +35,6 @@ class CoRecipe extends DataEntity
     #[Groups(['recipe_form', 'recipe_read'])]
     private ?int $status = null;
 
-    #[ORM\Column]
-    #[Groups(['recipe_read'])]
-    private ?int $rate = 0;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['recipe_list', 'recipe_read'])]
     private ?string $content = null;
@@ -118,18 +114,6 @@ class CoRecipe extends DataEntity
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
-
-        return $this;
-    }
-
-    public function getRate(): ?int
-    {
-        return $this->rate;
-    }
-
-    public function setRate(int $rate): self
-    {
-        $this->rate = $rate;
 
         return $this;
     }

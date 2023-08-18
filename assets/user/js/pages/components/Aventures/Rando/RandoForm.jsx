@@ -137,12 +137,12 @@ class Form extends Component {
                                 Référent
                             </Select>
                             <div className="line">
-                                <Input identifiant="name" valeur={name} {...params}>Nom de la randonnée *</Input>
+                                <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure *</Input>
                             </div>
                             <div className="line">
                                 <TinyMCE type={7} identifiant='description' valeur={description.value}
                                          errors={errors} onUpdateData={this.handleChangeTinyMCE}>
-                                    Petite description de la randonnée
+                                    Petite description
                                 </TinyMCE>
                             </div>
                         </div>

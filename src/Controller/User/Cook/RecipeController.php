@@ -16,6 +16,7 @@ use App\Repository\Cook\CoRecipeRepository;
 use App\Repository\Cook\CoStepRepository;
 use App\Repository\Main\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -25,20 +26,34 @@ use Symfony\Component\Serializer\SerializerInterface;
 class RecipeController extends AbstractController
 {
     #[Route('/', name: 'index', options: ['expose' => true])]
-    public function list(CoRecipeRepository $repository, CoFavoriteRepository $favoriteRepository): Response
+    public function list(Request $request, CoRecipeRepository $repository, CoFavoriteRepository $favoriteRepository): Response
     {
+        $onlyFavorites = $request->query->get('favorite');
+        $onlyMine = $request->query->get('mine');
+        $favorites = $favoriteRepository->findBy(['user' => $this->getUser()]);
+
         $recipes = [];
         foreach($repository->findAll() as $obj){
-            if($obj->getStatus() == CookStatut::Active){
-                $recipes[] = $obj;
-            }else{
-                if($obj->getAuthor()->getId() == $this->getUser()->getId()){
+            if($onlyFavorites){
+                foreach($favorites as $favorite) {
+                    if ($favorite->getIdentifiant() == $obj->getId()) {
+                        $recipes[] = $obj;
+                    }
+                }
+            }else if($onlyMine){
+                if($obj->getAuthor() === $this->getUser()){
                     $recipes[] = $obj;
+                }
+            }else{
+                if($obj->getStatus() == CookStatut::Active){
+                    $recipes[] = $obj;
+                }else{
+                    if($obj->getAuthor()->getId() == $this->getUser()->getId()){
+                        $recipes[] = $obj;
+                    }
                 }
             }
         }
-
-        $favorites = $favoriteRepository->findBy(['user' => $this->getUser()]);
 
         return $this->render('user/pages/recipes/index.html.twig', ['recipes' => $recipes, 'favorites' => $favorites]);
     }
@@ -54,6 +69,12 @@ class RecipeController extends AbstractController
         $coms  = $commentaryRepository->findBy(['recipe' => $obj]);
         $fav   = $favoriteRepository->findOneBy(['user' => $this->getUser(), 'identifiant' => $obj->getId()]);
 
+        $rate = 0;
+        foreach($coms as $com){
+            $rate += $com->getRate();
+        }
+        $rate = $rate / (count($coms) > 0 ? count($coms) : 1);
+
         $elem  = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::READ]);
         $steps = $serializer->serialize($steps, 'json', ['groups' => CoStep::FORM]);
         $ingre = $serializer->serialize($ingre, 'json', ['groups' => CoIngredient::FORM]);
@@ -65,6 +86,7 @@ class RecipeController extends AbstractController
             'steps' => $steps,
             'ingre' => $ingre,
             'coms' => $coms,
+            'rate' => $rate,
             'isFav' => (bool)$fav,
             'stepsObject' => $stepRepository->findBy(['recipe' => $obj])
         ]);

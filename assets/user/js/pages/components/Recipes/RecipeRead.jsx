@@ -112,7 +112,7 @@ export class RecipeRead extends Component {
     }
 
     render () {
-        const { mode, elem, steps, ingre, coms } = this.props;
+        const { mode, elem, steps, ingre, coms, rate } = this.props;
         const { isMobile, context, errors, loadData, nbPerson, difficulty, durationCooking, durationPrepare, description } = this.state;
 
         let content;
@@ -157,8 +157,7 @@ export class RecipeRead extends Component {
                         }
                     </div>}
                     <div className="rating">
-                        {/*<Rate disabled defaultValue={elem.rate} />*/}
-                        <Rate disabled defaultValue={3} />
+                        <Rate disabled allowHalf defaultValue={rate} />
                     </div>
 
                     {!isMobile
@@ -205,7 +204,7 @@ export class RecipeRead extends Component {
                                         </ButtonIcon>
                                     }
                                 </div>
-                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT'))} minutes de préparation</span>
+                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT', '', false))} de préparation</span>
                             }
                         </div> : null}
                         {(mode || elem.durationCooking) ? <div className="recipe-data-item">
@@ -221,7 +220,7 @@ export class RecipeRead extends Component {
                                         </ButtonIcon>
                                     }
                                 </div>
-                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT'))} minutes de cuisson</span>
+                                : <span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT', '', false))} de cuisson</span>
                             }
                         </div> : null}
                         {(mode || elem.nbPerson) ? <div className="recipe-data-item">

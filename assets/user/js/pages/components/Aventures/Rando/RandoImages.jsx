@@ -12,6 +12,7 @@ import Formulaire from "@commonFunctions/formulaire";
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { InputFile } from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
+import {Alert} from "@commonComponents/Elements/Alert";
 
 const URL_UPLOAD_IMAGES  = "api_aventures_images_upload_images";
 const URL_DELETE_IMAGE   = "api_aventures_images_delete";
@@ -107,6 +108,12 @@ export class RandoImages extends Component{
         return <div>
             <Button type="warning" outline={true} onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
 
+            <div style={{ marginTop: "12px" }}>
+                <Alert type="warning">
+                    Pour un tirage des photos, s'il existe, rendez-vous sur le Google Photos.
+                </Alert>
+            </div>
+
             <div className="rando-images">
                 <ResponsiveMasonry
                     columnsCountBreakPoints={{320: 2, 768: 2, 900: 3}}
@@ -153,8 +160,15 @@ export class RandoImages extends Component{
             <Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} title="Ajouter des photos"
                    content={<>
                        <div className="line">
+                           <div className="form-group">
+                               <Alert type="info" title="Traitement des photos">
+                                   Les photos seront automatiquement redimensionnées s'ils sont trop grandes/lourdes.
+                               </Alert>
+                           </div>
+                       </div>
+                       <div className="line">
                            <InputFile ref={this.files} type="multi" identifiant="files" valeur={files} accept="/*" max={20}
-                                      placeholder="Glissez et déposer des photos ou" {...params}>
+                                      placeholder="Glissez et déposer des photos (20 max par envoi)" {...params}>
                                Pièces jointes (20 fichiers maximums)
                            </InputFile>
                        </div>

@@ -2,6 +2,8 @@
 
 @import "js-datepicker/src/datepicker.scss";
 
+@import "../../propals.scss";
+
 .rando-read{
   .rando-meta{
     @include flex(row, center, space-between, var(--espaceEls));
@@ -108,90 +110,6 @@
 
 .rando-card-content{
   padding: var(--espaceDiv);
-}
-
-.propals{
-  @include flex(column, flex-start, flex-start, var(--espaceEls));
-  padding: calc(var(--espaceDiv) /2) 0;
-
-  .propal{
-    @include flex(row, flex-start, flex-start, 8px);
-    width: 100%;
-    padding:  calc(var(--espaceDiv) / 2) var(--espaceDiv);
-    transition: background-color 0.2s ease-in-out;
-
-    $widthSelector: 20px;
-    $widthCounter: 48px;
-    $widthActions: 96px;
-
-    &.selected{
-      color: var(--primary);
-      @include fontBold();
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-
-    .selector{
-      position: relative;
-      width: $widthSelector; height: $widthSelector;
-      border-radius: var(--radius);
-      background-color: var(--alpha);
-      cursor: pointer;
-
-      &.active{
-        &:before{
-          background-color: var(--primary);
-        }
-      }
-
-      &:before{
-        content: '';
-        display: block;
-        position: absolute;
-        width: 16px; height: 16px;
-        top: 2px; left: 2px;
-        border-radius: var(--radius);
-      }
-    }
-
-    &:hover{
-      background-color: var(--color0Opacity1);
-
-      .selector:not(.active):before{
-        background-color: var(--primaryOpacity4);
-      }
-    }
-
-    .propal-body{
-      width: calc(100% - $widthSelector - $widthCounter - $widthActions - 25px);
-
-      .name{
-        @include flex(row, flex-start, flex-start, 8px);
-        cursor: pointer;
-      }
-
-      .duration{
-        font-size: 14px;
-        opacity: 0.8;
-        margin-top: 4px;
-        cursor: pointer;
-      }
-    }
-
-    .propal-counter{
-      @include flex();
-      width: $widthCounter; height: 30px;
-      background-color: var(--color1);
-      border-radius: var(--radius);
-      cursor: pointer;
-    }
-
-    .propal-actions{
-      @include flex(row, flex-start, flex-start, 4px);
-      width: $widthActions;
-    }
-  }
 }
 
 .rando-images{

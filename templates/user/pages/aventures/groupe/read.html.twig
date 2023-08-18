@@ -4,7 +4,7 @@
 
 {% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
 {% set page_title_alone %}{{ elem.name }}{% endset %}
-{% set page_subtitle %}Groupe de randonnée : {{ elem.name }}{% endset %}
+{% set page_subtitle %}Groupe d'aventures : {{ elem.name }}{% endset %}
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
@@ -43,17 +43,6 @@
         </div>
     </div>
 
-    {% set trans_day_hash = {
-            "Monday": "Lundi",
-            "Tuesday": "Mardi",
-            "Wednesday": "Mercredi",
-            "Thursday": "Jeudi",
-            "Friday": "Vendredi",
-            "Saturday": "Samedi",
-            "Sunday": "Dimanche"
-        }
-    %}
-
     <div class="page-default">
         <div class="groupe-read">
             <div class="groupe-line-0">
@@ -62,10 +51,12 @@
                         <div class="col-1">
                             <div>
                                 <h2>{{ next.name }}</h2>
-                                <div class="subtitle">{{ next.description | raw }}</div>
+                                <div class="subtitle" style="margin-bottom: 12px;">{{ next.description | raw }}</div>
                                 <div class="subtitle sub-icon" style="margin-top: 4px;">
                                     <span class="icon-calendar"></span>
-                                    <span>{{ next.startAt ? trans_day_hash[next.startAt | date('l')] ~ next.startAt | date(' d M Y') : 'Date indéfinie' }}</span>
+                                    <span>
+                                        {{ next.startAt ? next.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
+                                    </span>
                                 </div>
                                 {% if next.adventure %}
                                     <div class="subtitle sub-icon" style="margin-top: 8px;">
@@ -78,7 +69,7 @@
                                             <span>{{ next.adventure.duration | date('H\\hi') }}</span>
                                         </div>
                                     {% endif %}
-                                    {% if next.adventure.url %}
+                                    {% if next.adventure.url and next.adventure.url != "https://" %}
                                         <div class="subtitle sub-icon" style="margin-top: 6px;">
                                             <span class="icon-link"></span>
                                             <span><a href="{{ next.adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
@@ -118,7 +109,7 @@
 
                             <div class="cta">
                                 <a href="{{ path('user_aventures_randos_read', {'slug': next.slug}) }}" class="btn btn-primary">
-                                    <span>Voir la rando</span>
+                                    <span>Voir l'aventure</span>
                                     <span class="icon-right-arrow"></span>
                                 </a>
                             </div>
@@ -126,8 +117,8 @@
                     {% else %}
                         <div class="col-1">
                             <div>
-                                <h2>Aucune randonnée de prévu.</h2>
-                                <div class="subtitle">Préparer la prochaine randonnée en cliquant sur <i>Créer une randonnée</i></div>
+                                <h2>Aucune aventure de prévue.</h2>
+                                <div class="subtitle">Préparez la prochaine aventure en cliquant sur <i>Créer une aventure</i></div>
                             </div>
                         </div>
 
@@ -136,7 +127,7 @@
                             <div class="cta">
                                 <a href="{{ path('user_aventures_randos_create', {'g_slug': elem.slug}) }}" class="btn btn-primary">
                                     <span class="icon-add"></span>
-                                    <span>Créer une rando</span>
+                                    <span>Créer une aventure</span>
                                 </a>
                             </div>
                         </div>
@@ -144,27 +135,17 @@
                 </div>
                 <div class="next-creator">
                     <h2><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ elem.author.displayName }}</h2>
-                    <div class="subtitle">Référent.e du groupe de randonnée</div>
+                    <div class="subtitle">Référent.e du groupe d'aventures</div>
                     {% if next %}
                         <h2 style="margin-top: 12px;"><span class="icon-user-octagon" style="font-size: 24px;"></span> {{ next.author.displayName }}</h2>
-                        <div class="subtitle">Référent.e de la prochaine randonnée</div>
+                        <div class="subtitle">Référent.e de la prochaine aventure</div>
                     {% endif %}
                 </div>
             </div>
 
             <div class="groupe-line-1">
                 <div class="groupe-line-title">
-                    <h2>Anciennes randonnées</h2>
-                    {% set trans_day_hash = {
-                        "Monday": "Lundi",
-                        "Tuesday": "Mardi",
-                        "Wednesday": "Mercredi",
-                        "Thursday": "Jeudi",
-                        "Friday": "Vendredi",
-                        "Saturday": "Samedi",
-                        "Sunday": "Dimanche"
-                    }
-                    %}
+                    <h2>Anciennes aventures</h2>
                     {% if randos | length > 0 %}
                         <div class="old-randos">
                             {% for rando in randos %}

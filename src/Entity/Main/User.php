@@ -6,6 +6,10 @@ use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
+use App\Entity\Holiday\HoProject;
+use App\Entity\Holiday\HoPropalActivity;
+use App\Entity\Holiday\HoPropalDate;
+use App\Entity\Holiday\HoPropalHouse;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaLink;
@@ -37,7 +41,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list', 'ra_img_list', 'rando_form'])]
+    #[Groups([
+        'user_list', 'user_form', 'com_read', 'user_select',
+        'pr_date_list', 'pr_house_list', 'pr_act_list',
+        'ra_img_list', 'rando_form'
+    ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -148,6 +156,18 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaImage::class)]
     private Collection $raImages;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoProject::class)]
+    private Collection $hoProjects;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalDate::class)]
+    private Collection $hoPropalDates;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalHouse::class)]
+    private Collection $hoPropalHouses;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalActivity::class)]
+    private Collection $hoPropalActivities;
+
     /**
      * @throws Exception
      */
@@ -164,6 +184,10 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->raPropalDates = new ArrayCollection();
         $this->raPropalAdventures = new ArrayCollection();
         $this->raImages = new ArrayCollection();
+        $this->hoProjects = new ArrayCollection();
+        $this->hoPropalDates = new ArrayCollection();
+        $this->hoPropalHouses = new ArrayCollection();
+        $this->hoPropalActivities = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -779,6 +803,126 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($raImage->getAuthor() === $this) {
                 $raImage->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoProject>
+     */
+    public function getHoProjects(): Collection
+    {
+        return $this->hoProjects;
+    }
+
+    public function addHoProject(HoProject $hoProject): self
+    {
+        if (!$this->hoProjects->contains($hoProject)) {
+            $this->hoProjects->add($hoProject);
+            $hoProject->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoProject(HoProject $hoProject): self
+    {
+        if ($this->hoProjects->removeElement($hoProject)) {
+            // set the owning side to null (unless already changed)
+            if ($hoProject->getAuthor() === $this) {
+                $hoProject->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalDate>
+     */
+    public function getHoPropalDates(): Collection
+    {
+        return $this->hoPropalDates;
+    }
+
+    public function addHoPropalDate(HoPropalDate $hoPropalDate): self
+    {
+        if (!$this->hoPropalDates->contains($hoPropalDate)) {
+            $this->hoPropalDates->add($hoPropalDate);
+            $hoPropalDate->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalDate(HoPropalDate $hoPropalDate): self
+    {
+        if ($this->hoPropalDates->removeElement($hoPropalDate)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalDate->getAuthor() === $this) {
+                $hoPropalDate->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalHouse>
+     */
+    public function getHoPropalHouses(): Collection
+    {
+        return $this->hoPropalHouses;
+    }
+
+    public function addHoPropalHouse(HoPropalHouse $hoPropalHouse): self
+    {
+        if (!$this->hoPropalHouses->contains($hoPropalHouse)) {
+            $this->hoPropalHouses->add($hoPropalHouse);
+            $hoPropalHouse->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalHouse(HoPropalHouse $hoPropalHouse): self
+    {
+        if ($this->hoPropalHouses->removeElement($hoPropalHouse)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalHouse->getAuthor() === $this) {
+                $hoPropalHouse->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalActivity>
+     */
+    public function getHoPropalActivities(): Collection
+    {
+        return $this->hoPropalActivities;
+    }
+
+    public function addHoPropalActivity(HoPropalActivity $hoPropalActivity): self
+    {
+        if (!$this->hoPropalActivities->contains($hoPropalActivity)) {
+            $this->hoPropalActivities->add($hoPropalActivity);
+            $hoPropalActivity->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalActivity(HoPropalActivity $hoPropalActivity): self
+    {
+        if ($this->hoPropalActivities->removeElement($hoPropalActivity)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalActivity->getAuthor() === $this) {
+                $hoPropalActivity->setAuthor(null);
             }
         }
 

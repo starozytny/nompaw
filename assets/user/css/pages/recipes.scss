@@ -15,6 +15,22 @@
   @include flex(row, center, center);
 }
 
+.favorite{
+  .btn-icon{
+    .icon-heart{
+      color: var(--alpha);
+    }
+  }
+}
+
+.rating{
+  & > ul:where(.css-dev-only-do-not-override-1km3mtt).ant-rate > li.ant-rate-star-zero {
+    .ant-rate-star-second {
+      color: var(--color3);
+    }
+  }
+}
+
 .recipes{
   @include flex(row, flex-start, flex-start, var(--espaceDiv));
   flex-wrap: wrap;
