@@ -255,7 +255,7 @@ export class ProjectHouse extends Component{
 
             <div className="project-card-footer project-card-footer-total">
                 <div>
-                    {housePrice ? Sanitaze.toFormatCurrency(housePrice) : ""}
+                    {Sanitaze.toFormatCurrency(housePrice)}
                 </div>
             </div>
 
