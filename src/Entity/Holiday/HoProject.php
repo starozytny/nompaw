@@ -74,12 +74,16 @@ class HoProject extends DataEntity
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoTodo::class)]
     private Collection $todos;
 
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoLifestyle::class)]
+    private Collection $lifestyles;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
         $this->propalHouses = new ArrayCollection();
         $this->propalActivities = new ArrayCollection();
         $this->todos = new ArrayCollection();
+        $this->lifestyles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -327,6 +331,36 @@ class HoProject extends DataEntity
             // set the owning side to null (unless already changed)
             if ($todo->getProject() === $this) {
                 $todo->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoLifestyle>
+     */
+    public function getLifestyles(): Collection
+    {
+        return $this->lifestyles;
+    }
+
+    public function addLifestyle(HoLifestyle $lifestyle): self
+    {
+        if (!$this->lifestyles->contains($lifestyle)) {
+            $this->lifestyles->add($lifestyle);
+            $lifestyle->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLifestyle(HoLifestyle $lifestyle): self
+    {
+        if ($this->lifestyles->removeElement($lifestyle)) {
+            // set the owning side to null (unless already changed)
+            if ($lifestyle->getProject() === $this) {
+                $lifestyle->setProject(null);
             }
         }
 

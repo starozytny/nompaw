@@ -2,6 +2,7 @@
 
 namespace App\Service\Data;
 
+use App\Entity\Holiday\HoLifestyle;
 use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalActivity;
 use App\Entity\Holiday\HoPropalDate;
@@ -37,6 +38,15 @@ class DataHolidays
         return ($obj)
             ->setName($this->sanitizeData->trimData($data->name))
             ->setUrl($this->sanitizeData->trimData($data->url))
+            ->setPrice($this->sanitizeData->setFloatValue($data->price))
+            ;
+    }
+
+    public function setDataLifestyle(HoLifestyle $obj, $data): HoLifestyle
+    {
+        return ($obj)
+            ->setName($this->sanitizeData->trimData($data->name))
+            ->setUnit($this->sanitizeData->trimData($data->unit))
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
             ;
     }
