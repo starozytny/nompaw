@@ -64,6 +64,14 @@
             </div>
 
             <div class="project-content">
+                <div id="project_budget"
+                     data-route-price="{{ elem.priceRoute }}"
+                     data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
+                     data-lifestyle="{{ lifestyles }}"
+                     data-activities="{{ propalActivities }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
                 <div id="project_route"
                      data-project-id="{{ elem.id }}"
                      data-texte="{{ elem.textRoute }}"

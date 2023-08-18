@@ -139,7 +139,7 @@ export class ProjectTodos extends Component{
 
         return <div className="project-card">
             <div className="project-card-header">
-                <div className="name">📌🖇️ Liste des choses à prendre</div>
+                <div className="name">⚒️ Liste des choses à prendre</div>
                 <div className="actions">
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>

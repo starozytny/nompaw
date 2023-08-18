@@ -60,6 +60,7 @@ export class ProjectActivities extends Component{
 
         this.setState({[name]: value})
     }
+
     handleChangeTinyMCE = (name, html) => {
         this.setState({ [name]: {value: this.state[name].value, html: html} })
     }
