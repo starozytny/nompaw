@@ -104,7 +104,7 @@ export class ProjectTodos extends Component{
 
         return <div className="project-card">
             <div className="project-card-header">
-                <div className="name">Liste des choses à prendre</div>
+                <div className="name">📌🖇️ Liste des choses à prendre</div>
             </div>
             <div className="project-card-body">
                 <div className="propals">

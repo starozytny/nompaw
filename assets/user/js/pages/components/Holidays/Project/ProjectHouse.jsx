@@ -134,7 +134,7 @@ export class ProjectHouse extends Component{
 
         return <div className="project-card">
             <div className="project-card-header">
-                <div className="name">Hébergement</div>
+                <div className="name">🏠 Hébergement</div>
             </div>
             <div className={`project-card-body${houseName ? " selected" : ""}`}>
                 {houseName

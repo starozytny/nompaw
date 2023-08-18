@@ -124,7 +124,7 @@ export class ProjectActivities extends Component{
 
         return <div className="project-card">
             <div className="project-card-header">
-                <div className="name">Activités</div>
+                <div className="name">💡 Activités</div>
             </div>
             <div className="project-card-body">
                 <div className="propals">

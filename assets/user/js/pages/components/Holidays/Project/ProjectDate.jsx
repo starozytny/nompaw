@@ -152,7 +152,7 @@ export class ProjectDate extends Component{
             })
         }
 
-        return <div className="project-card">
+        return <div className="project-card project-card-date">
             <div className="project-card-header">
                 <div className="name">{nStartAt ? "Date sélectionnée" : "Proposition de dates"}</div>
             </div>
