@@ -39,7 +39,7 @@ export class Commentary extends Component {
         e.preventDefault();
 
         const { recipe } = this.props;
-        const { loadData, message, rate } = this.state;
+        const { loadData, message } = this.state;
 
         this.setState({ errors: [] });
 

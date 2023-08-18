@@ -78,6 +78,26 @@ class ProjectController extends AbstractController
         return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $fileUploader);
     }
 
+    #[Route('/route/update/{id}', name: 'update_route', options: ['expose' => true], methods: 'PUT')]
+    public function updateRoute(Request $request, HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository,
+                                DataHolidays $dataEntity, ValidatorService $validator): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $obj = $dataEntity->setDataRoute($obj, $data);
+
+        $noErrors = $validator->validate($obj);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, HoProject::ROUTE);
+    }
+
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(HoProject $obj, HoProjectRepository $repository, ApiResponse $apiResponse, FileUploader $fileUploader): Response
     {

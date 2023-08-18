@@ -37,6 +37,13 @@
   }
 }
 
+.iframe-route{
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+}
+
 .project-propals{
   width: 100%;
 }
@@ -47,13 +54,16 @@
   }
 
   .project-card-header{
+    @include flex(row, center, space-between, var(--espaceEls));
     background-color: var(--color0Opacity6);
     border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
 
     .name{
       @include fontSemibold();
+      font-size: 20px;
     }
   }
+
   .project-card-body {
     background-color: var(--color0Opacity4);
 
@@ -116,6 +126,11 @@
       width: 64px;
     }
   }
+
+  .propal-route{
+    flex-direction: column;
+    gap: var(--espaceDiv);
+  }
 }
 
 .project-content{
@@ -150,6 +165,14 @@
           width: 180px;
           max-height: 240px;
         }
+      }
+    }
+
+    .propal-route{
+      flex-direction: row;
+
+      & > div{
+        width: 50%;
       }
     }
   }

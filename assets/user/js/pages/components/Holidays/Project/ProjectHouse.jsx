@@ -135,6 +135,14 @@ export class ProjectHouse extends Component{
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">🏠 Hébergement</div>
+                {(mode || authorId === parseInt(userId))
+                    ? <div className="actions">
+                        <ButtonIcon type="danger" icon="trash" text="Annuler l'hébergement"
+                                    onClick={() => this.handleModal('cancelHouse', 'delete', null)}
+                        />
+                    </div>
+                    : null
+                }
             </div>
             <div className={`project-card-body${houseName ? " selected" : ""}`}>
                 {houseName
@@ -193,26 +201,16 @@ export class ProjectHouse extends Component{
                                     </div>
                                 </div>
                             })}
+
+                            <div className="propal">
+                                <ButtonIcon type="primary" icon="add" text="Proposer un hébergement"
+                                            onClick={() => this.handleModal('formPropal', 'create', null)}
+                                />
+                            </div>
                         </div>
                     </>
                 }
             </div>
-            {houseName === ""
-                ? <div className="project-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-                    <div style={{display: 'flex', gap: '4px'}}>
-                        <span className="icon-add"></span>
-                        <span>Proposer un hébergement</span>
-                    </div>
-                </div>
-                : (mode || authorId === parseInt(userId)
-                    ? <div className="project-card-footer project-card-footer-danger" onClick={() => this.handleModal('cancelHouse', 'delete', null)}>
-                        <div style={{display: 'flex', gap: '4px'}}>
-                            <span className="icon-close"></span>
-                            <span>Annuler l'hébergement sélectionné</span>
-                        </div>
-                    </div>
-                    : null)
-            }
 
             <Modal ref={this.formPropal} identifiant="form-house" maxWidth={568} title="Proposer un hébergement"
                    content={<>

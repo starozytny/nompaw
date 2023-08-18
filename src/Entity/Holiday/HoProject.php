@@ -17,11 +17,12 @@ class HoProject extends DataEntity
     const FOLDER = "images/entity/holidays/cover/";
 
     const FORM = ['hopro_form'];
+    const ROUTE = ['hopro_route'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['hopro_form'])]
+    #[Groups(['hopro_form', 'hopro_route'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -76,6 +77,14 @@ class HoProject extends DataEntity
 
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoLifestyle::class)]
     private Collection $lifestyles;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_route'])]
+    private ?string $textRoute = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_route'])]
+    private ?string $iframeRoute = null;
 
     public function __construct()
     {
@@ -363,6 +372,30 @@ class HoProject extends DataEntity
                 $lifestyle->setProject(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTextRoute(): ?string
+    {
+        return $this->textRoute;
+    }
+
+    public function setTextRoute(?string $textRoute): self
+    {
+        $this->textRoute = $textRoute;
+
+        return $this;
+    }
+
+    public function getIframeRoute(): ?string
+    {
+        return $this->iframeRoute;
+    }
+
+    public function setIframeRoute(?string $iframeRoute): self
+    {
+        $this->iframeRoute = $iframeRoute;
 
         return $this;
     }

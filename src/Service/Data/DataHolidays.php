@@ -25,6 +25,14 @@ class DataHolidays
         ;
     }
 
+    public function setDataRoute(HoProject $obj, $data): HoProject
+    {
+        return ($obj)
+            ->setTextRoute($this->sanitizeData->trimData($data->texte->html))
+            ->setIframeRoute($this->sanitizeData->trimData($data->iframe))
+        ;
+    }
+
     public function setDataPropalDate(HoPropalDate $obj, $data): HoPropalDate
     {
         return ($obj)

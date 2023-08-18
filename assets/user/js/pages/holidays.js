@@ -9,6 +9,7 @@ import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
 import { ProjectActivities } from "@userPages/Holidays/Project/ProjectActivities";
 import { ProjectTodos } from "@userPages/Holidays/Project/ProjectTodos";
 import { ProjectLifestyle } from "@userPages/Holidays/Project/ProjectLifestyle";
+import { ProjectRoute } from "@userPages/Holidays/Project/ProjectRoute";
 
 let el = document.getElementById("projects_update");
 if(el){
@@ -30,6 +31,11 @@ if(deletesProject){
 let projectDate = document.getElementById("project_date");
 if(projectDate){
     createRoot(projectDate).render(<ProjectDate {...projectDate.dataset} mode={projectDate.dataset.mode === "1"} />)
+}
+
+let projectRoute = document.getElementById("project_route");
+if(projectRoute){
+    createRoot(projectRoute).render(<ProjectRoute {...projectRoute.dataset} />)
 }
 
 let projectHouse = document.getElementById("project_house");

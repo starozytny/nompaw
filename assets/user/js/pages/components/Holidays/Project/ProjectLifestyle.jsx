@@ -96,7 +96,7 @@ export class ProjectLifestyle extends Component{
             <div className="project-card-header">
                 <div className="name">✨ Style de vie</div>
             </div>
-            <div className="project-card-body">
+            <div className="project-card-body selected">
                 <div className="propals">
                     {data.map((el, index) => {
                         return <div className="propal" key={index}>
@@ -114,16 +114,15 @@ export class ProjectLifestyle extends Component{
                             </div>
                         </div>
                     })}
-                </div>
-            </div>
-            <div className="project-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-                <div style={{display: 'flex', gap: '4px'}}>
-                    <span className="icon-add"></span>
-                    <span>Ajouter</span>
+                    <div className="propal">
+                        <ButtonIcon type="primary" icon="add" text="Ajouter une dépense"
+                                    onClick={() => this.handleModal('formPropal', 'create', null)}
+                        />
+                    </div>
                 </div>
             </div>
 
-            <Modal ref={this.formPropal} identifiant="form-lifestyle" maxWidth={568} title="Ajouter"
+            <Modal ref={this.formPropal} identifiant="form-lifestyle" maxWidth={568} title="Ajouter une dépense"
                    content={<>
                        <div className="line line-3">
                            <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>

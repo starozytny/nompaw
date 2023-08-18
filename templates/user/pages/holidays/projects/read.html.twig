@@ -64,6 +64,13 @@
             </div>
 
             <div class="project-content">
+                <div id="project_route"
+                     data-project-id="{{ elem.id }}"
+                     data-texte="{{ elem.textRoute }}"
+                     data-iframe="{{ elem.iframeRoute }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
                 <div id="project_house"
                      data-project-id="{{ elem.id }}"
                      data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"

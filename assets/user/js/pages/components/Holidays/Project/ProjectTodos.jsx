@@ -106,7 +106,7 @@ export class ProjectTodos extends Component{
             <div className="project-card-header">
                 <div className="name">📌🖇️ Liste des choses à prendre</div>
             </div>
-            <div className="project-card-body">
+            <div className="project-card-body selected">
                 <div className="propals">
                     {data.map((el, index) => {
 
@@ -132,16 +132,16 @@ export class ProjectTodos extends Component{
                             </div>
                         </div>
                     })}
-                </div>
-            </div>
-            <div className="project-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-                <div style={{display: 'flex', gap: '4px'}}>
-                    <span className="icon-add"></span>
-                    <span>Ajouter</span>
+
+                    <div className="propal">
+                        <ButtonIcon type="primary" icon="add" text="Ajouter quelque chose"
+                                    onClick={() => this.handleModal('formPropal', 'create', null)}
+                        />
+                    </div>
                 </div>
             </div>
 
-            <Modal ref={this.formPropal} identifiant="form-todos" maxWidth={414} title="Ajouter"
+            <Modal ref={this.formPropal} identifiant="form-todos" maxWidth={414} title="Ajouter quelque chose"
                    content={<>
                        <div className="line">
                            <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>

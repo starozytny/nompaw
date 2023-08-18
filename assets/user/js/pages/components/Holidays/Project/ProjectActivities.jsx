@@ -126,7 +126,7 @@ export class ProjectActivities extends Component{
             <div className="project-card-header">
                 <div className="name">💡 Activités</div>
             </div>
-            <div className="project-card-body">
+            <div className="project-card-body selected">
                 <div className="propals">
                     {data.map((el, index) => {
 
@@ -174,12 +174,12 @@ export class ProjectActivities extends Component{
                             </div>
                         </div>
                     })}
-                </div>
-            </div>
-            <div className="project-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-                <div style={{display: 'flex', gap: '4px'}}>
-                    <span className="icon-add"></span>
-                    <span>Proposer une activité</span>
+
+                    <div className="propal">
+                        <ButtonIcon type="primary" icon="add" text="Proposer une activité"
+                                    onClick={() => this.handleModal('formPropal', 'create', null)}
+                        />
+                    </div>
                 </div>
             </div>
 
