@@ -277,7 +277,7 @@ export class ProjectActivities extends Component{
                    content={<>
                        <div className="line line-2">
                            <Input identifiant="name" valeur={name} {...params}>Nom de l'activité</Input>
-                           <Input identifiant="price" valeur={price} {...params}>Prix de l'activité</Input>
+                           <Input identifiant="price" valeur={price} {...params} placeholder="Par personnes..">Prix / personnes</Input>
                        </div>
                        <div className="line">
                            <Input identifiant="url" valeur={url} {...params}>Lien externe</Input>

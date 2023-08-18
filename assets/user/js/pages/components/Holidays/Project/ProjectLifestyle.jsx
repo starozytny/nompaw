@@ -191,7 +191,7 @@ export class ProjectLifestyle extends Component{
                        <div className="line line-3">
                            <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
                            <Input identifiant="unit" valeur={unit} {...params}>Unité</Input>
-                           <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                           <Input identifiant="price" valeur={price} {...params} placeholder="Par personnes..">Prix / personnes</Input>
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />
