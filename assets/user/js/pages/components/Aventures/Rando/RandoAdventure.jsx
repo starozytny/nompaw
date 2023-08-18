@@ -130,7 +130,7 @@ export class RandoAdventure extends Component {
         const { randoId } = this.props;
 
         this.cancelAdventure.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
-        Propals.endPropal(this, randoId, URL_CANCEL_ADV, modalCancelAdventure);
+        Propals.cancel(this, randoId, URL_CANCEL_ADV, modalCancelAdventure);
     }
 
     render() {

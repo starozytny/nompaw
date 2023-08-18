@@ -132,7 +132,7 @@ export class ProjectDate extends Component{
         const { projectId } = this.props;
 
         this.cancelDate.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
-        Propals.endPropal(this, projectId, URL_CANCEL_DATE, modalCancelDate);
+        Propals.cancel(this, projectId, URL_CANCEL_DATE, modalCancelDate);
     }
 
     render() {

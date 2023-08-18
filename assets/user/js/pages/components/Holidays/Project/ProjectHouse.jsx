@@ -123,7 +123,7 @@ export class ProjectHouse extends Component{
         const { projectId } = this.props;
 
         this.cancelHouse.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
-        Propals.endPropal(this, projectId, URL_CANCEL_HOUSE, modalCancelHouse);
+        Propals.cancel(this, projectId, URL_CANCEL_HOUSE, modalCancelHouse);
     }
 
     render() {
