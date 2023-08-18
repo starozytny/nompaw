@@ -111,7 +111,7 @@
   .propal{
 
     .propal-body-with-image{
-      width: calc(100% - 40px - 64px - 25px);
+      width: calc(100% - 20px - 40px - 96px - 25px);
     }
 
     .propal-body-lifestyle{
@@ -121,15 +121,17 @@
     .propal-body-todos{
       width: calc(100% - 20px - 64px - 10px);
     }
-
-    .propal-actions-activities{
-      width: 64px;
-    }
   }
 
   .propal-route{
     flex-direction: column;
     gap: var(--espaceDiv);
+  }
+
+  .propal-text{
+    &:hover{
+      background: var(--color0Opacity4);
+    }
   }
 }
 

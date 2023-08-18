@@ -144,7 +144,7 @@ export class ProjectTodos extends Component{
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
-            <div className="project-card-body selected">
+            <div className="project-card-body">
                 <div className="propals">
                     {textTodos
                         ? <div className="propal">

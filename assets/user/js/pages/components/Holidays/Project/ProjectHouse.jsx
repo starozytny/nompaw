@@ -182,22 +182,20 @@ export class ProjectHouse extends Component{
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
-            <div className={`project-card-body${houseName ? " selected" : ""}`}>
+            <div className="project-card-body">
                 <div className="propals">
                     {textHouse
-                        ? <div className="propal">
+                        ? <div className="propal propal-text">
                             <div dangerouslySetInnerHTML={{__html: textHouse}}></div>
                         </div>
                         : null
                     }
                     {houseName
                         ? <div className="propal selected" style={{ flexDirection: 'column' }}>
-                            <div>{houseName}</div>
                             {houseUrl ? <a href={houseUrl} target="_blank" className="txt-link">
-                                <span>Lien de l'hébergement</span>
+                                <span>{houseName}</span>
                                 <span className="icon-link" />
                             </a> : ""}
-                            {housePrice ? <div>{Sanitaze.toFormatCurrency(housePrice)}</div> : ""}
                         </div>
                         : <>
                             {data.map((el, index) => {
@@ -251,6 +249,12 @@ export class ProjectHouse extends Component{
                             </div>
                         </>
                     }
+                </div>
+            </div>
+
+            <div className="project-card-footer project-card-footer-total">
+                <div>
+                    {housePrice ? Sanitaze.toFormatCurrency(housePrice) : ""}
                 </div>
             </div>
 

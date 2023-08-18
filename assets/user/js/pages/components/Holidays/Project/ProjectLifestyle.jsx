@@ -134,7 +134,7 @@ export class ProjectLifestyle extends Component{
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
-            <div className="project-card-body selected">
+            <div className="project-card-body">
                 <div className="propals">
                     {textLifestyle
                         ? <div className="propal">
@@ -163,6 +163,12 @@ export class ProjectLifestyle extends Component{
                                     onClick={() => this.handleModal('formPropal', 'create', null)}
                         />
                     </div>
+                </div>
+            </div>
+
+            <div className="project-card-footer project-card-footer-total">
+                <div>
+                    Calcul
                 </div>
             </div>
 

@@ -162,7 +162,7 @@ export class ProjectActivities extends Component{
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
-            <div className="project-card-body selected">
+            <div className="project-card-body">
                 <div className="propals">
                     {textActivities
                         ? <div className="propal">
@@ -182,6 +182,7 @@ export class ProjectActivities extends Component{
                         })
 
                         return <div className="propal" key={index}>
+                            <div className={`selector${active}`} onClick={onVote}></div>
                             <div className="propal-body propal-body-with-image">
                                 <div className="image" onClick={onVote}>
                                     <img src={el.imageFile} alt={"illustration " + el.name}/>
@@ -199,11 +200,12 @@ export class ProjectActivities extends Component{
                                     </div>
                                 </div>
                             </div>
-                            <div className="propal-actions propal-actions-activities">
+                            <div className="propal-actions">
                                 {mode || el.author.id === parseInt(userId)
                                     ? <>
                                         <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
                                         <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                        {mode && <ButtonIcon icon="check1" type="success" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon> }
                                     </>
                                     : null
                                 }
@@ -222,6 +224,12 @@ export class ProjectActivities extends Component{
                                     onClick={() => this.handleModal('formPropal', 'create', null)}
                         />
                     </div>
+                </div>
+            </div>
+
+            <div className="project-card-footer project-card-footer-total">
+                <div>
+                    Calcul
                 </div>
             </div>
 

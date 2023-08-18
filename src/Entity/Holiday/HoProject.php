@@ -86,6 +86,10 @@ class HoProject extends DataEntity
     #[Groups(['hopro_text'])]
     private ?string $iframeRoute = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?float $priceRoute = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['hopro_text'])]
     private ?string $textHouse = null;
@@ -460,6 +464,18 @@ class HoProject extends DataEntity
     public function setTextTodos(?string $textTodos): self
     {
         $this->textTodos = $textTodos;
+
+        return $this;
+    }
+
+    public function getPriceRoute(): ?float
+    {
+        return $this->priceRoute;
+    }
+
+    public function setPriceRoute(?float $priceRoute): self
+    {
+        $this->priceRoute = $priceRoute;
 
         return $this;
     }

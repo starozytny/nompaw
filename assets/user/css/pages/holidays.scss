@@ -105,7 +105,11 @@
     }
   }
 
-  .project-card-footer{
-    //background: var(--color2);
+  .project-card-footer-total{
+    cursor: initial;
+    background: var(--color2);
+    @include fontBold();
+    font-size: 22px;
+    color: var(--warning);
   }
 }
