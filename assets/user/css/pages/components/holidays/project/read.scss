@@ -22,6 +22,8 @@
   padding: 12px;
   border-radius: calc(var(--radius) * 2);
   width: 100%;
+  background-size: cover;
+  background-position: center center;
 
   &:before{
     content: '';

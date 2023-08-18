@@ -104,7 +104,7 @@ export class ProjectRoute extends Component{
 
             <div className="project-card-footer project-card-footer-total">
                 <div>
-                    {priceRoute ? Sanitaze.toFormatCurrency(priceRoute) : ""}
+                    {Sanitaze.toFormatCurrency(priceRoute)}
                 </div>
             </div>
 
