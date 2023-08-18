@@ -24,6 +24,12 @@
         </div>
         <div class="col-2">
             {% if app.user.id == elem.author.id or app.user.admin %}
+                <div id="share_link" class="btn btn-default"
+                     data-url="{{ path('user_projects_read', {'slug': elem.slug, 'code': elem.code}) }}"
+                >
+                    <span class="icon-share"></span>
+                    <span>Partager</span>
+                </div>
                 <a href="{{ path('user_projects_update', {'slug': elem.slug}) }}" class="btn btn-warning">
                     <span class="icon-pencil"></span>
                     <span>Modifier</span>
@@ -42,82 +48,5 @@
         </div>
     </div>
 
-    <div class="page-default">
-        <div class="project-read">
-            <div class="project-header">
-                <div class="project-title" style="background-image: url({{ elem.imageFile }})">
-                    <h2>{{ elem.name }}</h2>
-                </div>
-                <div class="project-propals">
-                    <div id="project_date"
-                         data-project-id="{{ elem.id }}"
-                         data-n-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
-                         data-n-end-at="{{ elem.endAt ? elem.endAt | date('Y-m-d') : "" }}"
-                         data-propals="{{ propalDates }}"
-                         data-user-id="{{ app.user.id }}"
-                         data-author-id="{{ elem.author.id }}"
-                         data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
-                    >
-                        {% include "layout/components/loader.html.twig" %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="project-content">
-                <div id="project_budget"
-                     data-route-price="{{ elem.priceRoute }}"
-                     data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
-                     data-lifestyle="{{ lifestyles }}"
-                     data-activities="{{ propalActivities }}"
-                >
-                    {% include "layout/components/loader.html.twig" %}
-                </div>
-                <div id="project_route"
-                     data-project-id="{{ elem.id }}"
-                     data-texte="{{ elem.textRoute }}"
-                     data-iframe="{{ elem.iframeRoute }}"
-                     data-price="{{ elem.priceRoute }}"
-                >
-                    {% include "layout/components/loader.html.twig" %}
-                </div>
-                <div id="project_house"
-                     data-project-id="{{ elem.id }}"
-                     data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"
-                     data-house-url="{{ elem.propalHouse ? elem.propalHouse.url : '' }}"
-                     data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
-                     data-propals="{{ propalHouses }}"
-                     data-user-id="{{ app.user.id }}"
-                     data-author-id="{{ elem.author.id }}"
-                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
-                     data-texte="{{ elem.textHouse }}"
-                >
-                    {% include "layout/components/loader.html.twig" %}
-                </div>
-                <div id="project_lifestyle"
-                     data-project-id="{{ elem.id }}"
-                     data-donnees="{{ lifestyles }}"
-                     data-texte="{{ elem.textLifestyle }}"
-                >
-                    {% include "layout/components/loader.html.twig" %}
-                </div>
-                <div id="project_activities"
-                     data-project-id="{{ elem.id }}"
-                     data-propals="{{ propalActivities }}"
-                     data-user-id="{{ app.user.id }}"
-                     data-author-id="{{ elem.author.id }}"
-                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
-                     data-texte="{{ elem.textActivities }}"
-                >
-                    {% include "layout/components/loader.html.twig" %}
-                </div>
-                <div id="project_todos"
-                     data-project-id="{{ elem.id }}"
-                     data-donnees="{{ todos }}"
-                     data-texte="{{ elem.textTodos }}"
-                >
-                    {% include "layout/components/loader.html.twig" %}
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include "user/pages/holidays/projects/components/read_content.html.twig" %}
 {% endblock %}

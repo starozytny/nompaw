@@ -1,6 +1,7 @@
 import '../../css/pages/holidays.scss';
 
 import React from "react";
+import toastr from "toastr";
 import { createRoot } from "react-dom/client";
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
@@ -62,4 +63,12 @@ if(projectActivities){
 let projectTodos = document.getElementById("project_todos");
 if(projectTodos){
     createRoot(projectTodos).render(<ProjectTodos {...projectTodos.dataset} />)
+}
+
+let share = document.getElementById('share_link');
+if(share){
+    share.addEventListener('click', function () {
+        navigator.clipboard.writeText(location.origin + share.dataset.url);
+        toastr.info('Lien de partage copié')
+    })
 }

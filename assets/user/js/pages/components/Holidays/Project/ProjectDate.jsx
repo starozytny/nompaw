@@ -168,7 +168,7 @@ export class ProjectDate extends Component{
                         <div className="propals">
                             {data.map((el, index) => {
 
-                                let onVote = () => this.handleVote(el);
+                                let onVote = userId ? () => this.handleVote(el) : null;
 
                                 let active = "";
                                 el.votes.forEach(v => {
@@ -207,7 +207,7 @@ export class ProjectDate extends Component{
                     </>
                 }
             </div>
-            {nStartAt === ""
+            {userId && nStartAt === ""
                 ? <div className="project-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
                     <div style={{display: 'flex', gap: '4px'}}>
                         <span className="icon-add"></span>

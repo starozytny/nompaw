@@ -82,6 +82,7 @@ export class ProjectRoute extends Component{
     }
 
     render() {
+        const { userId } = this.props;
         const { errors, texte, iframe, price, textRoute, iframeRoute, priceRoute } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -89,9 +90,12 @@ export class ProjectRoute extends Component{
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">🚓 Trajet</div>
-                <div className="actions">
-                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
-                </div>
+                {userId
+                    ? <div className="actions">
+                        <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                    </div>
+                    : null
+                }
             </div>
             <div className="project-card-body">
                 <div className="propals">

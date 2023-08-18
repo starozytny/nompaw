@@ -49,7 +49,6 @@ export class ProjectBudget extends Component{
                 }
             }
         })
-        console.log(totalPers)
 
         totalPrice += lifeStylePrice + activitiesPrice;
         totalPromo += lifeStylePrice + activitiesPrice;
