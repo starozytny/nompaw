@@ -11,7 +11,7 @@ import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
-import { Input } from "@commonComponents/Elements/Fields";
+import {Input, Radiobox} from "@commonComponents/Elements/Fields";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'api_projects_lifestyle_create';
@@ -29,6 +29,7 @@ export class ProjectLifestyle extends Component{
             name: '',
             unit: '',
             price: '',
+            priceType: 0,
             texteLifestyle: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
             textLifestyle: Formulaire.setValue(props.texte),
             errors: [],
@@ -55,6 +56,7 @@ export class ProjectLifestyle extends Component{
             name: element ? element.name : "",
             unit: element ? Formulaire.setValue(element.unit) : "",
             price: element ? Formulaire.setValue(element.price) : "",
+            priceType: element ? Formulaire.setValue(element.priceType) : 0,
         })
         this[identifiant].current.handleClick();
     }
@@ -63,7 +65,7 @@ export class ProjectLifestyle extends Component{
         e.preventDefault();
 
         const { projectId } = this.props;
-        const { context, element, name, unit, price, data } = this.state;
+        const { context, element, name, unit, price, priceType, data } = this.state;
 
         this.setState({ errors: [] });
 
@@ -80,7 +82,7 @@ export class ProjectLifestyle extends Component{
 
             const self = this;
             this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
-            axios({ method: method, url: urlName, data: {name: name, unit: unit, price: price} })
+            axios({ method: method, url: urlName, data: {name: name, unit: unit, price: price, priceType: priceType} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
                     self.setState({ data: Propals.updateList(context, data, response) })
@@ -124,10 +126,15 @@ export class ProjectLifestyle extends Component{
 
     render() {
         const { userId } = this.props;
-        const { errors, name, unit, price, data, element, texteLifestyle, textLifestyle } = this.state;
+        const { errors, name, unit, price, priceType, data, element, texteLifestyle, textLifestyle } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
         let totalPrice = 0;
+
+        let pricesType = [
+            { value: 0, label: 'par pers.', identifiant: 'life-price-type-0' },
+            { value: 1, label: 'fixe',      identifiant: 'life-price-type-1' },
+        ]
 
         return <div className="project-card">
             <div className="project-card-header">
@@ -157,7 +164,7 @@ export class ProjectLifestyle extends Component{
                                     <span>{el.name}</span> <span>{el.unit ? "(" + el.unit + ")" : ""}</span>
                                 </div>
                                 <div className="duration">
-                                    {el.price ? Sanitaze.toFormatCurrency(el.price) : ""}
+                                    {el.price ? Sanitaze.toFormatCurrency(el.price) + (el.priceType === 0 ? " / pers" : "") : ""}
                                 </div>
                             </div>
                             {userId
@@ -202,7 +209,12 @@ export class ProjectLifestyle extends Component{
                        <div className="line line-3">
                            <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
                            <Input identifiant="unit" valeur={unit} {...params}>Unité</Input>
-                           <Input identifiant="price" valeur={price} {...params} placeholder="Par personnes..">Prix / personnes</Input>
+                           <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                       </div>
+                       <div className="line">
+                           <Radiobox items={pricesType} identifiant="priceType" valeur={priceType} {...params}>
+                               Type de prix
+                           </Radiobox>
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />

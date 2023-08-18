@@ -55,6 +55,10 @@ class HoPropalActivity extends DataEntity
     #[Groups(['pr_act_list'])]
     private ?bool $isSelected = false;
 
+    #[ORM\Column]
+    #[Groups(['pr_act_list'])]
+    private ?int $priceType = 0;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -158,6 +162,18 @@ class HoPropalActivity extends DataEntity
     public function setIsSelected(bool $isSelected): self
     {
         $this->isSelected = $isSelected;
+
+        return $this;
+    }
+
+    public function getPriceType(): ?int
+    {
+        return $this->priceType;
+    }
+
+    public function setPriceType(int $priceType): self
+    {
+        $this->priceType = $priceType;
 
         return $this;
     }

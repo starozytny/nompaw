@@ -11,7 +11,7 @@ import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Input, InputFile } from "@commonComponents/Elements/Fields";
+import {Input, InputFile, Radiobox} from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
@@ -33,6 +33,7 @@ export class ProjectActivities extends Component{
             name: '',
             url: 'https://',
             price: '',
+            priceType: 0,
             imageFile: '',
             texteActivities: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
             textActivities: Formulaire.setValue(props.texte),
@@ -76,6 +77,7 @@ export class ProjectActivities extends Component{
             name: propal ? propal.name : "",
             url: propal ? Formulaire.setValue(propal.url) : "https://",
             price: propal ? Formulaire.setValue(propal.price) : "",
+            priceType: propal ? Formulaire.setValue(propal.priceType) : 0,
             imageFile: propal ? Formulaire.setValue(propal.imageFile) : "",
         })
         this[identifiant].current.handleClick();
@@ -85,7 +87,7 @@ export class ProjectActivities extends Component{
         e.preventDefault();
 
         const { projectId } = this.props;
-        const { context, propal, name, url, price, data } = this.state;
+        const { context, propal, name, url, price, priceType, data } = this.state;
 
         this.setState({ errors: [] });
 
@@ -100,7 +102,7 @@ export class ProjectActivities extends Component{
                 : Routing.generate(URL_UPDATE_PROPAL, {'project': projectId, 'id': propal.id})
 
             let formData = new FormData();
-            formData.append("data", JSON.stringify({name: name, url: url, price: price}));
+            formData.append("data", JSON.stringify({name: name, url: url, price: price, priceType: priceType}));
 
             let file = this.file.current;
             if(file.state.files.length > 0){
@@ -174,10 +176,15 @@ export class ProjectActivities extends Component{
 
     render() {
         const { mode, userId } = this.props;
-        const { errors, loadData, name, url, price, data, propal, imageFile, texteActivities, textActivities } = this.state;
+        const { errors, loadData, name, url, price, priceType, data, propal, imageFile, texteActivities, textActivities } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
         let totalPrice = 0;
+
+        let pricesType = [
+            { value: 0, label: 'par pers.', identifiant: 'act-price-type-0' },
+            { value: 1, label: 'fixe',      identifiant: 'act-price-type-1' },
+        ]
 
         return <div className="project-card">
             <div className="project-card-header">
@@ -224,7 +231,7 @@ export class ProjectActivities extends Component{
                                         </a>}
                                     </div>
                                     <div className="duration" onClick={onVote}>
-                                        {el.price ? Sanitaze.toFormatCurrency(el.price) : ""}
+                                        {el.price ? Sanitaze.toFormatCurrency(el.price) + (el.priceType === 0 ? " / pers" : "") : ""}
                                     </div>
                                 </div>
                             </div>
@@ -282,9 +289,12 @@ export class ProjectActivities extends Component{
 
             <Modal ref={this.formPropal} identifiant="form-activities" maxWidth={568} margin={10} title="Proposer une activité"
                    content={<>
-                       <div className="line line-2">
+                       <div className="line line-3">
                            <Input identifiant="name" valeur={name} {...params}>Nom de l'activité</Input>
-                           <Input identifiant="price" valeur={price} {...params} placeholder="Par personnes..">Prix / personnes</Input>
+                           <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                           <Radiobox items={pricesType} identifiant="priceType" valeur={priceType} {...params}>
+                               Type de prix
+                           </Radiobox>
                        </div>
                        <div className="line">
                            <Input identifiant="url" valeur={url} {...params}>Lien externe</Input>

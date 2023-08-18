@@ -37,13 +37,13 @@ export class ProjectBudget extends Component{
         let lifeStylePricePers = 0, activitiesPricePers = 0;
         JSON.parse(lifestyle).map(el => {
             lifeStylePrice += el.price ? el.price : 0;
-            lifeStylePricePers += el.price ? el.price * nNbPers : 0;
+            lifeStylePricePers += el.price ? el.price * (el.priceType === 0 ? nNbPers : 1) : 0;
         })
         JSON.parse(activities).map(el => {
             if(el.isSelected){
                 if(el.price){
                     activitiesPrice += el.price;
-                    activitiesPricePers += el.price * nNbPers;
+                    activitiesPricePers += el.price * (el.priceType === 0 ? nNbPers : 1);
                 }else{
                     activitesWithoutPrice++;
                 }
