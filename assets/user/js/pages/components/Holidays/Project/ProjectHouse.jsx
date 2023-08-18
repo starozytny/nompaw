@@ -214,7 +214,7 @@ export class ProjectHouse extends Component{
 
                                 return <div className="propal" key={index}>
                                     <div className={`selector${active}`} onClick={onVote}></div>
-                                    <div className="propal-body" onClick={onVote}>
+                                    <div className="propal-body">
                                         <div className="name">
                                             <span onClick={onVote}>{el.name}</span>
                                             {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo" target="_blank">

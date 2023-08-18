@@ -179,8 +179,8 @@ export class ProjectActivities extends Component{
                         })
 
                         return <div className="propal" key={index}>
-                            <div className="propal-body propal-body-with-image" onClick={onVote}>
-                                <div className="image">
+                            <div className="propal-body propal-body-with-image">
+                                <div className="image" onClick={onVote}>
                                     <img src={el.imageFile} alt={"illustration " + el.name}/>
                                 </div>
                                 <div>
