@@ -123,6 +123,7 @@ export class ProjectLifestyle extends Component{
     }
 
     render() {
+        const { userId } = this.props;
         const { errors, name, unit, price, data, element, texteLifestyle, textLifestyle } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -131,9 +132,12 @@ export class ProjectLifestyle extends Component{
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">✨ Style de vie</div>
-                <div className="actions">
-                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
-                </div>
+                {userId
+                    ? <div className="actions">
+                        <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                    </div>
+                    : null
+                }
             </div>
             <div className="project-card-body">
                 <div className="propals">
@@ -156,17 +160,24 @@ export class ProjectLifestyle extends Component{
                                     {el.price ? Sanitaze.toFormatCurrency(el.price) : ""}
                                 </div>
                             </div>
-                            <div className="propal-actions propal-actions-lifestyle">
-                                <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-                                <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-                            </div>
+                            {userId
+                                ? <div className="propal-actions propal-actions-lifestyle">
+                                    <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+                                    <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                </div>
+                                : null
+                            }
                         </div>
                     })}
-                    <div className="propal">
-                        <ButtonIcon type="primary" icon="add" text="Ajouter une dépense"
-                                    onClick={() => this.handleModal('formPropal', 'create', null)}
-                        />
-                    </div>
+
+                    {userId
+                        ? <div className="propal">
+                            <ButtonIcon type="primary" icon="add" text="Ajouter une dépense"
+                                        onClick={() => this.handleModal('formPropal', 'create', null)}
+                            />
+                        </div>
+                        : null
+                    }
                 </div>
             </div>
 
@@ -191,7 +202,7 @@ export class ProjectLifestyle extends Component{
                        <div className="line line-3">
                            <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
                            <Input identifiant="unit" valeur={unit} {...params}>Unité</Input>
-                           <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                           <Input identifiant="price" valeur={price} {...params} placeholder="Par personnes..">Prix / personnes</Input>
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />

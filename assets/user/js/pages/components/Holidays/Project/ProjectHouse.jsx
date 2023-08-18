@@ -170,15 +170,18 @@ export class ProjectHouse extends Component{
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">🏠 Hébergement</div>
-                <div className="actions">
-                    {(mode || authorId === parseInt(userId))
-                        ? <ButtonIcon type="danger" icon="trash" text="Annuler l'hébergement"
-                                      onClick={() => this.handleModal('cancelHouse', 'delete', null)}
-                        />
-                        : null
-                    }
-                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
-                </div>
+                {userId
+                    ? <div className="actions">
+                        {(mode || authorId === parseInt(userId))
+                            ? <ButtonIcon type="danger" icon="trash" text="Annuler l'hébergement"
+                                          onClick={() => this.handleModal('cancelHouse', 'delete', null)}
+                            />
+                            : null
+                        }
+                        <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                    </div>
+                    : null
+                }
             </div>
             <div className="project-card-body">
                 <div className="propals">
@@ -201,7 +204,7 @@ export class ProjectHouse extends Component{
                         : <>
                             {data.map((el, index) => {
 
-                                let onVote = () => this.handleVote(el);
+                                let onVote = userId ? () => this.handleVote(el) : null;
 
                                 let active = "";
                                 el.votes.forEach(v => {
@@ -243,11 +246,14 @@ export class ProjectHouse extends Component{
                                 </div>
                             })}
 
-                            <div className="propal">
-                                <ButtonIcon type="primary" icon="add" text="Proposer un hébergement"
-                                            onClick={() => this.handleModal('formPropal', 'create', null)}
-                                />
-                            </div>
+                            {userId
+                                ? <div className="propal">
+                                    <ButtonIcon type="primary" icon="add" text="Proposer un hébergement"
+                                                onClick={() => this.handleModal('formPropal', 'create', null)}
+                                    />
+                                </div>
+                                : null
+                            }
                         </>
                     }
                 </div>

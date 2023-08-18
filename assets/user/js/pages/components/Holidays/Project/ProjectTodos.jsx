@@ -133,6 +133,7 @@ export class ProjectTodos extends Component{
     }
 
     render() {
+        const { userId } = this.props;
         const { errors, name, data, element, todosChecked, texteTodos, textTodos } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
@@ -140,9 +141,12 @@ export class ProjectTodos extends Component{
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">⚒️ Liste des choses à prendre</div>
-                <div className="actions">
-                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
-                </div>
+                {userId
+                    ? <div className="actions">
+                        <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                    </div>
+                    : null
+                }
             </div>
             <div className="project-card-body">
                 <div className="propals">
@@ -169,18 +173,24 @@ export class ProjectTodos extends Component{
                                     <span>{el.name}</span>
                                 </div>
                             </div>
-                            <div className="propal-actions propal-actions-todos">
-                                <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-                                <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-                            </div>
+                            {userId
+                                ? <div className="propal-actions propal-actions-todos">
+                                    <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+                                    <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                </div>
+                                : null
+                            }
                         </div>
                     })}
 
-                    <div className="propal">
-                        <ButtonIcon type="primary" icon="add" text="Ajouter quelque chose"
-                                    onClick={() => this.handleModal('formPropal', 'create', null)}
-                        />
-                    </div>
+                    {userId
+                        ? <div className="propal">
+                            <ButtonIcon type="primary" icon="add" text="Ajouter quelque chose"
+                                        onClick={() => this.handleModal('formPropal', 'create', null)}
+                            />
+                        </div>
+                        : null
+                    }
                 </div>
             </div>
 

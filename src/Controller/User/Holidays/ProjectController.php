@@ -15,6 +15,7 @@ use App\Repository\Holiday\HoPropalDateRepository;
 use App\Repository\Holiday\HoPropalHouseRepository;
 use App\Repository\Holiday\HoTodoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -32,7 +33,7 @@ class ProjectController extends AbstractController
     }
 
     #[Route('/projet/{slug}', name: 'read', options: ['expose' => true])]
-    public function read($slug, SerializerInterface $serializer, HoProjectRepository $repository,
+    public function read(Request $request, $slug, SerializerInterface $serializer, HoProjectRepository $repository,
                          HoPropalDateRepository $propalDateRepository, HoPropalHouseRepository $propalHouseRepository,
                          HoPropalActivityRepository $propalActivityRepository,
                          HoTodoRepository $todoRepository, HoLifestyleRepository$lifestyleRepository): Response
@@ -50,7 +51,16 @@ class ProjectController extends AbstractController
         $todos = $serializer->serialize($todos, 'json', ['groups' => HoTodo::LIST]);
         $lifestyles = $serializer->serialize($lifestyles, 'json', ['groups' => HoLifestyle::LIST]);
 
-        return $this->render('user/pages/holidays/projects/read.html.twig', [
+
+        if($this->getUser()){
+            $routeName = 'user/pages/holidays/projects/read.html.twig';
+        }else if($request->query->get('code') == $obj->getCode()) {
+            $routeName = 'user/pages/holidays/projects/read_visitor.html.twig';
+        }else{
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render($routeName, [
             'elem' => $obj,
             'propalDates' => $propalDates,
             'propalHouses' => $propalHouses,

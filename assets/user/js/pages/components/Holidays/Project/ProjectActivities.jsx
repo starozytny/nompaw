@@ -182,9 +182,12 @@ export class ProjectActivities extends Component{
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">💡 Activités</div>
-                <div className="actions">
-                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
-                </div>
+                {userId
+                    ? <div className="actions">
+                        <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                    </div>
+                    : null
+                }
             </div>
             <div className="project-card-body">
                 <div className="propals">
@@ -251,11 +254,15 @@ export class ProjectActivities extends Component{
                         </div>
                     })}
 
-                    <div className="propal">
-                        <ButtonIcon type="primary" icon="add" text="Proposer une activité"
-                                    onClick={() => this.handleModal('formPropal', 'create', null)}
-                        />
-                    </div>
+                    {userId
+                        ? <div className="propal">
+                            <ButtonIcon type="primary" icon="add" text="Proposer une activité"
+                                        onClick={() => this.handleModal('formPropal', 'create', null)}
+                            />
+                        </div>
+                        : null
+                    }
+
                 </div>
             </div>
 
@@ -277,7 +284,7 @@ export class ProjectActivities extends Component{
                    content={<>
                        <div className="line line-2">
                            <Input identifiant="name" valeur={name} {...params}>Nom de l'activité</Input>
-                           <Input identifiant="price" valeur={price} {...params}>Prix de l'activité</Input>
+                           <Input identifiant="price" valeur={price} {...params} placeholder="Par personnes..">Prix / personnes</Input>
                        </div>
                        <div className="line">
                            <Input identifiant="url" valeur={url} {...params}>Lien externe</Input>
