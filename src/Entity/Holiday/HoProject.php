@@ -17,7 +17,7 @@ class HoProject extends DataEntity
     const FOLDER = "images/entity/holidays/cover/";
 
     const FORM = ['hopro_form'];
-    const ROUTE = ['hopro_route'];
+    const TEXTE = ['hopro_text'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -79,12 +79,28 @@ class HoProject extends DataEntity
     private Collection $lifestyles;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_route'])]
+    #[Groups(['hopro_text'])]
     private ?string $textRoute = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_route'])]
+    #[Groups(['hopro_text'])]
     private ?string $iframeRoute = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textHouse = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textLifestyle = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textActivities = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['hopro_text'])]
+    private ?string $textTodos = null;
 
     public function __construct()
     {
@@ -396,6 +412,54 @@ class HoProject extends DataEntity
     public function setIframeRoute(?string $iframeRoute): self
     {
         $this->iframeRoute = $iframeRoute;
+
+        return $this;
+    }
+
+    public function getTextHouse(): ?string
+    {
+        return $this->textHouse;
+    }
+
+    public function setTextHouse(?string $textHouse): self
+    {
+        $this->textHouse = $textHouse;
+
+        return $this;
+    }
+
+    public function getTextLifestyle(): ?string
+    {
+        return $this->textLifestyle;
+    }
+
+    public function setTextLifestyle(?string $textLifestyle): self
+    {
+        $this->textLifestyle = $textLifestyle;
+
+        return $this;
+    }
+
+    public function getTextActivities(): ?string
+    {
+        return $this->textActivities;
+    }
+
+    public function setTextActivities(?string $textActivities): self
+    {
+        $this->textActivities = $textActivities;
+
+        return $this;
+    }
+
+    public function getTextTodos(): ?string
+    {
+        return $this->textTodos;
+    }
+
+    public function setTextTodos(?string $textTodos): self
+    {
+        $this->textTodos = $textTodos;
 
         return $this;
     }

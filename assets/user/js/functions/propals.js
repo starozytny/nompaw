@@ -2,6 +2,7 @@ const axios = require("axios");
 const Routing = require("@publicFolder/bundles/fosjsrouting/js/router.min.js");
 
 const Formulaire = require("@commonFunctions/formulaire");
+const {Button} = require("@commonComponents/Elements/Button");
 
 function updateList (context, data, response) {
     let nData = data;

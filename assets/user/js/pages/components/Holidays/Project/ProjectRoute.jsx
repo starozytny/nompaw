@@ -5,14 +5,13 @@ import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire   from "@commonFunctions/formulaire";
-import Validateur   from "@commonFunctions/validateur";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 import { Input } from "@commonComponents/Elements/Fields";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
-const URL_UPDATE_PROJECT = 'api_projects_update_route';
+const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
 export class ProjectRoute extends Component{
     constructor(props) {
@@ -46,34 +45,25 @@ export class ProjectRoute extends Component{
         const { projectId } = this.props;
         const { texte, iframe } = this.state;
 
-        this.setState({ errors: [] });
+        const self = this;
+        this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        axios({
+            method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'route', 'id': projectId}),
+            data: {texte: texte, iframe: iframe}
+        })
+            .then(function (response) {
+                self.formPropal.current.handleClose();
 
-        let paramsToValidate = [];
-
-        let validate = Validateur.validateur(paramsToValidate)
-        if(!validate.code){
-            Formulaire.showErrors(this, validate);
-        }else {
-            const self = this;
-            this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
-            axios({
-                method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'id': projectId}),
-                data: {texte: texte, iframe: iframe}
-            })
-                .then(function (response) {
-                    self.formPropal.current.handleClose();
-
-                    let data = response.data;
-                    self.setState({
-                        texte: {value: Formulaire.setValue(data.textRoute), html: Formulaire.setValue(data.textRoute)},
-                        iframe: Formulaire.setValue(data.iframeRoute),
-                        iframeRoute: Formulaire.setValue(data.iframeRoute),
-                        textRoute: Formulaire.setValue(data.textRoute),
-                    })
+                let data = response.data;
+                self.setState({
+                    texte: {value: Formulaire.setValue(data.textRoute), html: Formulaire.setValue(data.textRoute)},
+                    iframe: Formulaire.setValue(data.iframeRoute),
+                    iframeRoute: Formulaire.setValue(data.iframeRoute),
+                    textRoute: Formulaire.setValue(data.textRoute),
                 })
-                .catch(function (error) { modalFormPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-            ;
-        }
+            })
+            .catch(function (error) { modalFormPropal(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
     }
 
     render() {
@@ -97,7 +87,7 @@ export class ProjectRoute extends Component{
                 </div>
             </div>
 
-            <Modal ref={this.formPropal} identifiant="form-route" maxWidth={568} title="Modifier la partie Route"
+            <Modal ref={this.formPropal} identifiant="form-route" maxWidth={768} title="Modifier la partie Route"
                    content={<>
                        <div className="line">
                            <TinyMCE type={8} identifiant="texte" valeur={texte.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>

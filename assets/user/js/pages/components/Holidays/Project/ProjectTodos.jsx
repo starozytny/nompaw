@@ -9,12 +9,14 @@ import Validateur   from "@commonFunctions/validateur";
 import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal }    from "@commonComponents/Elements/Modal";
+import { Modal } from "@commonComponents/Elements/Modal";
 import { Input } from "@commonComponents/Elements/Fields";
+import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'api_projects_todos_create';
 const URL_UPDATE_PROPAL = 'api_projects_todos_update';
 const URL_DELETE_PROPAL = 'api_projects_todos_delete';
+const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
 export class ProjectTodos extends Component{
     constructor(props) {
@@ -24,18 +26,26 @@ export class ProjectTodos extends Component{
             context: 'create',
             element: null,
             name: '',
+            texteTodos: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
+            textTodos: Formulaire.setValue(props.texte),
             errors: [],
             data: JSON.parse(props.donnees),
             todosChecked: []
         }
 
+        this.formText = React.createRef();
         this.formPropal = React.createRef();
         this.deletePropal = React.createRef();
     }
 
-    handleChange = (e, picker) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
+    handleChange = (e) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
+
+    handleChangeTinyMCE = (name, html) => {
+        this.setState({ [name]: {value: this.state[name].value, html: html} })
+    }
 
     handleModal = (identifiant, context, element) => {
+        modalFormText(this);
         modalFormPropal(this);
         modalDeletePropal(this);
         this.setState({
@@ -76,6 +86,31 @@ export class ProjectTodos extends Component{
         }
     }
 
+    handleSubmitText = (e) => {
+        e.preventDefault();
+
+        const { projectId } = this.props;
+        const { texteTodos } = this.state;
+
+        const self = this;
+        this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        axios({
+            method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'todos', 'id': projectId}),
+            data: {texte: texteTodos}
+        })
+            .then(function (response) {
+                self.formText.current.handleClose();
+
+                let data = response.data;
+                self.setState({
+                    texteTodos: {value: Formulaire.setValue(data.textTodos), html: Formulaire.setValue(data.textTodos)},
+                    textTodos: Formulaire.setValue(data.textTodos),
+                })
+            })
+            .catch(function (error) { modalFormText(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
+    }
+
     handleDeletePropal = () => {
         const { element, data } = this.state;
 
@@ -98,16 +133,25 @@ export class ProjectTodos extends Component{
     }
 
     render() {
-        const { errors, name, data, element, todosChecked } = this.state;
+        const { errors, name, data, element, todosChecked, texteTodos, textTodos } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">📌🖇️ Liste des choses à prendre</div>
+                <div className="actions">
+                    <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
+                </div>
             </div>
             <div className="project-card-body selected">
                 <div className="propals">
+                    {textTodos
+                        ? <div className="propal">
+                            <div dangerouslySetInnerHTML={{__html: textTodos}}></div>
+                        </div>
+                        : null
+                    }
                     {data.map((el, index) => {
 
                         let onVote = () => this.handleCheck(el.name);
@@ -150,6 +194,16 @@ export class ProjectTodos extends Component{
                    </>}
                    footer={null} closeTxt="Annuler" />
 
+            <Modal ref={this.formText} identifiant="form-todos-text" maxWidth={768} title="Modifier le texte"
+                   content={<>
+                       <div className="line">
+                           <TinyMCE type={8} identifiant="texteTodos" valeur={texteTodos.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                               <span>Texte</span>
+                           </TinyMCE>
+                       </div>
+                   </>}
+                   footer={null} closeTxt="Annuler" />
+
             <Modal ref={this.deletePropal} identifiant='delete-todos' maxWidth={414} title="Supprimer"
                    content={<p>Etes-vous sûr de vouloir supprimer <b>{element ? element.name : ""}</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
@@ -162,6 +216,9 @@ ProjectTodos.propTypes = {
     donnees: PropTypes.string.isRequired,
 }
 
+function modalFormText (self) {
+    self.formText.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitText}>Confirmer</Button>)
+}
 function modalFormPropal (self) {
     self.formPropal.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitPropal}>Confirmer</Button>)
 }
