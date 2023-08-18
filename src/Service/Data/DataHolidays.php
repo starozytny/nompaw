@@ -6,6 +6,7 @@ use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalActivity;
 use App\Entity\Holiday\HoPropalDate;
 use App\Entity\Holiday\HoPropalHouse;
+use App\Entity\Holiday\HoTodo;
 use App\Service\SanitizeData;
 
 class DataHolidays
@@ -46,6 +47,13 @@ class DataHolidays
             ->setName($this->sanitizeData->trimData($data->name))
             ->setUrl($this->sanitizeData->trimData($data->url))
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
+            ;
+    }
+
+    public function setDataTodo(HoTodo $obj, $data): HoTodo
+    {
+        return ($obj)
+            ->setName($this->sanitizeData->trimData($data->name))
             ;
     }
 }

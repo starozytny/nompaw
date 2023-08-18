@@ -71,11 +71,15 @@ class HoProject extends DataEntity
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalActivity::class)]
     private Collection $propalActivities;
 
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoTodo::class)]
+    private Collection $todos;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
         $this->propalHouses = new ArrayCollection();
         $this->propalActivities = new ArrayCollection();
+        $this->todos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -293,6 +297,36 @@ class HoProject extends DataEntity
             // set the owning side to null (unless already changed)
             if ($propalActivity->getProject() === $this) {
                 $propalActivity->setProject(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoTodo>
+     */
+    public function getTodos(): Collection
+    {
+        return $this->todos;
+    }
+
+    public function addTodo(HoTodo $todo): self
+    {
+        if (!$this->todos->contains($todo)) {
+            $this->todos->add($todo);
+            $todo->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTodo(HoTodo $todo): self
+    {
+        if ($this->todos->removeElement($todo)) {
+            // set the owning side to null (unless already changed)
+            if ($todo->getProject() === $this) {
+                $todo->setProject(null);
             }
         }
 

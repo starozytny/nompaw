@@ -85,6 +85,12 @@
                 >
                     {% include "layout/components/loader.html.twig" %}
                 </div>
+                <div id="project_todos"
+                     data-project-id="{{ elem.id }}"
+                     data-donnees="{{ todos }}"
+                >
+                    {% include "layout/components/loader.html.twig" %}
+                </div>
             </div>
         </div>
     </div>

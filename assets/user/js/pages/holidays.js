@@ -7,6 +7,7 @@ import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
 import { ProjectDate } from "@userPages/Holidays/Project/ProjectDate";
 import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
 import { ProjectActivities } from "@userPages/Holidays/Project/ProjectActivities";
+import { ProjectTodos } from "@userPages/Holidays/Project/ProjectTodos";
 
 let el = document.getElementById("projects_update");
 if(el){
@@ -38,4 +39,10 @@ if(projectHouse){
 let projectActivities = document.getElementById("project_activities");
 if(projectActivities){
     createRoot(projectActivities).render(<ProjectActivities {...projectActivities.dataset} mode={projectActivities.dataset.mode === "1"} />)
+}
+
+
+let projectTodos = document.getElementById("project_todos");
+if(projectTodos){
+    createRoot(projectTodos).render(<ProjectTodos {...projectTodos.dataset} />)
 }

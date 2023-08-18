@@ -10,8 +10,8 @@ import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal }    from "@commonComponents/Elements/Modal";
-import {Input, InputFile} from "@commonComponents/Elements/Fields";
+import { Input, InputFile } from "@commonComponents/Elements/Fields";
+import { Modal } from "@commonComponents/Elements/Modal";
 
 const URL_CREATE_PROPAL = 'api_projects_propals_activity_create';
 const URL_UPDATE_PROPAL = 'api_projects_propals_activity_update';
