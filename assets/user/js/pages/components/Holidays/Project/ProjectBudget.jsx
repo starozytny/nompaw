@@ -55,20 +55,20 @@ export class ProjectBudget extends Component{
                         <b>Récapitulatif des dépenses.</b>
                     </div>
                     <div className="propal">
-                        <div>Trajet : {routePrice ? Sanitaze.toFormatCurrency(routePrice) : "N.C"}</div>
+                        <div>Trajet : {routePrice ? Sanitaze.toFormatCurrency(routePrice) : <span className="txt-danger">N.C</span>}</div>
                     </div>
                     <div className="propal">
                         <div>
-                            Hébergement : {housePrice ? Sanitaze.toFormatCurrency(housePrice) : "N.C"}
-                            {housePromo && <span style={{opacity: "0.8", fontSize: "14px", paddingLeft: "8px"}}> (avec 30% : {housePromo})</span>}
+                            Hébergement : {housePrice ? Sanitaze.toFormatCurrency(housePrice) : <span className="txt-danger">N.C</span>}
+                            {housePromo ? <span style={{opacity: "0.8", fontSize: "14px", paddingLeft: "8px"}}> (avec 30% : {housePromo})</span> : null}
                         </div>
                     </div>
                     <div className="propal">
-                        <div>Style de vie : {lifeStylePrice ? Sanitaze.toFormatCurrency(lifeStylePrice) : "N.C"}</div>
+                        <div>Style de vie : {lifeStylePrice ? Sanitaze.toFormatCurrency(lifeStylePrice) : <span className="txt-danger">N.C</span>}</div>
                     </div>
                     <div className="propal">
                         <div>
-                            Activités : {activitiesPrice ? Sanitaze.toFormatCurrency(activitiesPrice) : (activitesWithoutPrice === 0 ? "N.C" : "0€")}
+                            Activités : {activitiesPrice ? Sanitaze.toFormatCurrency(activitiesPrice) : (activitesWithoutPrice === 0 ? <span className="txt-danger">N.C</span> : "0€")}
                             {activitesWithoutPrice > 0 ? <span style={{opacity: "0.8", fontSize: "14px", paddingLeft: "8px"}}> ({activitesWithoutPrice} sans prix)</span> : null}
                         </div>
                     </div>
