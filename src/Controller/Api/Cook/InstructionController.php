@@ -29,8 +29,6 @@ class InstructionController extends AbstractController
         $steps = $stepRepository->findBy(['recipe' => $recipe]);
         $dataArray = (array) $data; $order = 1;
 
-        dump($data);
-
         for ($i = 1 ; $i <= $data->nbSteps ; $i++){
             $name = 'step' . $i;
             if($dataArray[$name] != ""){
