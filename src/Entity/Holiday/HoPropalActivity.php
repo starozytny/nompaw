@@ -51,6 +51,10 @@ class HoPropalActivity extends DataEntity
     #[Groups(['pr_act_list'])]
     private ?string $image = null;
 
+    #[ORM\Column]
+    #[Groups(['pr_act_list'])]
+    private ?bool $isSelected = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -144,5 +148,17 @@ class HoPropalActivity extends DataEntity
     public function getImageFile()
     {
         return $this->getFileOrDefault($this->getImage(), self::FOLDER . $this->project->getId());
+    }
+
+    public function isIsSelected(): ?bool
+    {
+        return $this->isSelected;
+    }
+
+    public function setIsSelected(bool $isSelected): self
+    {
+        $this->isSelected = $isSelected;
+
+        return $this;
     }
 }

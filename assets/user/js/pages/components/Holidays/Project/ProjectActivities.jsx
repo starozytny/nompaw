@@ -19,6 +19,8 @@ const URL_CREATE_PROPAL = 'api_projects_propals_activity_create';
 const URL_UPDATE_PROPAL = 'api_projects_propals_activity_update';
 const URL_DELETE_PROPAL = 'api_projects_propals_activity_delete';
 const URL_VOTE_PROPAL   = 'api_projects_propals_activity_vote';
+const URL_END_PROPAL    = 'api_projects_propals_activity_end';
+const URL_CANCEL_PROPAL = 'api_projects_propals_activity_cancel';
 const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
 export class ProjectActivities extends Component{
@@ -39,10 +41,13 @@ export class ProjectActivities extends Component{
             loadData: false,
         }
 
+        this.file = React.createRef();
+
         this.formText = React.createRef();
         this.formPropal = React.createRef();
         this.deletePropal = React.createRef();
-        this.file = React.createRef();
+        this.endPropal = React.createRef();
+        this.cancelPropal = React.createRef();
     }
 
     handleChange = (e) => {
@@ -55,6 +60,7 @@ export class ProjectActivities extends Component{
 
         this.setState({[name]: value})
     }
+
     handleChangeTinyMCE = (name, html) => {
         this.setState({ [name]: {value: this.state[name].value, html: html} })
     }
@@ -62,6 +68,8 @@ export class ProjectActivities extends Component{
     handleModal = (identifiant, context, propal) => {
         modalFormText(this);
         modalDeletePropal(this);
+        modalEndPropal(this);
+        modalCancelPropal(this);
         this.setState({
             context: context, propal: propal,
             name: propal ? propal.name : "",
@@ -149,11 +157,26 @@ export class ProjectActivities extends Component{
         Propals.vote(this, propal, data, userId, loadData, URL_VOTE_PROPAL);
     }
 
+    handleEndPropal = () => {
+        const { propal } = this.state;
+
+        this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Valider</Button>);
+        Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
+    }
+
+    handleCancelPropal = () => {
+        const { propal } = this.state;
+
+        this.cancelPropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
+        Propals.cancel(this, propal.id, URL_CANCEL_PROPAL, modalCancelPropal);
+    }
+
     render() {
         const { mode, userId } = this.props;
         const { errors, loadData, name, url, price, data, propal, imageFile, texteActivities, textActivities } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
+        let totalPrice = 0;
 
         return <div className="project-card">
             <div className="project-card-header">
@@ -162,17 +185,17 @@ export class ProjectActivities extends Component{
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
-            <div className="project-card-body selected">
+            <div className="project-card-body">
                 <div className="propals">
                     {textActivities
-                        ? <div className="propal">
+                        ? <div className="propal propal-text">
                             <div dangerouslySetInnerHTML={{__html: textActivities}}></div>
                         </div>
                         : null
                     }
                     {data.map((el, index) => {
 
-                        let onVote = () => this.handleVote(el);
+                        let onVote = el.isSelected ? null : () => this.handleVote(el);
 
                         let active = "";
                         el.votes.forEach(v => {
@@ -180,6 +203,8 @@ export class ProjectActivities extends Component{
                                 active = " active"
                             }
                         })
+
+                        totalPrice += el.isSelected && el.price ? el.price : 0;
 
                         return <div className="propal" key={index}>
                             <div className="propal-body propal-body-with-image">
@@ -199,16 +224,24 @@ export class ProjectActivities extends Component{
                                     </div>
                                 </div>
                             </div>
-                            <div className="propal-actions propal-actions-activities">
+                            <div className="propal-actions">
                                 {mode || el.author.id === parseInt(userId)
                                     ? <>
-                                        <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-                                        <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                        {!el.isSelected && <>
+                                            <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+                                            <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                        </>}
+                                        {mode && <>
+                                            {el.isSelected
+                                                ? <ButtonIcon icon="close" type="default" onClick={() => this.handleModal('cancelPropal', 'delete', el)}>Annuler</ButtonIcon>
+                                                : <ButtonIcon icon="check1" type="success" onClick={() => this.handleModal("endPropal", "update", el)}>Valider</ButtonIcon>
+                                            }
+                                        </>}
                                     </>
                                     : null
                                 }
                             </div>
-                            <div className="propal-counter" onClick={onVote}>
+                            <div className={`propal-counter${el.isSelected ? " active" : ""}`} onClick={onVote}>
                                 {loadData
                                     ? <span className="icon-chart-3"/>
                                     : `+ ${el.votes.length}`
@@ -223,6 +256,10 @@ export class ProjectActivities extends Component{
                         />
                     </div>
                 </div>
+            </div>
+
+            <div className="project-card-footer project-card-footer-total">
+                <div>{Sanitaze.toFormatCurrency(totalPrice)}</div>
             </div>
 
             <Modal ref={this.formText} identifiant="form-activities-text" maxWidth={768} title="Modifier le texte"
@@ -256,6 +293,14 @@ export class ProjectActivities extends Component{
             <Modal ref={this.deletePropal} identifiant='delete-propal-activities' maxWidth={414} title="Supprimer l'activité"
                    content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? propal.name : ""}</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.endPropal} identifiant='end-propal-activities' maxWidth={414} title="Sélectionner une activité validée"
+                   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? propal.name : ""}</b> comme une activité <b className="txt-primary">validée</b> ?</p>}
+                   footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.cancelPropal} identifiant='cancel-activities' maxWidth={414} title="Annuler une activité"
+                   content={<p>Etes-vous sûr de vouloir annuler cette activité ?</p>}
+                   footer={null} closeTxt="Annuler" />
         </div>
     }
 }
@@ -275,4 +320,10 @@ function modalFormPropal (self) {
 }
 function modalDeletePropal (self) {
     self.deletePropal.current.handleUpdateFooter(<Button type="danger" onClick={self.handleDeletePropal}>Confirmer la suppression</Button>)
+}
+function modalEndPropal (self) {
+    self.endPropal.current.handleUpdateFooter(<Button type="success" onClick={self.handleEndPropal}>Valider</Button>)
+}
+function modalCancelPropal (self) {
+    self.cancelPropal.current.handleUpdateFooter(<Button type="danger" onClick={self.handleCancelPropal}>Confirmer l'annulation</Button>)
 }

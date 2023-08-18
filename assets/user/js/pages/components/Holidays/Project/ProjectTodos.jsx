@@ -139,15 +139,15 @@ export class ProjectTodos extends Component{
 
         return <div className="project-card">
             <div className="project-card-header">
-                <div className="name">📌🖇️ Liste des choses à prendre</div>
+                <div className="name">⚒️ Liste des choses à prendre</div>
                 <div className="actions">
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
-            <div className="project-card-body selected">
+            <div className="project-card-body">
                 <div className="propals">
                     {textTodos
-                        ? <div className="propal">
+                        ? <div className="propal propal-text">
                             <div dangerouslySetInnerHTML={{__html: textTodos}}></div>
                         </div>
                         : null
@@ -164,13 +164,12 @@ export class ProjectTodos extends Component{
                         })
 
                         return <div className="propal" key={index}>
-                            <div className={`selector${active}`}></div>
                             <div className="propal-body propal-body-todos" onClick={onVote}>
                                 <div className="name">
                                     <span>{el.name}</span>
                                 </div>
                             </div>
-                            <div className="propal-actions propal-actions-activities">
+                            <div className="propal-actions propal-actions-todos">
                                 <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
                                 <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
                             </div>

@@ -4,12 +4,14 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import Formulaire   from "@commonFunctions/formulaire";
+import Formulaire from "@commonFunctions/formulaire";
+import Sanitaze   from "@commonFunctions/sanitaze";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 import { Input } from "@commonComponents/Elements/Fields";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
+import Inputs from "@commonFunctions/inputs";
 
 const URL_UPDATE_PROJECT = 'api_projects_update_text';
 
@@ -20,15 +22,26 @@ export class ProjectRoute extends Component{
         this.state = {
             texte: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
             iframe: Formulaire.setValue(props.iframe),
+            price: Formulaire.setValue(props.price),
             iframeRoute: Formulaire.setValue(props.iframe),
             textRoute: Formulaire.setValue(props.texte),
+            priceRoute: Formulaire.setValue(props.price),
             errors: [],
         }
 
         this.formText = React.createRef();
     }
 
-    handleChange = (e) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
+    handleChange = (e) => {
+        let name  = e.currentTarget.name;
+        let value = e.currentTarget.value;
+
+        if(name === "price"){
+            value = Inputs.textMoneyMinusInput(e, this.state[name])
+        }
+
+        this.setState({[name]: value})
+    }
 
     handleChangeTinyMCE = (name, html) => {
         this.setState({ [name]: {value: this.state[name].value, html: html} })
@@ -43,13 +56,13 @@ export class ProjectRoute extends Component{
         e.preventDefault();
 
         const { projectId } = this.props;
-        const { texte, iframe } = this.state;
+        const { texte, iframe, price } = this.state;
 
         const self = this;
         this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
         axios({
             method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'route', 'id': projectId}),
-            data: {texte: texte, iframe: iframe}
+            data: {texte: texte, iframe: iframe, price: price}
         })
             .then(function (response) {
                 self.formText.current.handleClose();
@@ -58,8 +71,10 @@ export class ProjectRoute extends Component{
                 self.setState({
                     texte: {value: Formulaire.setValue(data.textRoute), html: Formulaire.setValue(data.textRoute)},
                     iframe: Formulaire.setValue(data.iframeRoute),
+                    price: Formulaire.setValue(data.priceRoute),
                     iframeRoute: Formulaire.setValue(data.iframeRoute),
                     textRoute: Formulaire.setValue(data.textRoute),
+                    priceRoute: Formulaire.setValue(data.priceRoute),
                 })
             })
             .catch(function (error) { modalFormText(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
@@ -67,7 +82,7 @@ export class ProjectRoute extends Component{
     }
 
     render() {
-        const { errors, texte, iframe, textRoute, iframeRoute } = this.state;
+        const { errors, texte, iframe, price, textRoute, iframeRoute, priceRoute } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -78,7 +93,7 @@ export class ProjectRoute extends Component{
                     <ButtonIcon type="warning" icon="pencil" text="Modifier" onClick={() => this.handleModal("formText")} />
                 </div>
             </div>
-            <div className="project-card-body selected">
+            <div className="project-card-body">
                 <div className="propals">
                     <div className="propal propal-route">
                         <div dangerouslySetInnerHTML={{__html: textRoute}}></div>
@@ -87,7 +102,13 @@ export class ProjectRoute extends Component{
                 </div>
             </div>
 
-            <Modal ref={this.formText} identifiant="form-route" maxWidth={768} title="Modifier la partie Route"
+            <div className="project-card-footer project-card-footer-total">
+                <div>
+                    {priceRoute ? Sanitaze.toFormatCurrency(priceRoute) : ""}
+                </div>
+            </div>
+
+            <Modal ref={this.formText} identifiant="form-route" maxWidth={768} margin={5} title="Modifier la partie Route"
                    content={<>
                        <div className="line">
                            <TinyMCE type={8} identifiant="texte" valeur={texte.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
@@ -96,6 +117,9 @@ export class ProjectRoute extends Component{
                        </div>
                        <div className="line">
                            <Input identifiant="iframe" valeur={iframe} {...params}>Iframe</Input>
+                       </div>
+                       <div className="line">
+                           <Input identifiant="price" valeur={price} {...params}>Prix</Input>
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />
