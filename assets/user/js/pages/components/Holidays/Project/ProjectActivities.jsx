@@ -186,6 +186,10 @@ export class ProjectActivities extends Component{
             { value: 1, label: 'fixe',      identifiant: 'act-price-type-1' },
         ]
 
+        if(!userId && data.length === 0 && textActivities === ""){
+            return null;
+        }
+
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">💡 Activités</div>
