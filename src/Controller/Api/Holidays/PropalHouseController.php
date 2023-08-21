@@ -72,7 +72,7 @@ class PropalHouseController extends AbstractController
     public function delete(HoPropalHouse $obj, HoPropalHouseRepository $repository, ApiResponse $apiResponse): Response
     {
         $project = $obj->getProject();
-        if($project->getPropalHouse()->getId() == $obj->getId()){
+        if($project->getPropalHouse() && $project->getPropalHouse()->getId() == $obj->getId()){
             $project->setPropalHouse(null);
         }
 

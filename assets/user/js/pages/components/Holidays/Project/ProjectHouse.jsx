@@ -176,7 +176,7 @@ export class ProjectHouse extends Component{
                 <div className="name">🏠 Hébergement</div>
                 {userId
                     ? <div className="actions">
-                        {(mode || authorId === parseInt(userId))
+                        {((mode || authorId === parseInt(userId)) && houseName)
                             ? <ButtonIcon type="danger" icon="trash" text="Annuler l'hébergement"
                                           onClick={() => this.handleModal('cancelHouse', 'delete', null)}
                             />
