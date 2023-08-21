@@ -62,6 +62,17 @@
         </nav>
 
         <main class="{{ half_width is defined ? 'half-width' : '' }}">
+
+            <div class="impersonate" style="
+                position: relative; display: flex; align-items: center; justify-content: center;
+                padding: 12px; background: var(--danger);
+            ">
+                <a class="semibold" style="color: var(--alpha)" href="{{ path('app_login') }}">
+                    <span class="icon-padlock"></span>
+                    Se connecter ou s'enregistrer
+                </a>
+            </div>
+
             {% block breadcrumb %}
                 {% include "user/layout/components/breadcrumbs.html.twig" %}
             {% endblock %}

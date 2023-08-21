@@ -87,6 +87,10 @@ export class ProjectRoute extends Component{
 
         let params = { errors: errors, onChange: this.handleChange }
 
+        if(!userId && priceRoute === "" && textRoute === "" && iframeRoute === ""){
+            return null;
+        }
+
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">🚓 Trajet</div>

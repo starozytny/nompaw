@@ -136,6 +136,10 @@ export class ProjectLifestyle extends Component{
             { value: 1, label: 'fixe',      identifiant: 'life-price-type-1' },
         ]
 
+        if(!userId && data.length === 0 && textLifestyle === ""){
+            return null;
+        }
+
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">✨ Style de vie</div>

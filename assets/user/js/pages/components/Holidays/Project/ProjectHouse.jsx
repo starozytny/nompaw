@@ -167,6 +167,10 @@ export class ProjectHouse extends Component{
 
         let params = { errors: errors, onChange: this.handleChange }
 
+        if(!userId && data.length === 0 && textHouse === ""){
+            return null;
+        }
+
         return <div className="project-card">
             <div className="project-card-header">
                 <div className="name">🏠 Hébergement</div>

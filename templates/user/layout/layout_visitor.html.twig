@@ -2,7 +2,11 @@
 
 {% set page_prefix = "Nompaw" %}
 
-{% set menu = [] %}
+{% set menu = [
+    { name: "Se connecter", icon: "user",
+        path: path('app_login'), matchRoute: ['app_login']
+    }
+] %}
 
 {% set menu_bottom = [] %}
 
