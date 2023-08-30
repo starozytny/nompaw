@@ -32,6 +32,7 @@ class DataBirthdays
             ->setName($this->sanitizeData->trimData($data->name))
             ->setUrl($this->sanitizeData->trimData($data->url))
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
+            ->setPriceMax($this->sanitizeData->setFloatValue($data->priceMax))
         ;
     }
 }
