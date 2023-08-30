@@ -179,7 +179,7 @@ export class Presents extends Component{
                                     </>
                                     : null
                                 }
-                                <ButtonIcon icon="cart" type="primary" onClick={() => this.handleModal("endPropal", "update", el)}>Prendre</ButtonIcon>
+                                {!el.isSelected && <ButtonIcon icon="cart" type="primary" onClick={() => this.handleModal("endPropal", "update", el)}>Prendre</ButtonIcon>}
                             </div>
                             <div className={`propal-counter${el.isSelected ? " active" : ""}`}>
                                 {loadData
@@ -227,9 +227,10 @@ export class Presents extends Component{
             <Modal ref={this.endPropal} identifiant='end-presents' maxWidth={414} title="Prendre ce cadeau"
                    content={<>
                        <p>Etes-vous sûr de vouloir <b className="txt-primary">prendre</b> le cadeau <b>{propal ? propal.name : ""}</b> ?</p>
-                       <div className="line" style={{ marginTop: "8px" }}>
+                       <div className="line" style={{ marginTop: "12px" }}>
                            <Input identifiant="guestName" valeur={guestName} {...params}>Qui es-tu ? (facultatif)</Input>
                        </div>
+                       <p>Si vous changez d'avis, vous devrez contacter le responsable du groupe.</p>
                    </>}
                    footer={null} closeTxt="Annuler" />
 
