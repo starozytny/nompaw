@@ -17,7 +17,6 @@ import { Modal } from "@commonComponents/Elements/Modal";
 const URL_CREATE_PROPAL = 'api_birthdays_presents_create';
 const URL_UPDATE_PROPAL = 'api_birthdays_presents_update';
 const URL_DELETE_PROPAL = 'api_birthdays_presents_delete';
-const URL_VOTE_PROPAL   = 'api_birthdays_presents_vote';
 const URL_END_PROPAL    = 'api_birthdays_presents_end';
 const URL_CANCEL_PROPAL = 'api_birthdays_presents_cancel';
 
@@ -32,6 +31,7 @@ export class Presents extends Component{
             url: 'https://',
             price: '',
             imageFile: '',
+            guestName: '',
             errors: [],
             data: JSON.parse(props.donnees),
             loadData: false,
@@ -67,6 +67,7 @@ export class Presents extends Component{
             url: propal ? Formulaire.setValue(propal.url) : "https://",
             price: propal ? Formulaire.setValue(propal.price) : "",
             imageFile: propal ? Formulaire.setValue(propal.imageFile) : "",
+            guestName: propal ? Formulaire.setValue(propal.guestName) : "",
         })
         this[identifiant].current.handleClick();
     }
@@ -116,18 +117,11 @@ export class Presents extends Component{
         Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
     }
 
-    handleVote = (propal) => {
-        const { userId } = this.props;
-        const { loadData, data } = this.state;
-
-        Propals.vote(this, propal, data, userId, loadData, URL_VOTE_PROPAL);
-    }
-
     handleEndPropal = () => {
-        const { propal } = this.state;
+        const { propal, guestName } = this.state;
 
         this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Valider</Button>);
-        Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
+        Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal, {guestName: guestName});
     }
 
     handleCancelPropal = () => {
@@ -139,7 +133,7 @@ export class Presents extends Component{
 
     render() {
         const { mode, userId } = this.props;
-        const { errors, loadData, name, url, price, data, propal, imageFile } = this.state;
+        const { errors, loadData, name, url, price, data, propal, imageFile, guestName } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -154,9 +148,6 @@ export class Presents extends Component{
             <div className="birthday-card-body">
                 <div className="propals">
                     {data.map((el, index) => {
-
-                        let active = el.isSelected ? " active" : "";
-
                         return <div className="propal" key={index}>
                             <div className="propal-body propal-body-with-image">
                                 <div className="image">
@@ -164,7 +155,7 @@ export class Presents extends Component{
                                 </div>
                                 <div>
                                     <div className="name">
-                                        <span>{el.name}</span>
+                                        <span>{el.name} {el.isSelected ? <span className="txt-primary">[Pris par {el.guestName}]</span>: ""}</span>
                                         {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo" target="_blank">
                                             <span className="icon-link"></span>
                                             <span className="tooltip">Lien externe</span>
@@ -178,19 +169,17 @@ export class Presents extends Component{
                             <div className="propal-actions">
                                 {mode || el.author.id === parseInt(userId)
                                     ? <>
-                                        {!el.isSelected && <>
-                                            <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-                                            <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-                                        </>}
-                                        {mode && <>
-                                            {el.isSelected
-                                                ? <ButtonIcon icon="close" type="default" onClick={() => this.handleModal('cancelPropal', 'delete', el)}>Annuler</ButtonIcon>
-                                                : <ButtonIcon icon="check1" type="success" onClick={() => this.handleModal("endPropal", "update", el)}>Valider</ButtonIcon>
-                                            }
-                                        </>}
+                                        {el.isSelected
+                                            ? <ButtonIcon icon="close" type="default" onClick={() => this.handleModal('cancelPropal', 'delete', el)}>Annuler</ButtonIcon>
+                                            : <>
+                                                <ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+                                                <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                            </>
+                                        }
                                     </>
                                     : null
                                 }
+                                <ButtonIcon icon="cart" type="primary" onClick={() => this.handleModal("endPropal", "update", el)}>Prendre</ButtonIcon>
                             </div>
                             <div className={`propal-counter${el.isSelected ? " active" : ""}`}>
                                 {loadData
@@ -235,8 +224,13 @@ export class Presents extends Component{
                    content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? propal.name : ""}</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
 
-            <Modal ref={this.endPropal} identifiant='end-presents' maxWidth={414} title="Sélectionner un cadeau pris"
-                   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? propal.name : ""}</b> comme un cadeau <b className="txt-primary">pris</b> ?</p>}
+            <Modal ref={this.endPropal} identifiant='end-presents' maxWidth={414} title="Prendre ce cadeau"
+                   content={<>
+                       <p>Etes-vous sûr de vouloir <b className="txt-primary">prendre</b> le cadeau <b>{propal ? propal.name : ""}</b> ?</p>
+                       <div className="line" style={{ marginTop: "8px" }}>
+                           <Input identifiant="guestName" valeur={guestName} {...params}>Qui es-tu ? (facultatif)</Input>
+                       </div>
+                   </>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.cancelPropal} identifiant='cancel-presents' maxWidth={414} title="Annuler un cadeau"

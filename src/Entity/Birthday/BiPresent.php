@@ -50,6 +50,10 @@ class BiPresent extends DataEntity
     #[ORM\JoinColumn(nullable: false)]
     private ?BiBirthday $birthday = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['bi_present_list'])]
+    private ?string $guestName = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -141,6 +145,18 @@ class BiPresent extends DataEntity
     public function setBirthday(?BiBirthday $birthday): self
     {
         $this->birthday = $birthday;
+
+        return $this;
+    }
+
+    public function getGuestName(): ?string
+    {
+        return $this->guestName;
+    }
+
+    public function setGuestName(?string $guestName): self
+    {
+        $this->guestName = $guestName;
 
         return $this;
     }

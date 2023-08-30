@@ -13,6 +13,7 @@
                         <div class="propals">
                             <div class="propal selected">
                                 {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
+                                {{ elem.timeAt ? "à " ~ elem.timeAt | date('H\\hi') : '' }}
                             </div>
                         </div>
                     </div>

@@ -35,7 +35,7 @@ export function BirthdayFormulaire ({ context, element })
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
         startAt={element ? Formulaire.setValueDate(element.startAt) : ""}
         timeAt={element ? Formulaire.setValueTime(element.timeAt) : ""}
-        iframeRoute={element ? Formulaire.setValueDate(element.iframeRoute) : ""}
+        iframeRoute={element ? Formulaire.setValue(element.iframeRoute) : ""}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -64,6 +64,8 @@ class Form extends Component {
         this.file = React.createRef();
     }
 
+    componentDidMount = () => { Inputs.initDateInput(this.handleChangeDate, this.handleChange, new Date()) }
+
     handleChange = (e, picker) => {
         let name  = e.currentTarget.name;
         let value = e.currentTarget.value;
@@ -78,6 +80,8 @@ class Form extends Component {
 
         this.setState({[name]: value})
     }
+
+    handleChangeDate = (name, value) => { this.setState({ [name]: value }) }
 
     handleChangeTinyMCE = (name, html) => {
         this.setState({ [name]: {value: this.state[name].value, html: html} })

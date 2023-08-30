@@ -8,6 +8,7 @@ use App\Repository\Birthday\BiPresentRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataBirthdays;
 use App\Service\FileUploader;
+use App\Service\SanitizeData;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -80,9 +81,12 @@ class PresentController extends AbstractController
     }
 
     #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
-    public function end(BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository): Response
+    public function end(Request $request, BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository,
+                        SanitizeData $sanitizeData): Response
     {
+        $data = json_decode($request->getContent());
         $obj->setIsSelected(true);
+        $obj->setGuestName($sanitizeData->trimData($data->guestName) ?? "Anonyme");
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
@@ -92,6 +96,7 @@ class PresentController extends AbstractController
     public function cancel(BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository): Response
     {
         $obj->setIsSelected(false);
+        $obj->setGuestName(null);
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
