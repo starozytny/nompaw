@@ -117,6 +117,15 @@
     }
   }
 
+  .propal-presents{
+    flex-wrap: wrap;
+    justify-content: flex-end;
+
+    .propal-body-with-image{
+      width: 100%;
+    }
+  }
+
   .propal-route{
     flex-direction: column;
     gap: var(--espaceDiv);
@@ -158,11 +167,15 @@
     .propal{
       .propal-body-with-image{
         @include flex(row, flex-start, flex-start, var(--espaceEls));
+      }
+    }
 
-        .image{
-          width: 180px;
-          max-height: 240px;
-        }
+    .propal-presents{
+      flex-wrap: initial;
+      justify-content: flex-start;
+
+      .propal-body-with-image{
+        width: calc(100% - 40px - 96px - 25px);
       }
     }
 
