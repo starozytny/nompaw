@@ -67,6 +67,7 @@ class DataHolidays
             ->setUrl($this->sanitizeData->trimData($data->url))
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
             ->setPriceType((int) $data->priceType)
+            ->setDescription($this->sanitizeData->trimData($data->description))
             ;
     }
 

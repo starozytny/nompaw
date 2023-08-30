@@ -59,6 +59,10 @@ class HoPropalActivity extends DataEntity
     #[Groups(['pr_act_list'])]
     private ?int $priceType = 0;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['pr_act_list'])]
+    private ?string $description = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -174,6 +178,18 @@ class HoPropalActivity extends DataEntity
     public function setPriceType(int $priceType): self
     {
         $this->priceType = $priceType;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }
