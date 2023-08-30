@@ -162,7 +162,7 @@ export class Presents extends Component{
                         </div>
                     </div>
                     {data.map((el, index) => {
-                        return <div className="propal" key={index}>
+                        return <div className="propal propal-presents" key={index}>
                             <div className="propal-body propal-body-with-image">
                                 <div className="image">
                                     <img src={el.imageFile} alt={"illustration " + el.name}/>
