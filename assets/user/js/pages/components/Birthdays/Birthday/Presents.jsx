@@ -162,7 +162,7 @@ export class Presents extends Component{
                         </div>
                     </div>
                     {data.map((el, index) => {
-                        return <div className={`propal${el.isSelected ? " active " : ""}propal-presents`} key={index}>
+                        return <div className={`propal${el.isSelected ? " active " : " "}propal-presents`} key={index}>
                             <div className="propal-body propal-body-with-image">
                                 <div className="image">
                                     <img src={el.imageFile} alt={"illustration " + el.name}/>
