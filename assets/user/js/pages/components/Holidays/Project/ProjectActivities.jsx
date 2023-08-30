@@ -11,7 +11,7 @@ import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import {Input, InputFile, Radiobox} from "@commonComponents/Elements/Fields";
+import {Input, InputFile, Radiobox, TextArea} from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
@@ -37,6 +37,7 @@ export class ProjectActivities extends Component{
             imageFile: '',
             texteActivities: {value: Formulaire.setValue(props.texte), html: Formulaire.setValue(props.texte)},
             textActivities: Formulaire.setValue(props.texte),
+            description: '',
             errors: [],
             data: JSON.parse(props.propals),
             loadData: false,
@@ -79,6 +80,7 @@ export class ProjectActivities extends Component{
             price: propal ? Formulaire.setValue(propal.price) : "",
             priceType: propal ? Formulaire.setValue(propal.priceType) : 0,
             imageFile: propal ? Formulaire.setValue(propal.imageFile) : "",
+            description: propal ? Formulaire.setValue(propal.description) : "",
         })
         this[identifiant].current.handleClick();
     }
@@ -87,7 +89,7 @@ export class ProjectActivities extends Component{
         e.preventDefault();
 
         const { projectId } = this.props;
-        const { context, propal, name, url, price, priceType, data } = this.state;
+        const { context, propal, name, url, price, priceType, description, data } = this.state;
 
         this.setState({ errors: [] });
 
@@ -102,7 +104,7 @@ export class ProjectActivities extends Component{
                 : Routing.generate(URL_UPDATE_PROPAL, {'project': projectId, 'id': propal.id})
 
             let formData = new FormData();
-            formData.append("data", JSON.stringify({name: name, url: url, price: price, priceType: priceType}));
+            formData.append("data", JSON.stringify({name: name, url: url, price: price, priceType: priceType, description: description}));
 
             let file = this.file.current;
             if(file.state.files.length > 0){
@@ -176,7 +178,7 @@ export class ProjectActivities extends Component{
 
     render() {
         const { mode, userId } = this.props;
-        const { errors, loadData, name, url, price, priceType, data, propal, imageFile, texteActivities, textActivities } = this.state;
+        const { errors, loadData, name, url, price, priceType, description, data, propal, imageFile, texteActivities, textActivities } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
         let totalPrice = 0;
@@ -221,6 +223,8 @@ export class ProjectActivities extends Component{
 
                         totalPrice += el.isSelected && el.price ? el.price : 0;
 
+                        let descriptionFormatted = el.description ? el.description.replaceAll("\n", "<br />") : null;
+
                         return <div className="propal" key={index}>
                             <div className="propal-body propal-body-with-image">
                                 <div className="image" onClick={onVote}>
@@ -237,6 +241,9 @@ export class ProjectActivities extends Component{
                                     <div className="duration" onClick={onVote}>
                                         {el.price ? Sanitaze.toFormatCurrency(el.price) + (el.priceType === 0 ? " / pers" : "") : ""}
                                     </div>
+                                    {descriptionFormatted && <div className="duration" onClick={onVote}>
+                                        <div dangerouslySetInnerHTML={{__html: descriptionFormatted}}></div>
+                                    </div>}
                                 </div>
                             </div>
                             <div className="propal-actions">
@@ -308,6 +315,9 @@ export class ProjectActivities extends Component{
                                       placeholder="Glissez et déposer une image" {...params}>
                                Illustration
                            </InputFile>
+                       </div>
+                       <div className="line">
+                           <TextArea identifiant="description" valeur={description} {...params}>Description</TextArea>
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />
