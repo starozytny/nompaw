@@ -188,7 +188,7 @@ export class Presents extends Component{
                                 </div>
                             </div>
                             <div className="propal-actions">
-                                {mode || el.author.id === parseInt(userId)
+                                {mode || el.author.id === parseInt(userId) || (el.guest && el.guest.id === parseInt(userId))
                                     ? <>
                                         {el.isSelected
                                             ? <ButtonIcon icon="close" type="default" onClick={() => this.handleModal('cancelPropal', 'delete', el)}>Annuler</ButtonIcon>
