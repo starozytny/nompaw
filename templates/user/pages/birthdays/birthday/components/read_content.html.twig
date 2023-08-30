@@ -1,0 +1,48 @@
+<div class="page-default">
+    <div class="birthday-read">
+        <div class="birthday-header">
+            <div class="birthday-title" style="background-image: url({{ elem.imageFile }})">
+                <h2>{{ elem.name }}</h2>
+            </div>
+            <div class="birthday-propals">
+                <div class="birthday-card birthday-card-date">
+                    <div class="birthday-card-header">
+                        <div class="name">Rendez-vous</div>
+                    </div>
+                    <div class="birthday-card-body {{ elem.startAt ? "selected" : "" }}">
+                        <div class="propals">
+                            <div class="propal selected">
+                                {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="birthday-content">
+            <div class="birthday-card">
+                <div class="birthday-card-header">
+                    <div class="name">🎂 Anniversaire</div>
+                </div>
+                <div class="birthday-card-body">
+                    <div class="propals">
+                        <div class="propal propal-route">
+                            <div>{{ elem.description | raw }}</div>
+                            <div class="iframe-route">{{ elem.iframeRoute | raw }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="birthdays_presents"
+                 data-birthday-id="{{ elem.id }}"
+                 data-donnees="{{ presents }}"
+                 data-user-id="{{ app.user ? app.user.id : null }}"
+                 data-author-id="{{ elem.author.id }}"
+                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+            >
+                {% include "layout/components/loader.html.twig" %}
+            </div>
+        </div>
+    </div>
+</div>

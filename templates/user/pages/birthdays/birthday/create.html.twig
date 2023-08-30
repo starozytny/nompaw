@@ -1,0 +1,17 @@
+{% extends 'user/pages/birthdays/template.html.twig' %}
+
+{% set page_title %}Création d'un anniversaire{% endset %}
+{% set page_subtitle %}Ajoutez le maximum de détails à votre anniversaire !{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([{ text: page_title }]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block main_content %}
+    {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_birthdays_index') } %}
+
+    <div id="birthdays_create">
+        {% include "layout/components/loader.html.twig" %}
+    </div>
+{% endblock %}

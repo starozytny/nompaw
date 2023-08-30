@@ -1,0 +1,52 @@
+{% extends 'user/pages/birthdays/template.html.twig' %}
+
+{% set author = elem.author %}
+
+{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
+{% set page_title_alone %}{{ elem.name }}{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([
+        { text: page_title_alone, url: path('user_birthdays_read', {'slug': elem.slug}) },
+    ]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% set half_width = true %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_birthdays_index') }}" class="btn btn-outline-default">
+                <span class="icon-left-arrow"></span>
+                <span>Retourner aux anniversaires</span>
+            </a>
+        </div>
+        <div class="col-2">
+            {% if app.user.id == elem.author.id or app.user.admin %}
+                <div id="share_link" class="btn btn-default"
+                     data-url="{{ path('user_birthdays_read', {'slug': elem.slug, 'code': elem.code}) }}"
+                >
+                    <span class="icon-share"></span>
+                    <span>Partager</span>
+                </div>
+                <a href="{{ path('user_birthdays_update', {'slug': elem.slug}) }}" class="btn btn-warning">
+                    <span class="icon-pencil"></span>
+                    <span>Modifier</span>
+                </a>
+                <div class="delete-birthday"
+                     data-context="birthdays"
+                     data-id="{{ elem.id }}"
+                     data-name="{{ elem.name }}"
+                >
+                    <button class="btn btn-danger btn-loader-without-text">
+                        <span class="icon-chart-3"></span>
+                        <span>Supprimer</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% include "user/pages/birthdays/birthday/components/read_content.html.twig" %}
+{% endblock %}
