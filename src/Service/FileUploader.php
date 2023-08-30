@@ -12,6 +12,7 @@ use App\Entity\Main\Changelog;
 use App\Entity\Main\Help\HeQuestion;
 use App\Entity\Main\Image;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\ImageRepository;
 use Exception;
@@ -158,6 +159,7 @@ class FileUploader
                 ImageType::Commentary => CoCommentary::FOLDER,
                 ImageType::Groupe => RaGroupe::FOLDER,
                 ImageType::Rando => RaRando::FOLDER,
+                ImageType::Route => RaImage::FOLDER,
             };
 
             $fileName = $this->replaceFile($file, $folder);
