@@ -11,7 +11,7 @@ import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Input, InputFile } from "@commonComponents/Elements/Fields";
+import { Input, InputFile, TextArea } from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
 
 const URL_CREATE_PROPAL = 'api_birthdays_presents_create';
@@ -34,6 +34,7 @@ export class Presents extends Component{
             imageFile: '',
             guest: props.userId ? props.userId : "",
             guestName: props.userDisplay ? props.userDisplay : "",
+            description: '',
             errors: [],
             data: JSON.parse(props.donnees),
             loadData: false,
@@ -74,6 +75,7 @@ export class Presents extends Component{
             imageFile: propal ? Formulaire.setValue(propal.imageFile) : "",
             guest: propal ? Formulaire.setValue(propal.guest, userId) : userId,
             guestName: propal ? Formulaire.setValue(propal.guestName, userDisplay) : userDisplay,
+            description: propal ? Formulaire.setValue(propal.description) : "",
         })
         this[identifiant].current.handleClick();
     }
@@ -82,7 +84,7 @@ export class Presents extends Component{
         e.preventDefault();
 
         const { birthdayId } = this.props;
-        const { context, propal, name, url, price, priceMax, data } = this.state;
+        const { context, propal, name, url, price, priceMax, description, data } = this.state;
 
         this.setState({ errors: [] });
 
@@ -97,7 +99,7 @@ export class Presents extends Component{
                 : Routing.generate(URL_UPDATE_PROPAL, {'birthday': birthdayId, 'id': propal.id})
 
             let formData = new FormData();
-            formData.append("data", JSON.stringify({name: name, url: url, price: price, priceMax: priceMax}));
+            formData.append("data", JSON.stringify({name: name, url: url, price: price, priceMax: priceMax, description: description}));
 
             let file = this.file.current;
             if(file.state.files.length > 0){
@@ -139,7 +141,7 @@ export class Presents extends Component{
 
     render() {
         const { mode, userId, isAdmin } = this.props;
-        const { errors, loadData, name, url, price, priceMax, data, propal, imageFile, guestName } = this.state;
+        const { errors, loadData, name, url, price, priceMax, description, data, propal, imageFile, guestName } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -162,6 +164,9 @@ export class Presents extends Component{
                         </div>
                     </div>
                     {data.map((el, index) => {
+
+                        let descriptionFormatted = el.description ? el.description.replaceAll("\n", "<br />") : null;
+
                         return <div className={`propal${el.isSelected ? " active " : " "}propal-presents`} key={index}>
                             <div className="propal-body propal-body-with-image">
                                 <div className="image">
@@ -185,6 +190,9 @@ export class Presents extends Component{
                                     <div className="duration">
                                         {el.price ? Sanitaze.toFormatCurrency(el.price) : ""} {el.priceMax ? " - " + Sanitaze.toFormatCurrency(el.priceMax) : ""}
                                     </div>
+                                    {descriptionFormatted && <div className="duration">
+                                        <div dangerouslySetInnerHTML={{__html: descriptionFormatted}}></div>
+                                    </div>}
                                 </div>
                             </div>
                             <div className="propal-actions">
@@ -238,6 +246,9 @@ export class Presents extends Component{
                                       placeholder="Glissez et déposer une image" {...params}>
                                Illustration
                            </InputFile>
+                       </div>
+                       <div className="line">
+                           <TextArea identifiant="description" valeur={description} {...params}>Description</TextArea>
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />

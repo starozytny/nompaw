@@ -5,6 +5,7 @@ namespace App\Entity\Birthday;
 use App\Entity\DataEntity;
 use App\Entity\Main\User;
 use App\Repository\Birthday\BiPresentRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -61,6 +62,10 @@ class BiPresent extends DataEntity
     #[ORM\Column(nullable: true)]
     #[Groups(['bi_present_list'])]
     private ?float $priceMax = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['bi_present_list'])]
+    private ?string $description = null;
 
     public function getId(): ?int
     {
@@ -189,6 +194,18 @@ class BiPresent extends DataEntity
     public function setPriceMax(?float $priceMax): self
     {
         $this->priceMax = $priceMax;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }
