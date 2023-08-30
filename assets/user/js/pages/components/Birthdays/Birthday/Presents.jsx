@@ -248,11 +248,16 @@ export class Presents extends Component{
 
             <Modal ref={this.endPropal} identifiant='end-presents' maxWidth={414} title="Prendre ce cadeau"
                    content={<>
-                       <p>Etes-vous sûr de vouloir <b className="txt-primary">prendre</b> le cadeau <b>{propal ? propal.name : ""}</b> ?</p>
-                       <div className="line" style={{ marginTop: "12px" }}>
+                       <div className="line">
                            <Input identifiant="guestName" valeur={guestName} {...params}>Qui es-tu ? (facultatif)</Input>
                        </div>
-                       <p>Si vous changez d'avis, vous devrez contacter le responsable du groupe.</p>
+                       <p style={{ marginTop: "12px" }}>Etes-vous sûr de vouloir <b className="txt-primary">prendre</b> le cadeau <b>{propal ? propal.name : ""}</b> ?</p>
+                       {(propal && propal.url && propal.url !== "https://") && <div style={{ marginTop: "12px" }}>
+                           <a href={propal.url} className="url-topo txt-link" target="_blank">
+                               <span className="icon-link"></span>
+                               <span>Proposition de lien</span>
+                           </a>
+                       </div>}
                    </>}
                    footer={null} closeTxt="Annuler" />
 
