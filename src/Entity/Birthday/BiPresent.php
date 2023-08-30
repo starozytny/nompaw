@@ -54,6 +54,14 @@ class BiPresent extends DataEntity
     #[Groups(['bi_present_list'])]
     private ?string $guestName = null;
 
+    #[ORM\ManyToOne(inversedBy: 'buyPresents')]
+    #[Groups(['bi_present_list'])]
+    private ?User $guest = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['bi_present_list'])]
+    private ?float $priceMax = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -157,6 +165,30 @@ class BiPresent extends DataEntity
     public function setGuestName(?string $guestName): self
     {
         $this->guestName = $guestName;
+
+        return $this;
+    }
+
+    public function getGuest(): ?User
+    {
+        return $this->guest;
+    }
+
+    public function setGuest(?User $guest): self
+    {
+        $this->guest = $guest;
+
+        return $this;
+    }
+
+    public function getPriceMax(): ?float
+    {
+        return $this->priceMax;
+    }
+
+    public function setPriceMax(?float $priceMax): self
+    {
+        $this->priceMax = $priceMax;
 
         return $this;
     }

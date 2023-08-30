@@ -79,34 +79,12 @@
       width: 120px;
       max-height: 180px;
       overflow: hidden;
-      cursor: pointer;
 
       img{
         object-fit: cover;
         height: 100%;
       }
     }
-  }
-
-  .birthday-card-footer{
-    @include flex();
-    background-color: var(--primary);
-    border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
-    cursor: pointer;
-    opacity: 0.9;
-    transition: opacity 0.2s ease-in-out;
-
-    &:hover{
-      opacity: 1;
-    }
-  }
-
-  .birthday-card-footer-danger{
-    background-color: var(--danger);
-  }
-
-  .birthday-card-footer-warning{
-    background-color: var(--warning);
   }
 }
 
@@ -126,9 +104,16 @@
 
 .propals{
   .propal{
-
     .propal-body-with-image{
       width: calc(100% - 40px - 96px - 25px);
+    }
+    .propal-body{
+      .name, .duration{
+        cursor: initial;
+      }
+    }
+    .propal-counter{
+      cursor: initial;
     }
   }
 

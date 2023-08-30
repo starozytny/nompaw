@@ -30,8 +30,10 @@ export class Presents extends Component{
             name: '',
             url: 'https://',
             price: '',
+            priceMax: '',
             imageFile: '',
-            guestName: '',
+            guest: props.userId ? props.userId : "",
+            guestName: props.userDisplay ? props.userDisplay : "",
             errors: [],
             data: JSON.parse(props.donnees),
             loadData: false,
@@ -57,6 +59,8 @@ export class Presents extends Component{
     }
 
     handleModal = (identifiant, context, propal) => {
+        const { userId, userDisplay } = this.props;
+
         modalFormPropal(this);
         modalDeletePropal(this);
         modalEndPropal(this);
@@ -66,8 +70,10 @@ export class Presents extends Component{
             name: propal ? propal.name : "",
             url: propal ? Formulaire.setValue(propal.url) : "https://",
             price: propal ? Formulaire.setValue(propal.price) : "",
+            priceMax: propal ? Formulaire.setValue(propal.priceMax) : "",
             imageFile: propal ? Formulaire.setValue(propal.imageFile) : "",
-            guestName: propal ? Formulaire.setValue(propal.guestName) : "",
+            guest: propal ? Formulaire.setValue(propal.guest, userId) : userId,
+            guestName: propal ? Formulaire.setValue(propal.guestName, userDisplay) : userDisplay,
         })
         this[identifiant].current.handleClick();
     }
@@ -76,7 +82,7 @@ export class Presents extends Component{
         e.preventDefault();
 
         const { birthdayId } = this.props;
-        const { context, propal, name, url, price, data } = this.state;
+        const { context, propal, name, url, price, priceMax, data } = this.state;
 
         this.setState({ errors: [] });
 
@@ -91,7 +97,7 @@ export class Presents extends Component{
                 : Routing.generate(URL_UPDATE_PROPAL, {'birthday': birthdayId, 'id': propal.id})
 
             let formData = new FormData();
-            formData.append("data", JSON.stringify({name: name, url: url, price: price}));
+            formData.append("data", JSON.stringify({name: name, url: url, price: price, priceMax: priceMax}));
 
             let file = this.file.current;
             if(file.state.files.length > 0){
@@ -118,10 +124,10 @@ export class Presents extends Component{
     }
 
     handleEndPropal = () => {
-        const { propal, guestName } = this.state;
+        const { propal, guest, guestName } = this.state;
 
         this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Valider</Button>);
-        Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal, {guestName: guestName});
+        Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal, {guest: guest, guestName: guestName});
     }
 
     handleCancelPropal = () => {
@@ -132,8 +138,8 @@ export class Presents extends Component{
     }
 
     render() {
-        const { mode, userId } = this.props;
-        const { errors, loadData, name, url, price, data, propal, imageFile, guestName } = this.state;
+        const { mode, userId, isAdmin } = this.props;
+        const { errors, loadData, name, url, price, priceMax, data, propal, imageFile, guestName } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -147,6 +153,14 @@ export class Presents extends Component{
             </div>
             <div className="birthday-card-body">
                 <div className="propals">
+                    <div className="propal propal-text">
+                        <div>
+                            Connectez-vous pour modifier votre choix et profiter au max des fonctionnalités de Nompaw,
+                            sinon il faudra contacter le responsable du groupe si vous souhaiter annuler votre choix.
+                            <br/>
+                            Cliquez sur le bouton <span className="txt-primary">bleu</span> pour annoncer que vous prenez ce cadeau !
+                        </div>
+                    </div>
                     {data.map((el, index) => {
                         return <div className="propal" key={index}>
                             <div className="propal-body propal-body-with-image">
@@ -155,14 +169,21 @@ export class Presents extends Component{
                                 </div>
                                 <div>
                                     <div className="name">
-                                        <span>{el.name} {el.isSelected ? <span className="txt-primary">[Pris par {el.guestName}]</span>: ""}</span>
+                                        <span>{el.name} {el.isSelected
+                                            ? <span className="txt-danger">[Pris par {el.guestName}{isAdmin === "1" && el.guest && el.guestName === "Anonyme"
+                                                ? " - #" + el.guest.displayName
+                                                : ""
+                                            }]</span>
+                                            : ""
+                                        }
+                                        </span>
                                         {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo" target="_blank">
                                             <span className="icon-link"></span>
                                             <span className="tooltip">Lien externe</span>
                                         </a>}
                                     </div>
                                     <div className="duration">
-                                        {el.price ? Sanitaze.toFormatCurrency(el.price) : ""}
+                                        {el.price ? Sanitaze.toFormatCurrency(el.price) : ""} {el.priceMax ? " - " + Sanitaze.toFormatCurrency(el.priceMax) : ""}
                                     </div>
                                 </div>
                             </div>
@@ -204,9 +225,10 @@ export class Presents extends Component{
 
             <Modal ref={this.formPropal} identifiant="form-presents" maxWidth={568} margin={10} title="Proposer un cadeau"
                    content={<>
-                       <div className="line line-2">
+                       <div className="line line-3">
                            <Input identifiant="name" valeur={name} {...params}>Nom du cadeau</Input>
-                           <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                           <Input identifiant="price" valeur={price} {...params}>Prix min ou réel</Input>
+                           <Input identifiant="priceMax" valeur={priceMax} {...params}>Prix max (facultatif)</Input>
                        </div>
                        <div className="line">
                            <Input identifiant="url" valeur={url} {...params}>Lien externe</Input>

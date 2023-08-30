@@ -5,6 +5,7 @@ namespace App\Controller\Api\Birthdays;
 use App\Entity\Birthday\BiBirthday;
 use App\Entity\Birthday\BiPresent;
 use App\Repository\Birthday\BiPresentRepository;
+use App\Repository\Main\UserRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataBirthdays;
 use App\Service\FileUploader;
@@ -82,10 +83,17 @@ class PresentController extends AbstractController
 
     #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
     public function end(Request $request, BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository,
-                        SanitizeData $sanitizeData): Response
+                        UserRepository $userRepository, SanitizeData $sanitizeData): Response
     {
         $data = json_decode($request->getContent());
+
+        $guest = null;
+        if($data->guest){
+            $guest = $userRepository->find($data->guest);
+        }
+
         $obj->setIsSelected(true);
+        $obj->setGuest($guest);
         $obj->setGuestName($sanitizeData->trimData($data->guestName) ?? "Anonyme");
 
         $repository->save($obj, true);
@@ -96,6 +104,7 @@ class PresentController extends AbstractController
     public function cancel(BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository): Response
     {
         $obj->setIsSelected(false);
+        $obj->setGuest(null);
         $obj->setGuestName(null);
 
         $repository->save($obj, true);

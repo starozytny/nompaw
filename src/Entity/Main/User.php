@@ -55,7 +55,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'bi_present_list'])]
     private ?string $displayName = null;
 
     #[ORM\Column]
@@ -176,6 +176,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: BiPresent::class)]
     private Collection $biPresents;
 
+    #[ORM\OneToMany(mappedBy: 'guest', targetEntity: BiPresent::class)]
+    private Collection $buyPresents;
+
     /**
      * @throws Exception
      */
@@ -198,6 +201,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->hoPropalActivities = new ArrayCollection();
         $this->biBirthdays = new ArrayCollection();
         $this->biPresents = new ArrayCollection();
+        $this->buyPresents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -993,6 +997,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($biPresent->getAuthor() === $this) {
                 $biPresent->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BiPresent>
+     */
+    public function getBuyPresents(): Collection
+    {
+        return $this->buyPresents;
+    }
+
+    public function addBuyPresent(BiPresent $buyPresent): self
+    {
+        if (!$this->buyPresents->contains($buyPresent)) {
+            $this->buyPresents->add($buyPresent);
+            $buyPresent->setGuest($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBuyPresent(BiPresent $buyPresent): self
+    {
+        if ($this->buyPresents->removeElement($buyPresent)) {
+            // set the owning side to null (unless already changed)
+            if ($buyPresent->getGuest() === $this) {
+                $buyPresent->setGuest(null);
             }
         }
 
