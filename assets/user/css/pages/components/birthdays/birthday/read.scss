@@ -4,7 +4,7 @@
 
 @import "../../propals.scss";
 
-.project-read{
+.birthday-read{
   @include flex(column, flex-start, flex-start, var(--espaceDiv));
 
   & > div{
@@ -12,11 +12,11 @@
   }
 }
 
-.project-header{
+.birthday-header{
   @include flex(column, stretch, flex-start, var(--espaceDiv));
 }
 
-.project-title{
+.birthday-title{
   position: relative;
   min-height: 148px;
   padding: 12px;
@@ -47,16 +47,16 @@
   width: 100%;
 }
 
-.project-propals{
+.birthday-propals{
   width: 100%;
 }
 
-.project-card{
-  .project-card-header, .project-card-footer{
+.birthday-card{
+  .birthday-card-header, .birthday-card-footer{
     padding: var(--espaceDiv);
   }
 
-  .project-card-header{
+  .birthday-card-header{
     @include flex(row, center, space-between, var(--espaceEls));
     background-color: var(--color0Opacity6);
     border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
@@ -67,7 +67,7 @@
     }
   }
 
-  .project-card-body {
+  .birthday-card-body {
     background-color: var(--color0Opacity4);
 
     &.selected{
@@ -88,7 +88,7 @@
     }
   }
 
-  .project-card-footer{
+  .birthday-card-footer{
     @include flex();
     background-color: var(--primary);
     border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
@@ -101,16 +101,22 @@
     }
   }
 
-  .project-card-footer-danger{
+  .birthday-card-footer-danger{
     background-color: var(--danger);
   }
 
-  .project-card-footer-warning{
+  .birthday-card-footer-warning{
     background-color: var(--warning);
   }
 }
 
-.project-content{
+.birthday-card-date{
+  .birthday-card-body{
+    border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
+  }
+}
+
+.birthday-content{
   @include flex(column, flex-start, flex-start, var(--espaceLayout));
 
   & > div{
@@ -123,18 +129,6 @@
 
     .propal-body-with-image{
       width: calc(100% - 40px - 96px - 25px);
-    }
-
-    .propal-body-lifestyle{
-      width: calc(100% - 64px - 10px);
-    }
-
-    .propal-body-todos{
-      width: calc(100% - 64px - 10px);
-    }
-
-    .propal-actions-lifestyle, .propal-actions-todos{
-      width: 64px;
     }
   }
 
@@ -156,20 +150,6 @@
   }
 }
 
-.propals-budget{
-  gap: var(--espaceDiv);
-
-  & > div{
-    width: 100%;
-  }
-}
-
-.total-by-pers{
-  @include fontBold();
-  color: var(--primary);
-  font-size: 16px;
-}
-
 //                      __   _____ __    ___    __
 //                     | _| |___  / /_  ( _ )  |_ |
 //    _____ _____ _____| |     / / '_ \ / _ \   | |_____ _____ _____
@@ -177,15 +157,15 @@
 //                     | |   /_/  \___/ \___/   | |
 //                     |__|                    |__|
 @media (min-width:768px) {
-  .project-header{
+  .birthday-header{
     flex-direction: row;
   }
 
-  .project-title{
+  .birthday-title{
     padding: 24px;
   }
 
-  .project-title, .project-propals{
+  .birthday-title, .birthday-propals{
     width: 50%;
   }
 
@@ -208,9 +188,5 @@
         width: 50%;
       }
     }
-  }
-
-  .propals-budget{
-    flex-direction: row;
   }
 }

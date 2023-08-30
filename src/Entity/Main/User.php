@@ -2,6 +2,8 @@
 
 namespace App\Entity\Main;
 
+use App\Entity\Birthday\BiBirthday;
+use App\Entity\Birthday\BiPresent;
 use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
@@ -44,7 +46,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups([
         'user_list', 'user_form', 'com_read', 'user_select',
         'pr_date_list', 'pr_house_list', 'pr_act_list',
-        'ra_img_list', 'rando_form'
+        'ra_img_list', 'rando_form', 'bi_present_list'
     ])]
     private ?int $id = null;
 
@@ -168,6 +170,12 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalActivity::class)]
     private Collection $hoPropalActivities;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: BiBirthday::class)]
+    private Collection $biBirthdays;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: BiPresent::class)]
+    private Collection $biPresents;
+
     /**
      * @throws Exception
      */
@@ -188,6 +196,8 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->hoPropalDates = new ArrayCollection();
         $this->hoPropalHouses = new ArrayCollection();
         $this->hoPropalActivities = new ArrayCollection();
+        $this->biBirthdays = new ArrayCollection();
+        $this->biPresents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -923,6 +933,66 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($hoPropalActivity->getAuthor() === $this) {
                 $hoPropalActivity->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BiBirthday>
+     */
+    public function getBiBirthdays(): Collection
+    {
+        return $this->biBirthdays;
+    }
+
+    public function addBiBirthday(BiBirthday $biBirthday): self
+    {
+        if (!$this->biBirthdays->contains($biBirthday)) {
+            $this->biBirthdays->add($biBirthday);
+            $biBirthday->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBiBirthday(BiBirthday $biBirthday): self
+    {
+        if ($this->biBirthdays->removeElement($biBirthday)) {
+            // set the owning side to null (unless already changed)
+            if ($biBirthday->getAuthor() === $this) {
+                $biBirthday->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BiPresent>
+     */
+    public function getBiPresents(): Collection
+    {
+        return $this->biPresents;
+    }
+
+    public function addBiPresent(BiPresent $biPresent): self
+    {
+        if (!$this->biPresents->contains($biPresent)) {
+            $this->biPresents->add($biPresent);
+            $biPresent->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBiPresent(BiPresent $biPresent): self
+    {
+        if ($this->biPresents->removeElement($biPresent)) {
+            // set the owning side to null (unless already changed)
+            if ($biPresent->getAuthor() === $this) {
+                $biPresent->setAuthor(null);
             }
         }
 

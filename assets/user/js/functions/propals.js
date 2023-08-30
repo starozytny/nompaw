@@ -52,8 +52,8 @@ function vote (self, element, data, userId, loadData, urlName) {
     }
 }
 
-function endPropal (self, element, urlName, modalFunction) {
-    axios({ method: "PUT", url: Routing.generate(urlName, {'id': element.id}), data: {} })
+function endPropal (self, element, urlName, modalFunction, data = {}) {
+    axios({ method: "PUT", url: Routing.generate(urlName, {'id': element.id}), data: data })
         .then(function (response) {
             location.reload();
         })
