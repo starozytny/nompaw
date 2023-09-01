@@ -19,7 +19,7 @@ class BirthdayController extends AbstractController
     #[Route('/', name: 'index', options: ['expose' => true])]
     public function list(BiBirthdayRepository $repository): Response
     {
-        $birthdays = $repository->findAll();
+        $birthdays = $repository->findBy(['author' => $this->getUser()]);
 
         return $this->render('user/pages/birthdays/index.html.twig', ['birthdays' => $birthdays]);
     }

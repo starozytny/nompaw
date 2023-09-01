@@ -19,16 +19,14 @@
         path: path('user_projects_index'), matchRoute: [
             'user_projects_index', 'user_projects_read', 'user_projects_create', 'user_projects_update']
     },
+    { name: "Anniversaires", icon: "cake",
+        path: path('user_birthdays_index'), matchRoute: [
+            'user_birthdays_index', 'user_birthdays_read', 'user_birthdays_create', 'user_birthdays_update']
+    },
     { name: "Mon profil", icon: "user-octagon",
         path: path('user_profil_index'), matchRoute: ['user_profil_index', 'user_profil_update']
     },
 ] %}
-
-
-{#{ name: "Anniversaires", icon: "cake",#}
-{#path: path('user_birthdays_index'), matchRoute: [#}
-{#'user_birthdays_index', 'user_birthdays_read', 'user_birthdays_create', 'user_birthdays_update']#}
-{#},#}
 
 {% set menu_bottom = [] %}
 
