@@ -13,7 +13,6 @@ const config = {
 firebase.initializeApp(config);
 
 const messaging = firebase.messaging();
-messaging.getToken({vapidKey: "BCmepTKaIuXVBhvlD4nSV8spK17Hb8pTPO-vo1JGcKZc3UVxgKT1QO1CUjC7_yMQ_K8yowzt55mTiCuIUhTcY04"})
 
 messaging.onBackgroundMessage((payload) => {
     console.log(
