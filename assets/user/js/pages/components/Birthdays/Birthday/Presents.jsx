@@ -31,6 +31,7 @@ export class Presents extends Component{
         super(props);
 
         this.state = {
+            haveNotifPermission: false,
             context: 'create',
             propal: null,
             name: '',
@@ -44,7 +45,6 @@ export class Presents extends Component{
             errors: [],
             data: JSON.parse(props.donnees),
             loadData: false,
-            haveNotifPermission: false
         }
 
         this.file = React.createRef();
@@ -155,25 +155,31 @@ export class Presents extends Component{
 
     handleNotif = () => {
         const { birthdayId } = this.props;
+        const { loadData } = this.state;
 
-        firebase.initializeApp(FirebaseConfig.getConfig());
+        if(!loadData){
+            firebase.initializeApp(FirebaseConfig.getConfig());
 
-        let self = this;
-        let msgError = 'Veuillez vérifier vos paramètres d\'autorisations de notifications.';
+            let self = this;
+            let msgError = 'Veuillez vérifier vos paramètres d\'autorisations de notifications.';
 
-        const messaging = firebase.messaging();
-        messaging.getToken({ vapidKey: FirebaseConfig.getApiKey() })
-            .then((currentToken) => {
-                if (currentToken) {
-                    axios({ method: "POST", url: Routing.generate(URL_STORE_TOKEN, {'type': 'birthday', 'id': birthdayId}), data: {token: currentToken} })
-                        .then(function (response) { self.setState({ haveNotifPermission: true }) })
-                        .catch(function (error) { console.log(error); toastr.error(msgError); })
-                    ;
-                } else {
-                    toastr.error(msgError);
-                }
-            }).catch((err) => { toastr.error(msgError); })
-        ;
+            self.setState({ loadData: true })
+
+            const messaging = firebase.messaging();
+            messaging.getToken({ vapidKey: FirebaseConfig.getApiKey() })
+                .then((currentToken) => {
+                    if (currentToken) {
+                        axios({ method: "POST", url: Routing.generate(URL_STORE_TOKEN, {'type': 'birthday', 'id': birthdayId}), data: {token: currentToken} })
+                            .then(function (response) { self.setState({ haveNotifPermission: true }) })
+                            .catch(function (error) { toastr.error(msgError); })
+                            .then(function () { self.setState({ loadData: false }) })
+                        ;
+                    } else {
+                        toastr.error(msgError);
+                    }
+                }).catch((err) => { toastr.error(msgError); })
+            ;
+        }
     }
 
     render() {
@@ -189,6 +195,18 @@ export class Presents extends Component{
         return <div className="birthday-card">
             <div className="birthday-card-header">
                 <div className="name">🎁 Cadeaux</div>
+                <div className="actions">
+                    {loadData
+                        ? <span className="icon-chart-3"/>
+                        : (haveNotifPermission
+                                ? <div className="firebase-notif-bell">
+                                    <span className="icon-notification"></span>
+                                    <span className="tooltip">Notifications activées</span>
+                                </div>
+                                : <Button onClick={this.handleNotif} icon="notification">Activer les notifications</Button>
+                        )
+                    }
+                </div>
             </div>
             <div className="birthday-card-body">
                 <div className="propals">
@@ -199,10 +217,7 @@ export class Presents extends Component{
                             <br/>
                             Cliquez sur le bouton <span className="txt-primary">bleu</span> pour annoncer que vous prenez ce cadeau !
                         </div>
-                        {haveNotifPermission
-                            ? <ButtonIcon icon="notification" type="success" tooltipWidth={142}>Notifications activées</ButtonIcon>
-                            : <Button onClick={this.handleNotif} icon="notification">Activer les notifications</Button>
-                        }
+
                     </div>
                     {data.map((el, index) => {
 
