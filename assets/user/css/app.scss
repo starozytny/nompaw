@@ -95,10 +95,16 @@ a{
   position: relative;
 
   [class^="icon-"]{
-    color: var(--warning);
+    color: var(--primary);
   }
 
   .tooltip{
     width: 142px;
+  }
+
+  &.disabled{
+    [class^="icon-"]{
+      color: var(--danger);
+    }
   }
 }
