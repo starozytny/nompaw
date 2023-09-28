@@ -90,3 +90,21 @@ a{
 .icon-google{
   display: flex;
 }
+
+.firebase-notif-bell{
+  position: relative;
+
+  [class^="icon-"]{
+    color: var(--primary);
+  }
+
+  .tooltip{
+    width: 142px;
+  }
+
+  &.disabled{
+    [class^="icon-"]{
+      color: var(--danger);
+    }
+  }
+}

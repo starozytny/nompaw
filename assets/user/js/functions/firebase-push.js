@@ -10,7 +10,5 @@ firebase.initializeApp(FirebaseConfig.getConfig());
 const messaging = firebase.messaging();
 
 messaging.onMessage((payload) => {
-    console.log('Message received. ', payload);
-
-    toastr.info("notif")
+    toastr.info(payload.notification.body, payload.notification.title);
 });

@@ -102,12 +102,13 @@ class PresentController extends AbstractController
         $obj->setGuestName($sanitizeData->trimData($data->guestName) ?? "Anonyme");
 
         $tokens = $fiTokenRepository->findBy(['birthdayId' => $obj->getBirthday()->getId()]);
-
         $bearToken = $googleService->connect();
-
         foreach($tokens as $token){
-            $title = 'Anniversaire ' . $obj->getBirthday()->getName() . ' - ' . $token->getId();
-            $firebaseService->sendNotif($bearToken, $token, $fiTokenRepository, $title, 'Cadeau pris : ' . $obj->getName(), $obj->getImageFile());
+            $title = 'Anniversaire ' . $obj->getBirthday()->getName();
+            $firebaseService->sendNotif(
+                $bearToken, $token, $fiTokenRepository, $title,
+                'Cadeau pris : ' . $obj->getName(), $obj->getImageFile()
+            );
         }
 
         $repository->save($obj, true);
@@ -116,11 +117,22 @@ class PresentController extends AbstractController
     }
 
     #[Route('/cancel/{id}', name: 'cancel', options: ['expose' => true], methods: 'PUT')]
-    public function cancel(BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository): Response
+    public function cancel(BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository,
+                           FiTokenRepository $fiTokenRepository, GoogleService $googleService, FirebaseService $firebaseService): Response
     {
         $obj->setIsSelected(false);
         $obj->setGuest(null);
         $obj->setGuestName(null);
+
+        $tokens = $fiTokenRepository->findBy(['birthdayId' => $obj->getBirthday()->getId()]);
+        $bearToken = $googleService->connect();
+        foreach($tokens as $token){
+            $title = 'Anniversaire ' . $obj->getBirthday()->getName();
+            $firebaseService->sendNotif(
+                $bearToken, $token, $fiTokenRepository,
+                $title, 'Cadeau de nouveau disponible : ' . $obj->getName(), $obj->getImageFile()
+            );
+        }
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
