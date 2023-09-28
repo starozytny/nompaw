@@ -11,7 +11,11 @@ import { Cookies } from "@commonComponents/Modules/Cookies/Cookies";
 import { UserFormulaire } from "@adminPages/Users/UserForm";
 import { Theme } from "@userPages/Theme/Theme";
 
+import "./functions/firebase-push";
+
 Routing.setRoutingData(routes);
+
+menu();
 
 let notifs = document.getElementById("notifs_list");
 if(notifs){
@@ -32,8 +36,6 @@ el = document.getElementById("users_update");
 if(el){
     createRoot(el).render(<UserFormulaire context="update" element={JSON.parse(el.dataset.obj)} />)
 }
-
-menu();
 
 function menu() {
     let btn = document.querySelector('.nav-mobile');

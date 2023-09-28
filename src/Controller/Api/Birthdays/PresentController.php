@@ -5,10 +5,13 @@ namespace App\Controller\Api\Birthdays;
 use App\Entity\Birthday\BiBirthday;
 use App\Entity\Birthday\BiPresent;
 use App\Repository\Birthday\BiPresentRepository;
+use App\Repository\Firebase\FiTokenRepository;
 use App\Repository\Main\UserRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataBirthdays;
 use App\Service\FileUploader;
+use App\Service\ThirdPart\FirebaseService;
+use App\Service\ThirdPart\GoogleService;
 use App\Service\SanitizeData;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -83,7 +86,9 @@ class PresentController extends AbstractController
 
     #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
     public function end(Request $request, BiPresent $obj, ApiResponse $apiResponse, BiPresentRepository $repository,
-                        UserRepository $userRepository, SanitizeData $sanitizeData): Response
+                        UserRepository $userRepository, SanitizeData $sanitizeData,
+                        GoogleService $googleService, FiTokenRepository $fiTokenRepository,
+                        FirebaseService $firebaseService): Response
     {
         $data = json_decode($request->getContent());
 
@@ -96,7 +101,17 @@ class PresentController extends AbstractController
         $obj->setGuest($guest);
         $obj->setGuestName($sanitizeData->trimData($data->guestName) ?? "Anonyme");
 
+        $tokens = $fiTokenRepository->findBy(['birthdayId' => $obj->getBirthday()->getId()]);
+
+        $bearToken = $googleService->connect();
+
+        foreach($tokens as $token){
+            $title = 'Anniversaire ' . $obj->getBirthday()->getName() . ' - ' . $token->getId();
+            $firebaseService->sendNotif($bearToken, $token, $fiTokenRepository, $title, 'Cadeau pris : ' . $obj->getName(), $obj->getImageFile());
+        }
+
         $repository->save($obj, true);
+
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 

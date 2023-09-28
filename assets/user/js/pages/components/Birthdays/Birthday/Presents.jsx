@@ -2,13 +2,18 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import axios from "axios";
+import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
+
+import firebase from "firebase/compat/app";
+import "firebase/compat/messaging";
 
 import Formulaire   from "@commonFunctions/formulaire";
 import Validateur   from "@commonFunctions/validateur";
 import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
+import FirebaseConfig from "@userFunctions/firebase-config";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input, InputFile, TextArea } from "@commonComponents/Elements/Fields";
@@ -19,6 +24,7 @@ const URL_UPDATE_PROPAL = 'api_birthdays_presents_update';
 const URL_DELETE_PROPAL = 'api_birthdays_presents_delete';
 const URL_END_PROPAL    = 'api_birthdays_presents_end';
 const URL_CANCEL_PROPAL = 'api_birthdays_presents_cancel';
+const URL_STORE_TOKEN   = "api_firebase_notifs_create_token_birthday";
 
 export class Presents extends Component{
     constructor(props) {
@@ -38,6 +44,7 @@ export class Presents extends Component{
             errors: [],
             data: JSON.parse(props.donnees),
             loadData: false,
+            haveNotifPermission: false
         }
 
         this.file = React.createRef();
@@ -46,6 +53,13 @@ export class Presents extends Component{
         this.deletePropal = React.createRef();
         this.endPropal = React.createRef();
         this.cancelPropal = React.createRef();
+    }
+
+    componentDidMount() {
+        let self = this;
+        if (Notification.permission === "granted") {
+            self.setState({ haveNotifPermission: true })
+        }
     }
 
     handleChange = (e) => {
@@ -139,9 +153,32 @@ export class Presents extends Component{
         Propals.cancel(this, propal.id, URL_CANCEL_PROPAL, modalCancelPropal);
     }
 
+    handleNotif = () => {
+        const { birthdayId } = this.props;
+
+        firebase.initializeApp(FirebaseConfig.getConfig());
+
+        let self = this;
+        let msgError = 'Veuillez vérifier vos paramètres d\'autorisations de notifications.';
+
+        const messaging = firebase.messaging();
+        messaging.getToken({ vapidKey: FirebaseConfig.getApiKey() })
+            .then((currentToken) => {
+                if (currentToken) {
+                    axios({ method: "POST", url: Routing.generate(URL_STORE_TOKEN, {'type': 'birthday', 'id': birthdayId}), data: {token: currentToken} })
+                        .then(function (response) { self.setState({ haveNotifPermission: true }) })
+                        .catch(function (error) { console.log(error); toastr.error(msgError); })
+                    ;
+                } else {
+                    toastr.error(msgError);
+                }
+            }).catch((err) => { toastr.error(msgError); })
+        ;
+    }
+
     render() {
         const { mode, userId, isAdmin } = this.props;
-        const { errors, loadData, name, url, price, priceMax, description, data, propal, imageFile, guestName } = this.state;
+        const { haveNotifPermission, errors, loadData, name, url, price, priceMax, description, data, propal, imageFile, guestName } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
@@ -162,6 +199,10 @@ export class Presents extends Component{
                             <br/>
                             Cliquez sur le bouton <span className="txt-primary">bleu</span> pour annoncer que vous prenez ce cadeau !
                         </div>
+                        {haveNotifPermission
+                            ? <ButtonIcon icon="notification" type="success" tooltipWidth={142}>Notifications activées</ButtonIcon>
+                            : <Button onClick={this.handleNotif} icon="notification">Activer les notifications</Button>
+                        }
                     </div>
                     {data.map((el, index) => {
 
