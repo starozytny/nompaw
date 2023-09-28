@@ -15,11 +15,6 @@
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
-###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
 graph.svg
 yarn.lock
 error_log
@@ -37,6 +32,7 @@ winpty.exe.stackdump
 /bin/backup/*
 
 /config/databaseConfig.json
+/config/credentials.json
 
 .yarnrc
 /.yarn/*
