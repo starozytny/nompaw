@@ -8,6 +8,9 @@ import toastr from "toastr"
 // Initialize Firebase
 firebase.initializeApp(FirebaseConfig.getConfig());
 const messaging = firebase.messaging();
+messaging.getToken({ vapidKey: FirebaseConfig.getApiKey() })
+    .then((currentToken) => {})
+    .catch((err) => { console.log(err) })
 
 messaging.onMessage((payload) => {
     console.log('Message received. ', payload);
