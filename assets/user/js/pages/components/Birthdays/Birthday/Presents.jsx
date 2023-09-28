@@ -179,7 +179,7 @@ export class Presents extends Component{
                     } else {
                         toastr.error(msgError);
                     }
-                }).catch((err) => { toastr.error(msgError); })
+                }).catch((err) => { console.log(err); toastr.error(msgError); })
             ;
         }
     }
