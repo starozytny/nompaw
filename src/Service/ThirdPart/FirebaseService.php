@@ -27,15 +27,15 @@ class FirebaseService
                     'token' => $token->getToken(),
                     'notification' => [
                         'title' => $title,
+                        'body' => $body,
+                        'image' => $image ?: '',
                     ],
                     'webpush' => [
                         "headers" => [
                             'TTL' => '7200'
                         ],
                         'notification' => [
-                            'body' => $body,
                             'badge' => '/favicon.png',
-                            'image' => $image ?: ''
                         ]
                     ],
 //                    'android' => [
