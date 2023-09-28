@@ -38,12 +38,12 @@ class FirebaseService
                             'image' => $image ?: ''
                         ]
                     ],
-                    'android' => [
-                        'ttl' => '7200s',
-                        'notification' => [
-                            'body' => $body,
-                        ]
-                    ]
+//                    'android' => [
+//                        'ttl' => '7200s',
+//                        'notification' => [
+//                            'body' => $body,
+//                        ]
+//                    ]
                 ]
             ]
         ]);
