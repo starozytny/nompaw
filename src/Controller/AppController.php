@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Enum\Cook\CookStatut;
 use App\Repository\Cook\CoRecipeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +14,7 @@ class AppController extends AbstractController
     public function index(CoRecipeRepository $recipeRepository): Response
     {
         return $this->render('app/pages/index.html.twig', [
-            'recipes' => $recipeRepository->findBy([],[], 3)
+            'recipes' => $recipeRepository->findBy(['status' => CookStatut::Active],[], 3)
         ]);
     }
 
