@@ -12,12 +12,13 @@
         <div class="homepage-header-content">
             <h1>Nompaw 👋</h1>
             <div class="subtitle">
-                Retrouvez pleins de recettes et un blog dédié à la cuisine !
+                Retrouvez pleins de recettes, des randonnées et des systèmes de gestion d'évènements !
             </div>
 
             <div class="cta">
                 <a class="btn btn-primary" href="{{ path('app_login') }}">Accéder à mon espace</a>
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                {% else %}
                     <a class="btn btn-outline-primary" href="{{ path('app_registration') }}">Rejoindre la communauté</a>
                     <a class="btn btn-outline-primary" href="{{ path('connect_google') }}">Se connecter avec Google</a>
                     <a class="btn btn-outline-primary" href="{{ path('connect_facebook') }}">Se connecter avec Facebook</a>
@@ -32,6 +33,21 @@
             <div class="homepage-section-title">
                 <h2>Recettes ⚒️</h2>
                 <div class="subtitle">Parcourez les recettes !</div>
+            </div>
+            <div class="recipes">
+                {% for elem in recipes %}
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="name">
+                                <div>{{ elem.name }}</div>
+                                <span class="difficulty">{{ elem.difficultyString }}</span>
+                            </div>
+                        </div>
+                        <a class="card-body">
+                            <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
+                        </a>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     </div>
