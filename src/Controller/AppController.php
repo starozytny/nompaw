@@ -12,7 +12,6 @@ class AppController extends AbstractController
     #[Route('/', name: 'app_homepage')]
     public function index(CoRecipeRepository $recipeRepository): Response
     {
-        dump($recipeRepository->findBy([],[], 3));
         return $this->render('app/pages/index.html.twig', [
             'recipes' => $recipeRepository->findBy([],[], 3)
         ]);
