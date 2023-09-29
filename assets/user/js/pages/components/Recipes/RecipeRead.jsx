@@ -12,9 +12,6 @@ import Formulaire from '@commonFunctions/formulaire';
 import Validateur from "@commonFunctions/validateur";
 import Inputs     from "@commonFunctions/inputs";
 
-import moment from "moment";
-import 'moment/locale/fr';
-
 import { Radio, Rate } from "antd";
 import { Input, Radiobox } from "@commonComponents/Elements/Fields";
 import { ButtonIcon } from "@commonComponents/Elements/Button";
@@ -22,7 +19,7 @@ import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
-import {Commentary} from "@userPages/Recipes/Commentary";
+import { Commentary } from "@userPages/Recipes/Commentary";
 
 const URL_UPDATE_DATA = 'api_cook_recipes_update_data';
 
