@@ -101,15 +101,15 @@ class PresentController extends AbstractController
         $obj->setGuest($guest);
         $obj->setGuestName($sanitizeData->trimData($data->guestName) ?? "Anonyme");
 
-        $tokens = $fiTokenRepository->findBy(['birthdayId' => $obj->getBirthday()->getId()]);
-        $bearToken = $googleService->connect();
-        foreach($tokens as $token){
-            $title = 'Anniversaire ' . $obj->getBirthday()->getName();
-            $firebaseService->sendNotif(
-                $bearToken, $token, $fiTokenRepository, $title,
-                'Cadeau pris : ' . $obj->getName(), $obj->getImageFile()
-            );
-        }
+//        $tokens = $fiTokenRepository->findBy(['birthdayId' => $obj->getBirthday()->getId()]);
+//        $bearToken = $googleService->connect();
+//        foreach($tokens as $token){
+//            $title = 'Anniversaire ' . $obj->getBirthday()->getName();
+//            $firebaseService->sendNotif(
+//                $bearToken, $token, $fiTokenRepository, $title,
+//                'Cadeau pris : ' . $obj->getName(), $obj->getImageFile()
+//            );
+//        }
 
         $repository->save($obj, true);
 
@@ -124,15 +124,15 @@ class PresentController extends AbstractController
         $obj->setGuest(null);
         $obj->setGuestName(null);
 
-        $tokens = $fiTokenRepository->findBy(['birthdayId' => $obj->getBirthday()->getId()]);
-        $bearToken = $googleService->connect();
-        foreach($tokens as $token){
-            $title = 'Anniversaire ' . $obj->getBirthday()->getName();
-            $firebaseService->sendNotif(
-                $bearToken, $token, $fiTokenRepository,
-                $title, 'Cadeau de nouveau disponible : ' . $obj->getName(), $obj->getImageFile()
-            );
-        }
+//        $tokens = $fiTokenRepository->findBy(['birthdayId' => $obj->getBirthday()->getId()]);
+//        $bearToken = $googleService->connect();
+//        foreach($tokens as $token){
+//            $title = 'Anniversaire ' . $obj->getBirthday()->getName();
+//            $firebaseService->sendNotif(
+//                $bearToken, $token, $fiTokenRepository,
+//                $title, 'Cadeau de nouveau disponible : ' . $obj->getName(), $obj->getImageFile()
+//            );
+//        }
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
