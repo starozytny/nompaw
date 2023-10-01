@@ -24,7 +24,7 @@ const URL_UPDATE_PROPAL = 'api_birthdays_presents_update';
 const URL_DELETE_PROPAL = 'api_birthdays_presents_delete';
 const URL_END_PROPAL    = 'api_birthdays_presents_end';
 const URL_CANCEL_PROPAL = 'api_birthdays_presents_cancel';
-const URL_STORE_TOKEN   = "api_firebase_notifs_create_token_birthday";
+// const URL_STORE_TOKEN   = "api_firebase_notifs_create_token_birthday";
 
 export class Presents extends Component{
     constructor(props) {
