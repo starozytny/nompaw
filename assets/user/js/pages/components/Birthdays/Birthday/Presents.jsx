@@ -5,15 +5,15 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken } from "firebase/messaging";
+// import { initializeApp } from "firebase/app";
+// import { getMessaging, getToken } from "firebase/messaging";
 
 import Formulaire   from "@commonFunctions/formulaire";
 import Validateur   from "@commonFunctions/validateur";
 import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
-import FirebaseConfig from "@userFunctions/firebase-config";
+// import FirebaseConfig from "@userFunctions/firebase-config";
 
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input, InputFile, TextArea } from "@commonComponents/Elements/Fields";
@@ -55,14 +55,14 @@ export class Presents extends Component{
         this.cancelPropal = React.createRef();
     }
 
-    componentDidMount() {
-        let self = this;
-        if (Notification.permission === "granted") {
-            self.setState({ haveNotifPermission: 1 })
-        }else if(Notification.permission === "denied"){
-            self.setState({ haveNotifPermission: 2 })
-        }
-    }
+    // componentDidMount() {
+    //     let self = this;
+    //     if (Notification.permission === "granted") {
+    //         self.setState({ haveNotifPermission: 1 })
+    //     }else if(Notification.permission === "denied"){
+    //         self.setState({ haveNotifPermission: 2 })
+    //     }
+    // }
 
     handleChange = (e) => {
         let name  = e.currentTarget.name;
@@ -160,27 +160,27 @@ export class Presents extends Component{
         const { loadData } = this.state;
 
         if(!loadData){
-            let app = initializeApp(FirebaseConfig.getConfig());
-
-            let self = this;
-            let msgError = 'Veuillez vérifier vos paramètres d\'autorisations de notifications.';
-
-            self.setState({ loadData: true })
-
-            const messaging = getMessaging(app);
-            getToken(messaging, { vapidKey: FirebaseConfig.getApiKey() })
-                .then((currentToken) => {
-                    if (currentToken) {
-                        axios({ method: "POST", url: Routing.generate(URL_STORE_TOKEN, {'type': 'birthday', 'id': birthdayId}), data: {token: currentToken} })
-                            .then(function (response) { self.setState({ haveNotifPermission: 1 }) })
-                            .catch(function (error) { toastr.error(msgError); })
-                            .then(function () { self.setState({ loadData: false }) })
-                        ;
-                    } else {
-                        toastr.error(msgError);
-                    }
-                }).catch((err) => { console.log(err); toastr.error(msgError); })
-            ;
+            // let app = initializeApp(FirebaseConfig.getConfig());
+            //
+            // let self = this;
+            // let msgError = 'Veuillez vérifier vos paramètres d\'autorisations de notifications.';
+            //
+            // self.setState({ loadData: true })
+            //
+            // const messaging = getMessaging(app);
+            // getToken(messaging, { vapidKey: FirebaseConfig.getApiKey() })
+            //     .then((currentToken) => {
+            //         if (currentToken) {
+            //             axios({ method: "POST", url: Routing.generate(URL_STORE_TOKEN, {'type': 'birthday', 'id': birthdayId}), data: {token: currentToken} })
+            //                 .then(function (response) { self.setState({ haveNotifPermission: 1 }) })
+            //                 .catch(function (error) { toastr.error(msgError); })
+            //                 .then(function () { self.setState({ loadData: false }) })
+            //             ;
+            //         } else {
+            //             toastr.error(msgError);
+            //         }
+            //     }).catch((err) => { console.log(err); toastr.error(msgError); })
+            // ;
         }
     }
 
@@ -197,26 +197,26 @@ export class Presents extends Component{
         return <div className="birthday-card">
             <div className="birthday-card-header">
                 <div className="name">🎁 Cadeaux</div>
-                <div className="actions">
-                    {loadData
-                        ? <span className="icon-chart-3"/>
-                        : (haveNotifPermission === 1
-                                ? <div className="firebase-notif-bell">
-                                    <span className="icon-notification"></span>
-                                    <span className="tooltip">Notifications activées</span>
-                                </div>
-                                : (haveNotifPermission === 2
-                                    ? <div className="firebase-notif-bell disabled">
-                                        <span className="icon-notification"></span>
-                                        <span className="tooltip">Notifications refusées</span>
-                                    </div>
-                                    : <Button onClick={this.handleNotif} icon="notification">
-                                            Activer les notifications
-                                </Button>
-                                )
-                        )
-                    }
-                </div>
+                {/*<div className="actions">*/}
+                {/*    {loadData*/}
+                {/*        ? <span className="icon-chart-3"/>*/}
+                {/*        : (haveNotifPermission === 1*/}
+                {/*                ? <div className="firebase-notif-bell">*/}
+                {/*                    <span className="icon-notification"></span>*/}
+                {/*                    <span className="tooltip">Notifications activées</span>*/}
+                {/*                </div>*/}
+                {/*                : (haveNotifPermission === 2*/}
+                {/*                    ? <div className="firebase-notif-bell disabled">*/}
+                {/*                        <span className="icon-notification"></span>*/}
+                {/*                        <span className="tooltip">Notifications refusées</span>*/}
+                {/*                    </div>*/}
+                {/*                    : <Button onClick={this.handleNotif} icon="notification">*/}
+                {/*                            Activer les notifications*/}
+                {/*                </Button>*/}
+                {/*                )*/}
+                {/*        )*/}
+                {/*    }*/}
+                {/*</div>*/}
             </div>
             <div className="birthday-card-body">
                 <div className="propals">
