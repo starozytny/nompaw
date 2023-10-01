@@ -12,4 +12,5 @@ enum ImageType: int
     const Commentary = 5;
     const Groupe = 6;
     const Rando = 7;
+    const Route = 8;
 }

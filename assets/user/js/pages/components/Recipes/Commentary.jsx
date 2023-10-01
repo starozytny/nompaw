@@ -12,6 +12,7 @@ import Sort       from "@commonFunctions/sort";
 
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 import { Button }  from "@commonComponents/Elements/Button";
+import { Rate }    from "antd";
 
 const URL_CREATE_ELEMENT = 'api_cook_commentaries_create';
 
@@ -21,11 +22,14 @@ export class Commentary extends Component {
 
         this.state = {
             message: {value: '', html: ''},
+            rate: 1,
             errors: [],
             loadData: false,
             data: props.coms
         }
     }
+
+    handleChangeRate = (value) => { this.setState({ rate: value }) }
 
     handleChangeTinyMCE = (name, html) => {
         this.setState({ [name]: {value: this.state[name].value, html: html} })
@@ -60,7 +64,7 @@ export class Commentary extends Component {
 
     render () {
         const { recipe } = this.props;
-        const { loadData, errors, message, data } = this.state;
+        const { loadData, errors, message, data, rate } = this.state;
 
         data.sort(Sort.compareCreatedAtInverse);
 
@@ -69,6 +73,11 @@ export class Commentary extends Component {
                 <div className="line">
                     <TinyMCE type={5} identifiant='message' valeur={message.value} params={{'id': recipe.id}}
                              errors={errors} onUpdateData={this.handleChangeTinyMCE} key={loadData} />
+                </div>
+                <div className="line">
+                    <div className="form-group rating">
+                        <Rate defaultValue={rate} onChange={this.handleChangeRate} />
+                    </div>
                 </div>
                 <div className="line-buttons">
                     <Button onClick={this.handleSubmit} type="primary">Ajouter le commentaire</Button>
@@ -86,6 +95,7 @@ export class Commentary extends Component {
                         </div>
                         <div className="commentary-body">
                             <div className="name">{elem.user.username}</div>
+                            <div className="rating"><Rate disabled defaultValue={elem.rate} /></div>
                             <div className="message">{parse(elem.message)}</div>
                             <div className="date">{Sanitaze.toFormatCalendar(elem.createdAt)}</div>
                         </div>

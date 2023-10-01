@@ -36,6 +36,7 @@
         "@tinymce/tinymce-react": "^4.3.0",
         "antd": "^5.2.2",
         "axios": "^1.2.1",
+        "firebase": "^10.4.0",
         "fs-extra": "^11.1.0",
         "html-react-parser": "^3.0.9",
         "jquery-resizable-dom": "^0.35.0",

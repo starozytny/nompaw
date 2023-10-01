@@ -1,0 +1,52 @@
+{% extends 'user/pages/holidays/template.html.twig' %}
+
+{% set page_title %}Projets{% endset %}
+{% set page_subtitle %}Liste des projets{% endset %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_projects_create') }}" class="btn btn-primary">
+                <span>Ajouter un projet</span>
+            </a>
+        </div>
+    </div>
+    <div class="page-default">
+        <div class="projects">
+            {% for elem in projects %}
+                <div class="card">
+                    <div class="card-header">
+                        <div class="name">
+                            <div>{{ elem.name }}</div>
+                        </div>
+                    </div>
+                    <a
+                            href="{{ path('user_projects_read', {'slug': elem.slug}) }}"
+                            class="card-body"
+                            style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}"
+                    >
+                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
+                    </a>
+                    {% if app.user.id == elem.author.id %}
+                        <div class="card-footer">
+                            <a
+                                    href="{{ path('user_projects_update', {'slug': elem.slug}) }}"
+                                    class="btn-icon"
+                            >
+                                <span class="icon-pencil"></span>
+                                <span class="tooltip">Modifier</span>
+                            </a>
+                            <div class="delete-project"
+                                 data-context="projects"
+                                 data-id="{{ elem.id }}"
+                                 data-name="{{ elem.name }}"
+                            >
+                                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -515,7 +515,7 @@ export class InputFile extends Component {
     }
 
     handleFileInput = (e) => {
-        const { type, max = 1 } = this.props;
+        const { identifiant, type, max = 1 } = this.props;
         const { files } = this.state;
 
         const file = e.target.files[0];
@@ -525,6 +525,10 @@ export class InputFile extends Component {
                     toastr.error("Le fichier est trop volumineux.")
                 }else{
                     this.setState({ files: [file] })
+
+                    if(this.props.onCustomAction){
+                        this.props.onCustomAction(identifiant, [file])
+                    }
                 }
             }else{
                 let nFiles = [];
@@ -537,19 +541,31 @@ export class InputFile extends Component {
                         nFiles.push(file);
                     }
                 });
-                this.setState({ files: [...files, ...nFiles] })
 
+                let newFiles = [...files, ...nFiles];
+
+                this.setState({ files: newFiles })
+
+                if(this.props.onCustomAction){
+                    this.props.onCustomAction(identifiant, [newFiles])
+                }
             }
         }
     }
 
     handleFileRemove = (file) => {
+        const { identifiant } = this.props;
+
         let nFiles = [];
         this.state.files.forEach(f => {
             if(f.name !== file.name) nFiles.push(f);
         })
 
         this.setState({ files: nFiles })
+
+        if(this.props.onCustomAction){
+            this.props.onCustomAction(identifiant, nFiles)
+        }
     }
 
     render () {

@@ -12,6 +12,7 @@ use App\Entity\Main\Changelog;
 use App\Entity\Main\Help\HeQuestion;
 use App\Entity\Main\Image;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\ImageRepository;
 use Exception;
@@ -37,7 +38,7 @@ class FileUploader
         $this->slugger = $slugger;
     }
 
-    public function upload(UploadedFile $file, $folder=null, $isPublic=true, $reduce=false): string
+    public function upload(UploadedFile $file, $folder=null, $isPublic=true, $reducePixel=false): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
@@ -59,10 +60,10 @@ class FileUploader
 
             $layer = ImageWorkshop::initFromPath($fileOri);
 
-            if($reduce){
-                $layer->resizeInPixel(null, 500, true);
-            }else if($layer->getHeight() > 1080){
-                $layer->resizeInPixel(null, 1080, true);
+            if($reducePixel){
+                $layer->resizeInPixel(null, $reducePixel, true);
+            }else if($layer->getHeight() > 2160){
+                $layer->resizeInPixel(null, 2160, true);
             }
 
             $layer->save($directory, $fileName);
@@ -108,7 +109,7 @@ class FileUploader
         }
     }
 
-    public function replaceFile($file, $folderName, $oldFileName = null, $isPublic = true): ?string
+    public function replaceFile($file, $folderName, $oldFileName = null, $isPublic = true, $reducePixel = false): ?string
     {
         if($file){
             if($oldFileName){
@@ -120,7 +121,7 @@ class FileUploader
                 }
             }
 
-            return $this->upload($file, $folderName, $isPublic);
+            return $this->upload($file, $folderName, $isPublic, $reducePixel);
         }
 
         return null;
@@ -158,6 +159,7 @@ class FileUploader
                 ImageType::Commentary => CoCommentary::FOLDER,
                 ImageType::Groupe => RaGroupe::FOLDER,
                 ImageType::Rando => RaRando::FOLDER,
+                ImageType::Route => RaImage::FOLDER,
             };
 
             $fileName = $this->replaceFile($file, $folder);

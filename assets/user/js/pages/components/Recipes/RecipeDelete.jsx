@@ -35,8 +35,8 @@ export function RecipeDelete ({ context, id, name })
             ? <Button icon="trash" type="danger" onClick={handleClick}>Supprimer</Button>
             : <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
         }
-        <Modal ref={modalRef} identifiant={`delete-tuto-${id}`} maxWidth={414} title="Supprimer la recette"
-               content={<p>Etes-vous sûr de vouloir supprimer le tutoriel : <b>{name}</b> ?</p>}
+        <Modal ref={modalRef} identifiant={`delete-recipe-${id}`} maxWidth={414} title="Supprimer la recette"
+               content={<p>Etes-vous sûr de vouloir supprimer la recette : <b>{name}</b> ?</p>}
                footer={<Button type="danger" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
     </>
 }

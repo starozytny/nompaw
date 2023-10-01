@@ -1,0 +1,26 @@
+{% extends 'layout/layout_visitor.html.twig' %}
+
+{% set page_prefix = "Nompaw" %}
+
+{% set menu = [
+    { name: "Se connecter", icon: "user",
+        path: path('app_login'), matchRoute: ['app_login']
+    }
+] %}
+
+{% set menu_bottom = [] %}
+
+ {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
+     {% set menu_bottom = menu_bottom | merge([
+         { name: "Espace admin", icon: "earth",
+             path: path('admin_homepage'), matchRoute: ['admin_homepage']
+         },
+         { name: "Page accueil", icon: "earth",
+             path: path('app_homepage'), matchRoute: ['app_homepage']
+         },
+     ]) %}
+ {% endif %}
+
+{% block footer %}
+    {% include "user/layout/components/footer.html.twig" %}
+{% endblock %}

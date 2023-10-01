@@ -44,6 +44,10 @@ function compareDateAt(a, b){
     return comparison(a.dateAt, b.dateAt);
 }
 
+function compareStartAt(a, b){
+    return comparison(a.startAt, b.startAt);
+}
+
 function compareWithoutAccent(aVal, bVal) {
     let aName = Sanitaze.removeAccents(aVal);
     let bName = Sanitaze.removeAccents(bVal);
@@ -92,4 +96,5 @@ module.exports = {
     compareRankThenLabel,
     compareLabel,
     compareDateAt,
+    compareStartAt,
 }

@@ -13,7 +13,8 @@ if(el){
                                       elem={JSON.parse(el.dataset.element)}
                                       steps={JSON.parse(el.dataset.steps)}
                                       ingre={JSON.parse(el.dataset.ingre)}
-                                      coms={JSON.parse(el.dataset.coms)} />)
+                                      coms={JSON.parse(el.dataset.coms)}
+                                      rate={JSON.parse(el.dataset.rate)} />)
 }
 
 el = document.getElementById("recipes_update");

@@ -2,10 +2,16 @@
 
 namespace App\Entity\Main;
 
+use App\Entity\Birthday\BiBirthday;
+use App\Entity\Birthday\BiPresent;
 use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
 use App\Entity\DataEntity;
+use App\Entity\Holiday\HoProject;
+use App\Entity\Holiday\HoPropalActivity;
+use App\Entity\Holiday\HoPropalDate;
+use App\Entity\Holiday\HoPropalHouse;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaLink;
@@ -37,7 +43,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'pr_date_list', 'ra_img_list'])]
+    #[Groups([
+        'user_list', 'user_form', 'com_read', 'user_select',
+        'pr_date_list', 'pr_house_list', 'pr_act_list',
+        'ra_img_list', 'rando_form', 'bi_present_list'
+    ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -45,7 +55,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'bi_present_list'])]
     private ?string $displayName = null;
 
     #[ORM\Column]
@@ -148,6 +158,27 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: RaImage::class)]
     private Collection $raImages;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoProject::class)]
+    private Collection $hoProjects;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalDate::class)]
+    private Collection $hoPropalDates;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalHouse::class)]
+    private Collection $hoPropalHouses;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalActivity::class)]
+    private Collection $hoPropalActivities;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: BiBirthday::class)]
+    private Collection $biBirthdays;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: BiPresent::class)]
+    private Collection $biPresents;
+
+    #[ORM\OneToMany(mappedBy: 'guest', targetEntity: BiPresent::class)]
+    private Collection $buyPresents;
+
     /**
      * @throws Exception
      */
@@ -164,6 +195,13 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->raPropalDates = new ArrayCollection();
         $this->raPropalAdventures = new ArrayCollection();
         $this->raImages = new ArrayCollection();
+        $this->hoProjects = new ArrayCollection();
+        $this->hoPropalDates = new ArrayCollection();
+        $this->hoPropalHouses = new ArrayCollection();
+        $this->hoPropalActivities = new ArrayCollection();
+        $this->biBirthdays = new ArrayCollection();
+        $this->biPresents = new ArrayCollection();
+        $this->buyPresents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -779,6 +817,216 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($raImage->getAuthor() === $this) {
                 $raImage->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoProject>
+     */
+    public function getHoProjects(): Collection
+    {
+        return $this->hoProjects;
+    }
+
+    public function addHoProject(HoProject $hoProject): self
+    {
+        if (!$this->hoProjects->contains($hoProject)) {
+            $this->hoProjects->add($hoProject);
+            $hoProject->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoProject(HoProject $hoProject): self
+    {
+        if ($this->hoProjects->removeElement($hoProject)) {
+            // set the owning side to null (unless already changed)
+            if ($hoProject->getAuthor() === $this) {
+                $hoProject->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalDate>
+     */
+    public function getHoPropalDates(): Collection
+    {
+        return $this->hoPropalDates;
+    }
+
+    public function addHoPropalDate(HoPropalDate $hoPropalDate): self
+    {
+        if (!$this->hoPropalDates->contains($hoPropalDate)) {
+            $this->hoPropalDates->add($hoPropalDate);
+            $hoPropalDate->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalDate(HoPropalDate $hoPropalDate): self
+    {
+        if ($this->hoPropalDates->removeElement($hoPropalDate)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalDate->getAuthor() === $this) {
+                $hoPropalDate->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalHouse>
+     */
+    public function getHoPropalHouses(): Collection
+    {
+        return $this->hoPropalHouses;
+    }
+
+    public function addHoPropalHouse(HoPropalHouse $hoPropalHouse): self
+    {
+        if (!$this->hoPropalHouses->contains($hoPropalHouse)) {
+            $this->hoPropalHouses->add($hoPropalHouse);
+            $hoPropalHouse->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalHouse(HoPropalHouse $hoPropalHouse): self
+    {
+        if ($this->hoPropalHouses->removeElement($hoPropalHouse)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalHouse->getAuthor() === $this) {
+                $hoPropalHouse->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HoPropalActivity>
+     */
+    public function getHoPropalActivities(): Collection
+    {
+        return $this->hoPropalActivities;
+    }
+
+    public function addHoPropalActivity(HoPropalActivity $hoPropalActivity): self
+    {
+        if (!$this->hoPropalActivities->contains($hoPropalActivity)) {
+            $this->hoPropalActivities->add($hoPropalActivity);
+            $hoPropalActivity->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoPropalActivity(HoPropalActivity $hoPropalActivity): self
+    {
+        if ($this->hoPropalActivities->removeElement($hoPropalActivity)) {
+            // set the owning side to null (unless already changed)
+            if ($hoPropalActivity->getAuthor() === $this) {
+                $hoPropalActivity->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BiBirthday>
+     */
+    public function getBiBirthdays(): Collection
+    {
+        return $this->biBirthdays;
+    }
+
+    public function addBiBirthday(BiBirthday $biBirthday): self
+    {
+        if (!$this->biBirthdays->contains($biBirthday)) {
+            $this->biBirthdays->add($biBirthday);
+            $biBirthday->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBiBirthday(BiBirthday $biBirthday): self
+    {
+        if ($this->biBirthdays->removeElement($biBirthday)) {
+            // set the owning side to null (unless already changed)
+            if ($biBirthday->getAuthor() === $this) {
+                $biBirthday->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BiPresent>
+     */
+    public function getBiPresents(): Collection
+    {
+        return $this->biPresents;
+    }
+
+    public function addBiPresent(BiPresent $biPresent): self
+    {
+        if (!$this->biPresents->contains($biPresent)) {
+            $this->biPresents->add($biPresent);
+            $biPresent->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBiPresent(BiPresent $biPresent): self
+    {
+        if ($this->biPresents->removeElement($biPresent)) {
+            // set the owning side to null (unless already changed)
+            if ($biPresent->getAuthor() === $this) {
+                $biPresent->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BiPresent>
+     */
+    public function getBuyPresents(): Collection
+    {
+        return $this->buyPresents;
+    }
+
+    public function addBuyPresent(BiPresent $buyPresent): self
+    {
+        if (!$this->buyPresents->contains($buyPresent)) {
+            $this->buyPresents->add($buyPresent);
+            $buyPresent->setGuest($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBuyPresent(BiPresent $buyPresent): self
+    {
+        if ($this->buyPresents->removeElement($buyPresent)) {
+            // set the owning side to null (unless already changed)
+            if ($buyPresent->getGuest() === $this) {
+                $buyPresent->setGuest(null);
             }
         }
 

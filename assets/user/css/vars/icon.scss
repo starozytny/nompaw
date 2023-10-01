@@ -1,4 +1,43 @@
 
+.icon-google-black:before {
+  content: "\e99e";
+}
+.icon-office:before {
+  content: "\e99f";
+  color: #ff5722;
+}
+.icon-office-black:before {
+  content: "\e9a0";
+}
+.icon-google .path1:before {
+  content: "\e9a1";
+  color: rgb(22, 126, 230);
+}
+.icon-google .path2:before {
+  content: "\e9a2";
+  margin-left: -1em;
+  color: rgb(18, 179, 71);
+}
+.icon-google .path3:before {
+  content: "\e9a3";
+  margin-left: -1em;
+  color: rgb(15, 153, 62);
+}
+.icon-google .path4:before {
+  content: "\e9a4";
+  margin-left: -1em;
+  color: rgb(255, 213, 0);
+}
+.icon-google .path5:before {
+  content: "\e9a5";
+  margin-left: -1em;
+  color: rgb(255, 75, 38);
+}
+.icon-google .path6:before {
+  content: "\e9a6";
+  margin-left: -1em;
+  color: rgb(217, 63, 33);
+}
 .icon-heart1:before {
   content: "\e99d";
 }
@@ -52,6 +91,9 @@
 }
 .icon-document-copy:before {
   content: "\e987";
+}
+.icon-edit-2:before {
+  content: "\e9a7";
 }
 .icon-eraser-1:before {
   content: "\e98b";

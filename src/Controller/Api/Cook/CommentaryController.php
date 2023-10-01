@@ -30,6 +30,7 @@ class CommentaryController extends AbstractController
             ->setRecipe($recipe)
             ->setUser($this->getUser())
             ->setMessage($data->message->html)
+            ->setRate((int) $data->rate)
         ;
 
         $noErrors = $validator->validate($commentary);

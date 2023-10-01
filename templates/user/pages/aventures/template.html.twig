@@ -1,0 +1,13 @@
+{% extends 'user/layout/layout.html.twig' %}
+
+{% set breadcrumbs = [{ text: "Aventures", icon: "map", url: path('user_aventures_groupes_index') }] %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_aventures') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_aventures') }}
+{% endblock %}

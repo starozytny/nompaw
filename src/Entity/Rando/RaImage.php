@@ -11,6 +11,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: RaImageRepository::class)]
 class RaImage extends DataEntity
 {
+    const FOLDER = "images/editor/raimages";
+
     const LIST = ["ra_img_list"];
 
     #[ORM\Id]

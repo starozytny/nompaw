@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page_title }} | {{ page_prefix }} {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_app') }}
+{% endblock %}
+
+{% block body %}
+    {% include "layout/components/page-loader.html.twig" %}
+
+    <div class="body">
+        <nav>
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <div>
+                        <img src="{{ asset('build/user/images/logo.png') }}" alt="Logo societe">
+                    </div>
+                </div>
+
+                <div class="nav-mobile">
+                    <span class="icon-menu"></span>
+                </div>
+
+                <div class="nav-content">
+                    <div class="nav-header">
+                        <div class="avatar">
+                                <div class="avatar-letter">VI</div>
+                        </div>
+                        <div class="nav-header-infos">
+                            <div>Visiteur</div>
+                        </div>
+                        <div class="nav-header-actions">
+                        </div>
+                    </div>
+
+                    <div class="nav-menu">
+                        <div class="nav-items">
+                            {% for item in menu %}
+                                <a class="nav-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
+                                   href="{{ item.path }}"
+                                >
+                                    <span class="icon-{{ item.icon }}"></span>
+                                    <span>{{ item.name }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <div class="nav-items">
+                            {% for item in menu_bottom %}
+                                <a class="nav-item {{- app.request.get('_route') in item.matchRoute ? " active" : "" -}}"
+                                   href="{{ item.path }}"
+                                >
+                                    <span class="icon-{{ item.icon }}"></span>
+                                    <span>{{ item.name }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="{{ half_width is defined ? 'half-width' : '' }}">
+
+            <div class="impersonate" style="
+                position: relative; display: flex; align-items: center; justify-content: center;
+                padding: 12px; background: var(--danger);
+            ">
+                <a class="semibold" style="color: var(--alpha)" href="{{ path('app_login') }}">
+                    <span class="icon-padlock"></span>
+                    Se connecter ou s'enregistrer
+                </a>
+            </div>
+
+            {% block breadcrumb %}
+                {% include "user/layout/components/breadcrumbs.html.twig" %}
+            {% endblock %}
+
+            {% if page_title is defined %}
+                {% include "layout/components/admin/page_title.html.twig" %}
+            {% endif %}
+
+            {% if page_title_alone is defined %}
+                {% include "layout/components/admin/page_title.html.twig" with {page_title: page_title_alone} %}
+            {% endif %}
+            <div>
+                {% block main_content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    {% block footer %}{% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_app') }}
+{% endblock %}

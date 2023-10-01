@@ -1,6 +1,6 @@
 {% extends 'user/pages/recipes/template.html.twig' %}
 
-{% set page_title %}Recettes{% endset %}
+{% set page_title %}{{ app.request.get('mine') ? "Mes r" : "R" }}ecettes{{ app.request.get('favorite') ? " favorites" : "" }}{% endset %}
 {% set page_subtitle %}Liste totale des recettes !{% endset %}
 
 {% block main_content %}
@@ -9,59 +9,71 @@
             <a href="{{ path('user_recipes_create') }}" class="btn btn-primary">
                 <span>Ajouter une recette</span>
             </a>
+            <a href="{{ path('user_recipes_index', {'favorite': 1}) }}" class="btn btn-default">
+                <span class="icon-heart1"></span>
+                <span>Afficher mes favoris</span>
+            </a>
+            <a href="{{ path('user_recipes_index', {'mine': 1}) }}" class="btn btn-default">
+                <span class="icon-book-1"></span>
+                <span>Afficher mes recettes</span>
+            </a>
         </div>
     </div>
     <div class="page-default">
         <div class="recipes">
-            {% for elem in recipes %}
+            {% if recipes | length > 0 %}
+                {% for elem in recipes %}
 
-                {% set isFav = 0 %}
-                {% for fav in favorites %}
-                    {% if fav.identifiant == elem.id %}
-                        {% set isFav = 1 %}
-                    {% endif %}
-                {% endfor %}
+                    {% set isFav = 0 %}
+                    {% for fav in favorites %}
+                        {% if fav.identifiant == elem.id %}
+                            {% set isFav = 1 %}
+                        {% endif %}
+                    {% endfor %}
 
-                <div class="card">
-                    <div class="card-header">
-                        <div class="name">
-                            <div>{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}</div>
-                            <span class="difficulty">{{ elem.difficultyString }}</span>
-                        </div>
-                        <div class="favorite"
-                             data-id="{{ elem.id }}"
-                             data-is-fav="{{ isFav }}"
-                        >
-                            <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
-                        </div>
-                    </div>
-                    <a
-                            href="{{ path('user_recipes_read', {'slug': elem.slug}) }}"
-                            class="card-body"
-                            style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}"
-                    >
-                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
-                    </a>
-                    {% if app.user.id == elem.author.id %}
-                        <div class="card-footer">
-                            <a
-                                    href="{{ path('user_recipes_update', {'slug': elem.slug}) }}"
-                                    class="btn-icon"
-                            >
-                                <span class="icon-pencil"></span>
-                                <span class="tooltip">Modifier</span>
-                            </a>
-                            <div class="delete-recipe"
-                                 data-context="recipes"
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="name">
+                                <div>{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}</div>
+                                <span class="difficulty">{{ elem.difficultyString }}</span>
+                            </div>
+                            <div class="favorite"
                                  data-id="{{ elem.id }}"
-                                 data-name="{{ elem.name }}"
+                                 data-is-fav="{{ isFav }}"
                             >
                                 <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
                             </div>
                         </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+                        <a
+                                href="{{ path('user_recipes_read', {'slug': elem.slug}) }}"
+                                class="card-body"
+                                style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}"
+                        >
+                            <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
+                        </a>
+                        {% if app.user.id == elem.author.id %}
+                            <div class="card-footer">
+                                <a
+                                        href="{{ path('user_recipes_update', {'slug': elem.slug}) }}"
+                                        class="btn-icon"
+                                >
+                                    <span class="icon-pencil"></span>
+                                    <span class="tooltip">Modifier</span>
+                                </a>
+                                <div class="delete-recipe"
+                                     data-context="recipes"
+                                     data-id="{{ elem.id }}"
+                                     data-name="{{ elem.name }}"
+                                >
+                                    <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div>Aucun recette trouvée.</div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

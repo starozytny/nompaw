@@ -23,6 +23,7 @@ Encore
         '@appFolder': path.resolve(__dirname, './assets/app/js'),
         '@adminPages': path.resolve(__dirname, './assets/admin/js/pages/components'),
         '@userPages': path.resolve(__dirname, './assets/user/js/pages/components'),
+        '@userFunctions': path.resolve(__dirname, './assets/user/js/functions'),
         '@nodeModulesFolder': path.resolve(__dirname, './node_modules'),
     })
 
@@ -85,7 +86,9 @@ Encore
     .addEntry('user_homepage', './assets/user/js/pages/homepage.js')
     .addEntry('user_recipes', './assets/user/js/pages/recipes.js')
     .addEntry('user_profil', './assets/user/js/pages/profil.js')
-    .addEntry('user_randos', './assets/user/js/pages/randos.js')
+    .addEntry('user_aventures', './assets/user/js/pages/aventures.js')
+    .addEntry('user_holidays', './assets/user/js/pages/holidays.js')
+    .addEntry('user_birthdays', './assets/user/js/pages/birthdays.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     // .enableStimulusBridge('./assets/controllers.json')

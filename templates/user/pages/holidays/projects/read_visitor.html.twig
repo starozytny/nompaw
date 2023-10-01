@@ -1,0 +1,21 @@
+{% extends 'user/pages/holidays/template_visitor.html.twig' %}
+
+{% set author = elem.author %}
+
+{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
+{% set page_title_alone %}{{ elem.name }}{% endset %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% set half_width = true %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+        </div>
+        <div class="col-2">
+        </div>
+    </div>
+
+    {% include "user/pages/holidays/projects/components/read_content.html.twig" %}
+{% endblock %}

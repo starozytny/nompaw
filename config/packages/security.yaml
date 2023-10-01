@@ -38,6 +38,9 @@ security:
         ROLE_DEVELOPER: [ ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH ]
 
     access_control:
+         - { path: ^/espace-membre/anniversaires/anniversaire, roles: PUBLIC_ACCESS }
+         - { path: ^/api/birthdays/presents/end, roles: PUBLIC_ACCESS }
+         - { path: ^/espace-membre/projets/projet, roles: PUBLIC_ACCESS }
          - { path: ^/api/users/password,     roles: PUBLIC_ACCESS }
          - { path: ^/api/users/create,       roles: PUBLIC_ACCESS }
          - { path: ^/api,                    roles: ROLE_USER }

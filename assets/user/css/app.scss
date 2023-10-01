@@ -82,3 +82,29 @@ $data:
 .icon-heart1{
   color: var(--danger);
 }
+
+a{
+  color: var(--primary);
+}
+
+.icon-google{
+  display: flex;
+}
+
+.firebase-notif-bell{
+  position: relative;
+
+  [class^="icon-"]{
+    color: var(--primary);
+  }
+
+  .tooltip{
+    width: 142px;
+  }
+
+  &.disabled{
+    [class^="icon-"]{
+      color: var(--danger);
+    }
+  }
+}
