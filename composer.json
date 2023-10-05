@@ -24,7 +24,6 @@
         "sensio/framework-extra-bundle": "^6.1",
         "sensiolabs/ansi-to-html": "^1.2",
         "sybio/image-workshop": "^2.2",
-        "sybio/image-workshop": "^2.2",
         "symfony/asset": "6.3.*",
         "symfony/console": "6.3.*",
         "symfony/doctrine-messenger": "6.3.*",

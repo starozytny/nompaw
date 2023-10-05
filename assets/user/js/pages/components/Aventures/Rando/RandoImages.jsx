@@ -12,7 +12,7 @@ import Formulaire from "@commonFunctions/formulaire";
 import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { InputFile } from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
-import {Alert} from "@commonComponents/Elements/Alert";
+import { Alert } from "@commonComponents/Elements/Alert";
 
 const URL_UPLOAD_IMAGES  = "api_aventures_images_upload_images";
 const URL_DELETE_IMAGE   = "api_aventures_images_delete";
