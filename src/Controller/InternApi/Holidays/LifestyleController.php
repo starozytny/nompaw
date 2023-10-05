@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/projects/lifestyle', name: 'api_projects_lifestyle_')]
+#[Route('/intern/api/projects/lifestyle', name: 'intern_api_projects_lifestyle_')]
 class LifestyleController extends AbstractController
 {
     public function submitForm($type, HoLifestyleRepository $repository, HoLifestyle $obj, Request $request, ApiResponse $apiResponse,

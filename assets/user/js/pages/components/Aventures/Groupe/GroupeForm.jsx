@@ -13,8 +13,8 @@ import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 
 const URL_INDEX_PAGE        = "user_aventures_groupes_read";
-const URL_CREATE_ELEMENT    = "api_aventures_groupes_create";
-const URL_UPDATE_ELEMENT    = "api_aventures_groupes_update";
+const URL_CREATE_ELEMENT    = "intern_api_aventures_groupes_create";
+const URL_UPDATE_ELEMENT    = "intern_api_aventures_groupes_update";
 const TEXT_CREATE           = "Ajouter le groupe";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 

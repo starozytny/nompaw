@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/cook/recipes', name: 'api_cook_recipes_')]
+#[Route('/intern/api/cook/recipes', name: 'intern_api_cook_recipes_')]
 class RecipeController extends AbstractController
 {
     #[Route('/list', name: 'list', options: ['expose' => true], methods: 'GET')]

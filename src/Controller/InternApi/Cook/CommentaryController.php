@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/cook/commentaries', name: 'api_cook_commentaries_')]
+#[Route('/intern/api/cook/commentaries', name: 'intern_api_cook_commentaries_')]
 class CommentaryController extends AbstractController
 {
     public function submitForm(CoCommentaryRepository $repository, CoRecipe $recipe, Request $request, ApiResponse $apiResponse,

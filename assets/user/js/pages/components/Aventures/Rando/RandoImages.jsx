@@ -14,10 +14,10 @@ import { InputFile } from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
 import { Alert } from "@commonComponents/Elements/Alert";
 
-const URL_UPLOAD_IMAGES  = "api_aventures_images_upload_images";
-const URL_DELETE_IMAGE   = "api_aventures_images_delete";
-const URL_DOWNLOAD_IMAGE = "api_aventures_images_download";
-const URL_COVER_IMAGE    = "api_aventures_randos_cover";
+const URL_UPLOAD_IMAGES  = "intern_api_aventures_images_upload_images";
+const URL_DELETE_IMAGE   = "intern_api_aventures_images_delete";
+const URL_DOWNLOAD_IMAGE = "intern_api_aventures_images_download";
+const URL_COVER_IMAGE    = "intern_api_aventures_randos_cover";
 
 export class RandoImages extends Component{
     constructor(props) {

@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/aventures/groupes', name: 'api_aventures_groupes_')]
+#[Route('/intern/api/aventures/groupes', name: 'intern_api_aventures_groupes_')]
 class GroupeController extends AbstractController
 {
     public function submitForm($type, RaGroupeRepository $repository, RaGroupe $obj, Request $request, ApiResponse $apiResponse,

@@ -19,12 +19,12 @@ import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Input, InputFile, TextArea } from "@commonComponents/Elements/Fields";
 import { Modal } from "@commonComponents/Elements/Modal";
 
-const URL_CREATE_PROPAL = 'api_birthdays_presents_create';
-const URL_UPDATE_PROPAL = 'api_birthdays_presents_update';
-const URL_DELETE_PROPAL = 'api_birthdays_presents_delete';
-const URL_END_PROPAL    = 'api_birthdays_presents_end';
-const URL_CANCEL_PROPAL = 'api_birthdays_presents_cancel';
-// const URL_STORE_TOKEN   = "api_firebase_notifs_create_token_birthday";
+const URL_CREATE_PROPAL = 'intern_api_birthdays_presents_create';
+const URL_UPDATE_PROPAL = 'intern_api_birthdays_presents_update';
+const URL_DELETE_PROPAL = 'intern_api_birthdays_presents_delete';
+const URL_END_PROPAL    = 'intern_api_birthdays_presents_end';
+const URL_CANCEL_PROPAL = 'intern_api_birthdays_presents_cancel';
+// const URL_STORE_TOKEN   = "intern_api_firebase_notifs_create_token_birthday";
 
 export class Presents extends Component{
     constructor(props) {

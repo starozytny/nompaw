@@ -15,13 +15,13 @@ import { Input, InputFile, Radiobox, TextArea } from "@commonComponents/Elements
 import { Modal } from "@commonComponents/Elements/Modal";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
-const URL_CREATE_PROPAL = 'api_projects_propals_activity_create';
-const URL_UPDATE_PROPAL = 'api_projects_propals_activity_update';
-const URL_DELETE_PROPAL = 'api_projects_propals_activity_delete';
-const URL_VOTE_PROPAL   = 'api_projects_propals_activity_vote';
-const URL_END_PROPAL    = 'api_projects_propals_activity_end';
-const URL_CANCEL_PROPAL = 'api_projects_propals_activity_cancel';
-const URL_UPDATE_PROJECT = 'api_projects_update_text';
+const URL_CREATE_PROPAL = 'intern_api_projects_propals_activity_create';
+const URL_UPDATE_PROPAL = 'intern_api_projects_propals_activity_update';
+const URL_DELETE_PROPAL = 'intern_api_projects_propals_activity_delete';
+const URL_VOTE_PROPAL   = 'intern_api_projects_propals_activity_vote';
+const URL_END_PROPAL    = 'intern_api_projects_propals_activity_end';
+const URL_CANCEL_PROPAL = 'intern_api_projects_propals_activity_cancel';
+const URL_UPDATE_PROJECT = 'intern_api_projects_update_text';
 
 export class ProjectActivities extends Component{
     constructor(props) {

@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/aventures/propal/date', name: 'api_aventures_propals_date_')]
+#[Route('/intern/api/aventures/propal/date', name: 'intern_api_aventures_propals_date_')]
 class PropalDateController extends AbstractController
 {
     public function submitForm($type, RaPropalDateRepository $repository, RaPropalDate $obj, Request $request, ApiResponse $apiResponse,

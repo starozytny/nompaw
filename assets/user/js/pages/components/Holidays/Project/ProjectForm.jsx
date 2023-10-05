@@ -13,8 +13,8 @@ import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 
 const URL_INDEX_PAGE        = "user_projects_read";
-const URL_CREATE_ELEMENT    = "api_projects_create";
-const URL_UPDATE_ELEMENT    = "api_projects_update";
+const URL_CREATE_ELEMENT    = "intern_api_projects_create";
+const URL_UPDATE_ELEMENT    = "intern_api_projects_update";
 const TEXT_CREATE           = "Ajouter le projet";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 

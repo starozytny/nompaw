@@ -17,12 +17,12 @@ import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal }    from "@commonComponents/Elements/Modal";
 import { Input }    from "@commonComponents/Elements/Fields";
 
-const URL_CREATE_PROPAL = 'api_aventures_propals_adventure_create';
-const URL_UPDATE_PROPAL = 'api_aventures_propals_adventure_update';
-const URL_DELETE_PROPAL = 'api_aventures_propals_adventure_delete';
-const URL_VOTE_PROPAL   = 'api_aventures_propals_adventure_vote';
-const URL_END_PROPAL    = 'api_aventures_propals_adventure_end';
-const URL_CANCEL_ADV    = 'api_aventures_randos_cancel_adventure';
+const URL_CREATE_PROPAL = 'intern_api_aventures_propals_adventure_create';
+const URL_UPDATE_PROPAL = 'intern_api_aventures_propals_adventure_update';
+const URL_DELETE_PROPAL = 'intern_api_aventures_propals_adventure_delete';
+const URL_VOTE_PROPAL   = 'intern_api_aventures_propals_adventure_vote';
+const URL_END_PROPAL    = 'intern_api_aventures_propals_adventure_end';
+const URL_CANCEL_ADV    = 'intern_api_aventures_randos_cancel_adventure';
 
 export class RandoAdventure extends Component {
     constructor(props) {

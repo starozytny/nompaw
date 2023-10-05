@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/projects/propal/house', name: 'api_projects_propals_house_')]
+#[Route('/intern/api/projects/propal/house', name: 'intern_api_projects_propals_house_')]
 class PropalHouseController extends AbstractController
 {
     public function submitForm($type, HoPropalHouseRepository $repository, HoPropalHouse $obj, Request $request, ApiResponse $apiResponse,

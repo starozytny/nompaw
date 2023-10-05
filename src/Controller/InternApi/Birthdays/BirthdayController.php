@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/birthdays', name: 'api_birthdays_')]
+#[Route('/intern/api/birthdays', name: 'intern_api_birthdays_')]
 class BirthdayController extends AbstractController
 {
     public function submitForm($type, BiBirthdayRepository $repository, BiBirthday $obj, Request $request, ApiResponse $apiResponse,

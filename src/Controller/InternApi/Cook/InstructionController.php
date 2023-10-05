@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/cook/instructions', name: 'api_cook_instructions_')]
+#[Route('/intern/api/cook/instructions', name: 'intern_api_cook_instructions_')]
 class InstructionController extends AbstractController
 {
     public function submitForm(CoRecipeRepository $repository, CoRecipe $recipe, Request $request, ApiResponse $apiResponse,

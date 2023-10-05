@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/aventures/rando', name: 'api_aventures_randos_')]
+#[Route('/intern/api/aventures/rando', name: 'intern_api_aventures_randos_')]
 class RandoController extends AbstractController
 {
     public function submitForm($type, RaRandoRepository $repository, RaRando $obj, Request $request, ApiResponse $apiResponse,

@@ -13,7 +13,7 @@ import { InputFile }  from "@commonComponents/Elements/Fields";
 
 import Formulaire   from "@commonFunctions/formulaire";
 
-const URL_DELETE_IMAGE = "api_cook_instructions_delete_image";
+const URL_DELETE_IMAGE = "intern_api_cook_instructions_delete_image";
 
 export function StepFormulaire ({ step, recipe, element, onUpdateData, onRemoveStep })
 {

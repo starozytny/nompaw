@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/aventures/propals/adventure', name: 'api_aventures_propals_adventure_')]
+#[Route('/intern/api/aventures/propals/adventure', name: 'intern_api_aventures_propals_adventure_')]
 class PropalAdventureController extends AbstractController
 {
     public function submitForm($type, RaPropalAdventureRepository $repository, RaPropalAdventure $obj, Request $request, ApiResponse $apiResponse,

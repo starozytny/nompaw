@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/projects', name: 'api_projects_')]
+#[Route('/intern/api/projects', name: 'intern_api_projects_')]
 class ProjectController extends AbstractController
 {
     public function submitForm($type, HoProjectRepository $repository, HoProject $obj, Request $request, ApiResponse $apiResponse,

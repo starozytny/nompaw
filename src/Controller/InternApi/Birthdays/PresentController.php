@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/birthdays/presents', name: 'api_birthdays_presents_')]
+#[Route('/intern/api/birthdays/presents', name: 'intern_api_birthdays_presents_')]
 class PresentController extends AbstractController
 {
     public function submitForm($type, BiPresentRepository $repository, BiPresent $obj, Request $request, ApiResponse $apiResponse,
