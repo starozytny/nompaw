@@ -18,12 +18,12 @@ import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal }    from "@commonComponents/Elements/Modal";
 import { Input }    from "@commonComponents/Elements/Fields";
 
-const URL_CREATE_PROPAL = 'api_aventures_propals_date_create';
-const URL_UPDATE_PROPAL = 'api_aventures_propals_date_update';
-const URL_DELETE_PROPAL = 'api_aventures_propals_date_delete';
-const URL_VOTE_PROPAL   = 'api_aventures_propals_date_vote';
-const URL_END_PROPAL    = 'api_aventures_propals_date_end';
-const URL_CANCEL_DATE   = 'api_aventures_randos_cancel_date';
+const URL_CREATE_PROPAL = 'intern_api_aventures_propals_date_create';
+const URL_UPDATE_PROPAL = 'intern_api_aventures_propals_date_update';
+const URL_DELETE_PROPAL = 'intern_api_aventures_propals_date_delete';
+const URL_VOTE_PROPAL   = 'intern_api_aventures_propals_date_vote';
+const URL_END_PROPAL    = 'intern_api_aventures_propals_date_end';
+const URL_CANCEL_DATE   = 'intern_api_aventures_randos_cancel_date';
 
 export class RandoDate extends Component{
     constructor(props) {

@@ -14,10 +14,10 @@ import { Modal } from "@commonComponents/Elements/Modal";
 import {Input, Radiobox} from "@commonComponents/Elements/Fields";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 
-const URL_CREATE_PROPAL = 'api_projects_lifestyle_create';
-const URL_UPDATE_PROPAL = 'api_projects_lifestyle_update';
-const URL_DELETE_PROPAL = 'api_projects_lifestyle_delete';
-const URL_UPDATE_PROJECT = 'api_projects_update_text';
+const URL_CREATE_PROPAL = 'intern_api_projects_lifestyle_create';
+const URL_UPDATE_PROPAL = 'intern_api_projects_lifestyle_update';
+const URL_DELETE_PROPAL = 'intern_api_projects_lifestyle_delete';
+const URL_UPDATE_PROJECT = 'intern_api_projects_update_text';
 
 export class ProjectLifestyle extends Component{
     constructor(props) {

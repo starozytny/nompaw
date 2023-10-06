@@ -13,7 +13,7 @@ import { Input } from "@commonComponents/Elements/Fields";
 import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
 import Inputs from "@commonFunctions/inputs";
 
-const URL_UPDATE_PROJECT = 'api_projects_update_text';
+const URL_UPDATE_PROJECT = 'intern_api_projects_update_text';
 
 export class ProjectRoute extends Component{
     constructor(props) {

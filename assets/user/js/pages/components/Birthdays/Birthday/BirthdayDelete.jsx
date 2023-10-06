@@ -10,7 +10,7 @@ import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 
 const URL_INDEX_ELEMENTS = 'user_birthdays_index';
-const URL_DELETE_ELEMENT = 'api_birthdays_delete';
+const URL_DELETE_ELEMENT = 'intern_api_birthdays_delete';
 
 export function BirthdayDelete ({ context, id, name })
 {

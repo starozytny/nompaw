@@ -13,8 +13,8 @@ import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 
 const URL_INDEX_PAGE        = "user_aventures_randos_read";
-const URL_CREATE_ELEMENT    = "api_aventures_randos_create";
-const URL_UPDATE_ELEMENT    = "api_aventures_randos_update";
+const URL_CREATE_ELEMENT    = "intern_api_aventures_randos_create";
+const URL_UPDATE_ELEMENT    = "intern_api_aventures_randos_update";
 const TEXT_CREATE           = "Ajouter la randonnée";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 

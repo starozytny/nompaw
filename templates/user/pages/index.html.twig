@@ -10,50 +10,63 @@
 
 {% block main_content %}
     <div class="page-default">
+        <div class="dashboard">
+            <div class="dashboard-line-1">
+                {% set cards = [
+                    { path: path('user_recipes_index'), icon: 'book-1', name: 'Recettes' },
+                    { path: path('user_aventures_groupes_index'), icon: 'map', name: 'Aventures' },
+                    { path: path('user_projects_index'), icon: 'calendar', name: 'Projets' },
+                    { path: path('user_birthdays_index'), icon: 'cake', name: 'Anniversaires' },
+                ] %}
 
-        <div class="alert alert-danger">
-            <div class="alert-container">
-                <p>
-                    En cours de développement ! 😇 <b>[BETA]</b>
-                </p>
+                {% for item in cards %}
+                    <a class="card" href="{{ item.path }}">
+                        <div class="card-icon"><span class="icon-{{ item.icon }}"></span></div>
+                        <div class="card-title">
+                            <span class="name">{{ item.name }}</span>
+                            <span class="icon-right-arrow"></span>
+                        </div>
+                    </a>
+                {% endfor %}
             </div>
-        </div>
 
-        <div style="margin-top: 1.2rem;">
-            <a href="{{ path('user_recipes_index') }}" class="btn btn-primary" style="display: inline-block">Voir les recettes</a>
-            <a href="{{ path('user_aventures_groupes_index') }}" class="btn btn-primary" style="display: inline-block">Voir les aventures</a>
-        </div>
+            <div class="dashboard-line-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon"><span class="icon-refresh1"></span></div>
+                        <div class="title">Informations des mises à jours</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="changelogs-view">
+                            {% if changelogs | length <= 0 %}
+                                <div class="changelog-view changelog-type-1">
+                                    <div class="col-1">
+                                        <span class="icon-follow"></span>
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="name">Site internet à jour</div>
+                                        <div class="date">{{ "now" | date | format_datetime('full', 'short', locale="fr") | replace({":": "h"}) | capitalize }}</div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {% for elem in changelogs %}
+                                    <div class="changelog-view changelog-type-{{ elem.type }}">
+                                        <div class="col-1">
+                                            <span class="icon-{{ elem.icon }}"></span>
+                                        </div>
+                                        <div class="col-2">
+                                            <div class="name">{{ elem.name }}</div>
+                                            <div class="date">{{ elem.createdAt | format_datetime('full', 'short', locale="fr") | replace({":": "h"}) | capitalize }}</div>
+                                            <div class="content">{{ elem.content | raw }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
 
-        <div style="margin-top: 1.2rem; margin-bottom: 1.2rem;">
-            <p>Liste à faire</p>
-
-            <ul>
-                <li class="txt-danger" style="text-decoration: line-through;">Formulaire recette sur la page de lecture</li>
-                <li class="txt-danger" style="text-decoration: line-through;">Lancement ALPHA</li>
-                <li class="txt-danger" style="text-decoration: line-through;">Textarea avec TinyMCE</li>
-                <li>Champs durée plus agréable a saisir</li>
-                <li><span class="txt-danger" style="text-decoration: line-through;">Système de commentaires/avis</span> + Réponse</li>
-                <li>Meilleur responsive design (mobile)</li>
-                <li class="txt-danger" style="text-decoration: line-through;">Système d'image par étape</li>
-                <li class="txt-danger" style="text-decoration: line-through;">Système de favoris</li>
-                <li class="txt-danger" style="text-decoration: line-through;">Système de notation</li>
-                <li class="txt-danger" style="text-decoration: line-through;">Page profil / modification du compte</li>
-                <li class="txt-danger" style="text-decoration: line-through;">Page mes recettes</li>
-                <li>Design global</li>
-                <li>Blog astuce & co</li>
-                <li>....</li>
-            </ul>
-
-            <p>Projet en parallèle</p>
-
-            <ul>
-                <li class="txt-danger" style="text-decoration: line-through;">Site de souvenirs (randonnées, voyages, etc..)</li>
-                <li>Refonte du site de planificateur de budget</li>
-                <li>Site d'entraide financier</li>
-                <li>Articles : Les histoires de Borrito</li>
-                <li>Refonte du site principal</li>
-            </ul>
-
+            </div>
         </div>
     </div>
 {% endblock %}

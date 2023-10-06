@@ -14,8 +14,8 @@ import Validateur           from "@commonFunctions/validateur";
 import Inputs               from "@commonFunctions/inputs";
 
 const URL_INDEX_PAGE        = "user_birthdays_read";
-const URL_CREATE_ELEMENT    = "api_birthdays_create";
-const URL_UPDATE_ELEMENT    = "api_birthdays_update";
+const URL_CREATE_ELEMENT    = "intern_api_birthdays_create";
+const URL_UPDATE_ELEMENT    = "intern_api_birthdays_update";
 const TEXT_CREATE           = "Ajouter l'anniversaire";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 

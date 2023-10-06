@@ -15,13 +15,13 @@ import { Modal }    from "@commonComponents/Elements/Modal";
 import { Input }    from "@commonComponents/Elements/Fields";
 import { TinyMCE }  from "@commonComponents/Elements/TinyMCE";
 
-const URL_CREATE_PROPAL = 'api_projects_propals_house_create';
-const URL_UPDATE_PROPAL = 'api_projects_propals_house_update';
-const URL_DELETE_PROPAL = 'api_projects_propals_house_delete';
-const URL_VOTE_PROPAL   = 'api_projects_propals_house_vote';
-const URL_END_PROPAL    = 'api_projects_propals_house_end';
-const URL_CANCEL_HOUSE  = 'api_projects_cancel_house';
-const URL_UPDATE_PROJECT = 'api_projects_update_text';
+const URL_CREATE_PROPAL = 'intern_api_projects_propals_house_create';
+const URL_UPDATE_PROPAL = 'intern_api_projects_propals_house_update';
+const URL_DELETE_PROPAL = 'intern_api_projects_propals_house_delete';
+const URL_VOTE_PROPAL   = 'intern_api_projects_propals_house_vote';
+const URL_END_PROPAL    = 'intern_api_projects_propals_house_end';
+const URL_CANCEL_HOUSE  = 'intern_api_projects_cancel_house';
+const URL_UPDATE_PROJECT = 'intern_api_projects_update_text';
 
 export class ProjectHouse extends Component{
     constructor(props) {

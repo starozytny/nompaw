@@ -4,6 +4,8 @@ namespace App\Entity\Main;
 
 use App\Entity\Birthday\BiBirthday;
 use App\Entity\Birthday\BiPresent;
+use App\Entity\Budget\BuCategory;
+use App\Entity\Budget\BuItem;
 use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
@@ -179,6 +181,12 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'guest', targetEntity: BiPresent::class)]
     private Collection $buyPresents;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuItem::class)]
+    private Collection $buItems;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuCategory::class)]
+    private Collection $buCategories;
+
     /**
      * @throws Exception
      */
@@ -202,6 +210,8 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->biBirthdays = new ArrayCollection();
         $this->biPresents = new ArrayCollection();
         $this->buyPresents = new ArrayCollection();
+        $this->buItems = new ArrayCollection();
+        $this->buCategories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1027,6 +1037,66 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($buyPresent->getGuest() === $this) {
                 $buyPresent->setGuest(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BuItem>
+     */
+    public function getBuItems(): Collection
+    {
+        return $this->buItems;
+    }
+
+    public function addBuItem(BuItem $buItem): static
+    {
+        if (!$this->buItems->contains($buItem)) {
+            $this->buItems->add($buItem);
+            $buItem->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBuItem(BuItem $buItem): static
+    {
+        if ($this->buItems->removeElement($buItem)) {
+            // set the owning side to null (unless already changed)
+            if ($buItem->getUser() === $this) {
+                $buItem->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BuCategory>
+     */
+    public function getBuCategories(): Collection
+    {
+        return $this->buCategories;
+    }
+
+    public function addBuCategory(BuCategory $buCategory): static
+    {
+        if (!$this->buCategories->contains($buCategory)) {
+            $this->buCategories->add($buCategory);
+            $buCategory->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBuCategory(BuCategory $buCategory): static
+    {
+        if ($this->buCategories->removeElement($buCategory)) {
+            // set the owning side to null (unless already changed)
+            if ($buCategory->getUser() === $this) {
+                $buCategory->setUser(null);
             }
         }
 

@@ -13,11 +13,11 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Sort       from "@commonFunctions/sort";
 
-const URL_SELECT_SOCIETIES  = "api_selection_societies";
+const URL_SELECT_SOCIETIES  = "intern_api_selection_societies";
 const URL_INDEX_ELEMENTS    = "admin_users_index";
 const URL_PROFIL_ELEMENT    = "user_profil_index";
-const URL_CREATE_ELEMENT    = "api_users_create";
-const URL_UPDATE_GROUP      = "api_users_update";
+const URL_CREATE_ELEMENT    = "intern_api_users_create";
+const URL_UPDATE_ELEMENT    = "intern_api_users_update";
 const TEXT_CREATE           = "Ajouter l'utilisateur";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
@@ -28,7 +28,7 @@ export function UserFormulaire ({ context, element, page = 'user' })
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
     if(context === "update"){
-        url = Routing.generate(URL_UPDATE_GROUP, {'id': element.id});
+        url = Routing.generate(URL_UPDATE_ELEMENT, {'id': element.id});
     }
 
     let form = <Form
@@ -126,6 +126,7 @@ class Form extends Component {
         this.setState({ errors: [] });
 
         let paramsToValidate = [
+
             {type: "text",  id: 'username',     value: username},
             {type: "text",  id: 'firstname',    value: firstname},
             {type: "text",  id: 'lastname',     value: lastname},
