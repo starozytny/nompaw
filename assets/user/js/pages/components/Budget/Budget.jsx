@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import Sanitaze from "@commonFunctions/sanitaze";
+
 const TYPE_EXPENSE = 0;
 const TYPE_INCOME = 1;
 const TYPE_SAVING = 2;
@@ -11,17 +13,46 @@ export function Budget () {
     const [year, setYear] = useState(today.getFullYear())
     const [month, setMonth] = useState(today.getMonth() + 1)
 
-    console.log(month, today.getMonth() + 1)
+
+    let cards = [
+        { value: 0, name: "Budget disponible",  total: 15000,  initial: 15000, icon: "credit-card" },
+        { value: 1, name: "Dépenses",           total: 15000,  initial: null, icon: "minus" },
+        { value: 2, name: "Revenus",            total: 15000,  initial: null, icon: "add" },
+        { value: 3, name: "Economies",          total: 15000,  initial: null, icon: "time" },
+    ]
 
     return <div className="page-default">
 
+        <div className="budget-planning">
+            <Year year={year} onSelect={setYear} />
+            <Months active={month} onSelect={setMonth} useShortName={false} />
+        </div>
+
         <div className="budget">
-
-            <div className="budget-planning">
-                <Year year={year} onSelect={setYear} />
-                <Months active={month} onSelect={setMonth} useShortName={false} />
+            <div className="col-1">
+                <div className="cards">
+                    {cards.map(item => {
+                        return <div className="card" key={item.value}>
+                            <div className="card-icon">
+                                <span className={`icon-${item.icon}`}></span>
+                            </div>
+                            <div className="card-body">
+                                <div className="name">{item.name}</div>
+                                <div className="total">{Sanitaze.toFormatCurrency(item.total)}</div>
+                                {item.initial && <div className="initial">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
+                            </div>
+                        </div>
+                    })}
+                </div>
             </div>
-
+            <div className="col-2">
+                <div className="col-1">
+                    Formulaire + autres
+                </div>
+                <div className="col-2">
+                    Liste des items
+                </div>
+            </div>
         </div>
 
     </div>
