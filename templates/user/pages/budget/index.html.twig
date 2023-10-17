@@ -1,0 +1,10 @@
+{% extends 'user/pages/budget/template.html.twig' %}
+
+{% set page_title %}Planificateur de budget{% endset %}
+{% set page_subtitle %}Planifie ton budget au cours de l'année{% endset %}
+
+{% block main_content %}
+    <div id="budget">
+        {% include "layout/components/loader.html.twig" %}
+    </div>
+{% endblock %}
