@@ -32,6 +32,9 @@
 
  {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
      {% set menu_bottom = menu_bottom | merge([
+         { name: "Planificateur", icon: "heart",
+             path: path('user_budget_index'), matchRoute: ['user_budget_index']
+         },
          { name: "Espace admin", icon: "earth",
              path: path('admin_homepage'), matchRoute: ['admin_homepage']
          },

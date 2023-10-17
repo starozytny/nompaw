@@ -4,6 +4,7 @@ namespace App\Controller;
 
 
 use App\Entity\Main\User;
+use App\Repository\Main\ChangelogRepository;
 use App\Repository\Main\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,9 +15,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 class UserController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
-    public function index(): Response
+    public function index(ChangelogRepository $changelogRepository): Response
     {
-        return $this->render('user/pages/index.html.twig');
+        $changelogs = $changelogRepository->findBy(['isPublished' => true], ['createdAt' => 'ASC'], 5);
+
+        return $this->render('user/pages/index.html.twig', [
+            'changelogs' => $changelogs,
+        ]);
     }
 
     #[Route('/profil', name: 'profil_index', options: ['expose' => true])]

@@ -1,1 +1,86 @@
 @import "../vars/vars";
+
+@import "../components/changelog";
+
+.dashboard{
+  @include flex(column, flex-start, flex-start, var(--espaceDiv));
+
+  .dashboard-line-1{
+    @include flex(row, flex-start, flex-start, var(--espaceDiv));
+    flex-wrap: wrap;
+
+    .card{
+      @include flex(row, flex-start, flex-start, var(--espaceDiv));
+      @include shadowCommon();
+      background-color: var(--color0);
+      padding: var(--espaceDiv);
+      color: var(--alpha);
+
+      &:hover{
+        .card-title{
+          [class^="icon-"]{
+            transform: translateX(4px);
+          }
+        }
+      }
+
+      .card-icon{
+        display: inline-block;
+        background-color: var(--color2Opacity4);
+        padding: 12px 12px 8px 12px;
+        border-radius: var(--radius);
+        font-size: 24px;
+      }
+
+      .card-title{
+        @include flex(row, center, space-between, var(--espaceDiv));
+        padding-top: 4px;
+        width: 100%;
+
+        .name{
+          @include fontBold();
+          font-size: 26px;
+        }
+        [class^="icon-"]{
+          transition: transform 0.2s ease;
+        }
+      }
+    }
+  }
+
+  .dashboard-line-2{
+    width: 100%;
+
+    .card{
+      @include flex(column, flex-start, flex-start, 8px);
+      background-color: var(--color0);
+      border-radius: 8px;
+      @include shadowCommon();
+      padding: 1.8rem 1.2rem;
+      width: 100%;
+      max-width: 768px;
+
+      .card-header{
+        @include flex(row, flex-start, flex-start, 8px);
+        @include fontSemibold();
+        font-size: 18px;
+        margin-bottom: var(--espaceDiv);
+        border-bottom: 1px solid var(--color2Opacity4);
+        padding-bottom: var(--espaceDiv);
+        width: 100%;
+      }
+
+      .card-body{
+        width: 100%;
+      }
+
+      a{
+        color: var(--primary);
+
+        &:hover{
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
