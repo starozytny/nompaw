@@ -35,6 +35,7 @@ winpty.exe.stackdump
 /documents/data/*
 
 /config/databaseConfig.json
+/config/packages/doctrine.yaml
 /config/credentials.json
 
 .yarnrc
