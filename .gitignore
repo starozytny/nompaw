@@ -29,7 +29,10 @@ winpty.exe.stackdump
 
 /.idea/*
 /public/error_log
+/public/immo/photos/*
+/public/immo/logos/*
 /bin/backup/*
+/documents/data/*
 
 /config/databaseConfig.json
 /config/credentials.json
