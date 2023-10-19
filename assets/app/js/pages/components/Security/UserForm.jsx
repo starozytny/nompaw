@@ -13,7 +13,7 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 const URL_LOGIN_PAGE     = "app_login";
-const URL_CREATE_ELEMENT = "api_users_create";
+const URL_CREATE_ELEMENT = "intern_api_users_create";
 
 export function UserFormulaire ()
 {
