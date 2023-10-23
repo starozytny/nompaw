@@ -118,6 +118,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups(['user_list'])]
     private ?bool $blocked = false;
 
+
     #[ORM\Column(nullable: true)]
     private ?string $googleId = null;
 
@@ -186,10 +187,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuCategory::class)]
     private Collection $buCategories;
-
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[Groups(['user_form'])]
-    private ?UserMail $userMail = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Mail::class)]
     private Collection $mails;
@@ -505,7 +502,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
         return $this;
     }
-
 
     /**
      * @return Collection<int, CoRecipe>
