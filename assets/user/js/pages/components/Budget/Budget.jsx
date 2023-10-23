@@ -3,12 +3,17 @@ import React, { useState } from 'react';
 import Sanitaze from "@commonFunctions/sanitaze";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
+import List from "@commonFunctions/list";
 
 export function Budget ({ donnees, y, m })
 {
     const [year, setYear] = useState(parseInt(y))
     const [month, setMonth] = useState(parseInt(m))
     const [data, setData] = useState(JSON.parse(donnees))
+
+    let handleUpdateList = (elem, context) => {
+        setData(List.updateDataMuta(elem, context, data));
+    }
 
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
@@ -73,7 +78,9 @@ export function Budget ({ donnees, y, m })
             </div>
             <div className="col-2">
                 <div className="col-1">
-                    <BudgetFormulaire context="create" element={null} year={year} month={month} key={month}/>
+                    <BudgetFormulaire context="create" element={null} year={year} month={month}
+                                      onUpdateList={handleUpdateList}
+                                      key={month} />
                 </div>
                 <div className="col-2">
                     Liste des items

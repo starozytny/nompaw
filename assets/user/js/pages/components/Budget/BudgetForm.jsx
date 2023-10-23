@@ -17,7 +17,7 @@ import Inputs               from "@commonFunctions/inputs";
 const URL_CREATE_ELEMENT    = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT    = "intern_api_budget_items_update";
 
-export function BudgetFormulaire ({ context, element, year, month })
+export function BudgetFormulaire ({ context, element, year, month, onUpdateList })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -35,6 +35,8 @@ export function BudgetFormulaire ({ context, element, year, month })
         name={element ? Formulaire.setValue(element.name) : ""}
         isActive={element ? Formulaire.setValue(element.isActive) : false}
         dateAt={element ? Formulaire.setValue(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
+
+        onUpdateList={onUpdateList}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -107,6 +109,8 @@ class Form extends Component {
                     .then(function (response) {
                         toastr.info('Données enregistrées.');
                         self.setState({ price: "", name: "" })
+
+                        self.props.onUpdateList(response.data, context);
                     })
                     .catch(function (error) { Formulaire.displayErrors(self, error); })
                     .then(function () { Formulaire.loader(false); self.setState({ load: false }) })
