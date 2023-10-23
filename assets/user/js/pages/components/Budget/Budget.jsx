@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 
 import Sanitaze from "@commonFunctions/sanitaze";
 import List from "@commonFunctions/list";
+import Sort from "@commonFunctions/sort";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
-import {BudgetList} from "@userPages/Budget/BudgetList";
+import { BudgetList } from "@userPages/Budget/BudgetList";
+
+const SORTER = Sort.compareDateAtInverse;
 
 export function Budget ({ donnees, y, m })
 {
@@ -13,7 +16,7 @@ export function Budget ({ donnees, y, m })
     const [data, setData] = useState(JSON.parse(donnees))
 
     let handleUpdateList = (elem, context) => {
-        setData(List.updateDataMuta(elem, context, data));
+        setData(List.updateDataMuta(elem, context, data, SORTER));
     }
 
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];

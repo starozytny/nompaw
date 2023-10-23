@@ -44,6 +44,10 @@ function compareDateAt(a, b){
     return comparison(a.dateAt, b.dateAt);
 }
 
+function compareDateAtInverse(a, b){
+    return comparison(b.dateAt, a.dateAt);
+}
+
 function compareStartAt(a, b){
     return comparison(a.startAt, b.startAt);
 }
@@ -96,5 +100,6 @@ module.exports = {
     compareRankThenLabel,
     compareLabel,
     compareDateAt,
+    compareDateAtInverse,
     compareStartAt,
 }

@@ -13,6 +13,7 @@ class DataBudget
 
     public function setDataItem(BuItem $obj, $data): BuItem
     {
+        dump($data);
         return ($obj)
             ->setYear($this->sanitizeData->setIntValue($data->year))
             ->setMonth($this->sanitizeData->setIntValue($data->month))

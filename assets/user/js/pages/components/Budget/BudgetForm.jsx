@@ -80,6 +80,8 @@ class Form extends Component {
         this.setState({[name]: value})
     }
 
+    handleChangeDate = (name, value) => { this.setState({ [name]: value }) }
+
     handleSubmit = (e) => {
         e.preventDefault();
 
