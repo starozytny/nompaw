@@ -17,6 +17,12 @@
       width: 100%;
     }
   }
+
+  & > .col-2{
+    & > .col-2{
+      width: 100%;
+    }
+  }
 }
 
 @media (min-width:768px) {
@@ -25,6 +31,9 @@
 
     & > .col-1{
       max-width: 351px;
+    }
+    & > .col-2{
+      width: calc(100% - 351px);
     }
   }
 }
