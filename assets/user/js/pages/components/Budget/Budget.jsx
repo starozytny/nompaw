@@ -10,9 +10,10 @@ export function Budget ({ donnees, y, m })
     const [month, setMonth] = useState(parseInt(m))
     const [data, setData] = useState(JSON.parse(donnees))
 
-    let totaux = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
-    let totalDispo = 0, totalExpense = 0, totalIncome = 0, totalSaving = 0;
+    let totalExpense = 0, totalIncome = 0, totalSaving = 0;
     data.forEach(d => {
         console.log(d);
         if(d.month === month){
@@ -24,8 +25,20 @@ export function Budget ({ donnees, y, m })
             }
         }
 
-        totaux[d.month] += d.price
+        switch (d.type){
+            case 0: case 2: totauxExpense[d.month] += d.price; break;
+            case 1: totauxIncome[d.month] += d.price; break;
+            default:break;
+        }
     })
+
+    let totaux = [];
+    for(let i = 0; i < 12 ; i++){
+        let tmpDispo = totauxIncome[i] - totauxExpense[i];
+        totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
+    }
+
+    let totalDispo = totalIncome - (totalExpense + totalSaving)
 
     let cards = [
         { value: 0, name: "Budget disponible",  total: totalDispo,    initial: 0, icon: "credit-card" },
@@ -104,7 +117,7 @@ function Months ({ active, onSelect, useShortName, totaux }) {
                     onClick={() => onSelect(elem.id)}
                     key={elem.id}>
             <div>{useShortName ? elem.shortName : elem.name}</div>
-            <div className="totaux">{Sanitaze.toFormatCurrency(totaux[elem.id])}</div>
+            <div className="totaux">{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}</div>
         </div>
     })
 
