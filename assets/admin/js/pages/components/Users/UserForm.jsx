@@ -120,6 +120,7 @@ class Form extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
+
         const { context, page, url } = this.props;
         const { username, firstname, lastname, password, password2, email, roles, society, displayName } = this.state;
 
@@ -173,7 +174,7 @@ class Form extends Component {
 
     render () {
         const { context, page, avatarFile } = this.props;
-        const { errors, username, firstname, lastname, email, password, password2, roles, societyName, loadData, displayName } = this.state;
+        const { errors, loadData, username, firstname, lastname, email, password, password2, roles, societyName, displayName } = this.state;
 
         let rolesItems = [
             { value: 'ROLE_ADMIN',      label: 'Admin',          identifiant: 'admin' },
