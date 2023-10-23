@@ -187,6 +187,13 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuCategory::class)]
     private Collection $buCategories;
 
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[Groups(['user_form'])]
+    private ?UserMail $userMail = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Mail::class)]
+    private Collection $mails;
+
     /**
      * @throws Exception
      */
@@ -212,6 +219,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->buyPresents = new ArrayCollection();
         $this->buItems = new ArrayCollection();
         $this->buCategories = new ArrayCollection();
+        $this->mails = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -497,6 +505,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
         return $this;
     }
+
 
     /**
      * @return Collection<int, CoRecipe>
@@ -1091,12 +1100,56 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
+
     public function removeBuCategory(BuCategory $buCategory): static
     {
         if ($this->buCategories->removeElement($buCategory)) {
             // set the owning side to null (unless already changed)
             if ($buCategory->getUser() === $this) {
                 $buCategory->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+    public function getUserMail(): ?UserMail
+    {
+        return $this->userMail;
+    }
+
+    public function setUserMail(?UserMail $userMail): static
+    {
+        $this->userMail = $userMail;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Mail>
+     */
+    public function getMails(): Collection
+    {
+        return $this->mails;
+    }
+
+    public function addMail(Mail $mail): static
+    {
+        if (!$this->mails->contains($mail)) {
+            $this->mails->add($mail);
+            $mail->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMail(Mail $mail): static
+    {
+        if ($this->mails->removeElement($mail)) {
+            // set the owning side to null (unless already changed)
+            if ($mail->getUser() === $this) {
+                $mail->setUser(null);
             }
         }
 

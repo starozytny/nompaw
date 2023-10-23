@@ -43,6 +43,12 @@ export function UserFormulaire ({ context, element, page = 'user' })
         email={element ? Formulaire.setValue(element.email) : ""}
         avatarFile={element ? Formulaire.setValue(element.avatarFile) : null}
         roles={element ? Formulaire.setValue(element.roles, []) : []}
+
+        userMailExiste={!!(element && element.userMail)}
+        mailHote={element && element.userMail ? Formulaire.setValue(element.userMail.hote) : ''}
+        mailPort={element && element.userMail ? Formulaire.setValue(element.userMail.port, '993') : '993'}
+        mailUsername={element && element.userMail ? Formulaire.setValue(element.userMail.username) : ''}
+        mailPassword={element && element.userMail ? Formulaire.setValue(element.userMail.password) : ''}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -69,6 +75,12 @@ class Form extends Component {
             roles: props.roles,
             password: '',
             password2: '',
+
+            mailHote: props.mailHote,
+            mailPort: props.mailPort,
+            mailUsername: props.mailUsername,
+            mailPassword: '',
+
             errors: [],
             loadData: true,
         }
@@ -120,8 +132,11 @@ class Form extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
-        const { context, page, url } = this.props;
-        const { username, firstname, lastname, password, password2, email, roles, society, displayName } = this.state;
+        const { context, page, url, userMailExiste } = this.props;
+        const {
+            username, firstname, lastname, password, password2, email, roles, society, displayName,
+            mailHote, mailPort, mailUsername, mailPassword
+        } = this.state;
 
         this.setState({ errors: [] });
 
@@ -139,6 +154,24 @@ class Form extends Component {
             if(password !== ""){
                 paramsToValidate = [...paramsToValidate,
                     ...[{type: "password", id: 'password', value: password, idCheck: 'password2', valueCheck: password2}]
+                ];
+            }
+        }
+
+        if(mailHote !== ""){
+            paramsToValidate = [...paramsToValidate,
+                ...[
+                    {type: "text",  id: 'username',  value: username},
+                    {type: "text",  id: 'mailPort',  value: mailPort},
+                    {type: "text",  id: 'mailUsername',  value: mailUsername},
+                ]
+            ];
+
+            console.log(userMailExiste);
+
+            if(!userMailExiste){
+                paramsToValidate = [...paramsToValidate,
+                    ...[{type: "text",  id: 'mailPassword',  value: mailPassword}]
                 ];
             }
         }
@@ -172,8 +205,11 @@ class Form extends Component {
     }
 
     render () {
-        const { context, page, avatarFile } = this.props;
-        const { errors, username, firstname, lastname, email, password, password2, roles, societyName, loadData, displayName } = this.state;
+        const { context, pages, avatarFile } = this.props;
+        const {
+            errors, loadData, username, firstname, lastname, email, password, password2, roles, societyName, displayName,
+            mailHote, mailPort, mailUsername, mailPassword
+        } = this.state;
 
         let rolesItems = [
             { value: 'ROLE_ADMIN',      label: 'Admin',          identifiant: 'admin' },
@@ -253,6 +289,28 @@ class Form extends Component {
                     </div>
 
                     <Password template="inline" context={context} password={password} password2={password2} params={paramsInput0} />
+
+
+                    <div className="line">
+                        <div className="line-col-1">
+                            <div className="title">Ajouter un compte de courrier</div>
+                            <div className="subtitle">Ajoutez la configuration IMAP de votre courrier.</div>
+                            <div className="subtitle"><u>Pour le mot de passe</u> : Laisser les champs vides pour ne pas le modifier.</div>
+                        </div>
+                        <div className="line-col-2">
+                            <div className="line line-2">
+                                <Input identifiant="mailHote" valeur={mailHote} {...paramsInput0}>Hôte</Input>
+                                <Input identifiant="mailPort" valeur={mailPort} {...paramsInput0}>Port</Input>
+                            </div>
+                            <div className="line line-2">
+                                <Input identifiant="mailUsername" valeur={mailUsername} {...paramsInput0}>Adresse e-mail</Input>
+                                <Input identifiant="mailPassword" valeur={mailPassword} {...paramsInput0}
+                                       password={true} type="password" autocomplete="new-password">
+                                    Mot de passe
+                                </Input>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="line-buttons">

@@ -81,6 +81,7 @@ Encore
     .addEntry('admin_help',         './assets/admin/js/pages/help.js')
     .addEntry('admin_storage',      './assets/admin/js/pages/storage.js')
     .addEntry('admin_styleguide',   './assets/admin/js/pages/styleguide.js')
+    .addEntry('admin_mails',        './assets/admin/js/pages/mails.js')
 
     .addEntry('user_app', './assets/user/js/app.js')
     .addEntry('user_homepage', './assets/user/js/pages/homepage.js')

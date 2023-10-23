@@ -7,10 +7,12 @@ use App\Entity\Main\Changelog;
 use App\Entity\Main\Contact;
 use App\Entity\Main\Help\HeCategory;
 use App\Entity\Main\Help\HeQuestion;
+use App\Entity\Main\Mail;
 use App\Entity\Main\Notification;
 use App\Entity\Main\Settings;
 use App\Entity\Main\Society;
 use App\Entity\Main\User;
+use App\Entity\Main\UserMail;
 use App\Service\SanitizeData;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -32,6 +34,20 @@ class DataMain
             ->setLastname($this->sanitizeData->sanitizeString($data->lastname))
             ->setDisplayName($this->sanitizeData->sanitizeString($data->displayName))
             ->setEmail($data->email)
+        ;
+    }
+
+    public function setDataUserMail(UserMail $obj, $data): UserMail
+    {
+        $password = $this->sanitizeData->trimData($data->mailPassword);
+        if(!$obj->getPassword() || $obj->getPassword() && $password){
+            $obj->setPassword($password);
+        }
+
+        return ($obj)
+            ->setHote($this->sanitizeData->trimData($data->mailHote))
+            ->setPort($this->sanitizeData->trimData($data->mailPort))
+            ->setUsername($this->sanitizeData->trimData($data->mailUsername))
         ;
     }
 
@@ -116,5 +132,28 @@ class DataMain
             ->setName($this->sanitizeData->trimData($data->name))
             ->setContent($this->sanitizeData->trimData($data->content->html))
         ;
+    }
+
+    public function setDataMail(Mail $obj, $data): Mail
+    {
+        return ($obj)
+            ->setSubject($this->sanitizeData->trimData($data->subject))
+            ->setDestinators($this->setTab($data->to))
+            ->setCc($this->setTab($data->cc))
+            ->setBcc($this->setTab($data->bcc))
+            ->setExpeditor($this->sanitizeData->trimData($data->from))
+            ->setMessage($this->sanitizeData->trimData($data->message->html))
+            ->setTheme((int) $data->theme)
+        ;
+    }
+
+    private function setTab($data): array
+    {
+        $values = [];
+        foreach ($data as $dest){
+            $values[] = $dest->value;
+        }
+
+        return $values;
     }
 }

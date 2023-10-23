@@ -40,5 +40,3 @@ winpty.exe.stackdump
 
 .yarnrc
 /.yarn/*
-
-/public/tinymce/
