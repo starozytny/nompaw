@@ -10,7 +10,7 @@ import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
 import { Modal } from "@commonComponents/Elements/Modal";
 
 const URL_READ_GROUPE = 'user_aventures_groupes_read';
-const URL_DELETE_ELEMENT = 'intern_api_aventures_rando_delete';
+const URL_DELETE_ELEMENT = 'intern_api_aventures_randos_delete';
 
 export function RandoDelete ({ context, id, name, groupeSlug })
 {
