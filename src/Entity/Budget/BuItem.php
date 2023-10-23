@@ -44,7 +44,7 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     private ?bool $isActive = false;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['buitem_list'])]
     private ?\DateTimeInterface $dateAt = null;
 

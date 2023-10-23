@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
 import Sanitaze from "@commonFunctions/sanitaze";
+import List from "@commonFunctions/list";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
-import List from "@commonFunctions/list";
+import {BudgetList} from "@userPages/Budget/BudgetList";
 
 export function Budget ({ donnees, y, m })
 {
@@ -83,7 +84,7 @@ export function Budget ({ donnees, y, m })
                                       key={month} />
                 </div>
                 <div className="col-2">
-                    Liste des items
+                    <BudgetList data={data} />
                 </div>
             </div>
         </div>
