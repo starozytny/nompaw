@@ -15,7 +15,6 @@ export function Budget ({ donnees, y, m })
 
     let totalExpense = 0, totalIncome = 0, totalSaving = 0;
     data.forEach(d => {
-        console.log(d);
         if(d.month === month){
             switch (d.type){
                 case 0: totalExpense += d.price; break;
@@ -26,8 +25,8 @@ export function Budget ({ donnees, y, m })
         }
 
         switch (d.type){
-            case 0: case 2: totauxExpense[d.month] += d.price; break;
-            case 1: totauxIncome[d.month] += d.price; break;
+            case 0: case 2: totauxExpense[d.month - 1] += d.price; break;
+            case 1: totauxIncome[d.month - 1] += d.price; break;
             default:break;
         }
     })
@@ -38,13 +37,14 @@ export function Budget ({ donnees, y, m })
         totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
     }
 
-    let totalDispo = totalIncome - (totalExpense + totalSaving)
+    let initial = month !== 1 ? totaux[month - 2] : 0;
+    let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
 
     let cards = [
-        { value: 0, name: "Budget disponible",  total: totalDispo,    initial: 0, icon: "credit-card" },
-        { value: 1, name: "Dépenses",           total: totalExpense,  initial: null, icon: "minus" },
-        { value: 2, name: "Revenus",            total: totalIncome,   initial: null, icon: "add" },
-        { value: 3, name: "Economies",          total: totalSaving,   initial: null, icon: "time" },
+        { value: 0, name: "Budget disponible",  total: totalDispo,    initial: initial, icon: "credit-card" },
+        { value: 1, name: "Dépenses",           total: totalExpense,  initial: null,    icon: "minus" },
+        { value: 2, name: "Revenus",            total: totalIncome,   initial: null,    icon: "add" },
+        { value: 3, name: "Economies",          total: totalSaving,   initial: null,    icon: "time" },
     ]
 
     return <div className="page-default">
