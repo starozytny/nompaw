@@ -1,43 +1,19 @@
 @import "../vars/vars";
 
-.planning{
-  @include flex(row, center, flex-start);
-  overflow-x: auto;
-  border-bottom: 1px solid var(--grey0Opacity1);
-  padding-bottom: 24px;
-  margin-bottom: 12px;
+@import "./components/budget/planning";
+@import "./components/budget/card";
 
-  .planning-item:not(:last-child){
-    margin-right: 12px;
+.budget, .budget > .col-2{
+  @include flex(column, flex-start, flex-start, var(--espaceDiv));
+}
+
+@media (min-width:768px) {
+  .budget{
+    flex-direction: row;
   }
-
-  .planning-item{
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    border-radius: 4px;
-    min-width: 64px;
-    text-align: center;
-
-    &:not(.active):hover{
-      transform: translateY(-5px);
-    }
-
-    &.active{
-      background: var(--primary);
-      color: var(--alpha);
-    }
-    &.disabled{
-      opacity: 0.5;
-      cursor: not-allowed;
-
-      &:hover{
-        transform: none;
-      }
-    }
-  }
-
-  @media (min-width:768px) {
-    justify-content: center;
+}
+@media (min-width:1280px) {
+  .budget > .col-2{
+    flex-direction: row;
   }
 }
