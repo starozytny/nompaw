@@ -1109,19 +1109,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-
-    public function getUserMail(): ?UserMail
-    {
-        return $this->userMail;
-    }
-
-    public function setUserMail(?UserMail $userMail): static
-    {
-        $this->userMail = $userMail;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Mail>
      */
