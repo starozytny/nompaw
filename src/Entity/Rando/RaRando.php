@@ -67,11 +67,11 @@ class RaRando extends DataEntity
     #[ORM\OneToMany(mappedBy: 'rando', targetEntity: RaPropalAdventure::class)]
     private Collection $propalAdventures;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[ORM\OneToOne(cascade: ['persist'], fetch: 'EAGER')]
     #[Groups(['rando_form'])]
     private ?RaPropalAdventure $adventure = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[ORM\OneToOne(cascade: ['persist'], fetch: 'EAGER')]
     #[Groups(['rando_form'])]
     private ?RaPropalDate $adventureDate = null;
 

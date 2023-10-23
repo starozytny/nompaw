@@ -98,6 +98,11 @@ class RandoController extends AbstractController
                            RaPropalDateRepository $dateRepository, RaPropalAdventureRepository $adventureRepository,
                            RaImageRepository $imageRepository): Response
     {
+        $obj->setAdventure(null);
+        $obj->setAdventureDate(null);
+
+        $repository->save($obj, true);
+
         foreach($dateRepository->findBy(['rando' => $obj]) as $item){
             $dateRepository->remove($item);
         }
