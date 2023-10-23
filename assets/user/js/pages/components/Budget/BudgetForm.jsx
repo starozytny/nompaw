@@ -4,6 +4,9 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import moment from "moment/moment";
+import 'moment/locale/fr';
+
 import { Input, Radiobox, Checkbox } from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 
@@ -11,10 +14,10 @@ import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";
 import Inputs               from "@commonFunctions/inputs";
 
-const URL_CREATE_ELEMENT    = "intern_api_users_create";
-const URL_UPDATE_ELEMENT    = "intern_api_users_create";
+const URL_CREATE_ELEMENT    = "intern_api_budget_items_create";
+const URL_UPDATE_ELEMENT    = "intern_api_budget_items_update";
 
-export function BudgetFormulaire ({ context, element })
+export function BudgetFormulaire ({ context, element, year, month })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -25,13 +28,13 @@ export function BudgetFormulaire ({ context, element })
     let form = <Form
         context={context}
         url={url}
-        year={element ? Formulaire.setValue(element.year) : ""}
-        month={element ? Formulaire.setValue(element.month) : ""}
+        year={element ? Formulaire.setValue(element.year) : year}
+        month={element ? Formulaire.setValue(element.month) : month}
         type={element ? Formulaire.setValue(element.type) : 0}
         price={element ? Formulaire.setValue(element.price) : ""}
         name={element ? Formulaire.setValue(element.name) : ""}
         isActive={element ? Formulaire.setValue(element.isActive) : false}
-        dateAt={element ? Formulaire.setValue(element.dateAt) : new Date()}
+        dateAt={element ? Formulaire.setValue(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
     />
 
     return <div className="formulaire">{form}</div>;
@@ -54,7 +57,9 @@ class Form extends Component {
         }
     }
 
-    handleChange = (e) => {
+    componentDidMount = () => { Inputs.initDateInput(this.handleChangeDate, this.handleChange, "") }
+
+    handleChange = (e, picker) => {
         let name = e.currentTarget.name;
         let value = e.currentTarget.value;
 
@@ -66,6 +71,10 @@ class Form extends Component {
             value = Inputs.textNumericWithMinusInput(value, this.state.price);
         }
 
+        if(name === "dateAt"){
+            value = Inputs.dateInput(e, picker, this.state[name]);
+        }
+
         this.setState({[name]: value})
     }
 
@@ -73,17 +82,16 @@ class Form extends Component {
         e.preventDefault();
 
         const { context, url } = this.props;
-        const { load, year, month, type, price, name, dateAt } = this.state;
+        const { load, type, price, name, dateAt } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
-            {type: "text",  id: 'year',   value: year},
-            {type: "text",  id: 'month',  value: month},
             {type: "text",  id: 'type',   value: type},
             {type: "text",  id: 'price',  value: price},
             {type: "text",  id: 'name',   value: name},
             {type: "text",  id: 'dateAt', value: dateAt},
+            {type: "date",  id: 'dateAt', value: dateAt},
         ];
 
         let validate = Validateur.validateur(paramsToValidate)
@@ -98,6 +106,7 @@ class Form extends Component {
                 axios({ method: context === "create" ? "POST" : "PUT", url: url, data: this.state })
                     .then(function (response) {
                         toastr.info('Données enregistrées.');
+                        self.setState({ price: "", name: "" })
                     })
                     .catch(function (error) { Formulaire.displayErrors(self, error); })
                     .then(function () { Formulaire.loader(false); self.setState({ load: false }) })
@@ -130,6 +139,9 @@ class Form extends Component {
                 <div className="line line-2">
                     <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
                     <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                </div>
+                <div class="line">
+                    <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
                 </div>
 
                 <div className="line-buttons">

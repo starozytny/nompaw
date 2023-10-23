@@ -49,7 +49,7 @@ export function Budget ()
             </div>
             <div className="col-2">
                 <div className="col-1">
-                    <BudgetFormulaire context="create" element={null}/>
+                    <BudgetFormulaire context="create" element={null} year={year} month={month}/>
                 </div>
                 <div className="col-2">
                     Liste des items
