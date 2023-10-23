@@ -4,7 +4,9 @@
 {% set page_subtitle %}Planifie ton budget au cours de l'année{% endset %}
 
 {% block main_content %}
-    <div id="budget">
+    <div id="budget"
+         data-donnees="{{ donnees }}"
+    >
         {% include "layout/components/loader.html.twig" %}
     </div>
 {% endblock %}

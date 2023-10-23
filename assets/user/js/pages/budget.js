@@ -6,5 +6,5 @@ import { Budget } from "@userPages/Budget/Budget";
 
 let el = document.getElementById("budget");
 if(el){
-    createRoot(el).render(<Budget />)
+    createRoot(el).render(<Budget {...el.dataset} />)
 }

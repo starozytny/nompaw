@@ -25,6 +25,10 @@
     &.active{
       background: var(--primary);
       color: var(--alpha);
+
+      .totaux{
+        color: var(--grey2);
+      }
     }
     &.disabled{
       opacity: 0.5;
@@ -33,6 +37,10 @@
       &:hover{
         transform: none;
       }
+    }
+
+    .totaux{
+      color: var(--grey3);
     }
   }
 

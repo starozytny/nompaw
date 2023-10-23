@@ -1,31 +1,33 @@
 import React, { useState } from 'react';
 
 import Sanitaze from "@commonFunctions/sanitaze";
+import {BudgetFormulaire} from "@userPages/Budget/BudgetForm";
 
 const TYPE_EXPENSE = 0;
 const TYPE_INCOME = 1;
 const TYPE_SAVING = 2;
 
-export function Budget () {
-
+export function Budget ()
+{
     let today = new Date()
 
     const [year, setYear] = useState(today.getFullYear())
     const [month, setMonth] = useState(today.getMonth() + 1)
 
+    let totaux = [0,0,0,0,0,0,0,0,0,0,0,0];
 
     let cards = [
-        { value: 0, name: "Budget disponible",  total: 15000,  initial: 15000, icon: "credit-card" },
-        { value: 1, name: "Dépenses",           total: 15000,  initial: null, icon: "minus" },
-        { value: 2, name: "Revenus",            total: 15000,  initial: null, icon: "add" },
-        { value: 3, name: "Economies",          total: 15000,  initial: null, icon: "time" },
+        { value: 0, name: "Budget disponible",  total: 0,  initial: 0, icon: "credit-card" },
+        { value: 1, name: "Dépenses",           total: 0,  initial: null, icon: "minus" },
+        { value: 2, name: "Revenus",            total: 0,  initial: null, icon: "add" },
+        { value: 3, name: "Economies",          total: 0,  initial: null, icon: "time" },
     ]
 
     return <div className="page-default">
 
         <div className="budget-planning">
             <Year year={year} onSelect={setYear} />
-            <Months active={month} onSelect={setMonth} useShortName={false} />
+            <Months active={month} onSelect={setMonth} useShortName={false} totaux={totaux} />
         </div>
 
         <div className="budget">
@@ -39,7 +41,7 @@ export function Budget () {
                             <div className="card-body">
                                 <div className="name">{item.name}</div>
                                 <div className="total">{Sanitaze.toFormatCurrency(item.total)}</div>
-                                {item.initial && <div className="initial">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
+                                {item.initial !== null && <div className="initial">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
                             </div>
                         </div>
                     })}
@@ -47,7 +49,7 @@ export function Budget () {
             </div>
             <div className="col-2">
                 <div className="col-1">
-                    Formulaire + autres
+                    <BudgetFormulaire context="create" element={null}/>
                 </div>
                 <div className="col-2">
                     Liste des items
@@ -70,7 +72,7 @@ function Year ({ year, onSelect }){
     </div>
 }
 
-function Months ({ active, onSelect, useShortName }) {
+function Months ({ active, onSelect, useShortName, totaux }) {
     let data = [
         { id: 1, name: 'Janvier',        shortName: 'Jan' },
         { id: 2, name: 'Février',        shortName: 'Fev' },
@@ -91,7 +93,7 @@ function Months ({ active, onSelect, useShortName }) {
                     onClick={() => onSelect(elem.id)}
                     key={elem.id}>
             <div>{useShortName ? elem.shortName : elem.name}</div>
-            {/*<div>{Sanitaze.toFormatCurrency(totaux[elem.id])}</div>*/}
+            <div className="totaux">{Sanitaze.toFormatCurrency(totaux[elem.id])}</div>
         </div>
     })
 

@@ -5,7 +5,7 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import {Input, InputView, Radiobox, Select} from "@commonComponents/Elements/Fields";
+import { Input, Radiobox, Select } from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 

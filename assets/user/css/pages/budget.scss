@@ -7,9 +7,23 @@
   @include flex(column, flex-start, flex-start, var(--espaceDiv));
 }
 
+.budget{
+  & > .col-1{
+    width: 100%;
+
+    .card{
+      width: 100%;
+    }
+  }
+}
+
 @media (min-width:768px) {
   .budget{
     flex-direction: row;
+
+    & > .col-1{
+      max-width: 351px;
+    }
   }
 }
 @media (min-width:1280px) {

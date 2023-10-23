@@ -7,34 +7,45 @@ use App\Entity\Main\User;
 use App\Repository\Budget\BuItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BuItemRepository::class)]
 class BuItem extends DataEntity
 {
+    const LIST = ['buitem_list'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $year = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $month = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $type = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?float $price = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['buitem_list'])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?bool $isActive = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['buitem_list'])]
     private ?\DateTimeInterface $dateAt = null;
 
     #[ORM\Column]
