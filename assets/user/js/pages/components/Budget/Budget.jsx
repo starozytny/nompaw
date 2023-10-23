@@ -14,9 +14,15 @@ export function Budget ({ donnees, y, m })
     const [year, setYear] = useState(parseInt(y))
     const [month, setMonth] = useState(parseInt(m))
     const [data, setData] = useState(JSON.parse(donnees))
+    const [element, setElement] = useState(null)
 
     let handleUpdateList = (elem, context) => {
         setData(List.updateDataMuta(elem, context, data, SORTER));
+        setElement(null);
+    }
+
+    let handleEdit = (elem) => {
+        setElement(elem);
     }
 
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
@@ -82,12 +88,12 @@ export function Budget ({ donnees, y, m })
             </div>
             <div className="col-2">
                 <div className="col-1">
-                    <BudgetFormulaire context="create" element={null} year={year} month={month}
+                    <BudgetFormulaire context={element ? "update" : "create"} element={element} year={year} month={month}
                                       onUpdateList={handleUpdateList}
-                                      key={month} />
+                                      key={month + "-" + (element ? element.id : 0)} />
                 </div>
                 <div className="col-2">
-                    <BudgetList data={data} />
+                    <BudgetList data={data} onEdit={handleEdit} />
                 </div>
             </div>
         </div>

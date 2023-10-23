@@ -4,7 +4,7 @@ import Sanitaze from '@commonFunctions/sanitaze';
 
 import { ButtonIcon } from "@commonComponents/Elements/Button";
 
-export function BudgetItem ({ elem })
+export function BudgetItem ({ elem, onEdit })
 {
     return <div className="item">
         <div className="item-content">
@@ -23,7 +23,7 @@ export function BudgetItem ({ elem })
                     {Sanitaze.toFormatCurrency(elem.price)}
                 </div>
                 <div className="col-4 actions">
-                    <ButtonIcon outline={true} icon="pencil" onClick={null}>Modifier</ButtonIcon>
+                    <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
                     <ButtonIcon outline={true} icon="trash" onClick={null}>Supprimer</ButtonIcon>
                 </div>
             </div>

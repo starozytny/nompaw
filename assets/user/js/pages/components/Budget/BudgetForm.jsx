@@ -34,7 +34,7 @@ export function BudgetFormulaire ({ context, element, year, month, onUpdateList 
         price={element ? Formulaire.setValue(element.price) : ""}
         name={element ? Formulaire.setValue(element.name) : ""}
         isActive={element ? Formulaire.setValue(element.isActive) : false}
-        dateAt={element ? Formulaire.setValue(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
+        dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
 
         onUpdateList={onUpdateList}
     />

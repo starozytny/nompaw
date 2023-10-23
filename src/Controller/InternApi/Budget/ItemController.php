@@ -47,7 +47,7 @@ class ItemController extends AbstractController
         return $this->submitForm("create", $repository, new BuItem(), $request, $apiResponse, $validator, $dataEntity);
     }
 
-    #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'POST')]
+    #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'PUT')]
     public function update(Request $request, BuItem $obj, ApiResponse $apiResponse, ValidatorService $validator,
                            DataBudget $dataEntity, BuItemRepository $repository): Response
     {
