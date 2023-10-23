@@ -140,7 +140,7 @@ class Form extends Component {
                     <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
                     <Input identifiant="price" valeur={price} {...params}>Prix</Input>
                 </div>
-                <div class="line">
+                <div className="line">
                     <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
                 </div>
 

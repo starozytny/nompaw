@@ -1,26 +1,37 @@
 import React, { useState } from 'react';
 
 import Sanitaze from "@commonFunctions/sanitaze";
-import {BudgetFormulaire} from "@userPages/Budget/BudgetForm";
 
-const TYPE_EXPENSE = 0;
-const TYPE_INCOME = 1;
-const TYPE_SAVING = 2;
+import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 
-export function Budget ()
+export function Budget ({ donnees, y, m })
 {
-    let today = new Date()
-
-    const [year, setYear] = useState(today.getFullYear())
-    const [month, setMonth] = useState(today.getMonth() + 1)
+    const [year, setYear] = useState(parseInt(y))
+    const [month, setMonth] = useState(parseInt(m))
+    const [data, setData] = useState(JSON.parse(donnees))
 
     let totaux = [0,0,0,0,0,0,0,0,0,0,0,0];
 
+    let totalDispo = 0, totalExpense = 0, totalIncome = 0, totalSaving = 0;
+    data.forEach(d => {
+        console.log(d);
+        if(d.month === month){
+            switch (d.type){
+                case 0: totalExpense += d.price; break;
+                case 1: totalIncome += d.price; break;
+                case 2: totalSaving += d.price; break;
+                default:break;
+            }
+        }
+
+        totaux[d.month] += d.price
+    })
+
     let cards = [
-        { value: 0, name: "Budget disponible",  total: 0,  initial: 0, icon: "credit-card" },
-        { value: 1, name: "Dépenses",           total: 0,  initial: null, icon: "minus" },
-        { value: 2, name: "Revenus",            total: 0,  initial: null, icon: "add" },
-        { value: 3, name: "Economies",          total: 0,  initial: null, icon: "time" },
+        { value: 0, name: "Budget disponible",  total: totalDispo,    initial: 0, icon: "credit-card" },
+        { value: 1, name: "Dépenses",           total: totalExpense,  initial: null, icon: "minus" },
+        { value: 2, name: "Revenus",            total: totalIncome,   initial: null, icon: "add" },
+        { value: 3, name: "Economies",          total: totalSaving,   initial: null, icon: "time" },
     ]
 
     return <div className="page-default">
@@ -49,7 +60,7 @@ export function Budget ()
             </div>
             <div className="col-2">
                 <div className="col-1">
-                    <BudgetFormulaire context="create" element={null} year={year} month={month}/>
+                    <BudgetFormulaire context="create" element={null} year={year} month={month} key={month}/>
                 </div>
                 <div className="col-2">
                     Liste des items

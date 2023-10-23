@@ -6,6 +6,8 @@
 {% block main_content %}
     <div id="budget"
          data-donnees="{{ donnees }}"
+         data-y="{{ year }}"
+         data-m="{{ month }}"
     >
         {% include "layout/components/loader.html.twig" %}
     </div>

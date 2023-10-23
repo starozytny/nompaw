@@ -12,14 +12,18 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/espace-membre/planificateur', name: 'user_budget_')]
 class BudgetController extends AbstractController
 {
-    #[Route('/', name: 'index', options: ['expose' => true])]
-    public function list(BuItemRepository $repository, SerializerInterface $serializer): Response
+    #[Route('/{year}', name: 'index', options: ['expose' => true])]
+    public function list($year, BuItemRepository $repository, SerializerInterface $serializer): Response
     {
-        $data = $repository->findBy(['user' => $this->getUser()], ['dateAt' => 'DESC']);
+        $data = $repository->findBy(['user' => $this->getUser(), 'year' => $year], ['dateAt' => 'DESC']);
         $data = $serializer->serialize($data, 'json', ['groups' => BuItem::LIST]);
 
+        $today = new \DateTime();
+
         return $this->render('user/pages/budget/index.html.twig', [
-            'donnees' => $data
+            'year' => $year,
+            'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
+            'donnees' => $data,
         ]);
     }
 }
