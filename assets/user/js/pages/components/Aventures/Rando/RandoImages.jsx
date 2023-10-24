@@ -110,7 +110,7 @@ export class RandoImages extends Component{
 
             <div style={{ marginTop: "12px" }}>
                 <Alert type="warning">
-                    Pour un tirage des photos, s'il existe, rendez-vous sur le Google Photos.
+                    Pour un tirage des photos contactez moi ! <br /> Pour voir l'intégralité des photos, rendez-vous sur le Google Photos, si le lien existe.
                 </Alert>
             </div>
 

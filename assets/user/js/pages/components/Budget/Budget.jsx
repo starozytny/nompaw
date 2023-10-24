@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
+
 import Sanitaze from "@commonFunctions/sanitaze";
 import List from "@commonFunctions/list";
 import Sort from "@commonFunctions/sort";
@@ -8,6 +10,8 @@ import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
 
 const SORTER = Sort.compareDateAtInverse;
+
+const URl_INDEX_PAGE = "user_budget_index"
 
 export function Budget ({ donnees, y, m })
 {
@@ -65,7 +69,7 @@ export function Budget ({ donnees, y, m })
     return <div className="page-default">
 
         <div className="budget-planning">
-            <Year year={year} onSelect={setYear} />
+            <Year year={year} />
             <Months active={month} onSelect={setMonth} useShortName={false} totaux={totaux} />
         </div>
 
@@ -101,15 +105,15 @@ export function Budget ({ donnees, y, m })
     </div>
 }
 
-function Year ({ year, onSelect }){
+function Year ({ year }){
     return <div className="planning">
-        <div className="planning-item" onClick={() => onSelect(year - 1)}>
+        <a className="planning-item" href={Routing.generate(URl_INDEX_PAGE, {'year': year - 1})}>
             <span className="icon-left-arrow" />
-        </div>
+        </a>
         <div className="planning-item active">{year}</div>
-        <div className="planning-item" onClick={() => onSelect(year + 1)}>
+        <a className="planning-item" href={Routing.generate(URl_INDEX_PAGE, {'year': year + 1})}>
             <span className="icon-right-arrow" />
-        </div>
+        </a>
     </div>
 }
 
