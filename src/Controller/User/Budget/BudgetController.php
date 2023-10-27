@@ -3,6 +3,7 @@
 namespace App\Controller\User\Budget;
 
 use App\Entity\Budget\BuItem;
+use App\Entity\Main\User;
 use App\Repository\Budget\BuItemRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +16,12 @@ class BudgetController extends AbstractController
     #[Route('/{year}', name: 'index', options: ['expose' => true])]
     public function list($year, BuItemRepository $repository, SerializerInterface $serializer): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+        if($year < $user->getBudgetYear()){
+            return $this->redirectToRoute('user_budget_index', ['year' => $user->getBudgetYear()]);
+        }
+
         $data = $repository->findBy(['user' => $this->getUser(), 'year' => $year], ['dateAt' => 'DESC']);
         $data = $serializer->serialize($data, 'json', ['groups' => BuItem::LIST]);
 

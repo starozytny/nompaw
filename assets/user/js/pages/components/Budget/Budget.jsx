@@ -11,9 +11,9 @@ import { BudgetList } from "@userPages/Budget/BudgetList";
 
 const SORTER = Sort.compareDateAtInverse;
 
-const URl_INDEX_PAGE = "user_budget_index"
+const URL_INDEX_PAGE = "user_budget_index"
 
-export function Budget ({ donnees, y, m })
+export function Budget ({ donnees, y, m, yearMin, initTotal })
 {
     const [year, setYear] = useState(parseInt(y))
     const [month, setMonth] = useState(parseInt(m))
@@ -28,6 +28,8 @@ export function Budget ({ donnees, y, m })
     let handleEdit = (elem) => {
         setElement(elem);
     }
+
+    let totalInit = parseInt(yearMin) === year ? parseFloat(initTotal) : 0;
 
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
@@ -52,11 +54,11 @@ export function Budget ({ donnees, y, m })
 
     let totaux = [];
     for(let i = 0; i < 12 ; i++){
-        let tmpDispo = totauxIncome[i] - totauxExpense[i];
+        let tmpDispo = (i === 0 ? totalInit : 0) + totauxIncome[i] - totauxExpense[i];
         totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
     }
 
-    let initial = month !== 1 ? totaux[month - 2] : 0;
+    let initial = month !== 1 ? totaux[month - 2] : totalInit;
     let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
 
     let cards = [
@@ -69,7 +71,7 @@ export function Budget ({ donnees, y, m })
     return <div className="page-default">
 
         <div className="budget-planning">
-            <Year year={year} />
+            <Year year={year} yearMin={parseInt(yearMin)} />
             <Months active={month} onSelect={setMonth} useShortName={false} totaux={totaux} />
         </div>
 
@@ -105,13 +107,19 @@ export function Budget ({ donnees, y, m })
     </div>
 }
 
-function Year ({ year }){
+function Year ({ year, yearMin }){
+    console.log(year - 1, yearMin)
     return <div className="planning">
-        <a className="planning-item" href={Routing.generate(URl_INDEX_PAGE, {'year': year - 1})}>
-            <span className="icon-left-arrow" />
-        </a>
+        {year - 1 >= yearMin
+            ? <a className="planning-item" href={Routing.generate(URL_INDEX_PAGE, {'year': year - 1})}>
+                <span className="icon-left-arrow" />
+            </a>
+            : <div className="planning-item disabled">
+                <span className="icon-left-arrow" />
+            </div>
+        }
         <div className="planning-item active">{year}</div>
-        <a className="planning-item" href={Routing.generate(URl_INDEX_PAGE, {'year': year + 1})}>
+        <a className="planning-item" href={Routing.generate(URL_INDEX_PAGE, {'year': year + 1})}>
             <span className="icon-right-arrow" />
         </a>
     </div>

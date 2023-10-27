@@ -9,7 +9,8 @@
              data-donnees="{{ donnees }}"
              data-y="{{ year }}"
              data-m="{{ month }}"
-
+             data-year-min="{{ app.user.budgetYear }}"
+             data-init-total="{{ app.user.budgetInit }}"
         >
             {% include "layout/components/loader.html.twig" %}
         </div>
