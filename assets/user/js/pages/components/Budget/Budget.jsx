@@ -139,7 +139,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
     let totalExpense = 0, totalIncome = 0, totalSaving = 0;
-    let nData = [], nRecurrencesData = recurrencesData;
+    let nData = [], nRecurrencesData = [];
 
     // set totaux with recurrences
     for(let i = 0; i < 12 ; i++){
@@ -166,6 +166,13 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
             })
         }
     }
+
+    // add only recurrences eligible
+    recurrencesData.forEach(r => {
+        if(r.initYear > year || (r.initYear === year && month >= r.initMonth) ){
+            nRecurrencesData.push(r);
+        }
+    })
 
     // update totaux with items and update with itemRecurrence
     data.forEach(d => {
