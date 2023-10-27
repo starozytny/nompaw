@@ -83,6 +83,7 @@ class ItemController extends AbstractController
     {
         if($obj->getRecurrenceId()){
             $obj->setType($obj->getLastType());
+            $obj->setDateAt(new \DateTime());
         }
 
         $repository->save($obj, true);
