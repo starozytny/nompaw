@@ -181,9 +181,15 @@ class Form extends Component {
                             </div>
 
                             <div className="line">
-                                <Checkbox items={monthItems} identifiant="months" valeur={months} {...params}>
-                                    Pour quel(s) mois ?
-                                </Checkbox>
+                                {context === "create" ? <>
+                                        <Checkbox items={monthItems} identifiant="months" valeur={months} {...params}>
+                                            Pour quel(s) mois ?
+                                        </Checkbox>
+                                    </>
+                                    : <>
+                                        <InputView valeur={months.toString()} errors={errors}>Pour quel(s) mois ?</InputView>
+                                    </>
+                                }
                             </div>
                         </div>
                     </div>

@@ -145,10 +145,12 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
     for(let i = 0; i < 12 ; i++){
         recurrencesData.forEach(d => {
             if(year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth) ){
-                switch (d.type){
-                    case 0: case 2: totauxExpense[i] += d.price; break;
-                    case 1: totauxIncome[i] += d.price; break;
-                    default:break;
+                if(d.months.includes(i + 1)){
+                    switch (d.type){
+                        case 0: case 2: totauxExpense[i] += d.price; break;
+                        case 1: totauxIncome[i] += d.price; break;
+                        default:break;
+                    }
                 }
             }
         })
@@ -156,11 +158,13 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
         if(i + 1 === month){
             recurrencesData.forEach(d => {
                 if(year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth) ){
-                    switch (d.type){
-                        case 0: totalExpense += d.price; break;
-                        case 1: totalIncome += d.price; break;
-                        case 2: totalSaving += d.price; break;
-                        default:break;
+                    if(d.months.includes(i + 1)){
+                        switch (d.type){
+                            case 0: totalExpense += d.price; break;
+                            case 1: totalIncome += d.price; break;
+                            case 2: totalSaving += d.price; break;
+                            default:break;
+                        }
                     }
                 }
             })
@@ -168,9 +172,13 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
     }
 
     // add only recurrences eligible
+    console.log(recurrencesData);
     recurrencesData.forEach(r => {
         if(year > r.initYear || (r.initYear === year && month >= r.initMonth) ){
-            nRecurrencesData.push(r);
+            console.log(r.months, month);
+            if(r.months.includes(month)){
+                nRecurrencesData.push(r);
+            }
         }
     })
 

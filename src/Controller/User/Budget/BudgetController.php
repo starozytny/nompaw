@@ -39,11 +39,13 @@ class BudgetController extends AbstractController
             for($i = $user->getBudgetYear() ; $i < $year ; $i++){
                 for($j = 0; $j < 12 ; $j++){
                     foreach($recurrences as $re){
-                        if($re->getInitYear() > $i || ($re->getInitYear() == $i && $j + 1 >= $re->getInitMonth())){
-                            if($re->getType() != TypeType::Income){
-                                $totalExpense += $re->getPrice();
-                            }else{
-                                $totalIncome += $re->getPrice();
+                        if($i > $re->getInitYear() || ($re->getInitYear() == $i && $j + 1 >= $re->getInitMonth())){
+                            if(in_array($j + 1, $re->getMonths())){
+                                if($re->getType() != TypeType::Income){
+                                    $totalExpense += $re->getPrice();
+                                }else{
+                                    $totalIncome += $re->getPrice();
+                                }
                             }
                         }
                     }
