@@ -69,8 +69,14 @@ class RecurrenceController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(BuRecurrent $obj, BuRecurrentRepository $repository, ApiResponse $apiResponse): Response
+    public function delete(BuRecurrent $obj, BuRecurrentRepository $repository, ApiResponse $apiResponse, BuItemRepository $itemRepository): Response
     {
+        $items = $itemRepository->findBy(['user' => $this->getUser(), 'recurrenceId' => $obj->getId()]);
+        foreach($items as $item){
+            $item->setRecurrenceId(null);
+            $item->setRecurrencePrice(null);
+        }
+
         $repository->remove($obj, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
