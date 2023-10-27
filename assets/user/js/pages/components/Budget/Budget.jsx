@@ -19,6 +19,7 @@ const SORTER = Sort.compareDateAtInverseThenId;
 
 const URL_INDEX_PAGE = "user_budget_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
+const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
 
 export function Budget ({ donnees, y, m, yearMin, initTotal })
 {
@@ -61,10 +62,22 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
 
             axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': elem.id}), data: {} })
                 .then(function (response) {
-                    setData(List.updateDataMuta(elem, 'delete', data, SORTER));
+                    handleUpdateList(elem, "delete")
                     setElementToDelete(null);
                     deleteRef.current.handleClose();
                 })
+                .catch(function (error) { Formulaire.displayErrors(null, error); })
+                .then(function () { setLoad(false) })
+            ;
+        }
+    }
+
+    let handleActive = (elem) => {
+        if(!load){
+            setLoad(true)
+
+            axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_ELEMENT, {'id': elem.id}), data: {} })
+                .then(function (response) { handleUpdateList(response.data, "update") })
                 .catch(function (error) { Formulaire.displayErrors(null, error); })
                 .then(function () { setLoad(false) })
             ;
@@ -142,7 +155,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
                                       key={month + "-" + (element ? element.id : 0)} />
                 </div>
                 <div className="col-2">
-                    <BudgetList data={data} onEdit={handleEdit} onModal={handleModal} />
+                    <BudgetList data={data} onEdit={handleEdit} onModal={handleModal} onActive={handleActive} />
                 </div>
             </div>
         </div>

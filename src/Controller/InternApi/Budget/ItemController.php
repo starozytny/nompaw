@@ -58,7 +58,15 @@ class ItemController extends AbstractController
     public function delete(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
         $repository->remove($obj, true);
-
         return $apiResponse->apiJsonResponseSuccessful("ok");
+    }
+
+    #[Route('/active/{id}', name: 'active', options: ['expose' => true], methods: 'PUT')]
+    public function active(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
+    {
+        $obj->setIsActive(true);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
     }
 }

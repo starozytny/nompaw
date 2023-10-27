@@ -4,6 +4,12 @@
   .type-1{ color: var(--primary); }
   .type-2{ color: var(--warning); }
 
+  .badge.badge-0{
+    background-color: var(--overlay);
+    color: var(--greyOpacity4);
+    cursor: pointer;
+  }
+
   .item-prev{
     opacity: 0.5;
   }
