@@ -102,7 +102,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
     let totalExpense = 0, totalIncome = 0, totalSaving = 0;
-    let nData = [], nDataRecurrence = [], nDataRecurrenceActive = [];
+    let nData = [], nRecurrencesData = recurrencesData;
 
     // set totaux with recurrences
     for(let i = 0; i < 12 ; i++){
@@ -142,7 +142,17 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
 
             nData.push(d);
             if(d.recurrenceId){
-                nDataRecurrenceActive.push(d)
+                nRecurrencesData = nRecurrencesData.filter(r => r.id !== d.recurrenceId);
+                recurrencesData.forEach(r => {
+                    if(r.id === d.recurrenceId){
+                        switch (r.type){
+                            case 0: totalExpense -= r.price; break;
+                            case 1: totalIncome -= r.price; break;
+                            case 2: totalSaving -= r.price; break;
+                            default:break;
+                        }
+                    }
+                })
             }
         }
 
@@ -150,6 +160,18 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
             case 0: case 2: totauxExpense[d.month - 1] += d.price; break;
             case 1: totauxIncome[d.month - 1] += d.price; break;
             default:break;
+        }
+
+        if(d.recurrenceId){
+            recurrencesData.forEach(r => {
+                if(r.id === d.recurrenceId){
+                    switch (r.type){
+                        case 0: case 2: totauxExpense[d.month - 1] -= r.price; break;
+                        case 1: totauxIncome[d.month - 1] -= r.price; break;
+                        default:break;
+                    }
+                }
+            })
         }
     })
 
@@ -202,7 +224,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
                                       key={month + "-" + (element ? element.id : 0)} />
                 </div>
                 <div className="col-2">
-                    <BudgetList data={nData} recurrencesData={recurrencesData}
+                    <BudgetList data={nData} recurrencesData={nRecurrencesData}
                                 onEdit={handleEdit} onModal={handleModal} onActive={handleActive}
                                 onActiveRecurrence={handleActiveRecurrence} key={month} />
                 </div>
