@@ -25,9 +25,9 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
         setElement(null);
     }
 
-    let handleEdit = (elem) => {
-        setElement(elem);
-    }
+    let handleCancelEdit = () => { setElement(null) }
+
+    let handleEdit = (elem) => { setElement(elem); }
 
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
@@ -96,7 +96,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
             <div className="col-2">
                 <div className="col-1">
                     <BudgetFormulaire context={element ? "update" : "create"} element={element} year={year} month={month}
-                                      onUpdateList={handleUpdateList}
+                                      onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
                                       key={month + "-" + (element ? element.id : 0)} />
                 </div>
                 <div className="col-2">

@@ -17,7 +17,7 @@ import Inputs               from "@commonFunctions/inputs";
 const URL_CREATE_ELEMENT    = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT    = "intern_api_budget_items_update";
 
-export function BudgetFormulaire ({ context, element, year, month, onUpdateList })
+export function BudgetFormulaire ({ context, element, year, month, onCancel, onUpdateList })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -36,6 +36,7 @@ export function BudgetFormulaire ({ context, element, year, month, onUpdateList 
         isActive={element ? Formulaire.setValue(element.isActive) : false}
         dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
 
+        onCancel={onCancel}
         onUpdateList={onUpdateList}
     />
 
@@ -122,6 +123,7 @@ class Form extends Component {
     }
 
     render () {
+        const { context, onCancel } = this.props;
         const { errors, load, type, price, name, isActive, dateAt } = this.state;
 
         let typeItems = [
@@ -152,6 +154,7 @@ class Form extends Component {
 
                 <div className="line-buttons">
                     <Button isSubmit={true} isLoader={load} type="primary">Enregistrer</Button>
+                    {context === "update" && <Button onClick={onCancel}>Annuler</Button>}
                 </div>
             </form>
         </>
