@@ -70,7 +70,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
 
         <div className="budget-planning">
             <Year year={year} yearMin={parseInt(yearMin)} />
-            <Months active={month} onSelect={setMonth} totaux={totaux}
+            <Months year={year} active={month} onSelect={setMonth} totaux={totaux}
                     useShortName={window.matchMedia("(max-width: 768px)").matches} />
         </div>
 
@@ -123,7 +123,7 @@ function Year ({ year, yearMin }){
     </div>
 }
 
-function Months ({ active, onSelect, useShortName, totaux }) {
+function Months ({ year, active, onSelect, useShortName, totaux }) {
     let data = [
         { id: 1, name: 'Janvier',        shortName: 'Jan.' },
         { id: 2, name: 'Février',        shortName: 'Fev.' },
@@ -143,7 +143,7 @@ function Months ({ active, onSelect, useShortName, totaux }) {
 
     let items = data.map(elem => {
         let activeMonth = elem.id === active ? " active" : "";
-        let todayMonth = (elem.id === today.getMonth() + 1) ? " today" : "";
+        let todayMonth = (elem.id === today.getMonth() + 1 && year === today.getFullYear()) ? " today" : "";
         let statutMonth = totaux[elem.id - 1] < 0 ? " danger" : "";
         return <div className={"planning-item" + todayMonth + activeMonth + statutMonth}
                     onClick={() => onSelect(elem.id)}
