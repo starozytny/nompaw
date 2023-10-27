@@ -38,9 +38,13 @@ class BuCategory
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: BuItem::class)]
     private Collection $buItems;
 
+    #[ORM\OneToMany(mappedBy: 'category', targetEntity: BuRecurrent::class)]
+    private Collection $recurrents;
+
     public function __construct()
     {
         $this->buItems = new ArrayCollection();
+        $this->recurrents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -144,6 +148,36 @@ class BuCategory
             // set the owning side to null (unless already changed)
             if ($buItem->getCategory() === $this) {
                 $buItem->setCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BuRecurrent>
+     */
+    public function getRecurrents(): Collection
+    {
+        return $this->recurrents;
+    }
+
+    public function addRecurrent(BuRecurrent $recurrent): static
+    {
+        if (!$this->recurrents->contains($recurrent)) {
+            $this->recurrents->add($recurrent);
+            $recurrent->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRecurrent(BuRecurrent $recurrent): static
+    {
+        if ($this->recurrents->removeElement($recurrent)) {
+            // set the owning side to null (unless already changed)
+            if ($recurrent->getCategory() === $this) {
+                $recurrent->setCategory(null);
             }
         }
 

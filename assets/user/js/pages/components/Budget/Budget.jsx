@@ -124,7 +124,6 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
     data.sort(SORTER);
 
     return <div className="page-default">
-
         <div className="budget-planning">
             <Year year={year} yearMin={parseInt(yearMin)} />
             <Months year={year} active={month} onSelect={setMonth} totaux={totaux}

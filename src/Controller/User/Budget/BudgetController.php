@@ -6,6 +6,7 @@ use App\Entity\Budget\BuItem;
 use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuItemRepository;
+use App\Repository\Budget\BuRecurrentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,7 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/espace-membre/planificateur', name: 'user_budget_')]
 class BudgetController extends AbstractController
 {
-    #[Route('/{year}', name: 'index', options: ['expose' => true])]
+    #[Route('/planning/{year}', name: 'index', options: ['expose' => true])]
     public function list($year, BuItemRepository $repository, SerializerInterface $serializer): Response
     {
         /** @var User $user */
@@ -55,5 +56,11 @@ class BudgetController extends AbstractController
             'donnees' => $data,
             'initTotal' => $totalInit,
         ]);
+    }
+
+    #[Route('/recurrences', name: 'recurrences', options: ['expose' => true])]
+    public function recurrences(BuRecurrentRepository $repository, SerializerInterface $serializer): Response
+    {
+        return $this->render('user/pages/budget/recurrences.html.twig');
     }
 }

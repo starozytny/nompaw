@@ -5,6 +5,13 @@
 
 {% block main_content %}
     {% if app.user.budgetInit != null %}
+        <div class="page-actions">
+            <div class="col-1">
+                <a href="{{ path('user_budget_recurrences') }}" class="btn btn-primary">
+                    <span>Voir les récurrences</span>
+                </a>
+            </div>
+        </div>
         <div id="budget"
              data-donnees="{{ donnees }}"
              data-y="{{ year }}"

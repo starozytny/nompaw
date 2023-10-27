@@ -6,6 +6,7 @@ use App\Entity\Birthday\BiBirthday;
 use App\Entity\Birthday\BiPresent;
 use App\Entity\Budget\BuCategory;
 use App\Entity\Budget\BuItem;
+use App\Entity\Budget\BuRecurrent;
 use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
@@ -197,6 +198,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Column(nullable: true)]
     private ?float $budgetInit = null;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuRecurrent::class)]
+    private Collection $buRecurrents;
+
     /**
      * @throws Exception
      */
@@ -223,6 +227,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->buItems = new ArrayCollection();
         $this->buCategories = new ArrayCollection();
         $this->mails = new ArrayCollection();
+        $this->buRecurrents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1165,6 +1170,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setBudgetInit(?float $budgetInit): static
     {
         $this->budgetInit = $budgetInit;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BuRecurrent>
+     */
+    public function getBuRecurrents(): Collection
+    {
+        return $this->buRecurrents;
+    }
+
+    public function addBuRecurrent(BuRecurrent $buRecurrent): static
+    {
+        if (!$this->buRecurrents->contains($buRecurrent)) {
+            $this->buRecurrents->add($buRecurrent);
+            $buRecurrent->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBuRecurrent(BuRecurrent $buRecurrent): static
+    {
+        if ($this->buRecurrents->removeElement($buRecurrent)) {
+            // set the owning side to null (unless already changed)
+            if ($buRecurrent->getUser() === $this) {
+                $buRecurrent->setUser(null);
+            }
+        }
 
         return $this;
     }

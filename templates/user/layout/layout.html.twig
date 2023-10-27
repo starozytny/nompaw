@@ -24,7 +24,7 @@
             'user_birthdays_index', 'user_birthdays_read', 'user_birthdays_create', 'user_birthdays_update']
     },
     { name: "Planificateur", icon: "calculator",
-        path: path('user_budget_index', {'year': 'now'|date('Y')}), matchRoute: ['user_budget_index']
+        path: path('user_budget_index', {'year': 'now'|date('Y')}), matchRoute: ['user_budget_index', 'user_budget_recurrences']
     },
     { name: "Mon profil", icon: "user-octagon",
         path: path('user_profil_index'), matchRoute: ['user_profil_index', 'user_profil_update']
