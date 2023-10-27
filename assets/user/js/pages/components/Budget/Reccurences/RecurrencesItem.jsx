@@ -30,7 +30,7 @@ export function RecurrencesItem ({ elem, highlight, onModal })
                 </div>
                 <div className="col-2">
                     <div style={{marginBottom: '4px'}}>{elem.name}</div>
-                    <div class="sub" style={{marginBottom: '8px'}}>
+                    <div className="sub" style={{marginBottom: '8px'}}>
                         Débute le {elem.initMonth}/{elem.initYear}.
                     </div>
                     {elem.category && <div className={`badge badge-type-${elem.category.type}`}>{elem.category.name}</div>}
