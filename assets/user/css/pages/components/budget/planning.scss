@@ -22,8 +22,11 @@
       transform: translateY(-5px);
     }
 
+    &.today{
+      background-color: var(--warningOpacity4);
+    }
     &.active{
-      background: var(--primary);
+      background-color: var(--primary);
       color: var(--alpha);
 
       .totaux{

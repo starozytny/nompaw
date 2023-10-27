@@ -108,7 +108,6 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
 }
 
 function Year ({ year, yearMin }){
-    console.log(year - 1, yearMin)
     return <div className="planning">
         {year - 1 >= yearMin
             ? <a className="planning-item" href={Routing.generate(URL_INDEX_PAGE, {'year': year - 1})}>
@@ -141,8 +140,13 @@ function Months ({ active, onSelect, useShortName, totaux }) {
         { id: 12, name: 'Décembre',      shortName: 'Dèc' },
     ];
 
+    let today = new Date();
+    console.log(today.getMonth())
+
     let items = data.map(elem => {
-        return <div className={"planning-item" + (elem.id === active ? " active" : "")}
+        let activeMonth = elem.id === active ? " active" : "";
+        let todayMonth = (elem.id === today.getMonth() + 1) ? " today" : "";
+        return <div className={"planning-item" + todayMonth + activeMonth}
                     onClick={() => onSelect(elem.id)}
                     key={elem.id}>
             <div>{useShortName ? elem.shortName : elem.name}</div>
