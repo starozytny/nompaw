@@ -110,6 +110,14 @@ class BuItem extends DataEntity
         return $this;
     }
 
+    #[Groups(['buitem_list'])]
+    public function getTypeIcon(): ?string
+    {
+        $values = ['minus', 'add', 'time'];
+
+        return $values[$this->type];
+    }
+
     public function getPrice(): ?float
     {
         return $this->price;

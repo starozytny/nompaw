@@ -48,6 +48,16 @@ function compareDateAtInverse(a, b){
     return comparison(b.dateAt, a.dateAt);
 }
 
+function compareDateAtInverseThenId(a, b){
+    if (b.dateAt > a.dateAt) {
+        return 1;
+    } else if (b.dateAt < a.dateAt) {
+        return -1;
+    }
+
+    return comparison(b.id, a.id);
+}
+
 function compareStartAt(a, b){
     return comparison(a.startAt, b.startAt);
 }
@@ -101,5 +111,6 @@ module.exports = {
     compareLabel,
     compareDateAt,
     compareDateAtInverse,
+    compareDateAtInverseThenId,
     compareStartAt,
 }

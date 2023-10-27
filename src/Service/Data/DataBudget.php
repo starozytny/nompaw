@@ -20,7 +20,7 @@ class DataBudget
             ->setType((int) $data->type)
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
             ->setName($this->sanitizeData->trimData($data->name))
-            ->setIsActive((int) $data->isActive)
+            ->setIsActive((int) $data->isActive[0])
             ->setDateAt($this->sanitizeData->createDatePicker($data->dateAt))
         ;
     }

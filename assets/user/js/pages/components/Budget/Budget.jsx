@@ -9,7 +9,7 @@ import Sort from "@commonFunctions/sort";
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
 
-const SORTER = Sort.compareDateAtInverse;
+const SORTER = Sort.compareDateAtInverseThenId;
 
 const URL_INDEX_PAGE = "user_budget_index"
 
@@ -65,6 +65,8 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
         { value: 2, name: "Revenus",            total: totalIncome,   initial: null,    icon: "add" },
         { value: 3, name: "Economies",          total: totalSaving,   initial: null,    icon: "time" },
     ]
+
+    data.sort(SORTER);
 
     return <div className="page-default">
 

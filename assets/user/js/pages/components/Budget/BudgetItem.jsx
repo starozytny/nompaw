@@ -6,7 +6,8 @@ import { ButtonIcon } from "@commonComponents/Elements/Button";
 
 export function BudgetItem ({ elem, onEdit })
 {
-    return <div className="item">
+    console.log(elem);
+    return <div className={`item${!elem.isActive ? " item-prev" : ""}`}>
         <div className="item-content">
             <div className="item-infos">
                 <div className="col-1">
@@ -18,9 +19,12 @@ export function BudgetItem ({ elem, onEdit })
                 </div>
                 <div className="col-2">
                     <div className="name"><span>{elem.name}</span></div>
+                    {!elem.isActive && <div class="badge badge-disabled">Prévisionnel</div>}
                 </div>
                 <div className="col-3">
-                    {Sanitaze.toFormatCurrency(elem.price)}
+                    <div className={`type-${elem.type}`}>
+                        <span className={`icon-${elem.typeIcon}`}></span> {Sanitaze.toFormatCurrency(elem.price)}
+                    </div>
                 </div>
                 <div className="col-4 actions">
                     <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
