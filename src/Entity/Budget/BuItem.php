@@ -48,9 +48,6 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     private ?\DateTimeInterface $dateAt = null;
 
-    #[ORM\Column]
-    private ?bool $useSaving = false;
-
     #[ORM\ManyToOne(inversedBy: 'buItems')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -162,18 +159,6 @@ class BuItem extends DataEntity
     public function setDateAt(\DateTimeInterface $dateAt): static
     {
         $this->dateAt = $dateAt;
-
-        return $this;
-    }
-
-    public function isUseSaving(): ?bool
-    {
-        return $this->useSaving;
-    }
-
-    public function setUseSaving(bool $useSaving): static
-    {
-        $this->useSaving = $useSaving;
 
         return $this;
     }
