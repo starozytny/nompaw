@@ -69,7 +69,6 @@ class DataBudget
         return ($obj)
             ->setType((int) $data->type)
             ->setName($this->sanitizeData->trimData($data->name))
-            ->setIcon($this->sanitizeData->trimData($data->icon))
             ->setGoal($this->sanitizeData->setFloatValue($data->goal))
         ;
     }

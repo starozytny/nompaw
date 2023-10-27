@@ -15,8 +15,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/intern/api/financial/items', name: 'intern_api_budget_items_')]
-class ItemController extends AbstractController
+#[Route('/intern/api/budget/items', name: 'intern_api_budget_items_')]
+class ItemsController extends AbstractController
 {
     public function submitForm($type, BuItemRepository $repository, BuItem $obj, Request $request, ApiResponse $apiResponse,
                                ValidatorService $validator, DataBudget $dataEntity, BuCategoryRepository $categoryRepository): JsonResponse

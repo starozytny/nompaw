@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/intern/api/financial/initiate', name: 'intern_api_budget_init_')]
+#[Route('/intern/api/budget/initiate', name: 'intern_api_budget_init_')]
 class InitController extends AbstractController
 {
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'PUT')]

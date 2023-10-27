@@ -1,0 +1,12 @@
+{% extends 'user/pages/budget/categories/template.html.twig' %}
+
+{% set page_title %}Créer une catégorie{% endset %}
+{% set page_subtitle %}Renseignez le plus d'informations possibles{% endset %}
+
+{% block main_content %}
+    {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_budget_categories_index') } %}
+
+    <div id="categories_create">
+        {% include "layout/components/loader.html.twig" %}
+    </div>
+{% endblock %}

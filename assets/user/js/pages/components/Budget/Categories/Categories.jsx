@@ -11,14 +11,14 @@ import { Search }         from "@commonComponents/Elements/Search";
 import { Filter }         from "@commonComponents/Elements/Filter";
 import { ModalDelete }    from "@commonComponents/Shortcut/Modal";
 
-import { RecurrencesList } from "@userPages/Budget/Reccurences/RecurrencesList";
+import { CategoriesList } from "@userPages/Budget/Categories/CategoriesList";
 
-const URL_GET_DATA        = "intern_api_budget_recurrences_list";
-const URL_DELETE_ELEMENT  = "intern_api_budget_recurrences_delete";
+const URL_GET_DATA        = "intern_api_budget_categories_list";
+const URL_DELETE_ELEMENT  = "intern_api_budget_categories_delete";
 
 let SORTER = Sort.compareName;
 
-export class Recurrences extends Component {
+export class Categories extends Component {
     constructor(props) {
         super(props);
 
@@ -26,7 +26,7 @@ export class Recurrences extends Component {
             perPage: 20,
             currentPage: 0,
             sorter: SORTER,
-            sessionName: "local.recu.list.pagination",
+            sessionName: "local.bucategories.list.pagination",
             loadingData: true,
             filters: [],
             element: null
@@ -47,7 +47,7 @@ export class Recurrences extends Component {
 
     handleSearch = (search) => {
         const { perPage, sorter, dataImmuable, filters } = this.state;
-        List.search(this, 'recurrence', search, dataImmuable, perPage, sorter, true, filters, this.handleFilters)
+        List.search(this, 'category', search, dataImmuable, perPage, sorter, true, filters, this.handleFilters)
     }
 
     handleFilters = (filters) => {
@@ -103,16 +103,16 @@ export class Recurrences extends Component {
                                          onClick={this.handlePaginationClick}
                                          onPerPage={this.handlePerPage} onSorter={this.handleSorter} />
 
-                    <RecurrencesList data={currentData} highlight={parseInt(highlight)} onModal={this.handleModal} />
+                    <CategoriesList data={currentData} highlight={parseInt(highlight)} onModal={this.handleModal} />
 
                     <Pagination ref={this.pagination} sessionName={sessionName} items={data} taille={data.length}
                                 perPage={perPage} onUpdate={this.handleUpdateData} onChangeCurrentPage={this.handleChangeCurrentPage}/>
 
 
                     <ModalDelete refModal={this.delete} element={element} routeName={URL_DELETE_ELEMENT}
-                                 title="Supprimer cet élément" msgSuccess="Elément supprimé"
+                                 title="Supprimer cette catégorie" msgSuccess="Catégorie supprimée"
                                  onUpdateList={this.handleUpdateList} >
-                        Etes-vous sûr de vouloir supprimer définitivement cet élément ?
+                        Etes-vous sûr de vouloir supprimer définitivement cette catégorie ?
                     </ModalDelete>
                 </>
             }

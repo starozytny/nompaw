@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/espace-membre/planificateur/recurrences', name: 'user_budget_recurrences_')]
-class RecurrenceController extends AbstractController
+class RecurrencesController extends AbstractController
 {
     #[Route('/', name: 'index', options: ['expose' => true])]
     public function index(Request $request): Response

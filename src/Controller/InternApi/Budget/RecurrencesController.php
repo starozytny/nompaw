@@ -17,13 +17,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/intern/api/recurrences', name: 'intern_api_recurrences_')]
-class RecurrenceController extends AbstractController
+#[Route('/intern/api/budget/recurrences', name: 'intern_api_budget_recurrences_')]
+class RecurrencesController extends AbstractController
 {
     #[Route('/list', name: 'list', options: ['expose' => true], methods: 'GET')]
     public function list(BuRecurrentRepository $repository, ApiResponse $apiResponse): Response
     {
-        return $apiResponse->apiJsonResponse($repository->findAll(), BuRecurrent::LIST);
+        return $apiResponse->apiJsonResponse($repository->findBy(['user' => $this->getUser()]), BuRecurrent::LIST);
     }
 
     public function submitForm($type, BuRecurrentRepository $repository, BuRecurrent $obj, Request $request, ApiResponse $apiResponse,

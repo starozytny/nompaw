@@ -34,6 +34,7 @@ function switchFunction(type, search, v) {
                 return v;
             }
             break;
+        case "category":
         case "recurrence":
         case "contact":
         case "changelog":

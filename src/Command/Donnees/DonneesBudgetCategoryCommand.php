@@ -42,19 +42,16 @@ class DonneesBudgetCategoryCommand extends Command
             [
                 'type' => TypeType::Expense,
                 'name' => "Dépenses personnelles",
-                'icon' => "user",
                 'goal' => null,
             ],
             [
                 'type' => TypeType::Income,
                 'name' => "Salaire",
-                'icon' => "credit-card",
                 'goal' => null,
             ],
             [
                 'type' => TypeType::Saving,
                 'name' => "Fun",
-                'icon' => "time",
                 'goal' => 20000,
             ],
         ];

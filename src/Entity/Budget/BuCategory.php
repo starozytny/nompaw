@@ -13,25 +13,25 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class BuCategory
 {
     const SELECT = ['bucat_select'];
+    const LIST   = ['bucat_list'];
+    const FORM   = ['bucat_form'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['bucat_select', 'buitem_list', 'burecu_list', 'burecu_form'])]
+    #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['bucat_select', 'buitem_list', 'burecu_list', 'burecu_form'])]
+    #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?int $type = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['bucat_select', 'buitem_list', 'burecu_list', 'burecu_form'])]
+    #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $icon = null;
-
     #[ORM\Column(nullable: true)]
+    #[Groups(['bucat_list', 'bucat_form'])]
     private ?float $goal = null;
 
     #[ORM\Column(nullable: true)]
@@ -82,6 +82,14 @@ class BuCategory
         return $this;
     }
 
+    #[Groups(['bucat_list'])]
+    public function getTypeString(): ?string
+    {
+        $values = ['Dépense', 'Revenu', 'Economie'];
+
+        return $values[$this->type];
+    }
+
     public function getGoal(): ?float
     {
         return $this->goal;
@@ -90,18 +98,6 @@ class BuCategory
     public function setGoal(?float $goal): static
     {
         $this->goal = $goal;
-
-        return $this;
-    }
-
-    public function getIcon(): ?string
-    {
-        return $this->icon;
-    }
-
-    public function setIcon(?string $icon): static
-    {
-        $this->icon = $icon;
 
         return $this;
     }

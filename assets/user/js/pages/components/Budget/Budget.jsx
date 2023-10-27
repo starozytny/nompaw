@@ -21,8 +21,8 @@ const URL_INDEX_PAGE = "user_budget_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
 const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
-const URL_ACTIVE_RECURRENCE = "intern_api_recurrences_active"
-const URL_TRASH_RECURRENCE = "intern_api_recurrences_trash"
+const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
+const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 
 export function Budget ({ donnees, categories, y, m, yearMin, initTotal, recurrences })
 {

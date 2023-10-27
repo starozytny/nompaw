@@ -3,17 +3,17 @@ import React, { Component } from 'react';
 import axios   from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Checkbox, Input, InputView, Radiobox, SelectCustom } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
-
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Inputs from "@commonFunctions/inputs";
-import {Alert} from "@commonComponents/Elements/Alert";
+
+import { Checkbox, Input, InputView, Radiobox, SelectCustom } from "@commonComponents/Elements/Fields";
+import { Button } from "@commonComponents/Elements/Button";
+import { Alert } from "@commonComponents/Elements/Alert";
 
 const URL_INDEX_ELEMENTS    = "user_budget_recurrences_index";
-const URL_CREATE_ELEMENT    = "intern_api_recurrences_create";
-const URL_UPDATE_ELEMENT    = "intern_api_recurrences_update";
+const URL_CREATE_ELEMENT    = "intern_api_budget_recurrences_create";
+const URL_UPDATE_ELEMENT    = "intern_api_budget_recurrences_update";
 const TEXT_CREATE           = "Ajouter la récurrence";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
@@ -194,12 +194,9 @@ class Form extends Component {
                         </div>
                         <div className="line-col-2">
                             <div className="line">
-                                {context === "create" ? <>
-                                        <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}>Type</Radiobox>
-                                    </>
-                                    : <>
-                                        <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
-                                    </>
+                                {context === "create"
+                                    ? <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}>Type</Radiobox>
+                                    : <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
                                 }
                             </div>
 
@@ -216,14 +213,11 @@ class Form extends Component {
                             </div>
 
                             <div className="line">
-                                {context === "create" ? <>
-                                        <Checkbox items={monthItems} identifiant="months" valeur={months} {...paramsInput0}>
-                                            Pour quel(s) mois ?
-                                        </Checkbox>
-                                    </>
-                                    : <>
-                                        <InputView valeur={months.toString()} errors={errors}>Pour quel(s) mois ?</InputView>
-                                    </>
+                                {context === "create"
+                                    ? <Checkbox items={monthItems} identifiant="months" valeur={months} {...paramsInput0}>
+                                        Pour quel(s) mois ?
+                                    </Checkbox>
+                                    : <InputView valeur={months.toString()} errors={errors}>Pour quel(s) mois ?</InputView>
                                 }
                             </div>
                         </div>

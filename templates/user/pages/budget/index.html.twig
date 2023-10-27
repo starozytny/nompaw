@@ -7,8 +7,11 @@
     {% if app.user.budgetInit != null %}
         <div class="page-actions">
             <div class="col-1">
-                <a href="{{ path('user_budget_recurrences_index') }}" class="btn btn-primary">
+                <a href="{{ path('user_budget_recurrences_index') }}" class="btn btn-default">
                     <span>Voir les récurrences</span>
+                </a>
+                <a href="{{ path('user_budget_categories_index') }}" class="btn btn-default">
+                    <span>Voir les catégories</span>
                 </a>
             </div>
         </div>
