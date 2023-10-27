@@ -2,6 +2,7 @@
 
 namespace App\Service\Data;
 
+use App\Entity\Budget\BuCategory;
 use App\Entity\Budget\BuItem;
 use App\Entity\Budget\BuRecurrent;
 use App\Entity\Main\User;
@@ -62,4 +63,15 @@ class DataBudget
             ->setInitMonth($this->sanitizeData->setIntValue($data->initMonth))
         ;
     }
+
+    public function setDataCategory(BuCategory $obj, $data): BuCategory
+    {
+        return ($obj)
+            ->setType((int) $data->type)
+            ->setName($this->sanitizeData->trimData($data->name))
+            ->setIcon($this->sanitizeData->trimData($data->icon))
+            ->setGoal($this->sanitizeData->setFloatValue($data->goal))
+        ;
+    }
+
 }

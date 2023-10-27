@@ -29,7 +29,7 @@ class BuCategory
     private ?float $goal = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $used = null;
+    private ?float $used = 0;
 
     #[ORM\ManyToOne(inversedBy: 'buCategories')]
     #[ORM\JoinColumn(nullable: false)]
