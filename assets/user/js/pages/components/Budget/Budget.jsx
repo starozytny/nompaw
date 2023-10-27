@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
+import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze from "@commonFunctions/sanitaze";
 import List from "@commonFunctions/list";
 import Sort from "@commonFunctions/sort";
+
+import { Modal } from "@commonComponents/Elements/Modal";
+import { Button } from "@commonComponents/Elements/Button";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
@@ -12,13 +18,17 @@ import { BudgetList } from "@userPages/Budget/BudgetList";
 const SORTER = Sort.compareDateAtInverseThenId;
 
 const URL_INDEX_PAGE = "user_budget_index"
+const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 
 export function Budget ({ donnees, y, m, yearMin, initTotal })
 {
+    const deleteRef = useRef(null)
     const [year, setYear] = useState(parseInt(y))
     const [month, setMonth] = useState(parseInt(m))
     const [data, setData] = useState(JSON.parse(donnees))
     const [element, setElement] = useState(null)
+    const [elementToDelete, setElementToDelete] = useState(null)
+    const [load, setLoad] = useState(false)
 
     let handleUpdateList = (elem, context) => {
         setData(List.updateDataMuta(elem, context, data, SORTER));
@@ -28,6 +38,38 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
     let handleCancelEdit = () => { setElement(null) }
 
     let handleEdit = (elem) => { setElement(elem); }
+
+    let handleModal = (identifiant, elem) => {
+        let ref;
+        switch (identifiant){
+            case 'deleteRef':
+                ref = deleteRef;
+                setElementToDelete(elem);
+                deleteRef.current.handleUpdateFooter(<Button type="danger" onClick={() => handleDelete(elem)}>Confirmer la suppression</Button>)
+                break;
+            default:break;
+        }
+        if(ref){
+            ref.current.handleClick();
+        }
+    }
+
+    let handleDelete = (elem) => {
+        if(!load){
+            setLoad(true)
+            deleteRef.current.handleUpdateFooter(<Button type="danger" isLoader={true}>Confirmer la suppression</Button>)
+
+            axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': elem.id}), data: {} })
+                .then(function (response) {
+                    setData(List.updateDataMuta(elem, 'delete', data, SORTER));
+                    setElementToDelete(null);
+                    deleteRef.current.handleClose();
+                })
+                .catch(function (error) { Formulaire.displayErrors(null, error); })
+                .then(function () { setLoad(false) })
+            ;
+        }
+    }
 
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
@@ -100,11 +142,18 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
                                       key={month + "-" + (element ? element.id : 0)} />
                 </div>
                 <div className="col-2">
-                    <BudgetList data={data} onEdit={handleEdit} />
+                    <BudgetList data={data} onEdit={handleEdit} onModal={handleModal} />
                 </div>
             </div>
         </div>
 
+        {createPortal(
+            <Modal ref={deleteRef} identifiant="deleteItem" maxWidth={568} title="Supprimer un élément"
+                 content={<p>Souhaitez-vous supprimer définitivement : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
+                 footer={null}
+            />
+            , document.body)
+        }
     </div>
 }
 

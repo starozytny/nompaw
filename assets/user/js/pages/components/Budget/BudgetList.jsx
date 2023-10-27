@@ -4,7 +4,7 @@ import { Alert } from "@commonComponents/Elements/Alert";
 
 import { BudgetItem } from "@userPages/Budget/BudgetItem";
 
-export function BudgetList ({ data, onEdit })
+export function BudgetList ({ data, onEdit, onModal })
 {
     return <div className="list">
         <div className="list-table">
@@ -22,7 +22,7 @@ export function BudgetList ({ data, onEdit })
 
                 {data.length > 0
                     ? data.map(elem => {
-                        return <BudgetItem elem={elem} onEdit={onEdit} key={elem.id} />
+                        return <BudgetItem elem={elem} onEdit={onEdit} onModal={onModal} key={elem.id} />
                     })
                     : <Alert>Aucune donnée enregistrée.</Alert>
                 }

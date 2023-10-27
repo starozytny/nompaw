@@ -4,9 +4,8 @@ import Sanitaze from '@commonFunctions/sanitaze';
 
 import { ButtonIcon } from "@commonComponents/Elements/Button";
 
-export function BudgetItem ({ elem, onEdit })
+export function BudgetItem ({ elem, onEdit, onModal })
 {
-    console.log(elem);
     return <div className={`item${!elem.isActive ? " item-prev" : ""}`}>
         <div className="item-content">
             <div className="item-infos">
@@ -19,7 +18,7 @@ export function BudgetItem ({ elem, onEdit })
                 </div>
                 <div className="col-2">
                     <div className="name"><span>{elem.name}</span></div>
-                    {!elem.isActive && <div class="badge badge-disabled">Prévisionnel</div>}
+                    {!elem.isActive && <div className="badge badge-disabled">Prévisionnel</div>}
                 </div>
                 <div className="col-3">
                     <div className={`type-${elem.type}`}>
@@ -28,7 +27,7 @@ export function BudgetItem ({ elem, onEdit })
                 </div>
                 <div className="col-4 actions">
                     <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
-                    <ButtonIcon outline={true} icon="trash" onClick={null}>Supprimer</ButtonIcon>
+                    <ButtonIcon outline={true} icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
                 </div>
             </div>
         </div>
