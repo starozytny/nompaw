@@ -2,7 +2,9 @@
 
 namespace App\Controller\User\Budget;
 
+use App\Entity\Budget\BuCategory;
 use App\Entity\Budget\BuRecurrent;
+use App\Repository\Budget\BuCategoryRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,15 +21,28 @@ class RecurrenceController extends AbstractController
     }
 
     #[Route('/ajouter', name: 'create')]
-    public function create(): Response
+    public function create(BuCategoryRepository $categoryRepository, SerializerInterface $serializer): Response
     {
-        return $this->render('user/pages/budget/recurrences/create.html.twig');
+        $categories  = $categoryRepository->findBy(['user' => $this->getUser()]);
+        $categories = $serializer->serialize($categories, 'json', ['groups' => BuCategory::SELECT]);
+
+        return $this->render('user/pages/budget/recurrences/create.html.twig', [
+            'categories' => $categories
+        ]);
     }
 
     #[Route('/{id}', name: 'update', options: ['expose' => true])]
-    public function update(BuRecurrent $elem, SerializerInterface $serializer): Response
+    public function update(BuRecurrent $elem, BuCategoryRepository $categoryRepository, SerializerInterface $serializer): Response
     {
-        $obj = $serializer->serialize($elem, 'json', ['groups' => BuRecurrent::FORM]);
-        return $this->render('user/pages/budget/recurrences/update.html.twig', ['elem' => $elem, 'obj' => $obj]);
+        $categories  = $categoryRepository->findBy(['user' => $this->getUser()]);
+
+        $obj        = $serializer->serialize($elem,       'json', ['groups' => BuRecurrent::FORM]);
+        $categories = $serializer->serialize($categories, 'json', ['groups' => BuCategory::SELECT]);
+
+        return $this->render('user/pages/budget/recurrences/update.html.twig', [
+            'elem' => $elem,
+            'obj' => $obj,
+            'categories' => $categories
+        ]);
     }
 }

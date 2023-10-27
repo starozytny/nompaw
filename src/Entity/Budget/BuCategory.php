@@ -17,15 +17,15 @@ class BuCategory
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['bucat_select', 'buitem_list'])]
+    #[Groups(['bucat_select', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['bucat_select', 'buitem_list'])]
+    #[Groups(['bucat_select', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?int $type = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['bucat_select', 'buitem_list'])]
+    #[Groups(['bucat_select', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

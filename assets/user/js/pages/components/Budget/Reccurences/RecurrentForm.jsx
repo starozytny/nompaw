@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import axios   from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import {Checkbox, Input, InputView, Radiobox} from "@commonComponents/Elements/Fields";
+import { Checkbox, Input, InputView, Radiobox, SelectCustom } from "@commonComponents/Elements/Fields";
 import { Button } from "@commonComponents/Elements/Button";
 
 import Formulaire from "@commonFunctions/formulaire";
@@ -17,7 +17,7 @@ const URL_UPDATE_ELEMENT    = "intern_api_recurrences_update";
 const TEXT_CREATE           = "Ajouter la récurrence";
 const TEXT_UPDATE           = "Enregistrer les modifications";
 
-export function RecurrentFormulaire ({ context, element })
+export function RecurrentFormulaire ({ context, categories, element })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -29,10 +29,13 @@ export function RecurrentFormulaire ({ context, element })
 
     let form = <Form
         context={context}
+        categories={categories}
         url={url}
+
         type={element ? Formulaire.setValue(element.type) : 0}
         price={element ? Formulaire.setValue(element.price) : ""}
         name={element ? Formulaire.setValue(element.name) : ""}
+        category={element && element.category ? Formulaire.setValue(element.category.id) : ""}
         months={element ? Formulaire.setValue(element.months) : [1,2,3,4,5,6,7,8,9,10,11,12]}
         initYear={element ? Formulaire.setValue(element.initYear) : today.getFullYear()}
         initMonth={element ? Formulaire.setValue(element.initMonth) : today.getMonth() + 1}
@@ -49,12 +52,15 @@ class Form extends Component {
             type: props.type,
             price: props.price,
             name: props.name,
+            category: props.category,
             months: props.months,
             initYear: props.initYear,
             initMonth: props.initMonth,
             errors: [],
             loadData: false,
         }
+
+        this.select = React.createRef();
     }
 
     handleChange = (e) => {
@@ -73,7 +79,17 @@ class Form extends Component {
             value = Inputs.textNumericInput(value, this.state[name]);
         }
 
+        if(name === "type"){
+            this.setState({ category: "" })
+            this.select.current.handleClose(null, "")
+        }
+
         this.setState({[name]: value})
+    }
+
+    handleSelect = (name, value, displayValue) => {
+        this.setState({ [name]: value });
+        this.select.current.handleClose(null, displayValue);
     }
 
     handleSubmit = (e) => {
@@ -114,8 +130,8 @@ class Form extends Component {
     }
 
     render () {
-        const { context } = this.props;
-        const { errors, loadData, type, price, name, months, initYear, initMonth } = this.state;
+        const { context, categories } = this.props;
+        const { errors, loadData, type, price, name, category, months, initYear, initMonth } = this.state;
 
         let monthItems = [
             { value: 1, label: 'Janvier',        identifiant: 'Jan.' },
@@ -155,7 +171,19 @@ class Form extends Component {
 
         let typeString = ['Dépense', 'Revenu', 'Economie'];
 
-        let params = { errors: errors, onChange: this.handleChange }
+        let categoryItems = [{ value: "", label: "Aucun", inputName: "", identifiant: "cat-empty"}], categoryName = "";
+        categories.forEach(cat => {
+            if(cat.type === parseInt(type)){
+                if(cat.id === category){
+                    categoryName = cat.name;
+                }
+                categoryItems.push({ value: cat.id, label: cat.name, inputName: cat.name, identifiant: "cat-" + cat.id})
+            }
+        })
+
+        let params = { errors: errors, onChange: this.handleChange };
+        let paramsInput0 = {...params, ...{ onChange: this.handleChange }}
+        let paramsInput1 = {...params, ...{ onClick: this.handleSelect }}
 
         return <>
             <form onSubmit={this.handleSubmit}>
@@ -167,7 +195,7 @@ class Form extends Component {
                         <div className="line-col-2">
                             <div className="line">
                                 {context === "create" ? <>
-                                        <Radiobox items={typeItems} identifiant="type" valeur={type} {...params}>Type</Radiobox>
+                                        <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}>Type</Radiobox>
                                     </>
                                     : <>
                                         <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
@@ -176,13 +204,20 @@ class Form extends Component {
                             </div>
 
                             <div className="line line-2">
-                                <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
-                                <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                                <Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
+                                <Input identifiant="price" valeur={price} {...paramsInput0}>Prix</Input>
+                            </div>
+
+                            <div className="line">
+                                <SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}
+                                              items={categoryItems} {...paramsInput1}>
+                                    Catégorie
+                                </SelectCustom>
                             </div>
 
                             <div className="line">
                                 {context === "create" ? <>
-                                        <Checkbox items={monthItems} identifiant="months" valeur={months} {...params}>
+                                        <Checkbox items={monthItems} identifiant="months" valeur={months} {...paramsInput0}>
                                             Pour quel(s) mois ?
                                         </Checkbox>
                                     </>

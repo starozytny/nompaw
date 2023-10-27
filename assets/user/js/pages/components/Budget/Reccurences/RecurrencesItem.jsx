@@ -29,10 +29,11 @@ export function RecurrencesItem ({ elem, highlight, onModal })
                     <div className={"badge badge-type-" + elem.type}>{elem.typeString}</div>
                 </div>
                 <div className="col-2">
-                    <div>{elem.name}</div>
-                    <div class="sub">
+                    <div style={{marginBottom: '4px'}}>{elem.name}</div>
+                    <div class="sub" style={{marginBottom: '8px'}}>
                         Débute le {elem.initMonth}/{elem.initYear}.
                     </div>
+                    {elem.category && <div className={`badge badge-type-${elem.category.type}`}>{elem.category.name}</div>}
                 </div>
                 <div className="col-3">
                     <div className={`type-${elem.type}`}>

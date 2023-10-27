@@ -24,10 +24,10 @@ if(el){
 
 el = document.getElementById("recurrences_create");
 if(el){
-    createRoot(el).render(<RecurrentFormulaire context="create" element={null} />)
+    createRoot(el).render(<RecurrentFormulaire context="create" categories={JSON.parse(el.dataset.categories)} element={null} />)
 }
 
 el = document.getElementById("recurrences_update");
 if(el){
-    createRoot(el).render(<RecurrentFormulaire context="update"  element={JSON.parse(el.dataset.obj)} />)
+    createRoot(el).render(<RecurrentFormulaire context="update" categories={JSON.parse(el.dataset.categories)} element={JSON.parse(el.dataset.obj)} />)
 }

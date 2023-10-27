@@ -85,6 +85,11 @@ class Form extends Component {
             value = Inputs.dateInput(e, picker, this.state[name]);
         }
 
+        if(name === "type"){
+            this.setState({ category: "" })
+            this.select.current.handleClose(null, "")
+        }
+
         this.setState({[name]: value})
     }
 

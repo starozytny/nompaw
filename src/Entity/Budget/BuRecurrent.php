@@ -46,6 +46,7 @@ class BuRecurrent extends DataEntity
     private ?int $initMonth = null;
 
     #[ORM\ManyToOne(inversedBy: 'recurrents')]
+    #[Groups(['burecu_list', 'burecu_form'])]
     private ?BuCategory $category = null;
 
     #[ORM\ManyToOne(inversedBy: 'buRecurrents')]
