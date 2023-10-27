@@ -23,6 +23,9 @@
         path: path('user_birthdays_index'), matchRoute: [
             'user_birthdays_index', 'user_birthdays_read', 'user_birthdays_create', 'user_birthdays_update']
     },
+    { name: "Planificateur", icon: "calculator",
+        path: path('user_budget_index', {'year': 'now'|date('Y')}), matchRoute: ['user_budget_index']
+    },
     { name: "Mon profil", icon: "user-octagon",
         path: path('user_profil_index'), matchRoute: ['user_profil_index', 'user_profil_update']
     },
@@ -32,9 +35,6 @@
 
  {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
      {% set menu_bottom = menu_bottom | merge([
-         { name: "Planificateur", icon: "heart",
-             path: path('user_budget_index', {'year': 'now'|date('Y')}), matchRoute: ['user_budget_index']
-         },
          { name: "Espace admin", icon: "earth",
              path: path('admin_homepage'), matchRoute: ['admin_homepage']
          },
