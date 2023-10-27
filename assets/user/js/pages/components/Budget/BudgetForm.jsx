@@ -136,7 +136,7 @@ class Form extends Component {
 
         return <>
             <form onSubmit={this.handleSubmit}>
-                <div className="line line-2">
+                <div className="line line-2 line-real">
                     <Radiobox items={typeItems} identifiant="type" valeur={type} {...params}>Type</Radiobox>
                     <Checkbox isSwitcher={true} items={activeItems} identifiant="isActive" valeur={isActive} {...params}>
                         Réel ?

@@ -141,7 +141,6 @@ function Months ({ active, onSelect, useShortName, totaux }) {
     ];
 
     let today = new Date();
-    console.log(today.getMonth())
 
     let items = data.map(elem => {
         let activeMonth = elem.id === active ? " active" : "";
