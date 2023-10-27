@@ -8,7 +8,7 @@ export function BudgetList ({ data, onEdit })
 {
     return <div className="list">
         <div className="list-table">
-            <div className="items">
+            <div className="items items-budget">
                 <div className="item item-header">
                     <div className="item-content">
                         <div className="item-infos">
