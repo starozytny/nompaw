@@ -72,7 +72,8 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
 
         <div className="budget-planning">
             <Year year={year} yearMin={parseInt(yearMin)} />
-            <Months active={month} onSelect={setMonth} useShortName={false} totaux={totaux} />
+            <Months active={month} onSelect={setMonth} totaux={totaux}
+                    useShortName={window.matchMedia("(max-width: 768px)").matches} />
         </div>
 
         <div className="budget">
@@ -126,18 +127,18 @@ function Year ({ year, yearMin }){
 
 function Months ({ active, onSelect, useShortName, totaux }) {
     let data = [
-        { id: 1, name: 'Janvier',        shortName: 'Jan' },
-        { id: 2, name: 'Février',        shortName: 'Fev' },
-        { id: 3, name: 'Mars',           shortName: 'Mar' },
-        { id: 4, name: 'Avril',          shortName: 'Avr' },
-        { id: 5, name: 'Mai',            shortName: 'Mai' },
-        { id: 6, name: 'Juin',           shortName: 'Jui' },
-        { id: 7, name: 'Juillet',        shortName: 'Jui' },
-        { id: 8, name: 'Août',           shortName: 'Aoû' },
-        { id: 9, name: 'Septembre',      shortName: 'Sep' },
-        { id: 10, name: 'Octobre',       shortName: 'Oct' },
-        { id: 11, name: 'Novembre',      shortName: 'Nov' },
-        { id: 12, name: 'Décembre',      shortName: 'Dèc' },
+        { id: 1, name: 'Janvier',        shortName: 'Jan.' },
+        { id: 2, name: 'Février',        shortName: 'Fev.' },
+        { id: 3, name: 'Mars',           shortName: 'Mar.' },
+        { id: 4, name: 'Avril',          shortName: 'Avr.' },
+        { id: 5, name: 'Mai',            shortName: 'Mai.' },
+        { id: 6, name: 'Juin',           shortName: 'Jui.' },
+        { id: 7, name: 'Juillet',        shortName: 'Jui.' },
+        { id: 8, name: 'Août',           shortName: 'Aoû.' },
+        { id: 9, name: 'Septembre',      shortName: 'Sep.' },
+        { id: 10, name: 'Octobre',       shortName: 'Oct.' },
+        { id: 11, name: 'Novembre',      shortName: 'Nov.' },
+        { id: 12, name: 'Décembre',      shortName: 'Dèc.' },
     ];
 
     let today = new Date();
