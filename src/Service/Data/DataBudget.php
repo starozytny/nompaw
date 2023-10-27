@@ -3,6 +3,7 @@
 namespace App\Service\Data;
 
 use App\Entity\Budget\BuItem;
+use App\Entity\Main\User;
 use App\Service\SanitizeData;
 
 class DataBudget
@@ -13,7 +14,6 @@ class DataBudget
 
     public function setDataItem(BuItem $obj, $data): BuItem
     {
-        dump($data);
         return ($obj)
             ->setYear($this->sanitizeData->setIntValue($data->year))
             ->setMonth($this->sanitizeData->setIntValue($data->month))
@@ -22,6 +22,14 @@ class DataBudget
             ->setName($this->sanitizeData->trimData($data->name))
             ->setIsActive((int) $data->isActive)
             ->setDateAt($this->sanitizeData->createDatePicker($data->dateAt))
+        ;
+    }
+
+    public function setDataInit(User $obj, $data): User
+    {
+        return ($obj)
+            ->setBudgetInit($this->sanitizeData->setFloatValue($data->total))
+            ->setBudgetYear((new \DateTime())->format('Y'))
         ;
     }
 }

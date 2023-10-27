@@ -5,6 +5,10 @@
 @import "./components/budget/planning";
 @import "./components/budget/card";
 
+.budget-init-infos{
+  margin-bottom: var(--espaceDiv);
+}
+
 .budget, .budget > .col-2{
   @include flex(column, flex-start, flex-start, var(--espaceDiv));
 }

@@ -70,7 +70,7 @@ class Form extends Component {
         }
 
         if(name === "price"){
-            value = Inputs.textNumericWithMinusInput(value, this.state.price);
+            value = Inputs.textMoneyMinusInput(value, this.state.price);
         }
 
         if(name === "dateAt"){

@@ -4,11 +4,18 @@
 {% set page_subtitle %}Planifie ton budget au cours de l'année{% endset %}
 
 {% block main_content %}
-    <div id="budget"
-         data-donnees="{{ donnees }}"
-         data-y="{{ year }}"
-         data-m="{{ month }}"
-    >
-        {% include "layout/components/loader.html.twig" %}
-    </div>
+    {% if app.user.budgetInit != null %}
+        <div id="budget"
+             data-donnees="{{ donnees }}"
+             data-y="{{ year }}"
+             data-m="{{ month }}"
+
+        >
+            {% include "layout/components/loader.html.twig" %}
+        </div>
+    {% else %}
+        <div id="budget_init">
+            {% include "layout/components/loader.html.twig" %}
+        </div>
+    {% endif %}
 {% endblock %}

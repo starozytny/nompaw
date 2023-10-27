@@ -191,6 +191,12 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Mail::class)]
     private Collection $mails;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $budgetYear = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $budgetInit = null;
+
     /**
      * @throws Exception
      */
@@ -1135,6 +1141,30 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
                 $mail->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getBudgetYear(): ?int
+    {
+        return $this->budgetYear;
+    }
+
+    public function setBudgetYear(?int $budgetYear): static
+    {
+        $this->budgetYear = $budgetYear;
+
+        return $this;
+    }
+
+    public function getBudgetInit(): ?float
+    {
+        return $this->budgetInit;
+    }
+
+    public function setBudgetInit(?float $budgetInit): static
+    {
+        $this->budgetInit = $budgetInit;
 
         return $this;
     }
