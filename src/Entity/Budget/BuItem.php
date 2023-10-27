@@ -59,6 +59,7 @@ class BuItem extends DataEntity
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'buItems')]
+    #[Groups(['buitem_list'])]
     private ?BuCategory $category = null;
 
     #[ORM\Column(nullable: true)]

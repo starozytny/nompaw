@@ -4,6 +4,7 @@ namespace App\Controller\InternApi\Budget;
 
 use App\Entity\Budget\BuItem;
 use App\Entity\Enum\Budget\TypeType;
+use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Budget\BuItemRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataBudget;
@@ -18,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ItemController extends AbstractController
 {
     public function submitForm($type, BuItemRepository $repository, BuItem $obj, Request $request, ApiResponse $apiResponse,
-                               ValidatorService $validator, DataBudget $dataEntity): JsonResponse
+                               ValidatorService $validator, DataBudget $dataEntity, BuCategoryRepository $categoryRepository): JsonResponse
     {
         $data = json_decode($request->getContent());
         if ($data === null) {
@@ -27,6 +28,9 @@ class ItemController extends AbstractController
 
         $obj = $dataEntity->setDataItem($obj, $data);
         $obj->setUser($this->getUser());
+
+        $category = $categoryRepository->findOneBy(['id' => $data->category]);
+        $obj->setCategory($category);
 
         if($type == "update") {
             $obj->setUpdatedAt(new \DateTime());
@@ -43,16 +47,16 @@ class ItemController extends AbstractController
 
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataBudget $dataEntity, BuItemRepository $repository): Response
+                           DataBudget $dataEntity, BuItemRepository $repository, BuCategoryRepository $categoryRepository): Response
     {
-        return $this->submitForm("create", $repository, new BuItem(), $request, $apiResponse, $validator, $dataEntity);
+        return $this->submitForm("create", $repository, new BuItem(), $request, $apiResponse, $validator, $dataEntity, $categoryRepository);
     }
 
     #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'PUT')]
     public function update(Request $request, BuItem $obj, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataBudget $dataEntity, BuItemRepository $repository): Response
+                           DataBudget $dataEntity, BuItemRepository $repository, BuCategoryRepository $categoryRepository): Response
     {
-        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity);
+        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $categoryRepository);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

@@ -24,7 +24,7 @@ const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
 const URL_ACTIVE_RECURRENCE = "intern_api_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_recurrences_trash"
 
-export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
+export function Budget ({ donnees, categories, y, m, yearMin, initTotal, recurrences })
 {
     const deleteRef = useRef(null)
     const trashRef = useRef(null)
@@ -172,10 +172,8 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
     }
 
     // add only recurrences eligible
-    console.log(recurrencesData);
     recurrencesData.forEach(r => {
         if(year > r.initYear || (r.initYear === year && month >= r.initMonth) ){
-            console.log(r.months, month);
             if(r.months.includes(month)){
                 nRecurrencesData.push(r);
             }
@@ -263,7 +261,8 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
             </div>
             <div className="col-2">
                 <div className="col-1">
-                    <BudgetFormulaire context={element ? "update" : "create"} element={element} year={year} month={month}
+                    <BudgetFormulaire context={element ? "update" : "create"} categories={JSON.parse(categories)}
+                                      element={element} year={year} month={month}
                                       onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
                                       key={month + "-" + (element ? element.id : 0)} />
                 </div>

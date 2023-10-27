@@ -18,8 +18,11 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel })
                 </div>
                 <div className="col-2">
                     <div className="name"><span>{elem.name}</span></div>
-                    {!elem.isActive && <div className="badge badge-0" onClick={() => onActive(elem)}>Prévisionnel</div>}
-                    {elem.recurrenceId && <div className="badge badge-0" style={{cursor: "initial"}}>Récurrence</div>}
+                    <div className="badges">
+                        {!elem.isActive && <div className="badge badge-action badge-0" onClick={() => onActive(elem)}>Prévisionnel</div>}
+                        {elem.recurrenceId && <div className="badge badge-0">Récurrence</div>}
+                        {elem.category && <div className={`badge badge-type-${elem.category.type}`}>{elem.category.name}</div>}
+                    </div>
                 </div>
                 <div className="col-3">
                     <div className={`type-${elem.type}`}>

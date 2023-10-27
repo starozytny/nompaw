@@ -325,7 +325,7 @@ export class SelectCustom extends Component {
             <div className="select-input">
                 <input ref={this.input} type="text" name="inputValue" id="inputValue" value={inputValue}
                        placeholder={placeholder} onChange={this.handleChange} onKeyDown={this.handleBlur}
-                       autoComplete={"new-" + identifiant} key={init} />
+                       autoComplete="off" key={init} />
             </div>
             <div className="select-choices" id={"select-choices-" + identifiant}>
                 <div className="items">{nItems}</div>

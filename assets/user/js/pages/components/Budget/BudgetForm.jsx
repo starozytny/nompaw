@@ -7,7 +7,7 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import moment from "moment/moment";
 import 'moment/locale/fr';
 
-import {Input, Radiobox, Checkbox, InputView} from "@commonComponents/Elements/Fields";
+import { Input, Radiobox, Checkbox, InputView, SelectCustom } from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 
 import Formulaire           from "@commonFunctions/formulaire";
@@ -17,7 +17,7 @@ import Inputs               from "@commonFunctions/inputs";
 const URL_CREATE_ELEMENT    = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT    = "intern_api_budget_items_update";
 
-export function BudgetFormulaire ({ context, element, year, month, onCancel, onUpdateList })
+export function BudgetFormulaire ({ context, categories, element, year, month, onCancel, onUpdateList })
 {
     let url = Routing.generate(URL_CREATE_ELEMENT);
 
@@ -27,12 +27,15 @@ export function BudgetFormulaire ({ context, element, year, month, onCancel, onU
 
     let form = <Form
         context={context}
+        categories={categories}
         url={url}
+
         year={element ? Formulaire.setValue(element.year) : year}
         month={element ? Formulaire.setValue(element.month) : month}
         type={element ? Formulaire.setValue(element.type) : 0}
         price={element ? Formulaire.setValue(element.price) : ""}
         name={element ? Formulaire.setValue(element.name) : ""}
+        category={element && element.category ? Formulaire.setValue(element.category.id) : ""}
         isActive={element ? Formulaire.setValue(element.isActive) : false}
         dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
         recurrenceId={element ? Formulaire.setValue(element.recurrenceId) : ""}
@@ -54,11 +57,14 @@ class Form extends Component {
             type: props.type,
             price: props.price,
             name: props.name,
+            category: props.category,
             isActive: props.isActive ? [1] : [0],
             dateAt: props.dateAt,
             errors: [],
             load: false
         }
+
+        this.select = React.createRef();
     }
 
     componentDidMount = () => { Inputs.initDateInput(this.handleChangeDate, this.handleChange, "") }
@@ -83,6 +89,11 @@ class Form extends Component {
     }
 
     handleChangeDate = (name, value) => { this.setState({ [name]: value }) }
+
+    handleSelect = (name, value, displayValue) => {
+        this.setState({ [name]: value });
+        this.select.current.handleClose(null, displayValue);
+    }
 
     handleSubmit = (e) => {
         e.preventDefault();
@@ -124,8 +135,8 @@ class Form extends Component {
     }
 
     render () {
-        const { context, onCancel, recurrenceId } = this.props;
-        const { errors, load, type, price, name, isActive, dateAt } = this.state;
+        const { context, categories, onCancel, recurrenceId } = this.props;
+        const { errors, load, type, price, name, category, isActive, dateAt } = this.state;
 
         let typeItems = [
             { value: 0,  label: 'Dépense',   identifiant: 'it-depense' },
@@ -137,7 +148,19 @@ class Form extends Component {
 
         let activeItems = [ { value: 1, label: 'Oui', identifiant: 'oui-1' } ]
 
-        let params  = { errors: errors, onChange: this.handleChange };
+        let categoryItems = [{ value: "", label: "Aucun", inputName: "", identifiant: "cat-empty"}], categoryName = "";
+        categories.forEach(cat => {
+            if(cat.type === parseInt(type)){
+                if(cat.id === category){
+                    categoryName = cat.name;
+                }
+                categoryItems.push({ value: cat.id, label: cat.name, inputName: cat.name, identifiant: "cat-" + cat.id})
+            }
+        })
+
+        let params = { errors: errors, onChange: this.handleChange };
+        let paramsInput0 = {...params, ...{ onChange: this.handleChange }}
+        let paramsInput1 = {...params, ...{ onClick: this.handleSelect }}
 
         return <>
             <form onSubmit={this.handleSubmit}>
@@ -147,8 +170,8 @@ class Form extends Component {
                             <InputView valeur="Actif" errors={isActive}>Actif</InputView>
                         </>
                         : <>
-                            <Radiobox items={typeItems} identifiant="type" valeur={type} {...params}>Type</Radiobox>
-                            <Checkbox isSwitcher={true} items={activeItems} identifiant="isActive" valeur={isActive} {...params}>
+                            <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}>Type</Radiobox>
+                            <Checkbox isSwitcher={true} items={activeItems} identifiant="isActive" valeur={isActive} {...paramsInput0}>
                                 Réel ?
                             </Checkbox>
                         </>
@@ -156,11 +179,17 @@ class Form extends Component {
 
                 </div>
                 <div className="line line-2">
-                    <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
-                    <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+                    <Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
+                    <Input identifiant="price" valeur={price} {...paramsInput0}>Prix</Input>
                 </div>
                 <div className="line">
-                    <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
+                    <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
+                </div>
+                <div className="line">
+                    <SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}
+                                  items={categoryItems} {...paramsInput1}>
+                        Catégorie
+                    </SelectCustom>
                 </div>
 
                 <div className="line-buttons">

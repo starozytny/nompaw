@@ -3,6 +3,7 @@
 namespace App\Command\Donnees;
 
 use App\Entity\Budget\BuCategory;
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Service\Data\DataBudget;
 use App\Service\DatabaseService;
@@ -39,19 +40,19 @@ class DonneesBudgetCategoryCommand extends Command
         $io->title('Initialisation des données');
         $data =  [
             [
-                'type' => 0,
+                'type' => TypeType::Expense,
                 'name' => "Dépenses personnelles",
                 'icon' => "user",
                 'goal' => null,
             ],
             [
-                'type' => 0,
+                'type' => TypeType::Income,
                 'name' => "Salaire",
                 'icon' => "credit-card",
                 'goal' => null,
             ],
             [
-                'type' => 0,
+                'type' => TypeType::Saving,
                 'name' => "Fun",
                 'icon' => "time",
                 'goal' => 20000,

@@ -7,19 +7,25 @@ use App\Repository\Budget\BuCategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BuCategoryRepository::class)]
 class BuCategory
 {
+    const SELECT = ['bucat_select'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['bucat_select', 'buitem_list'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['bucat_select', 'buitem_list'])]
     private ?int $type = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['bucat_select', 'buitem_list'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

@@ -1,9 +1,14 @@
 .items-budget{
 
+  .badges{
+    @include flex(row, flex-start, flex-start, 4px);
+    flex-wrap: wrap;
+  }
+
   $data:
-          "0" var(--dangerOpacity4) var(--danger),
-          "1" var(--primaryOpacity4) var(--primary),
-          "2" var(--warningOpacity4) var(--warning),
+          "0" var(--dangerOpacity1) var(--danger),
+          "1" var(--primaryOpacity1) var(--primary),
+          "2" var(--warningOpacity1) var(--warning),
   ;
 
   @each $name, $bg, $txt in $data {
@@ -19,6 +24,9 @@
   .badge.badge-0{
     background-color: var(--overlay);
     color: var(--greyOpacity4);
+  }
+
+  .badge-action{
     cursor: pointer;
   }
 

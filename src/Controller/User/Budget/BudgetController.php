@@ -2,10 +2,12 @@
 
 namespace App\Controller\User\Budget;
 
+use App\Entity\Budget\BuCategory;
 use App\Entity\Budget\BuItem;
 use App\Entity\Budget\BuRecurrent;
 use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
+use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Budget\BuItemRepository;
 use App\Repository\Budget\BuRecurrentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +19,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 class BudgetController extends AbstractController
 {
     #[Route('/planning/{year}', name: 'index', options: ['expose' => true])]
-    public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository, SerializerInterface $serializer): Response
+    public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
+                         BuCategoryRepository $categoryRepository, SerializerInterface $serializer): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -26,6 +29,7 @@ class BudgetController extends AbstractController
         }
 
         $data        = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
+        $categories  = $categoryRepository->findBy(['user' => $user]);
         $recurrences = $recurrentRepository->findBy(['user' => $user]);
 
         $totalInit = $user->getBudgetInit();
@@ -85,6 +89,7 @@ class BudgetController extends AbstractController
         }
 
         $data        = $serializer->serialize($data,        'json', ['groups' => BuItem::LIST]);
+        $categories  = $serializer->serialize($categories,  'json', ['groups' => BuCategory::SELECT]);
         $recurrences = $serializer->serialize($recurrences, 'json', ['groups' => BuRecurrent::LIST]);
 
         $today = new \DateTime();
@@ -93,6 +98,7 @@ class BudgetController extends AbstractController
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
             'donnees' => $data,
+            'categories' => $categories,
             'recurrences' => $recurrences,
             'initTotal' => $totalInit,
         ]);
