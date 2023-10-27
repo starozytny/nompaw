@@ -21,7 +21,7 @@ const URL_INDEX_PAGE = "user_budget_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
 
-export function Budget ({ donnees, y, m, yearMin, initTotal })
+export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
 {
     const deleteRef = useRef(null)
     const [year, setYear] = useState(parseInt(y))
@@ -84,10 +84,12 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
         }
     }
 
+    let recurrencesData = JSON.parse(recurrences);
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
     let totalExpense = 0, totalIncome = 0, totalSaving = 0;
+    let nData = [];
     data.forEach(d => {
         if(d.month === month){
             switch (d.type){
@@ -96,6 +98,8 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
                 case 2: totalSaving += d.price; break;
                 default:break;
             }
+
+            nData.push(d);
         }
 
         switch (d.type){
@@ -121,7 +125,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
         { value: 3, name: "Economies",          total: totalSaving,   initial: null,    icon: "time" },
     ]
 
-    data.sort(SORTER);
+    nData.sort(SORTER);
 
     return <div className="page-default">
         <div className="budget-planning">
@@ -154,7 +158,8 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
                                       key={month + "-" + (element ? element.id : 0)} />
                 </div>
                 <div className="col-2">
-                    <BudgetList data={data} onEdit={handleEdit} onModal={handleModal} onActive={handleActive} />
+                    <BudgetList data={nData} recurrencesData={recurrencesData}
+                                onEdit={handleEdit} onModal={handleModal} onActive={handleActive} key={month} />
                 </div>
             </div>
         </div>

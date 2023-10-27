@@ -3,6 +3,7 @@
 namespace App\Controller\User\Budget;
 
 use App\Entity\Budget\BuItem;
+use App\Entity\Budget\BuRecurrent;
 use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuItemRepository;
@@ -45,10 +46,11 @@ class BudgetController extends AbstractController
             $totalInit = $totalInit + $totalIncome - $totalExpense;
         }
 
-        $data = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
-//        $data = $recurrentRepository->findBy(['user' => $user], ['dateAt' => 'DESC']);
+        $data        = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
+        $recurrences = $recurrentRepository->findBy(['user' => $user]);
 
-        $data = $serializer->serialize($data, 'json', ['groups' => BuItem::LIST]);
+        $data        = $serializer->serialize($data,        'json', ['groups' => BuItem::LIST]);
+        $recurrences = $serializer->serialize($recurrences, 'json', ['groups' => BuRecurrent::LIST]);
 
         $today = new \DateTime();
 
@@ -56,6 +58,7 @@ class BudgetController extends AbstractController
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
             'donnees' => $data,
+            'recurrences' => $recurrences,
             'initTotal' => $totalInit,
         ]);
     }
