@@ -55,15 +55,17 @@ class RecurrenceController extends AbstractController
     }
 
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'POST')]
-    public function create(Request $request, ApiResponse $apiResponse, ValidatorService $validator, DataBudget $dataEntity, BuRecurrentRepository $repository): Response
+    public function create(Request $request, ApiResponse $apiResponse, ValidatorService $validator,
+                           DataBudget $dataEntity, BuRecurrentRepository $repository, BuItemRepository $itemRepository): Response
     {
-        return $this->submitForm("create", $repository, new BuRecurrent(), $request, $apiResponse, $validator, $dataEntity);
+        return $this->submitForm("create", $repository, new BuRecurrent(), $request, $apiResponse, $validator, $dataEntity, $itemRepository);
     }
 
     #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'PUT')]
-    public function update(Request $request, BuRecurrent $obj, ApiResponse $apiResponse, ValidatorService $validator, DataBudget $dataEntity, BuRecurrentRepository $repository,): Response
+    public function update(Request $request, BuRecurrent $obj, ApiResponse $apiResponse, ValidatorService $validator,
+                           DataBudget $dataEntity, BuRecurrentRepository $repository, BuItemRepository $itemRepository): Response
     {
-        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity);
+        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $itemRepository);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

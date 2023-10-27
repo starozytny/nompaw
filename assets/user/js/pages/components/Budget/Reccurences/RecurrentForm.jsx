@@ -107,8 +107,7 @@ class Form extends Component {
                     .then(function (response) {
                         location.href = Routing.generate(URL_INDEX_ELEMENTS, {'h': response.data.id});
                     })
-                    .catch(function (error) { Formulaire.displayErrors(self, error); })
-                    .then(function () { Formulaire.loader(false); self.setState({ loadData: false }) })
+                    .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); self.setState({ loadData: false }) })
                 ;
             }
         }
