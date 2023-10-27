@@ -57,10 +57,4 @@ class BudgetController extends AbstractController
             'initTotal' => $totalInit,
         ]);
     }
-
-    #[Route('/recurrences', name: 'recurrences', options: ['expose' => true])]
-    public function recurrences(BuRecurrentRepository $repository, SerializerInterface $serializer): Response
-    {
-        return $this->render('user/pages/budget/recurrences.html.twig');
-    }
 }

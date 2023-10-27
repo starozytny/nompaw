@@ -2,29 +2,39 @@
 
 namespace App\Entity\Budget;
 
+use App\Entity\DataEntity;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuRecurrentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BuRecurrentRepository::class)]
-class BuRecurrent
+class BuRecurrent extends DataEntity
 {
+    const LIST = ['burecu_list'];
+    const FORM = ['burecu_form'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['burecu_list', 'burecu_form'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['burecu_list', 'burecu_form'])]
     private ?int $type = null;
 
     #[ORM\Column]
+    #[Groups(['burecu_list', 'burecu_form'])]
     private ?float $price = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['burecu_list', 'burecu_form'])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['burecu_list', 'burecu_form'])]
     private array $months = [];
 
     #[ORM\ManyToOne(inversedBy: 'recurrents')]
@@ -39,6 +49,11 @@ class BuRecurrent
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = $this->initNewDateImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -55,6 +70,22 @@ class BuRecurrent
         $this->type = $type;
 
         return $this;
+    }
+
+    #[Groups(['burecu_list'])]
+    public function getTypeIcon(): ?string
+    {
+        $values = ['minus', 'add', 'time'];
+
+        return $values[$this->type];
+    }
+
+    #[Groups(['burecu_list'])]
+    public function getTypeString(): ?string
+    {
+        $values = ['Dépense', 'Revenu', 'Economie'];
+
+        return $values[$this->type];
     }
 
     public function getPrice(): ?float

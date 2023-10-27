@@ -1,8 +1,20 @@
 .items-budget{
 
-  .type-0{ color: var(--danger); }
-  .type-1{ color: var(--primary); }
-  .type-2{ color: var(--warning); }
+  $data:
+          "0" var(--dangerOpacity4) var(--danger),
+          "1" var(--primaryOpacity4) var(--primary),
+          "2" var(--warningOpacity4) var(--warning),
+  ;
+
+  @each $name, $bg, $txt in $data {
+    .badge-type-#{$name} {
+      background: $bg;
+      color: $txt;
+    }
+    .type-#{$name} {
+      color: $txt;
+    }
+  }
 
   .badge.badge-0{
     background-color: var(--overlay);

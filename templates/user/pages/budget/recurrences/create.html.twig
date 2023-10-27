@@ -1,0 +1,12 @@
+{% extends 'user/pages/budget/recurrences/template.html.twig' %}
+
+{% set page_title %}Créer une récurrence{% endset %}
+{% set page_subtitle %}La récurrence sera automatiquement ajouter au planning à partir du mois en cours{% endset %}
+
+{% block main_content %}
+    {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_budget_recurrences_index') } %}
+
+    <div id="recurrences_create">
+        {% include "layout/components/loader.html.twig" %}
+    </div>
+{% endblock %}

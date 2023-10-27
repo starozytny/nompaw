@@ -3,6 +3,7 @@
 namespace App\Service\Data;
 
 use App\Entity\Budget\BuItem;
+use App\Entity\Budget\BuRecurrent;
 use App\Entity\Main\User;
 use App\Service\SanitizeData;
 
@@ -30,6 +31,16 @@ class DataBudget
         return ($obj)
             ->setBudgetInit($this->sanitizeData->setFloatValue($data->total))
             ->setBudgetYear((new \DateTime())->format('Y'))
+        ;
+    }
+
+    public function setDataRecurrent(BuRecurrent $obj, $data): BuRecurrent
+    {
+        return ($obj)
+            ->setType((int) $data->type)
+            ->setPrice($this->sanitizeData->setFloatValue($data->price))
+            ->setName($this->sanitizeData->trimData($data->name))
+            ->setMonths($data->months)
         ;
     }
 }
