@@ -181,7 +181,7 @@ class Form extends Component {
                         </div>
                     </div>
 
-                    <div className="line">
+                    {context === "create" && <div className="line">
                         <div className="line-col-1">
                             <div className="title">Début de la récurrence</div>
                             <div className="subtitle">La récurrence débute à quelle année et quel mois ?</div>
@@ -191,11 +191,13 @@ class Form extends Component {
                                 <Input identifiant="initYear" valeur={initYear} {...params}>Année</Input>
                                 <Radiobox items={monthItems2} identifiant="initMonth" valeur={initMonth} {...params}>Mois</Radiobox>
                             </div>
-                            {context === "update" && <div className="line">
-                                <Alert type="danger">Les récurrences <b>non activées</b> seront affectées par cette mise à jour.</Alert>
-                            </div>}
+
                         </div>
-                    </div>
+                    </div>}
+
+                    {context === "update" && <div className="line">
+                        <Alert type="danger">Les récurrences <b>non activées</b> seront affectées par cette mise à jour.</Alert>
+                    </div>}
                 </div>
 
                 <div className="line-buttons">
