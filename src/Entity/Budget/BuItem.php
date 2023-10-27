@@ -65,6 +65,9 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     private ?int $recurrenceId = null;
 
+    #[ORM\Column]
+    private ?int $lastType = null;
+
     public function __construct()
     {
         $this->createdAt = $this->initNewDateImmutable();
@@ -223,6 +226,18 @@ class BuItem extends DataEntity
     public function setRecurrenceId(?int $recurrenceId): static
     {
         $this->recurrenceId = $recurrenceId;
+
+        return $this;
+    }
+
+    public function getLastType(): ?int
+    {
+        return $this->lastType;
+    }
+
+    public function setLastType(int $lastType): static
+    {
+        $this->lastType = $lastType;
 
         return $this;
     }

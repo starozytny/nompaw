@@ -4,6 +4,7 @@ namespace App\Controller\InternApi\Budget;
 
 use App\Entity\Budget\BuItem;
 use App\Entity\Budget\BuRecurrent;
+use App\Entity\Enum\Budget\TypeType;
 use App\Repository\Budget\BuItemRepository;
 use App\Repository\Budget\BuRecurrentRepository;
 use App\Service\ApiResponse;
@@ -78,6 +79,28 @@ class RecurrentController extends AbstractController
 
         $obj = $dataEntity->setDataItemFromRecurrent(new BuItem(), $obj, $data);
         $obj->setUser($this->getUser());
+
+        $noErrors = $validator->validate($obj);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
+    }
+
+    #[Route('/trash/{id}', name: 'trash', options: ['expose' => true], methods: 'DELETE')]
+    public function trash(Request $request, BuRecurrent $obj, BuItemRepository $repository, ApiResponse $apiResponse,
+                          DataBudget $dataEntity, ValidatorService $validator): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $obj = $dataEntity->setDataItemFromRecurrent(new BuItem(), $obj, $data);
+        $obj->setUser($this->getUser());
+        $obj->setType(TypeType::Deleted);
 
         $noErrors = $validator->validate($obj);
         if ($noErrors !== true) {

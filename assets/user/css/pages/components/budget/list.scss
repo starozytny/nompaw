@@ -26,6 +26,13 @@
     opacity: 0.5;
   }
 
+  .item-trash{
+    .col-1, .col-2, .col-3{
+      text-decoration: line-through;
+      opacity: 0.3;
+    }
+  }
+
   .name{
     & + *{
       margin-top: var(--espaceEls);

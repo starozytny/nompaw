@@ -4,7 +4,7 @@ import { Alert } from "@commonComponents/Elements/Alert";
 
 import { BudgetItem, BudgetItemRecurrent } from "@userPages/Budget/BudgetItem";
 
-export function BudgetList ({ data, recurrencesData, onEdit, onModal, onActive, onActiveRecurrence })
+export function BudgetList ({ data, recurrencesData, onEdit, onModal, onActive, onCancel, onActiveRecurrence })
 {
     return <div className="list">
         <div className="list-table">
@@ -23,12 +23,11 @@ export function BudgetList ({ data, recurrencesData, onEdit, onModal, onActive, 
                 {data.length > 0 || recurrencesData.length > 0
                     ? <>
                         {recurrencesData.map(elem => {
-                            return <BudgetItemRecurrent key={elem.id} elem={elem}
-                                                        onEdit={onEdit} onModal={onModal} onActive={onActiveRecurrence} />
+                            return <BudgetItemRecurrent key={elem.id} elem={elem} onModal={onModal} onActive={onActiveRecurrence} />
                         })}
                         {data.map(elem => {
                             return <BudgetItem key={elem.id} elem={elem}
-                                               onEdit={onEdit} onModal={onModal} onActive={onActive} />
+                                               onEdit={onEdit} onModal={onModal} onActive={onActive} onCancel={onCancel} />
                         })}
                     </>
                     : <Alert>Aucune donnée enregistrée.</Alert>

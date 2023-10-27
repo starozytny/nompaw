@@ -3,6 +3,7 @@
 namespace App\Controller\InternApi\Budget;
 
 use App\Entity\Budget\BuItem;
+use App\Entity\Enum\Budget\TypeType;
 use App\Repository\Budget\BuItemRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataBudget;
@@ -57,6 +58,13 @@ class ItemController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
+        if($obj->getRecurrenceId()){
+            $obj->setType(TypeType::Deleted);
+            $repository->save($obj, true);
+
+            return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
+        }
+
         $repository->remove($obj, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }
@@ -65,6 +73,17 @@ class ItemController extends AbstractController
     public function active(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
         $obj->setIsActive(true);
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
+    }
+
+    #[Route('/cancel/{id}', name: 'cancel', options: ['expose' => true], methods: 'PUT')]
+    public function cancel(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
+    {
+        if($obj->getRecurrenceId()){
+            $obj->setType($obj->getLastType());
+        }
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponse($obj, BuItem::LIST);

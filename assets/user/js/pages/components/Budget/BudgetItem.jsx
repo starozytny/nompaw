@@ -4,9 +4,9 @@ import Sanitaze from '@commonFunctions/sanitaze';
 
 import { ButtonIcon } from "@commonComponents/Elements/Button";
 
-export function BudgetItem ({ elem, onEdit, onModal, onActive })
+export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel })
 {
-    return <div className={`item${!elem.isActive ? " item-prev" : ""}`}>
+    return <div className={`item${!elem.isActive ? " item-prev" : ""}${elem.type === 3 ? " item-trash" : ""}`}>
         <div className="item-content">
             <div className="item-infos">
                 <div className="col-1">
@@ -26,16 +26,22 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive })
                         <span className={`icon-${elem.typeIcon}`}></span> {Sanitaze.toFormatCurrency(elem.price)}
                     </div>
                 </div>
-                <div className="col-4 actions">
-                    <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
-                    <ButtonIcon outline={true} icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
+                <div className="col-4 actions" style={{textDecoration: 'initial'}}>
+                    {elem.type === 3 ? <>
+                            <ButtonIcon outline={true} icon="refresh1" onClick={() => onCancel(elem)} tooltipWidth={150}>Annuler la suppression</ButtonIcon>
+                        </>
+                        : <>
+                            <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
+                            <ButtonIcon outline={true} icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
+                        </>
+                    }
                 </div>
             </div>
         </div>
     </div>
 }
 
-export function BudgetItemRecurrent ({ elem, onEdit, onModal, onActive })
+export function BudgetItemRecurrent ({ elem, onModal, onActive })
 {
     return <div className="item item-prev">
         <div className="item-content">
@@ -57,7 +63,7 @@ export function BudgetItemRecurrent ({ elem, onEdit, onModal, onActive })
                     </div>
                 </div>
                 <div className="col-4 actions">
-                    <ButtonIcon outline={true} icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
+                    <ButtonIcon outline={true} icon="trash" onClick={() => onModal('trashRef', elem)}>Supprimer</ButtonIcon>
                 </div>
             </div>
         </div>

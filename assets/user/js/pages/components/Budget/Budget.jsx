@@ -20,11 +20,14 @@ const SORTER = Sort.compareDateAtInverseThenId;
 const URL_INDEX_PAGE = "user_budget_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
+const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
 const URL_ACTIVE_RECURRENCE = "intern_api_recurrences_active"
+const URL_TRASH_RECURRENCE = "intern_api_recurrences_trash"
 
 export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
 {
     const deleteRef = useRef(null)
+    const trashRef = useRef(null)
     const [year, setYear] = useState(parseInt(y))
     const [month, setMonth] = useState(parseInt(m))
     const [data, setData] = useState(JSON.parse(donnees))
@@ -49,6 +52,11 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
                 setElementToDelete(elem);
                 deleteRef.current.handleUpdateFooter(<Button type="danger" onClick={() => handleDelete(elem)}>Confirmer la suppression</Button>)
                 break;
+            case 'trashRef':
+                ref = trashRef;
+                setElementToDelete(elem);
+                trashRef.current.handleUpdateFooter(<Button type="danger" onClick={() => handleDeleteRecurrence(elem)}>Confirmer la suppression</Button>)
+                break;
             default:break;
         }
         if(ref){
@@ -63,7 +71,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
 
             axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': elem.id}), data: {} })
                 .then(function (response) {
-                    handleUpdateList(elem, "delete")
+                    handleUpdateList(response.data, elem.recurrenceId ? "update" : "delete")
                     setElementToDelete(null);
                     deleteRef.current.handleClose();
                 })
@@ -91,6 +99,35 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
 
             axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_RECURRENCE, {'id': elem.id}), data: {'year': year, 'month': month} })
                 .then(function (response) { handleUpdateList(response.data, "create") })
+                .catch(function (error) { Formulaire.displayErrors(null, error); })
+                .then(function () { setLoad(false) })
+            ;
+        }
+    }
+
+    let handleDeleteRecurrence = (elem) => {
+        if(!load){
+            setLoad(true)
+            trashRef.current.handleUpdateFooter(<Button type="danger" isLoader={true}>Confirmer la suppression</Button>)
+
+            axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, {'id': elem.id}), data: {'year': year, 'month': month} })
+                .then(function (response) {
+                    handleUpdateList(response.data, "create")
+                    setElementToDelete(null);
+                    trashRef.current.handleClose();
+                })
+                .catch(function (error) { Formulaire.displayErrors(null, error); })
+                .then(function () { setLoad(false) })
+            ;
+        }
+    }
+
+    let handleCancelTrash = (elem) => {
+        if(!load){
+            setLoad(true)
+
+            axios({ method: "PUT", url: Routing.generate(URL_CANCEL_ELEMENT, {'id': elem.id}), data: {} })
+                .then(function (response) { handleUpdateList(response.data, "update") })
                 .catch(function (error) { Formulaire.displayErrors(null, error); })
                 .then(function () { setLoad(false) })
             ;
@@ -225,7 +262,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
                 </div>
                 <div className="col-2">
                     <BudgetList data={nData} recurrencesData={nRecurrencesData}
-                                onEdit={handleEdit} onModal={handleModal} onActive={handleActive}
+                                onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
                                 onActiveRecurrence={handleActiveRecurrence} key={month} />
                 </div>
             </div>
@@ -234,6 +271,14 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
         {createPortal(
             <Modal ref={deleteRef} identifiant="deleteItem" maxWidth={568} title="Supprimer un élément"
                  content={<p>Souhaitez-vous supprimer définitivement : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
+                 footer={null}
+            />
+            , document.body)
+        }
+
+        {createPortal(
+            <Modal ref={trashRef} identifiant="trashRecurrence" maxWidth={568} title="Supprimer un élément"
+                 content={<p>Souhaitez-vous supprimer cet élément récurrent : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
                  footer={null}
             />
             , document.body)
