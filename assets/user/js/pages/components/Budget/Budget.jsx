@@ -29,8 +29,6 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
         setElement(elem);
     }
 
-    let totalInit = parseInt(yearMin) === year ? parseFloat(initTotal) : 0;
-
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
@@ -54,11 +52,11 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
 
     let totaux = [];
     for(let i = 0; i < 12 ; i++){
-        let tmpDispo = (i === 0 ? totalInit : 0) + totauxIncome[i] - totauxExpense[i];
+        let tmpDispo = (i === 0 ? parseFloat(initTotal) : 0) + totauxIncome[i] - totauxExpense[i];
         totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
     }
 
-    let initial = month !== 1 ? totaux[month - 2] : totalInit;
+    let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
     let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
 
     let cards = [
