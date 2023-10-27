@@ -9,6 +9,7 @@ import { Button } from "@commonComponents/Elements/Button";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Inputs from "@commonFunctions/inputs";
+import {Alert} from "@commonComponents/Elements/Alert";
 
 const URL_INDEX_ELEMENTS    = "user_budget_recurrences_index";
 const URL_CREATE_ELEMENT    = "intern_api_recurrences_create";
@@ -190,6 +191,9 @@ class Form extends Component {
                                 <Input identifiant="initYear" valeur={initYear} {...params}>Année</Input>
                                 <Radiobox items={monthItems2} identifiant="initMonth" valeur={initMonth} {...params}>Mois</Radiobox>
                             </div>
+                            {context === "update" && <div className="line">
+                                <Alert type="danger">Les récurrences <b>non activées</b> seront affectées par cette mise à jour.</Alert>
+                            </div>}
                         </div>
                     </div>
                 </div>
