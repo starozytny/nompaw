@@ -9,6 +9,7 @@ import { Pagination, TopSorterPagination } from "@commonComponents/Elements/Pagi
 import { LoaderElements } from "@commonComponents/Elements/Loader";
 import { Search }         from "@commonComponents/Elements/Search";
 import { Filter }         from "@commonComponents/Elements/Filter";
+import { ModalDelete }    from "@commonComponents/Shortcut/Modal";
 
 import { RecurrencesList } from "@userPages/Budget/Reccurences/RecurrencesList";
 
@@ -77,7 +78,7 @@ export class Recurrences extends Component {
 
     render () {
         const { highlight } = this.props;
-        const { sessionName, data, currentData, loadingData, perPage, currentPage, filters } = this.state;
+        const { sessionName, data, currentData, element, loadingData, perPage, currentPage, filters } = this.state;
 
         let filtersItems = [
             {value: 0, label: "Dépenses",  id: "f-0"},
@@ -106,6 +107,13 @@ export class Recurrences extends Component {
 
                     <Pagination ref={this.pagination} sessionName={sessionName} items={data} taille={data.length}
                                 perPage={perPage} onUpdate={this.handleUpdateData} onChangeCurrentPage={this.handleChangeCurrentPage}/>
+
+
+                    <ModalDelete refModal={this.delete} element={element} routeName={URL_DELETE_ELEMENT}
+                                 title="Supprimer cet élément" msgSuccess="Elément supprimé"
+                                 onUpdateList={this.handleUpdateList} >
+                        Etes-vous sûr de vouloir supprimer définitivement cet élément ?
+                    </ModalDelete>
                 </>
             }
         </>
