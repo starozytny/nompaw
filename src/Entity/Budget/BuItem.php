@@ -61,6 +61,10 @@ class BuItem extends DataEntity
     #[ORM\ManyToOne(inversedBy: 'buItems')]
     private ?BuCategory $category = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['buitem_list'])]
+    private ?int $recurrenceId = null;
+
     public function __construct()
     {
         $this->createdAt = $this->initNewDateImmutable();
@@ -110,7 +114,7 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     public function getTypeIcon(): ?string
     {
-        $values = ['minus', 'add', 'time'];
+        $values = ['minus', 'add', 'time', ''];
 
         return $values[$this->type];
     }
@@ -207,6 +211,18 @@ class BuItem extends DataEntity
     public function setCategory(?BuCategory $category): static
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getRecurrenceId(): ?int
+    {
+        return $this->recurrenceId;
+    }
+
+    public function setRecurrenceId(?int $recurrenceId): static
+    {
+        $this->recurrenceId = $recurrenceId;
 
         return $this;
     }

@@ -26,6 +26,20 @@ class DataBudget
         ;
     }
 
+    public function setDataItemFromRecurrent(BuItem $obj, BuRecurrent $recurrent, $data): BuItem
+    {
+        return ($obj)
+            ->setYear($this->sanitizeData->setIntValue($data->year))
+            ->setMonth($this->sanitizeData->setIntValue($data->month))
+            ->setType($recurrent->getType())
+            ->setPrice($recurrent->getPrice())
+            ->setName($recurrent->getName())
+            ->setIsActive(true)
+            ->setDateAt(new \DateTime())
+            ->setRecurrenceId($recurrent->getId())
+        ;
+    }
+
     public function setDataInit(User $obj, $data): User
     {
         return ($obj)

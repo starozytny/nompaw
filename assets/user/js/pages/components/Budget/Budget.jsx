@@ -20,6 +20,7 @@ const SORTER = Sort.compareDateAtInverseThenId;
 const URL_INDEX_PAGE = "user_budget_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
+const URL_ACTIVE_RECURRENCE = "intern_api_recurrences_active"
 
 export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
 {
@@ -84,12 +85,52 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
         }
     }
 
+    let handleActiveRecurrence = (elem) => {
+        if(!load){
+            setLoad(true)
+
+            axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_RECURRENCE, {'id': elem.id}), data: {'year': year, 'month': month} })
+                .then(function (response) { handleUpdateList(response.data, "create") })
+                .catch(function (error) { Formulaire.displayErrors(null, error); })
+                .then(function () { setLoad(false) })
+            ;
+        }
+    }
+
     let recurrencesData = JSON.parse(recurrences);
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
     let totalExpense = 0, totalIncome = 0, totalSaving = 0;
-    let nData = [];
+    let nData = [], nDataRecurrence = [], nDataRecurrenceActive = [];
+
+    // set totaux with recurrences
+    for(let i = 0; i < 12 ; i++){
+        recurrencesData.forEach(d => {
+            if(d.initYear > year || (d.initYear === year && i + 1 >= d.initMonth) ){
+                switch (d.type){
+                    case 0: case 2: totauxExpense[i] += d.price; break;
+                    case 1: totauxIncome[i] += d.price; break;
+                    default:break;
+                }
+            }
+        })
+
+        if(i + 1 === month){
+            recurrencesData.forEach(d => {
+                if(d.initYear > year || (d.initYear === year && i + 1 >= d.initMonth) ){
+                    switch (d.type){
+                        case 0: totalExpense += d.price; break;
+                        case 1: totalIncome += d.price; break;
+                        case 2: totalSaving += d.price; break;
+                        default:break;
+                    }
+                }
+            })
+        }
+    }
+
+    // update totaux with items and update with itemRecurrence
     data.forEach(d => {
         if(d.month === month){
             switch (d.type){
@@ -100,6 +141,9 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
             }
 
             nData.push(d);
+            if(d.recurrenceId){
+                nDataRecurrenceActive.push(d)
+            }
         }
 
         switch (d.type){
@@ -159,7 +203,8 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
                 </div>
                 <div className="col-2">
                     <BudgetList data={nData} recurrencesData={recurrencesData}
-                                onEdit={handleEdit} onModal={handleModal} onActive={handleActive} key={month} />
+                                onEdit={handleEdit} onModal={handleModal} onActive={handleActive}
+                                onActiveRecurrence={handleActiveRecurrence} key={month} />
                 </div>
             </div>
         </div>

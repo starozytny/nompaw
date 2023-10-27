@@ -2,7 +2,9 @@
 
 namespace App\Controller\InternApi\Budget;
 
+use App\Entity\Budget\BuItem;
 use App\Entity\Budget\BuRecurrent;
+use App\Repository\Budget\BuItemRepository;
 use App\Repository\Budget\BuRecurrentRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataBudget;
@@ -63,5 +65,26 @@ class RecurrentController extends AbstractController
     {
         $repository->remove($obj, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
+    }
+
+    #[Route('/active/{id}', name: 'active', options: ['expose' => true], methods: 'PUT')]
+    public function active(Request $request, BuRecurrent $obj, BuItemRepository $repository, ApiResponse $apiResponse,
+                           DataBudget $dataEntity, ValidatorService $validator): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $obj = $dataEntity->setDataItemFromRecurrent(new BuItem(), $obj, $data);
+        $obj->setUser($this->getUser());
+
+        $noErrors = $validator->validate($obj);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
     }
 }
