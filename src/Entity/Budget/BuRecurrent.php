@@ -37,6 +37,14 @@ class BuRecurrent extends DataEntity
     #[Groups(['burecu_list', 'burecu_form'])]
     private array $months = [];
 
+    #[ORM\Column]
+    #[Groups(['burecu_list', 'burecu_form'])]
+    private ?int $initYear = null;
+
+    #[ORM\Column]
+    #[Groups(['burecu_list', 'burecu_form'])]
+    private ?int $initMonth = null;
+
     #[ORM\ManyToOne(inversedBy: 'recurrents')]
     private ?BuCategory $category = null;
 
@@ -120,6 +128,30 @@ class BuRecurrent extends DataEntity
     public function setMonths(array $months): static
     {
         $this->months = $months;
+
+        return $this;
+    }
+
+    public function getInitYear(): ?int
+    {
+        return $this->initYear;
+    }
+
+    public function setInitYear(int $initYear): static
+    {
+        $this->initYear = $initYear;
+
+        return $this;
+    }
+
+    public function getInitMonth(): ?int
+    {
+        return $this->initMonth;
+    }
+
+    public function setInitMonth(int $initMonth): static
+    {
+        $this->initMonth = $initMonth;
 
         return $this;
     }

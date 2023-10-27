@@ -41,6 +41,8 @@ class DataBudget
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
             ->setName($this->sanitizeData->trimData($data->name))
             ->setMonths($data->months)
+            ->setInitYear($this->sanitizeData->setIntValue($data->initYear))
+            ->setInitMonth($this->sanitizeData->setIntValue($data->initMonth))
         ;
     }
 }

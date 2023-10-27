@@ -30,6 +30,9 @@ export function RecurrencesItem ({ elem, highlight, onModal })
                 </div>
                 <div className="col-2">
                     <div>{elem.name}</div>
+                    <div class="sub">
+                        Débute le {elem.initMonth}/{elem.initYear}.
+                    </div>
                 </div>
                 <div className="col-3">
                     <div className={`type-${elem.type}`}>

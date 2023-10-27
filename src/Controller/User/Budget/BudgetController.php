@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class BudgetController extends AbstractController
 {
     #[Route('/planning/{year}', name: 'index', options: ['expose' => true])]
-    public function list($year, BuItemRepository $repository, SerializerInterface $serializer): Response
+    public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository, SerializerInterface $serializer): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -27,7 +27,7 @@ class BudgetController extends AbstractController
         $totalInit = $user->getBudgetInit();
         if($year > $user->getBudgetYear()){
             //
-            // TODO : Create entity Total to store total by year for improve perfomance
+            // TODO : Create entity Total to store total by year for improve performance
             //
             $items = $repository->findBy(['user' => $user]);
 
@@ -46,6 +46,8 @@ class BudgetController extends AbstractController
         }
 
         $data = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
+//        $data = $recurrentRepository->findBy(['user' => $user], ['dateAt' => 'DESC']);
+
         $data = $serializer->serialize($data, 'json', ['groups' => BuItem::LIST]);
 
         $today = new \DateTime();
