@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/intern/api/recurrences', name: 'intern_api_recurrences_')]
-class RecurrentController extends AbstractController
+class RecurrenceController extends AbstractController
 {
     #[Route('/list', name: 'list', options: ['expose' => true], methods: 'GET')]
     public function list(BuRecurrentRepository $repository, ApiResponse $apiResponse): Response
@@ -26,7 +26,7 @@ class RecurrentController extends AbstractController
     }
 
     public function submitForm($type, BuRecurrentRepository $repository, BuRecurrent $obj, Request $request, ApiResponse $apiResponse,
-                               ValidatorService $validator, DataBudget $dataEntity): JsonResponse
+                               ValidatorService $validator, DataBudget $dataEntity, BuItemRepository $itemRepository): JsonResponse
     {
         $data = json_decode($request->getContent());
         if ($data === null) {
@@ -38,6 +38,11 @@ class RecurrentController extends AbstractController
 
         if($type == "update") {
             $obj->setUpdatedAt(new \DateTime());
+
+            $items = $itemRepository->findBy(['user' => $this->getUser(), 'recurrenceId' => $obj->getId()]);
+            foreach($items as $item){
+                $item->setRecurrencePrice($obj->getPrice());
+            }
         }
 
         $noErrors = $validator->validate($obj);

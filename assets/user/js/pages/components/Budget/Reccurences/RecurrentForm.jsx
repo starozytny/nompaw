@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import axios   from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Checkbox, Input, Radiobox } from "@commonComponents/Elements/Fields";
+import {Checkbox, Input, InputView, Radiobox} from "@commonComponents/Elements/Fields";
 import { Button } from "@commonComponents/Elements/Button";
 
 import Formulaire from "@commonFunctions/formulaire";
@@ -154,6 +154,8 @@ class Form extends Component {
             { value: 2,  label: 'Economie',  identifiant: 'it-economie' },
         ]
 
+        let typeString = ['Dépense', 'Revenu', 'Economie'];
+
         let params = { errors: errors, onChange: this.handleChange }
 
         return <>
@@ -165,7 +167,13 @@ class Form extends Component {
                         </div>
                         <div className="line-col-2">
                             <div className="line">
-                                <Radiobox items={typeItems} identifiant="type" valeur={type} {...params}>Type</Radiobox>
+                                {context === "create" ? <>
+                                        <Radiobox items={typeItems} identifiant="type" valeur={type} {...params}>Type</Radiobox>
+                                    </>
+                                    : <>
+                                        <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
+                                    </>
+                                }
                             </div>
 
                             <div className="line line-2">

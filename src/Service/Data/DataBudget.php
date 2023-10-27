@@ -39,6 +39,7 @@ class DataBudget
             ->setIsActive(true)
             ->setDateAt(new \DateTime())
             ->setRecurrenceId($recurrent->getId())
+            ->setRecurrencePrice($recurrent->getPrice())
         ;
     }
 

@@ -65,6 +65,10 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     private ?int $recurrenceId = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['buitem_list'])]
+    private ?float $recurrencePrice = null;
+
     #[ORM\Column]
     private ?int $lastType = null;
 
@@ -226,6 +230,18 @@ class BuItem extends DataEntity
     public function setRecurrenceId(?int $recurrenceId): static
     {
         $this->recurrenceId = $recurrenceId;
+
+        return $this;
+    }
+
+    public function getRecurrencePrice(): ?float
+    {
+        return $this->recurrencePrice;
+    }
+
+    public function setRecurrencePrice(?float $recurrencePrice): static
+    {
+        $this->recurrencePrice = $recurrencePrice;
 
         return $this;
     }

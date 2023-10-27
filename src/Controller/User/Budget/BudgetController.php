@@ -25,6 +25,9 @@ class BudgetController extends AbstractController
             return $this->redirectToRoute('user_budget_index', ['year' => $user->getBudgetYear()]);
         }
 
+        $data        = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
+        $recurrences = $recurrentRepository->findBy(['user' => $user]);
+
         $totalInit = $user->getBudgetInit();
         if($year > $user->getBudgetYear()){
             //
@@ -33,21 +36,51 @@ class BudgetController extends AbstractController
             $items = $repository->findBy(['user' => $user]);
 
             $totalExpense = 0; $totalIncome = 0;
+            for($i = $user->getBudgetYear() ; $i < $year ; $i++){
+                for($j = 0; $j < 12 ; $j++){
+                    foreach($recurrences as $re){
+                        if($re->getInitYear() > $i || ($re->getInitYear() == $i && $j + 1 >= $re->getInitMonth())){
+                            if($re->getType() != TypeType::Income){
+                                $totalExpense += $re->getPrice();
+                            }else{
+                                $totalIncome += $re->getPrice();
+                            }
+                        }
+                    }
+                }
+            }
+
             foreach($items as $item){
-                if($item->getYear() < $year){
+                $substractTotal = false;
+                if($item->getType() !== TypeType::Deleted){
+                    if($item->getYear() < $year){
+                        if($item->getType() != TypeType::Income){
+                            $totalExpense += $item->getPrice();
+                        }else{
+                            $totalIncome += $item->getPrice();
+                        }
+
+                        if($item->getRecurrenceId()){
+                            $substractTotal = true;
+                        }
+                    }
+                }else{
+                    if($item->getRecurrenceId()){
+                        $substractTotal = true;
+                    }
+                }
+
+                if($substractTotal){
                     if($item->getType() != TypeType::Income){
-                        $totalExpense += $item->getPrice();
+                        $totalExpense -= $item->getRecurrencePrice();
                     }else{
-                        $totalIncome += $item->getPrice();
+                        $totalIncome -= $item->getRecurrencePrice();
                     }
                 }
             }
 
             $totalInit = $totalInit + $totalIncome - $totalExpense;
         }
-
-        $data        = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
-        $recurrences = $recurrentRepository->findBy(['user' => $user]);
 
         $data        = $serializer->serialize($data,        'json', ['groups' => BuItem::LIST]);
         $recurrences = $serializer->serialize($recurrences, 'json', ['groups' => BuRecurrent::LIST]);

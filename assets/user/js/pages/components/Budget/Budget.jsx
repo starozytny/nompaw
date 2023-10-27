@@ -180,16 +180,12 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
             nData.push(d);
             if(d.recurrenceId){
                 nRecurrencesData = nRecurrencesData.filter(r => r.id !== d.recurrenceId);
-                recurrencesData.forEach(r => {
-                    if(r.id === d.recurrenceId){
-                        switch (r.type){
-                            case 0: totalExpense -= r.price; break;
-                            case 1: totalIncome -= r.price; break;
-                            case 2: totalSaving -= r.price; break;
-                            default:break;
-                        }
-                    }
-                })
+                switch (d.type){
+                    case 0: totalExpense -= d.recurrencePrice; break;
+                    case 1: totalIncome -= d.recurrencePrice; break;
+                    case 2: totalSaving -= d.recurrencePrice; break;
+                    default:break;
+                }
             }
         }
 
@@ -200,15 +196,11 @@ export function Budget ({ donnees, y, m, yearMin, initTotal, recurrences })
         }
 
         if(d.recurrenceId){
-            recurrencesData.forEach(r => {
-                if(r.id === d.recurrenceId){
-                    switch (r.type){
-                        case 0: case 2: totauxExpense[d.month - 1] -= r.price; break;
-                        case 1: totauxIncome[d.month - 1] -= r.price; break;
-                        default:break;
-                    }
-                }
-            })
+            switch (d.type){
+                case 0: case 2: totauxExpense[d.month - 1] -= d.recurrencePrice; break;
+                case 1: totauxIncome[d.month - 1] -= d.recurrencePrice; break;
+                default:break;
+            }
         }
     })
 
