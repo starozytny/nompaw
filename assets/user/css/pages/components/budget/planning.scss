@@ -27,6 +27,10 @@
       .totaux{
         color: var(--grey2);
       }
+
+      &.danger{
+        background-color: var(--dangerOpacity6);
+      }
     }
     &.disabled{
       opacity: 0.5;
@@ -36,6 +40,7 @@
         transform: none;
       }
     }
+
 
     .totaux{
       color: var(--grey3);

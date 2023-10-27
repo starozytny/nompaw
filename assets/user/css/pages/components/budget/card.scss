@@ -26,6 +26,15 @@
     }
   }
 
+  &.false{
+    background-color: var(--dangerOpacity1);
+
+    .card-icon{
+      color: var(--danger);
+      background-color: var(--dangerOpacity1);
+    }
+  }
+
   .name{
     opacity: 0.75;
     text-transform: uppercase;

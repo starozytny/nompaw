@@ -80,7 +80,7 @@ export function Budget ({ donnees, y, m, yearMin, initTotal })
             <div className="col-1">
                 <div className="cards">
                     {cards.map(item => {
-                        return <div className="card" key={item.value}>
+                        return <div className={`card ${item.value === 0 ? item.total > 0 : ""}`} key={item.value}>
                             <div className="card-icon">
                                 <span className={`icon-${item.icon}`}></span>
                             </div>
@@ -146,7 +146,8 @@ function Months ({ active, onSelect, useShortName, totaux }) {
     let items = data.map(elem => {
         let activeMonth = elem.id === active ? " active" : "";
         let todayMonth = (elem.id === today.getMonth() + 1) ? " today" : "";
-        return <div className={"planning-item" + todayMonth + activeMonth}
+        let statutMonth = totaux[elem.id - 1] < 0 ? " danger" : "";
+        return <div className={"planning-item" + todayMonth + activeMonth + statutMonth}
                     onClick={() => onSelect(elem.id)}
                     key={elem.id}>
             <div>{useShortName ? elem.shortName : elem.name}</div>
