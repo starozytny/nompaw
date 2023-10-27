@@ -57,7 +57,6 @@ export function BudgetItemRecurrent ({ elem, onEdit, onModal, onActive })
                     </div>
                 </div>
                 <div className="col-4 actions">
-                    <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
                     <ButtonIcon outline={true} icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
                 </div>
             </div>

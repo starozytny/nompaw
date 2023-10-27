@@ -7,7 +7,7 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import moment from "moment/moment";
 import 'moment/locale/fr';
 
-import { Input, Radiobox, Checkbox } from "@commonComponents/Elements/Fields";
+import {Input, Radiobox, Checkbox, InputView} from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 
 import Formulaire           from "@commonFunctions/formulaire";
@@ -35,6 +35,7 @@ export function BudgetFormulaire ({ context, element, year, month, onCancel, onU
         name={element ? Formulaire.setValue(element.name) : ""}
         isActive={element ? Formulaire.setValue(element.isActive) : false}
         dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
+        recurrenceId={element ? Formulaire.setValue(element.recurrenceId) : ""}
 
         onCancel={onCancel}
         onUpdateList={onUpdateList}
@@ -123,7 +124,7 @@ class Form extends Component {
     }
 
     render () {
-        const { context, onCancel } = this.props;
+        const { context, onCancel, recurrenceId } = this.props;
         const { errors, load, type, price, name, isActive, dateAt } = this.state;
 
         let typeItems = [
@@ -132,6 +133,8 @@ class Form extends Component {
             { value: 2,  label: 'Economie',  identifiant: 'it-economie' },
         ]
 
+        let typeString = ["Dépense", "Revenu", "Economie"];
+
         let activeItems = [ { value: 1, label: 'Oui', identifiant: 'oui-1' } ]
 
         let params  = { errors: errors, onChange: this.handleChange };
@@ -139,10 +142,18 @@ class Form extends Component {
         return <>
             <form onSubmit={this.handleSubmit}>
                 <div className="line line-2 line-real">
-                    <Radiobox items={typeItems} identifiant="type" valeur={type} {...params}>Type</Radiobox>
-                    <Checkbox isSwitcher={true} items={activeItems} identifiant="isActive" valeur={isActive} {...params}>
-                        Réel ?
-                    </Checkbox>
+                    {recurrenceId ? <>
+                            <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
+                            <InputView valeur="Actif" errors={isActive}>Actif</InputView>
+                        </>
+                        : <>
+                            <Radiobox items={typeItems} identifiant="type" valeur={type} {...params}>Type</Radiobox>
+                            <Checkbox isSwitcher={true} items={activeItems} identifiant="isActive" valeur={isActive} {...params}>
+                                Réel ?
+                            </Checkbox>
+                        </>
+                    }
+
                 </div>
                 <div className="line line-2">
                     <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
