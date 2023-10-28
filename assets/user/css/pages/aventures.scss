@@ -71,7 +71,6 @@
     background-color: var(--color0);
     border-radius: calc(var(--radius) * 2);
     width: 100%;
-    max-width: 321px;
 
     .card-header, .card-body{
       padding: var(--espaceDiv);
@@ -107,7 +106,6 @@
     .card-body{
       @include flex(column, flex-start, space-between, var(--espaceEls));
       min-height: 140px;
-      max-width: 321px;
 
       .level{
         opacity: 0.8;
@@ -154,6 +152,16 @@
             background-color: var(--color3);
           }
         }
+      }
+    }
+  }
+
+  @media (min-width:768px) {
+    .card{
+      max-width: 321px;
+
+      .card-body{
+        max-width: 321px;
       }
     }
   }
