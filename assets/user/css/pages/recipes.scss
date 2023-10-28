@@ -39,7 +39,6 @@
     background-color: var(--color0);
     border-radius: calc(var(--radius) * 2);
     width: 100%;
-    max-width: 321px;
 
     .card-header{
       @include flex(row, center, space-between, 24px);
@@ -69,7 +68,6 @@
       display: block;
       opacity: 0.75;
       height: 200px;
-      max-width: 321px;
       transition: opacity 0.2s ease-in-out;
       overflow: hidden;
       border-radius: 0 0 calc(var(--radius) * 2) calc(var(--radius) * 2);
@@ -122,6 +120,15 @@
             background-color: var(--color3);
           }
         }
+      }
+    }
+  }
+  @media (min-width:768px) {
+    .card{
+      max-width: 321px;
+
+      .card-body{
+        max-width: 321px;
       }
     }
   }
