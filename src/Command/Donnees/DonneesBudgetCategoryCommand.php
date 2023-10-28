@@ -39,21 +39,17 @@ class DonneesBudgetCategoryCommand extends Command
 
         $io->title('Initialisation des données');
         $data =  [
-            [
-                'type' => TypeType::Expense,
-                'name' => "Dépenses personnelles",
-                'goal' => null,
-            ],
-            [
-                'type' => TypeType::Income,
-                'name' => "Salaire",
-                'goal' => null,
-            ],
-            [
-                'type' => TypeType::Saving,
-                'name' => "Fun",
-                'goal' => 20000,
-            ],
+            ['type' => TypeType::Expense, 'name' => "Dépenses personnelles", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Alimentation", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Cadeaux", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Habitation", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Transports", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Banque", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Voyage", 'goal' => null,],
+            ['type' => TypeType::Income,  'name' => "Salaire", 'goal' => null,],
+            ['type' => TypeType::Income,  'name' => "Cadeaux", 'goal' => null,],
+            ['type' => TypeType::Income,  'name' => "Banque", 'goal' => null,],
+            ['type' => TypeType::Saving,  'name' => "Voyage", 'goal' => 15000,],
         ];
 
         foreach($users as $user){

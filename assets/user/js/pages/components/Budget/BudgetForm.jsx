@@ -7,12 +7,13 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import moment from "moment/moment";
 import 'moment/locale/fr';
 
+import Formulaire from "@commonFunctions/formulaire";
+import Validateur from "@commonFunctions/validateur";
+import Inputs     from "@commonFunctions/inputs";
+import Sort       from "@commonFunctions/sort";
+
 import { Input, Radiobox, Checkbox, InputView, SelectCustom } from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
-
-import Formulaire           from "@commonFunctions/formulaire";
-import Validateur           from "@commonFunctions/validateur";
-import Inputs               from "@commonFunctions/inputs";
 
 const URL_CREATE_ELEMENT    = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT    = "intern_api_budget_items_update";
@@ -157,6 +158,7 @@ class Form extends Component {
 
         let activeItems = [ { value: 1, label: 'Oui', identifiant: 'oui-1' } ]
 
+        categories.sort(Sort.compareName);
         let categoryItems = [{ value: "", label: "Aucun", inputName: "", identifiant: "cat-empty"}], categoryName = "";
         categories.forEach(cat => {
             if(cat.type === parseInt(type)){
