@@ -2,7 +2,10 @@
 
 namespace App\Controller\InternApi\Budget;
 
+use App\Entity\Budget\BuCategory;
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
+use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Main\UserRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataBudget;
@@ -17,7 +20,7 @@ class InitController extends AbstractController
 {
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'PUT')]
     public function create(Request $request, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataBudget $dataEntity, UserRepository $repository): Response
+                           DataBudget $dataEntity, UserRepository $repository, BuCategoryRepository $categoryRepository): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -27,6 +30,29 @@ class InitController extends AbstractController
         }
 
         $obj = $dataEntity->setDataInit($user, $data);
+
+        $categories =  [
+            ['type' => TypeType::Expense, 'name' => "Dépenses personnelles", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Alimentation", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Cadeaux", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Habitation", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Transports", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Banque", 'goal' => null,],
+            ['type' => TypeType::Expense, 'name' => "Voyage", 'goal' => null,],
+            ['type' => TypeType::Income,  'name' => "Salaire", 'goal' => null,],
+            ['type' => TypeType::Income,  'name' => "Cadeaux", 'goal' => null,],
+            ['type' => TypeType::Income,  'name' => "Banque", 'goal' => null,],
+            ['type' => TypeType::Saving,  'name' => "Voyage", 'goal' => 15000,],
+        ];
+
+        if(count($user->getBuCategories()) == 0){
+            foreach($categories as $cat){
+                $cat = $dataEntity->setDataCategory(new BuCategory(), json_decode(json_encode($cat)));
+                $cat->setUser($user);
+
+                $categoryRepository->save($cat);
+            }
+        }
 
         $noErrors = $validator->validate($obj);
         if ($noErrors !== true) {

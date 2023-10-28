@@ -15,6 +15,7 @@
       background-color: var(--color0);
       padding: var(--espaceDiv);
       color: var(--alpha);
+      width: 100%;
 
       &:hover{
         .card-title{
@@ -44,6 +45,24 @@
         [class^="icon-"]{
           transition: transform 0.2s ease;
         }
+      }
+    }
+
+    @media (min-width:768px) {
+      .card{
+        max-width: 366px;
+      }
+    }
+
+    @media (min-width:1024px) {
+      .card{
+        max-width: 378px;
+      }
+    }
+
+    @media (min-width:1920px) {
+      .card{
+        max-width: 296px;
       }
     }
   }
