@@ -104,7 +104,7 @@ class Form extends Component {
         e.preventDefault();
 
         const { context, url } = this.props;
-        const { load, type, price, name, dateAt } = this.state;
+        const { load, type, price, name, dateAt, category } = this.state;
 
         this.setState({ errors: [] });
 
@@ -115,6 +115,10 @@ class Form extends Component {
             {type: "text",  id: 'dateAt', value: dateAt},
             {type: "date",  id: 'dateAt', value: dateAt},
         ];
+
+        if(parseInt(type) === 2){
+            paramsToValidate = [...paramsToValidate, ...[{type: "text",  id: 'category', value: category},]]
+        }
 
         let validate = Validateur.validateur(paramsToValidate)
         if(!validate.code){

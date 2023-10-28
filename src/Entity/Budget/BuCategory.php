@@ -35,6 +35,7 @@ class BuCategory
     private ?float $goal = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['bucat_list'])]
     private ?float $used = 0;
 
     #[ORM\ManyToOne(inversedBy: 'buCategories')]

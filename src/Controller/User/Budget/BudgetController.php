@@ -28,9 +28,11 @@ class BudgetController extends AbstractController
             return $this->redirectToRoute('user_budget_index', ['year' => $user->getBudgetYear()]);
         }
 
-        $data        = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
-        $categories  = $categoryRepository->findBy(['user' => $user]);
-        $recurrences = $recurrentRepository->findBy(['user' => $user]);
+        $data         = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
+        $categories   = $categoryRepository->findBy(['user' => $user]);
+        $savings      = $categoryRepository->findBy(['user' => $user, 'type' => TypeType::Saving]);
+        $savingsItems = $repository->findBy(['user' => $user, 'type' => TypeType::Saving]);
+        $recurrences  = $recurrentRepository->findBy(['user' => $user]);
 
         $totalInit = $user->getBudgetInit();
         if($year > $user->getBudgetYear()){
@@ -88,9 +90,11 @@ class BudgetController extends AbstractController
             $totalInit = $totalInit + $totalIncome - $totalExpense;
         }
 
-        $data        = $serializer->serialize($data,        'json', ['groups' => BuItem::LIST]);
-        $categories  = $serializer->serialize($categories,  'json', ['groups' => BuCategory::SELECT]);
-        $recurrences = $serializer->serialize($recurrences, 'json', ['groups' => BuRecurrent::LIST]);
+        $data         = $serializer->serialize($data,         'json', ['groups' => BuItem::LIST]);
+        $categories   = $serializer->serialize($categories,   'json', ['groups' => BuCategory::SELECT]);
+        $savings      = $serializer->serialize($savings,      'json', ['groups' => BuCategory::LIST]);
+        $savingsItems = $serializer->serialize($savingsItems, 'json', ['groups' => BuItem::LIST]);
+        $recurrences  = $serializer->serialize($recurrences,  'json', ['groups' => BuRecurrent::LIST]);
 
         $today = new \DateTime();
 
@@ -99,6 +103,8 @@ class BudgetController extends AbstractController
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
             'donnees' => $data,
             'categories' => $categories,
+            'savings' => $savings,
+            'savingsItems' => $savingsItems,
             'recurrences' => $recurrences,
             'initTotal' => $totalInit,
         ]);

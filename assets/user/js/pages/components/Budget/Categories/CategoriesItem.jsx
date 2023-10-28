@@ -33,7 +33,7 @@ export function CategoriesItem ({ elem, highlight, onModal })
                 </div>
                 <div className="col-3">
                     {elem.type === 2 && <div>{Sanitaze.toFormatCurrency(elem.goal)}</div>}
-                    {elem.type === 2 && <div className="sub">Utilisé : {Sanitaze.toFormatCurrency(elem.used)}</div>}
+                    {elem.type === 2 && <div className="sub">Utilisée : {Sanitaze.toFormatCurrency(elem.used)}</div>}
                 </div>
                 <div className="col-4 actions">
                     <ButtonIcon outline={true} icon="pencil" onClick={urlUpdate} element="a">Modifier</ButtonIcon>

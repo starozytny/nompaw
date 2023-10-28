@@ -10,7 +10,7 @@ import List from "@commonFunctions/list";
 import Sort from "@commonFunctions/sort";
 
 import { Modal } from "@commonComponents/Elements/Modal";
-import { Button } from "@commonComponents/Elements/Button";
+import {Button, ButtonIcon} from "@commonComponents/Elements/Button";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
@@ -24,7 +24,7 @@ const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
 const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 
-export function Budget ({ donnees, categories, y, m, yearMin, initTotal, recurrences })
+export function Budget ({ donnees, categories, savings, savingsItems, y, m, yearMin, initTotal, recurrences })
 {
     const deleteRef = useRef(null)
     const trashRef = useRef(null)
@@ -135,6 +135,8 @@ export function Budget ({ donnees, categories, y, m, yearMin, initTotal, recurre
     }
 
     let recurrencesData = JSON.parse(recurrences);
+    let nSavings = JSON.parse(savings);
+    let nSavingsItems = JSON.parse(savingsItems);
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
@@ -265,6 +267,31 @@ export function Budget ({ donnees, categories, y, m, yearMin, initTotal, recurre
                                       element={element} year={year} month={month}
                                       onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
                                       key={month + "-" + (element ? element.id : 0)} />
+                    {nSavings.length !== 0 && <div className="savings">
+                        <h3>Utilisation des économies</h3>
+                        <div className="savings-list">
+                            {nSavings.map(sa => {
+
+                                let total = 0;
+                                nSavingsItems.forEach(s => {
+                                    if(s.category.id === sa.id){
+                                        total += s.price;
+                                    }
+                                })
+
+                                return <div className="savings-item" key={sa.id}>
+                                    <div className="name">{sa.name}</div>
+                                    <div className="total">
+                                        <div className="goal">{Sanitaze.toFormatCurrency(total)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
+                                        <div className="sub">Utilisée : {Sanitaze.toFormatCurrency(sa.used)}</div>
+                                    </div>
+                                    <div className="actions">
+                                        <ButtonIcon icon="cart">Utiliser</ButtonIcon>
+                                    </div>
+                                </div>
+                            })}
+                        </div>
+                    </div>}
                 </div>
                 <div className="col-2">
                     <BudgetList data={nData} recurrencesData={nRecurrencesData}
