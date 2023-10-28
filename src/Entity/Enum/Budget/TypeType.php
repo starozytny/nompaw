@@ -8,4 +8,5 @@ enum TypeType: int
     const Income = 1;
     const Saving = 2;
     const Deleted = 3;
+    const Used = 4;
 }

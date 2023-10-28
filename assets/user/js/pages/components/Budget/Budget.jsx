@@ -14,6 +14,7 @@ import {Button, ButtonIcon} from "@commonComponents/Elements/Button";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
+import {SavingForm} from "@userPages/Budget/SavingForm";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
@@ -23,16 +24,19 @@ const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
 const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
 const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
+const URL_USE_SAVING = "intern_api_budget_categories_use";
 
 export function Budget ({ donnees, categories, savings, savingsItems, y, m, yearMin, initTotal, recurrences })
 {
     const deleteRef = useRef(null)
     const trashRef = useRef(null)
+    const savingRef = useRef(null)
     const [year, setYear] = useState(parseInt(y))
     const [month, setMonth] = useState(parseInt(m))
     const [data, setData] = useState(JSON.parse(donnees))
     const [element, setElement] = useState(null)
     const [elementToDelete, setElementToDelete] = useState(null)
+    const [saving, setSaving] = useState(null)
     const [load, setLoad] = useState(false)
 
     let handleUpdateList = (elem, context) => {
@@ -56,6 +60,10 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
                 ref = trashRef;
                 setElementToDelete(elem);
                 trashRef.current.handleUpdateFooter(<Button type="danger" onClick={() => handleDeleteRecurrence(elem)}>Confirmer la suppression</Button>)
+                break;
+            case 'savingRef':
+                ref = savingRef;
+                setSaving(elem);
                 break;
             default:break;
         }
@@ -130,6 +138,20 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
                 .then(function (response) { handleUpdateList(response.data, "update") })
                 .catch(function (error) { Formulaire.displayErrors(null, error); })
                 .then(function () { setLoad(false) })
+            ;
+        }
+    }
+
+    let handleUseSaving = (sa, total) => {
+        if(!load){
+            setLoad(true)
+            Formulaire.loader(true)
+
+            let self = this;
+            axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, {'id': sa.id}), data: {'year': year, 'month': month, 'total': total} })
+                .then(function (response) { location.reload(); })
+                .catch(function (error) { Formulaire.displayErrors(self, error); })
+                .then(function () { setLoad(false); Formulaire.loader(false); })
             ;
         }
     }
@@ -286,7 +308,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
                                         <div className="sub">Utilisée : {Sanitaze.toFormatCurrency(sa.used)}</div>
                                     </div>
                                     <div className="actions">
-                                        <ButtonIcon icon="cart">Utiliser</ButtonIcon>
+                                        <ButtonIcon icon="cart" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
                                     </div>
                                 </div>
                             })}
@@ -312,6 +334,14 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
         {createPortal(
             <Modal ref={trashRef} identifiant="trashRecurrence" maxWidth={568} title="Supprimer un élément"
                  content={<p>Souhaitez-vous supprimer cet élément récurrent : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
+                 footer={null}
+            />
+            , document.body)
+        }
+
+        {createPortal(
+            <Modal ref={savingRef} identifiant="useSaving" maxWidth={568} title="Utiliser vos économies" isForm={true}
+                 content={<SavingForm saving={saving} onUseSaving={handleUseSaving} />}
                  footer={null}
             />
             , document.body)

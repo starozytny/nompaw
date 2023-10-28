@@ -3,6 +3,9 @@
 namespace App\Controller\InternApi\Budget;
 
 use App\Entity\Budget\BuCategory;
+use App\Entity\Budget\BuItem;
+use App\Entity\Enum\Budget\TypeType;
+use App\Entity\Main\User;
 use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Budget\BuItemRepository;
 use App\Service\ApiResponse;
@@ -67,5 +70,43 @@ class CategoriesController extends AbstractController
 
         $repository->remove($obj, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
+    }
+
+    #[Route('/use/{id}', name: 'use', options: ['expose' => true], methods: 'PUT')]
+    public function useSaving(Request $request, BuCategory $obj, BuItemRepository $repository, ApiResponse $apiResponse,
+                              DataBudget $dataEntity, ValidatorService $validator): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $savingsItems = $repository->findBy(['user' => $user, 'type' => TypeType::Saving, 'category' => $obj]);
+
+        $max = 0;
+        foreach($savingsItems as $sa){
+            $max += $sa->getPrice();
+        }
+
+        $obj = $dataEntity->setDataItemFromCategory(new BuItem(), $obj, $data);
+        $obj->setUser($user);
+
+        if($obj->getPrice() > $max){
+            return $apiResponse->apiJsonResponseBadRequest('Solde supérieur aux économies réalisées.');
+        }
+
+        if($obj->getPrice() <= 0){
+            return $apiResponse->apiJsonResponseBadRequest('Renseigner un solde supérieur à 0.');
+        }
+
+        $noErrors = $validator->validate($obj);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
     }
 }

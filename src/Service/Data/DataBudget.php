@@ -5,6 +5,7 @@ namespace App\Service\Data;
 use App\Entity\Budget\BuCategory;
 use App\Entity\Budget\BuItem;
 use App\Entity\Budget\BuRecurrent;
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Service\SanitizeData;
 
@@ -41,6 +42,21 @@ class DataBudget
             ->setDateAt(new \DateTime())
             ->setRecurrenceId($recurrent->getId())
             ->setRecurrencePrice($recurrent->getPrice())
+            ->setCategory($recurrent->getCategory())
+        ;
+    }
+
+    public function setDataItemFromCategory(BuItem $obj, BuCategory $category, $data): BuItem
+    {
+        return ($obj)
+            ->setYear($this->sanitizeData->setIntValue($data->year))
+            ->setMonth($this->sanitizeData->setIntValue($data->month))
+            ->setType(TypeType::Used)
+            ->setLastType(TypeType::Used)
+            ->setPrice($this->sanitizeData->setFloatValue($data->total))
+            ->setName('Economie utilisée : ' . $category->getName())
+            ->setIsActive(true)
+            ->setDateAt(new \DateTime())
         ;
     }
 
