@@ -17,6 +17,7 @@
                     { path: path('user_aventures_groupes_index'), icon: 'map', name: 'Aventures' },
                     { path: path('user_projects_index'), icon: 'calendar', name: 'Projets' },
                     { path: path('user_birthdays_index'), icon: 'cake', name: 'Anniversaires' },
+                    { path: path('user_budget_index', {'year': 'now'|date('Y')}), icon: 'calculator', name: 'Planificateur' },
                 ] %}
 
                 {% for item in cards %}
