@@ -32,6 +32,7 @@ class BudgetController extends AbstractController
         $categories   = $categoryRepository->findBy(['user' => $user]);
         $savings      = $categoryRepository->findBy(['user' => $user, 'type' => TypeType::Saving]);
         $savingsItems = $repository->findBy(['user' => $user, 'type' => TypeType::Saving]);
+        $savingsUsed  = $repository->findBy(['user' => $user, 'type' => TypeType::Used]);
         $recurrences  = $recurrentRepository->findBy(['user' => $user]);
 
         $totalInit = $user->getBudgetInit();
@@ -94,6 +95,7 @@ class BudgetController extends AbstractController
         $categories   = $serializer->serialize($categories,   'json', ['groups' => BuCategory::SELECT]);
         $savings      = $serializer->serialize($savings,      'json', ['groups' => BuCategory::LIST]);
         $savingsItems = $serializer->serialize($savingsItems, 'json', ['groups' => BuItem::LIST]);
+        $savingsUsed  = $serializer->serialize($savingsUsed,  'json', ['groups' => BuItem::LIST]);
         $recurrences  = $serializer->serialize($recurrences,  'json', ['groups' => BuRecurrent::LIST]);
 
         $today = new \DateTime();
@@ -105,6 +107,7 @@ class BudgetController extends AbstractController
             'categories' => $categories,
             'savings' => $savings,
             'savingsItems' => $savingsItems,
+            'savingsUsed' => $savingsUsed,
             'recurrences' => $recurrences,
             'initTotal' => $totalInit,
         ]);

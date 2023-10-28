@@ -57,6 +57,7 @@ class DataBudget
             ->setName('Economie utilisée : ' . $category->getName())
             ->setIsActive(true)
             ->setDateAt(new \DateTime())
+            ->setCategory($category)
         ;
     }
 

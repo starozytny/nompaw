@@ -21,7 +21,7 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel })
                     <div className="badges">
                         {!elem.isActive && <div className="badge badge-action badge-0" onClick={() => onActive(elem)}>Prévisionnel</div>}
                         {elem.recurrenceId && <div className="badge badge-0">Récurrence</div>}
-                        {elem.category && <div className={`badge badge-type-${elem.category.type}`}>{elem.category.name}</div>}
+                        {elem.type !== 4 && elem.category && <div className={`badge badge-type-${elem.category.type}`}>{elem.category.name}</div>}
                     </div>
                 </div>
                 <div className="col-3">
@@ -30,11 +30,10 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel })
                     </div>
                 </div>
                 <div className="col-4 actions" style={{textDecoration: 'initial'}}>
-                    {elem.type === 3 ? <>
-                            <ButtonIcon outline={true} icon="refresh1" onClick={() => onCancel(elem)} tooltipWidth={150}>Annuler la suppression</ButtonIcon>
-                        </>
+                    {elem.type === 3
+                        ? <ButtonIcon outline={true} icon="refresh1" onClick={() => onCancel(elem)} tooltipWidth={150}>Annuler la suppression</ButtonIcon>
                         : <>
-                            <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
+                            {elem.type !== 4 && <ButtonIcon outline={true} icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>}
                             <ButtonIcon outline={true} icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
                         </>
                     }

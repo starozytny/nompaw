@@ -26,7 +26,7 @@ const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 const URL_USE_SAVING = "intern_api_budget_categories_use";
 
-export function Budget ({ donnees, categories, savings, savingsItems, y, m, yearMin, initTotal, recurrences })
+export function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m, yearMin, initTotal, recurrences })
 {
     const deleteRef = useRef(null)
     const trashRef = useRef(null)
@@ -34,6 +34,8 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
     const [year, setYear] = useState(parseInt(y))
     const [month, setMonth] = useState(parseInt(m))
     const [data, setData] = useState(JSON.parse(donnees))
+    const [nSavingsItems, setNSavingsItems] = useState(JSON.parse(savingsItems))
+    const [nSavingsUsed, setNSavingsUsed] = useState(JSON.parse(savingsUsed))
     const [element, setElement] = useState(null)
     const [elementToDelete, setElementToDelete] = useState(null)
     const [saving, setSaving] = useState(null)
@@ -79,7 +81,13 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
 
             axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': elem.id}), data: {} })
                 .then(function (response) {
-                    handleUpdateList(response.data, elem.recurrenceId ? "update" : "delete")
+                    if(elem.recurrenceId){
+                        handleUpdateList(response.data, "update")
+                    }else{
+                        handleUpdateList(elem, "delete")
+                        setNSavingsUsed(List.updateDataMuta(elem, "delete", nSavingsUsed));
+                    }
+
                     setElementToDelete(null);
                     deleteRef.current.handleClose();
                 })
@@ -149,7 +157,12 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
 
             let self = this;
             axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, {'id': sa.id}), data: {'year': year, 'month': month, 'total': total} })
-                .then(function (response) { location.reload(); })
+                .then(function (response) {
+                    handleUpdateList(response.data, "create")
+                    setNSavingsUsed(List.updateDataMuta(response.data, "create", nSavingsUsed));
+                    setSaving(null);
+                    savingRef.current.handleClose();
+                })
                 .catch(function (error) { Formulaire.displayErrors(self, error); })
                 .then(function () { setLoad(false); Formulaire.loader(false); })
             ;
@@ -158,7 +171,6 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
 
     let recurrencesData = JSON.parse(recurrences);
     let nSavings = JSON.parse(savings);
-    let nSavingsItems = JSON.parse(savingsItems);
     let totauxExpense = [0,0,0,0,0,0,0,0,0,0,0,0];
     let totauxIncome  = [0,0,0,0,0,0,0,0,0,0,0,0];
 
@@ -294,18 +306,23 @@ export function Budget ({ donnees, categories, savings, savingsItems, y, m, year
                         <div className="savings-list">
                             {nSavings.map(sa => {
 
-                                let total = 0;
+                                let total = 0, used = 0;
                                 nSavingsItems.forEach(s => {
                                     if(s.category.id === sa.id){
                                         total += s.price;
+                                    }
+                                })
+                                nSavingsUsed.forEach(s => {
+                                    if(s.category.id === sa.id){
+                                        used += s.price;
                                     }
                                 })
 
                                 return <div className="savings-item" key={sa.id}>
                                     <div className="name">{sa.name}</div>
                                     <div className="total">
-                                        <div className="goal">{Sanitaze.toFormatCurrency(total)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
-                                        <div className="sub">Utilisée : {Sanitaze.toFormatCurrency(sa.used)}</div>
+                                        <div className="goal">{Sanitaze.toFormatCurrency(total - used)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
+                                        <div className="sub">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
                                     </div>
                                     <div className="actions">
                                         <ButtonIcon icon="cart" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>

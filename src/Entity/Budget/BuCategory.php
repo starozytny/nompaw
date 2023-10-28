@@ -34,10 +34,6 @@ class BuCategory
     #[Groups(['bucat_list', 'bucat_form'])]
     private ?float $goal = null;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups(['bucat_list'])]
-    private ?float $used = 0;
-
     #[ORM\ManyToOne(inversedBy: 'buCategories')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -111,18 +107,6 @@ class BuCategory
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
-        return $this;
-    }
-
-    public function getUsed(): ?float
-    {
-        return $this->used;
-    }
-
-    public function setUsed(?float $used): static
-    {
-        $this->used = $used;
 
         return $this;
     }
