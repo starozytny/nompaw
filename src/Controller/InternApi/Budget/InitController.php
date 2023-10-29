@@ -39,7 +39,6 @@ class InitController extends AbstractController
             ['type' => TypeType::Expense, 'name' => "Transports", 'goal' => null,],
             ['type' => TypeType::Expense, 'name' => "Banque", 'goal' => null,],
             ['type' => TypeType::Expense, 'name' => "Voyage", 'goal' => null,],
-            ['type' => TypeType::Expense, 'name' => "Santé", 'goal' => null,],
             ['type' => TypeType::Income,  'name' => "Salaire", 'goal' => null,],
             ['type' => TypeType::Income,  'name' => "Cadeaux", 'goal' => null,],
             ['type' => TypeType::Income,  'name' => "Banque", 'goal' => null,],
