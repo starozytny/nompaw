@@ -71,7 +71,9 @@ class RecipeController extends AbstractController
 
         $rate = 0;
         foreach($coms as $com){
-            $rate += $com->getRate();
+            if($com->getRate()){
+                $rate += $com->getRate();
+            }
         }
         $rate = $rate / (count($coms) > 0 ? count($coms) : 1);
 
