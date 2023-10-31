@@ -128,19 +128,19 @@ const CanvasMap=(props)=>{
         pointColor:null,
         pointRadius:null,
 
-        pointFutureColor:'#b8e200',
+        pointFutureColor:'#ccc',
         pointPresentColor:null,
         pointPastColor:null,
 
-        fontPastColor:'#b8e200',
-        fontPresentColor:'#b8e200',
-        fontFutureColor:'#b8e200',
+        fontPastColor:'#666',
+        fontPresentColor:'#000',
+        fontFutureColor:'#aaa',
       }
     },
     get trailColor(){
       if(typeof this.props !='undefined')
         if(this.props.trailColor!=null) return this.props.trailColor
-      if(this.trailPath==null) return '#b8e200'
+      if(this.trailPath==null) return '#ccc'
       return this.trailPath.getAttribute('stroke')
     },
     get trailWidth(){
@@ -228,7 +228,7 @@ const CanvasMap=(props)=>{
 
             let map=createCanvas(this.mapWidth*scale,this.mapHeight*scale)
             let mapCtx=map.getContext('2d',{alpha:false})
-            mapCtx.fillStyle='#b8e200'
+            mapCtx.fillStyle='#1b2432'
             mapCtx.fillRect(0,0,this.mapWidth*scale,this.mapHeight*scale)
             mapCtx.drawImage(img,0,0,this.mapWidth*scale,this.mapHeight*scale)
             return {map,scale}
@@ -237,7 +237,7 @@ const CanvasMap=(props)=>{
           this.mapBuffer=createCanvas(1,1)
           this.mapBufferCtx=this.mapBuffer.getContext('2d',{alpha:false})
           this.updateMapBufferSize()
-          this.mapBufferCtx.fillStyle='#b8e200'
+          this.mapBufferCtx.fillStyle='#1b2432'
           this.mapBufferCtx.fillRect(0,0,this.mapBufferSize.x,this.mapBufferSize.y)
           this.mapBufferOffset={x:0,y:0}
           this.mapBufferScale=this.mapScale
@@ -382,7 +382,7 @@ const CanvasMap=(props)=>{
       return this.getZoomAtPercent(this.state.pos)
     },
     drawMapBuffer(ctx,pos,zoom){
-      ctx.fillStyle='#b8e200'
+      ctx.fillStyle='#1b2432'
       ctx.fillRect(0,0,this.mapBufferSize.x,this.mapBufferSize.y)
       let mapIndex=0
       while(zoom>this.map[mapIndex].scale && mapIndex<this.map.length-1){
@@ -511,7 +511,7 @@ const CanvasMap=(props)=>{
             y:(radius+1)*Math.sin(angleOrigin)
           }
           let colorValue=imageVisibility*0.3
-          this.ctx.fillStyle=`rgba(220,220,202,${colorValue})`
+          this.ctx.fillStyle=`rgba(18, 20, 32, 0.5)`
           setCompositeOperation(this.ctx,'darken','source-over')
 
           this.ctx.beginPath()
@@ -537,7 +537,7 @@ const CanvasMap=(props)=>{
           this.ctx.fill()
           setCompositeOperation(this.ctx)
 
-          this.ctx.fillStyle=`#405b54`
+          this.ctx.fillStyle=`#121420`
           let imagePointRadius=4*imageVisibility
           this.ctx.beginPath()
           this.ctx.arc(origin.x,origin.y,imagePointRadius,0,PI2)
@@ -636,7 +636,7 @@ const CanvasMap=(props)=>{
           this.props.fontPresentColor,
           this.props.fontFutureColor
         )
-        this.ctx.strokeStyle='#b8e200'
+        this.ctx.strokeStyle='#FDFCEC'
         this.ctx.lineWidth=6
         let pos=add(point,{x:20*inverseZoom,y:0})
         this.ctx.strokeText(point.label,...canvasPos(pos))
