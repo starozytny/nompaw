@@ -101,6 +101,10 @@ class RaRando extends DataEntity
     #[Groups(['rando_form'])]
     private ?string $googlePhotos = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?string $story = null;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
@@ -418,6 +422,18 @@ class RaRando extends DataEntity
     public function setGooglePhotos(?string $googlePhotos): self
     {
         $this->googlePhotos = $googlePhotos;
+
+        return $this;
+    }
+
+    public function getStory(): ?string
+    {
+        return $this->story;
+    }
+
+    public function setStory(?string $story): self
+    {
+        $this->story = $story;
 
         return $this;
     }
