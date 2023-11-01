@@ -76,7 +76,7 @@ class RecipeController extends AbstractController
                 $totalComs++;
             }
         }
-        $rate = $rate / (count($coms) > 0 ? $totalComs : 1);
+        $rate = $rate / ($totalComs > 0 ? $totalComs : 1);
 
         $elem  = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::READ]);
         $steps = $serializer->serialize($steps, 'json', ['groups' => CoStep::FORM]);
