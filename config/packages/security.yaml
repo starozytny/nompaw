@@ -43,8 +43,6 @@ security:
          - { path: ^/espace-membre/projets/projet,              roles: PUBLIC_ACCESS }
          - { path: ^/intern/api/users/password,                 roles: PUBLIC_ACCESS }
          - { path: ^/intern/api/users/create,                   roles: PUBLIC_ACCESS }
-         - { path: ^/images/entity,                             roles: ROLE_USER }
-         - { path: ^/storytelling,                              roles: ROLE_USER }
          - { path: ^/intern/api,                                roles: ROLE_USER }
          - { path: ^/api,                                       roles: ROLE_USER }
          - { path: ^/espace-membre,                             roles: ROLE_USER }
