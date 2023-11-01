@@ -11,8 +11,14 @@ use Symfony\Component\Routing\Annotation\Route;
 class BlogController extends AbstractController
 {
     #[Route('/cochons-chamonix', name: 'cochons_chamonix')]
-    public function cochonChamonix(): Response
+    public function cochonsChamonix(): Response
     {
         return $this->render('user/pages/blog/cochons/chamonix.html.twig');
+    }
+
+    #[Route('/escapades-queyras', name: 'escapades_queyras')]
+    public function escapadesQueryas(): Response
+    {
+        return $this->render('user/pages/blog/escapades/queyras.html.twig');
     }
 }
