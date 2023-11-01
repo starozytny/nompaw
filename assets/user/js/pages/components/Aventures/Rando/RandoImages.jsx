@@ -57,7 +57,9 @@ export class RandoImages extends Component{
         let file = this.files.current;
         if(file.state.files.length > 0) {
             file.state.files.forEach((f, index) => {
+                let lastMod = ""+f.lastModified
                 formData.append("file-" + index, f);
+                formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
             })
         }
 
@@ -157,7 +159,7 @@ export class RandoImages extends Component{
                 </ResponsiveMasonry>
             </div>
 
-            <Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} title="Ajouter des photos"
+            <Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
                    content={<>
                        <div className="line">
                            <div className="form-group">

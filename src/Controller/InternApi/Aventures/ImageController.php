@@ -27,12 +27,13 @@ class ImageController extends AbstractController
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
     {
         if($request->files){
-            foreach($request->files as $file){
+            foreach($request->files as $key => $file){
                 $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES);
                 $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES, RaRando::FOLDER_THUMBS);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
+                    ->setMTime($request->get($key . "-time"))
                     ->setThumbs($filenameThumb)
                     ->setAuthor($this->getUser())
                     ->setRando($obj)
