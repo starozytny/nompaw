@@ -37,6 +37,9 @@ class RaImage extends DataEntity
     #[ORM\JoinColumn(nullable: false)]
     private ?RaRando $rando = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $mTime = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -98,6 +101,18 @@ class RaImage extends DataEntity
     public function setRando(?RaRando $rando): self
     {
         $this->rando = $rando;
+
+        return $this;
+    }
+
+    public function getMTime(): ?int
+    {
+        return $this->mTime;
+    }
+
+    public function setMTime(?int $mTime): static
+    {
+        $this->mTime = $mTime;
 
         return $this;
     }
