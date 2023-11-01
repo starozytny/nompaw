@@ -457,7 +457,14 @@ const CanvasMap=(props)=>{
       )
     },
     renderMap(){
-      if(!this.ready) return
+      if(!this.ready) {
+        return
+      }else{
+        let article = document.querySelector('#article');
+        let loader = document.querySelector('#article-loader');
+        article.style.opacity = "1";
+        loader.style.display = "none";
+      }
 
       let drawImagePointer=(image)=>{
         let scroll=getScroll()

@@ -178,12 +178,17 @@
     right: 12px;
   }
 
+  .link-story{
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+  }
+
   .card{
     position: relative;
     background-color: var(--color0);
     border-radius: calc(var(--radius) * 2);
     width: 100%;
-    max-width: 321px;
 
     &:hover{
       .card-header{
@@ -232,6 +237,11 @@
         width: 100%;
         min-height: 48px;
       }
+    }
+  }
+  @media (min-width:768px) {
+    .card{
+      max-width: 321px;
     }
   }
 }
