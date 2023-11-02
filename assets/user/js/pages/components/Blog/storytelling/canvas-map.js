@@ -174,6 +174,13 @@ const CanvasMap=(props)=>{
             this.renderMap()
           })
         })
+      Array.from(this.props.textContainer.querySelectorAll('video'))
+          .forEach(vid=>{
+            vid.addEventListener('load',(event)=>{
+              this.calculateSections()
+              this.renderMap()
+            })
+          })
 
       this.scrollAnim={value:0}
 
