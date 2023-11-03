@@ -15,7 +15,8 @@ import { Modal } from "@commonComponents/Elements/Modal";
 import { Alert } from "@commonComponents/Elements/Alert";
 
 const URL_UPLOAD_IMAGES  = "intern_api_aventures_images_upload_images";
-const URL_DELETE_IMAGE   = "intern_api_aventures_images_delete";
+const URL_DELETE_IMAGE   = "intern_api_aventures_images_image_delete";
+const URL_DELETE_IMAGES  = "intern_api_aventures_images_delete";
 const URL_DOWNLOAD_IMAGE = "intern_api_aventures_images_download";
 const URL_COVER_IMAGE    = "intern_api_aventures_randos_cover";
 
@@ -26,6 +27,7 @@ export class RandoImages extends Component{
         this.state = {
             files: "",
             data: JSON.parse(props.images),
+            selected: [],
             errors: [],
             image: null
         }
@@ -33,13 +35,36 @@ export class RandoImages extends Component{
         this.files = React.createRef();
         this.formFiles = React.createRef();
         this.deleteImage = React.createRef();
+        this.deleteFiles = React.createRef();
     }
 
     handleChange = (e) => { this.setState({[e.currentTarget.name]: e.currentTarget.value}) }
 
+    handleSelect = (id) => {
+        const { selected } = this.state;
+
+        let find = false;
+        selected.forEach(s => {
+            if(s === id){
+                find = true;
+            }
+        })
+
+        let nSelected = [];
+        if(find){
+            nSelected = selected.filter(s => s !== id);
+        }else{
+            nSelected = selected;
+            nSelected.push(id);
+        }
+
+        this.setState({ selected: nSelected })
+    }
+
     handleModal = (identifiant, image) => {
         modalForm(this);
         modalDeleteImage(this);
+        modalDeleteImages(this);
         this.setState({ image: image })
         this[identifiant].current.handleClick();
     }
@@ -87,6 +112,21 @@ export class RandoImages extends Component{
         ;
     }
 
+    handleDeleteImages = () => {
+        const { selected } = this.state;
+
+        Formulaire.loader(true);
+        let self = this;
+        this.deleteFiles.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+        axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: {selected: selected} })
+            .then(function (response) {
+                toastr.info('Photos supprimées.');
+                location.reload();
+            })
+            .catch(function (error) { modalDeleteImages(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
+        ;
+    }
+
     handleCover = (image) => {
         const { randoId } = this.props;
 
@@ -103,12 +143,21 @@ export class RandoImages extends Component{
 
     render () {
         const { userId } = this.props;
-        const { errors, files, data } = this.state;
+        const { errors, files, data, selected } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange }
 
         return <div>
-            <Button type="warning" outline={true} onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
+            <div className="selected-actions">
+                <Button type="warning" outline={true} onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
+                {selected.length !== 0
+                    ? <>
+                        <Button type="danger" outline={true} onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
+                    </>
+                    : null
+                }
+            </div>
+
 
             <div style={{ marginTop: "12px" }}>
                 <Alert type="warning">
@@ -122,17 +171,23 @@ export class RandoImages extends Component{
                 >
                     <Masonry gutter={'1.2rem'}>
                         {data.map((elem, index) => {
-                            return <div className="rando-image" key={index}>
+                            return <div className={`rando-image${selected.includes(elem.id) ? ' active' : ''}`} key={index}>
                                 <div className="image-data" style={elem.type === 1 ? { height: "87%" } : {}}>
                                     <div className="action-top">
-                                        {parseInt(userId) === elem.author.id && <>
-                                            <ButtonIcon icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
-                                                Image de couverture
-                                            </ButtonIcon>
-                                            <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
-                                                Supprimer
-                                            </ButtonIcon>
-                                        </>}
+                                        <div>
+                                            <div className={`selector${selected.includes(elem.id) ? ' active' : ''}`}
+                                                 onClick={() => this.handleSelect(elem.id)}></div>
+                                        </div>
+                                        <div>
+                                            {parseInt(userId) === elem.author.id && <>
+                                                <ButtonIcon icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
+                                                    Image de couverture
+                                                </ButtonIcon>
+                                                <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
+                                                    Supprimer
+                                                </ButtonIcon>
+                                            </>}
+                                        </div>
                                     </div>
                                     <div className="action-bottom">
                                         <div className="image-author">
@@ -185,6 +240,10 @@ export class RandoImages extends Component{
             <Modal ref={this.deleteImage} identifiant='delete-image' maxWidth={414} title="Supprimer cette photo"
                    content={<p>Etes-vous sûr de vouloir supprimer cette image ?</p>}
                    footer={null} closeTxt="Annuler" />
+
+            <Modal ref={this.deleteFiles} identifiant='delete-files' maxWidth={414} title="Supprimer la sélection"
+                   content={<p>Etes-vous sûr de vouloir supprimer <b>la sélection</b> ?</p>}
+                   footer={null} closeTxt="Annuler" />
         </div>
     }
 }
@@ -200,4 +259,7 @@ function modalForm (self) {
 }
 function modalDeleteImage (self) {
     self.deleteImage.current.handleUpdateFooter(<Button type="danger" onClick={self.handleDeleteImage}>Confirmer la suppression</Button>)
+}
+function modalDeleteImages (self) {
+    self.deleteFiles.current.handleUpdateFooter(<Button type="danger" onClick={self.handleDeleteImages}>Confirmer la suppression</Button>)
 }

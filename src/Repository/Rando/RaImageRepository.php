@@ -21,6 +21,11 @@ class RaImageRepository extends ServiceEntityRepository
         parent::__construct($registry, RaImage::class);
     }
 
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
+    }
+
     public function save(RaImage $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);

@@ -57,7 +57,7 @@ class ImageController extends AbstractController
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
-    #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
+    #[Route('/image/delete/{id}', name: 'image_delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(RaImage $obj, ApiResponse $apiResponse, RaImageRepository $repository,
                            FileUploader $fileUploader): Response
     {
@@ -66,6 +66,29 @@ class ImageController extends AbstractController
 
         $repository->remove($obj, true);
 
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/delete', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
+    public function deletes(Request $request, ApiResponse $apiResponse, RaImageRepository $repository,
+                           FileUploader $fileUploader): Response
+    {
+        $data = json_decode($request->getContent());
+
+        if($data == null || !isset($data->selected)){
+            return $apiResponse->apiJsonResponseBadRequest("Mauvaise données.");
+        }
+
+        $objs = $repository->findBy(['id' => $data->selected]);
+
+        foreach($objs as $obj){
+            $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES);
+            $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS);
+
+            $repository->remove($obj);
+        }
+
+        $repository->flush();
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
