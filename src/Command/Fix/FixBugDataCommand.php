@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Command\Donnees;
+namespace App\Command\Fix;
 
 use App\Entity\Rando\RaImage;
-use App\Entity\Rando\RaRando;
 use App\Service\Data\DataMain;
 use App\Service\DatabaseService;
 use Doctrine\Persistence\ObjectManager;
