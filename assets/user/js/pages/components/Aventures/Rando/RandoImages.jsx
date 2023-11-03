@@ -122,42 +122,43 @@ export class RandoImages extends Component{
                 >
                     <Masonry gutter={'1.2rem'}>
                         {data.map((elem, index) => {
-                            return elem.type === 1
-                                ? <video controls>
-                                    <source src={elem.fileFile} type="video/mp4" />
-                                </video>
-                                : <div className="rando-image" key={index}>
-                                    <div className="image-data">
-                                        <div className="action-top">
-                                            {parseInt(userId) === elem.author.id && <>
-                                                <ButtonIcon icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
-                                                    Image de couverture
-                                                </ButtonIcon>
-                                                <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
-                                                    Supprimer
-                                                </ButtonIcon>
-                                            </>}
+                            return <div className="rando-image" key={index}>
+                                <div className="image-data" style={elem.type === 1 ? { height: "87%" } : {}}>
+                                    <div className="action-top">
+                                        {parseInt(userId) === elem.author.id && <>
+                                            <ButtonIcon icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
+                                                Image de couverture
+                                            </ButtonIcon>
+                                            <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
+                                                Supprimer
+                                            </ButtonIcon>
+                                        </>}
+                                    </div>
+                                    <div className="action-bottom">
+                                        <div className="image-author">
+                                            <div className="avatar">
+                                                {elem.author.avatarFile
+                                                    ? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`}/>
+                                                    : <div className="avatar-letter">{elem.author.lastname.slice(0,1) + elem.author.firstname.slice(0,1)}</div>
+                                                }
+                                            </div>
+                                            <div className="username">{elem.author.displayName}</div>
                                         </div>
-                                        <div className="action-bottom">
-                                            <div className="image-author">
-                                                <div className="avatar">
-                                                    {elem.author.avatarFile
-                                                        ? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`}/>
-                                                        : <div className="avatar-letter">{elem.author.lastname.slice(0,1) + elem.author.firstname.slice(0,1)}</div>
-                                                    }
-                                                </div>
-                                                <div className="username">{elem.author.displayName}</div>
-                                            </div>
-                                            <div className="image-download">
-                                                <ButtonIcon icon="download" element="a" download={true}
-                                                            onClick={Routing.generate(URL_DOWNLOAD_IMAGE, {'id': elem.id})}>
-                                                    Télécharger
-                                                </ButtonIcon>
-                                            </div>
+                                        <div className="image-download">
+                                            <ButtonIcon icon="download" element="a" download={true}
+                                                        onClick={Routing.generate(URL_DOWNLOAD_IMAGE, {'id': elem.id})}>
+                                                Télécharger
+                                            </ButtonIcon>
                                         </div>
                                     </div>
-                                    <img src={elem.type === 3 ? elem.fileFile : elem.thumbsFile} alt=""/>
                                 </div>
+                                {elem.type === 1
+                                    ? <video controls>
+                                        <source src={elem.fileFile} type="video/mp4" />
+                                    </video>
+                                    : <img src={elem.type === 3 ? elem.fileFile : elem.thumbsFile} alt=""/>
+                                }
+                            </div>
                         })}
                     </Masonry>
                 </ResponsiveMasonry>

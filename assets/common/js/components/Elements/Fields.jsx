@@ -572,8 +572,6 @@ export class InputFile extends Component {
         const { type, identifiant, format="image", valeur, children, placeholder="", accept="image/*" } = this.props;
         const { files } = this.state;
 
-        console.log(files);
-
         let content = <div className="file-uploader">
             <input type='file' ref={this.fileInput} name={identifiant} id={identifiant} onChange={this.handleFileInput}
                    accept={accept} multiple={type !== "simple"} />
