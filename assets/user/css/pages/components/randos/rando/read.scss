@@ -112,21 +112,37 @@
   padding: var(--espaceDiv);
 }
 
+.selected-actions{
+  @include flex(row, center, space-between, var(--espaceEls));
+}
+
 .rando-images{
   margin-top: var(--espaceDiv);
 
   .rando-image{
     position: relative;
+    border: 2px solid transparent;
+    border-radius: var(--radius);
 
     img{
       height: 100%;
     }
 
+    video{
+      height: 100%;
+      width: 100%;
+    }
+
+    &.active,
     &:hover{
       .image-data{
         opacity: 1;
         z-index: 1;
       }
+    }
+
+    &.active{
+      border-color: var(--primaryOpacity4);
     }
   }
 
@@ -142,13 +158,48 @@
     transition: opacity 0.2s ease-in-out;
 
     .action-top{
-      @include flex(row, flex-start, flex-end, var(--espaceEls));
+      @include flex(row, flex-start, space-between, var(--espaceEls));
       width: 100%;
+
+      & > div:nth-child(2){
+        @include flex(row, flex-start, flex-end, var(--espaceEls));
+        width: calc(100% - 24px);
+      }
     }
 
     .action-bottom{
       @include flex(row, flex-end, space-between, var(--espaceEls));
       width: 100%;
+    }
+
+    .selector{
+      position: relative;
+      width: 23px; height: 23px;
+      border-radius: var(--radius);
+      border: 1px solid var(--grey1);
+      cursor: pointer;
+
+      &:before{
+        content: '';
+        position: absolute;
+        top: 2px; left: 2px;
+        display: block;
+        width: 17px; height: 17px;
+        border-radius: 2px;
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      &:not(.active):hover{
+        &:before{
+          background-color: var(--primaryOpacity6);
+        }
+      }
+
+      &.active{
+        &:before{
+          background-color: var(--primary);
+        }
+      }
     }
   }
 
