@@ -39,6 +39,15 @@ class ImageController extends AbstractController
                     ->setRando($obj)
                 ;
 
+                $mime = mime_content_type($this->getParameter('public_directory') . $image->getFileFile());
+                if(str_contains($mime, "image/")){
+                    $image->setType(0);
+                }elseif(str_contains($mime, "video/")){
+                    $image->setType(1);
+                }else{
+                    $image->setType(99);
+                }
+
                 $imageRepository->save($image);
             }
 

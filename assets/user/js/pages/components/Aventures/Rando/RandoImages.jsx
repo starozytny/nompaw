@@ -122,38 +122,42 @@ export class RandoImages extends Component{
                 >
                     <Masonry gutter={'1.2rem'}>
                         {data.map((elem, index) => {
-                            return <div className="rando-image" key={index}>
-                                <div className="image-data">
-                                    <div className="action-top">
-                                        {parseInt(userId) === elem.author.id && <>
-                                            <ButtonIcon icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
-                                                Image de couverture
-                                            </ButtonIcon>
-                                            <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
-                                                Supprimer
-                                            </ButtonIcon>
-                                        </>}
-                                    </div>
-                                    <div className="action-bottom">
-                                        <div className="image-author">
-                                            <div className="avatar">
-                                                {elem.author.avatarFile
-                                                    ? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`}/>
-                                                    : <div className="avatar-letter">{elem.author.lastname.slice(0,1) + elem.author.firstname.slice(0,1)}</div>
-                                                }
+                            return elem.type === 1
+                                ? <video controls>
+                                    <source src={elem.fileFile} type="video/mp4" />
+                                </video>
+                                : <div className="rando-image" key={index}>
+                                    <div className="image-data">
+                                        <div className="action-top">
+                                            {parseInt(userId) === elem.author.id && <>
+                                                <ButtonIcon icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
+                                                    Image de couverture
+                                                </ButtonIcon>
+                                                <ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal('deleteImage', elem)}>
+                                                    Supprimer
+                                                </ButtonIcon>
+                                            </>}
+                                        </div>
+                                        <div className="action-bottom">
+                                            <div className="image-author">
+                                                <div className="avatar">
+                                                    {elem.author.avatarFile
+                                                        ? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`}/>
+                                                        : <div className="avatar-letter">{elem.author.lastname.slice(0,1) + elem.author.firstname.slice(0,1)}</div>
+                                                    }
+                                                </div>
+                                                <div className="username">{elem.author.displayName}</div>
                                             </div>
-                                            <div className="username">{elem.author.displayName}</div>
-                                        </div>
-                                        <div className="image-download">
-                                            <ButtonIcon icon="download" element="a" download={true}
-                                                        onClick={Routing.generate(URL_DOWNLOAD_IMAGE, {'id': elem.id})}>
-                                                Télécharger
-                                            </ButtonIcon>
+                                            <div className="image-download">
+                                                <ButtonIcon icon="download" element="a" download={true}
+                                                            onClick={Routing.generate(URL_DOWNLOAD_IMAGE, {'id': elem.id})}>
+                                                    Télécharger
+                                                </ButtonIcon>
+                                            </div>
                                         </div>
                                     </div>
+                                    <img src={elem.type === 3 ? elem.fileFile : elem.thumbsFile} alt=""/>
                                 </div>
-                                <img src={elem.thumbsFile} alt=""/>
-                            </div>
                         })}
                     </Masonry>
                 </ResponsiveMasonry>
@@ -169,8 +173,8 @@ export class RandoImages extends Component{
                            </div>
                        </div>
                        <div className="line">
-                           <InputFile ref={this.files} type="multi" identifiant="files" valeur={files} accept="/*" max={20}
-                                      placeholder="Glissez et déposer des photos (20 max par envoi)" {...params}>
+                           <InputFile ref={this.files} type="multi" identifiant="files" valeur={files} accept="video/*,image/*" max={30}
+                                      placeholder="Glissez et déposer des photos (30 max par envoi)" {...params}>
                                Pièces jointes (20 fichiers maximums)
                            </InputFile>
                        </div>

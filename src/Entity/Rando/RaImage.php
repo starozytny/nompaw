@@ -28,6 +28,13 @@ class RaImage extends DataEntity
     #[Groups(['ra_img_list'])]
     private ?string $thumbs = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $mTime = null;
+
+    #[ORM\Column]
+    #[Groups(['ra_img_list'])]
+    private ?int $type = null;
+
     #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'raImages')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['ra_img_list'])]
@@ -36,9 +43,6 @@ class RaImage extends DataEntity
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]
     private ?RaRando $rando = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $mTime = null;
 
     public function getId(): ?int
     {
@@ -113,6 +117,18 @@ class RaImage extends DataEntity
     public function setMTime(?int $mTime): static
     {
         $this->mTime = $mTime;
+
+        return $this;
+    }
+
+    public function getType(): ?int
+    {
+        return $this->type;
+    }
+
+    public function setType(?int $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }

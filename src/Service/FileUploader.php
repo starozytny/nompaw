@@ -43,7 +43,7 @@ class FileUploader
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
-        $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+        $fileName = $safeFilename.'-'.uniqid().'.'.$file->getClientOriginalExtension();
 
         try {
             $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
@@ -59,18 +59,20 @@ class FileUploader
 
             $fileOri = $directory . "/" . $fileName;
 
-            $layer = ImageWorkshop::initFromPath($fileOri);
+            $mime = mime_content_type($fileOri);
+            if(str_contains($mime, "image/")){
+                $layer = ImageWorkshop::initFromPath($fileOri);
 
-            if($reducePixel){
-                $layer->resizeInPixel(null, $reducePixel, true);
-            }else if($layer->getHeight() > 2160){
-                if(!$keepOriginalSize){
-                    $layer->resizeInPixel(null, 2160, true);
+                if($reducePixel){
+                    $layer->resizeInPixel(null, $reducePixel, true);
+                }else if($layer->getHeight() > 2160){
+                    if(!$keepOriginalSize){
+                        $layer->resizeInPixel(null, 2160, true);
+                    }
                 }
+
+                $layer->save($directory, $fileName);
             }
-
-            $layer->save($directory, $fileName);
-
         } catch (FileException|ImageWorkshopException|ImageWorkshopLayerException $e) {
             return false;
         }
@@ -91,13 +93,16 @@ class FileUploader
         }
 
         $fileOri = $folderImages . "/" . $fileName;
+        $mime = mime_content_type($fileOri);
 
-        $layer = ImageWorkshop::initFromPath($fileOri);
-        $layer->resizeInPixel(null, 500, true);
+        if(str_contains($mime, "image/")){
+            $layer = ImageWorkshop::initFromPath($fileOri);
+            $layer->resizeInPixel(null, 500, true);
 
-        $fileName = "thumbs-" . $fileName;
+            $fileName = "thumbs-" . $fileName;
 
-        $layer->save($folderThumbs, $fileName);
+            $layer->save($folderThumbs, $fileName);
+        }
 
         return $fileName;
     }
