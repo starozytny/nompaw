@@ -27,9 +27,10 @@ class ImageController extends AbstractController
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
     {
         if($request->files){
+            $randoFile = '/' . $obj->getId();
             foreach($request->files as $key => $file){
-                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES, true, false, true);
-                $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES, RaRando::FOLDER_THUMBS);
+                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, true, false, true);
+                $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
@@ -61,8 +62,8 @@ class ImageController extends AbstractController
     public function delete(RaImage $obj, ApiResponse $apiResponse, RaImageRepository $repository,
                            FileUploader $fileUploader): Response
     {
-        $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES);
-        $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS);
+        $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId());
+        $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId());
 
         $repository->remove($obj, true);
 
@@ -82,8 +83,8 @@ class ImageController extends AbstractController
         $objs = $repository->findBy(['id' => $data->selected]);
 
         foreach($objs as $obj){
-            $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES);
-            $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS);
+            $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId());
+            $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId());
 
             $repository->remove($obj);
         }
@@ -95,6 +96,6 @@ class ImageController extends AbstractController
     #[Route('/download/{id}', name: 'download', options: ['expose' => true], methods: 'GET')]
     public function download(RaImage $obj): Response
     {
-        return $this->file(RaRando::FOLDER_IMAGES . '/' . $obj->getFile());
+        return $this->file(RaRando::FOLDER_IMAGES . '/' . $obj->getRando()->getId() . '/' . $obj->getFile());
     }
 }

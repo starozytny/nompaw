@@ -64,7 +64,7 @@ class RaImage extends DataEntity
     #[Groups(['ra_img_list'])]
     public function getFileFile()
     {
-        return $this->getFileOrDefault($this->file, RaRando::FOLDER_IMAGES);
+        return $this->getFileOrDefault($this->file, RaRando::FOLDER_IMAGES . '/' . $this->rando->getId());
     }
 
     public function getThumbs(): ?string
@@ -82,7 +82,7 @@ class RaImage extends DataEntity
     #[Groups(['ra_img_list'])]
     public function getThumbsFile()
     {
-        return $this->getFileOrDefault($this->thumbs, RaRando::FOLDER_THUMBS);
+        return $this->getFileOrDefault($this->thumbs, RaRando::FOLDER_THUMBS . '/' . $this->rando->getId());
     }
 
     public function getAuthor(): ?User
