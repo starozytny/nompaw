@@ -39,7 +39,7 @@ class FileUploader
         $this->slugger = $slugger;
     }
 
-    public function upload(UploadedFile $file, $folder=null, $isPublic=true, $reducePixel=false): string
+    public function upload(UploadedFile $file, $folder=null, $isPublic=true, $reducePixel=false, $keepOriginalSize=false): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
@@ -64,7 +64,9 @@ class FileUploader
             if($reducePixel){
                 $layer->resizeInPixel(null, $reducePixel, true);
             }else if($layer->getHeight() > 2160){
-                $layer->resizeInPixel(null, 2160, true);
+                if(!$keepOriginalSize){
+                    $layer->resizeInPixel(null, 2160, true);
+                }
             }
 
             $layer->save($directory, $fileName);
