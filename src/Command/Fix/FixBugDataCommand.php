@@ -3,6 +3,7 @@
 namespace App\Command\Fix;
 
 use App\Entity\Rando\RaImage;
+use App\Entity\Rando\RaRando;
 use App\Service\Data\DataMain;
 use App\Service\DatabaseService;
 use Doctrine\Persistence\ObjectManager;
@@ -39,11 +40,30 @@ class FixBugDataCommand extends Command
 
         $data = $this->em->getRepository(RaImage::class)->findAll();
         foreach($data as $item){
-            $folder = $this->publicDirectory;
 
-            $file = $folder . $item->getFileFile();
+            $directory = $this->publicDirectory;
+
+            $newDirectoryImages = $directory . RaRando::FOLDER_IMAGES . '/' . $item->getRando()->getId();
+            $newDirectoryThumbs = $directory . RaRando::FOLDER_THUMBS . '/' . $item->getRando()->getId();
+
+            if($newDirectoryImages){
+                if(!is_dir($newDirectoryImages)){
+                    mkdir($newDirectoryImages, 0777, true);
+                }
+            }
+            if($newDirectoryThumbs){
+                if(!is_dir($newDirectoryThumbs)){
+                    mkdir($newDirectoryThumbs, 0777, true);
+                }
+            }
+
+            $file = $directory . $item->getFileFile();
             if(file_exists($file)){
-                $item->setMTime(filemtime($file));
+                rename($file, $newDirectoryImages . '/' . $item->getFile());
+            }
+            $thumbs = $directory . $item->getThumbsFile();
+            if(file_exists($thumbs)){
+                rename($thumbs, $newDirectoryThumbs . '/' . $item->getThumbs());
             }
         }
 
