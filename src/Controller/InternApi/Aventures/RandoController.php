@@ -4,6 +4,7 @@ namespace App\Controller\InternApi\Aventures;
 
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaImageRepository;
@@ -12,6 +13,7 @@ use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataRandos;
+use App\Service\FileUploader;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -95,7 +97,9 @@ class RandoController extends AbstractController
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(RaRando $obj, RaRandoRepository $repository, ApiResponse $apiResponse,
-                           RaPropalDateRepository $dateRepository, RaPropalAdventureRepository $adventureRepository,
+                           FileUploader $fileUploader,
+                           RaPropalDateRepository $dateRepository,
+                           RaPropalAdventureRepository $adventureRepository,
                            RaImageRepository $imageRepository): Response
     {
         $obj->setAdventure(null);
@@ -110,6 +114,9 @@ class RandoController extends AbstractController
             $adventureRepository->remove($item);
         }
         foreach($imageRepository->findBy(['rando' => $obj]) as $item){
+            $fileUploader->deleteFile($item->getFile(), RaRando::FOLDER_IMAGES.'/'.$item->getRando()->getId());
+            $fileUploader->deleteFile($item->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$item->getRando()->getId());
+
             $imageRepository->remove($item);
         }
 
