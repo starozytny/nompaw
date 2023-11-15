@@ -17,7 +17,7 @@ class UserController extends AbstractController
     #[Route('/', name: 'homepage')]
     public function index(ChangelogRepository $changelogRepository): Response
     {
-        $changelogs = $changelogRepository->findBy(['isPublished' => true], ['createdAt' => 'ASC'], 5);
+        $changelogs = $changelogRepository->findBy(['isPublished' => true], ['createdAt' => 'DESC'], 5);
 
         return $this->render('user/pages/index.html.twig', [
             'changelogs' => $changelogs,
