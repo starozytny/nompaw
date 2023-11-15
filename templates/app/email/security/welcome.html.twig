@@ -1,11 +1,18 @@
-{% extends 'app/email/template/template_classique.html.twig' %}
+{% extends 'app/email/template/template.html.twig' %}
 
-{% block preheader %}Bienvenue sur nompaw.fr{% endblock %}
+{% block preheader %}Bienvenue sur Nompaw{% endblock %}
 
 {% block title %}Bienvenue{% endblock %}
 
 {% block body %}
     <div>
-        <div>Voici ton nom d'utilisateur : {{ user.username }}</div>
+        <p>Bonjour, <br>
+            <br>
+            Voici ton nom d'utilisateur : {{ user.username }}
+        </p>
+        <br>
+        <p>
+            Nous vous souhaitons une agréable visite sur notre site <a href="https://nompaw.fr">Nompaw.fr</a>.
+        </p>
     </div>
 {% endblock %}
