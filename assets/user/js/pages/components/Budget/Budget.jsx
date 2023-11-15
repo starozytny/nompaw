@@ -266,7 +266,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
     let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
 
     let cards = [
-        { value: 0, name: "Budget disponible",  total: totalDispo,    initial: initial, icon: "credit-card" },
+        { value: 0, name: "Budget disponible",  total: totalDispo,    initial: initial, icon: "cart" },
         { value: 1, name: "Dépenses",           total: totalExpense,  initial: null,    icon: "minus" },
         { value: 2, name: "Revenus",            total: totalIncome,   initial: null,    icon: "add" },
         { value: 3, name: "Economies",          total: totalSaving,   initial: null,    icon: "time" },
@@ -336,7 +336,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
                                         <div className="sub">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
                                     </div>
                                     <div className="actions">
-                                        <ButtonIcon icon="cart" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
+                                        <ButtonIcon icon="credit-card" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
                                     </div>
                                 </div>
                             })}
