@@ -87,7 +87,11 @@ class CategoriesController extends AbstractController
 
         $max = 0;
         foreach($savingsItems as $sa){
-            $max += $sa->getPrice();
+            if($sa->getYear() <= $data->year){
+                if($sa->getYear() < $data->year || ($sa->getYear() === $data->year && $sa->getMonth() <= $data->month)){
+                    $max += $sa->getPrice();
+                }
+            }
         }
 
         $obj = $dataEntity->setDataItemFromCategory(new BuItem(), $obj, $data);

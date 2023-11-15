@@ -14,7 +14,7 @@ import {Button, ButtonIcon} from "@commonComponents/Elements/Button";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
-import {SavingForm} from "@userPages/Budget/SavingForm";
+import { SavingForm } from "@userPages/Budget/SavingForm";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
@@ -309,12 +309,20 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
                                 let total = 0, used = 0;
                                 nSavingsItems.forEach(s => {
                                     if(s.category.id === sa.id){
-                                        total += s.price;
+                                        if(s.year <= year){
+                                            if(s.year < year || (s.year === year && s.month <= month)){
+                                                total += s.price;
+                                            }
+                                        }
                                     }
                                 })
                                 nSavingsUsed.forEach(s => {
                                     if(s.category.id === sa.id){
-                                        used += s.price;
+                                        if(s.year <= year){
+                                            if(s.year < year || (s.year === year && s.month <= month)){
+                                                used += s.price;
+                                            }
+                                        }
                                     }
                                 })
 
