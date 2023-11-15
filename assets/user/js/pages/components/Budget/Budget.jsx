@@ -43,6 +43,9 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 
     let handleUpdateList = (elem, context) => {
         setData(List.updateDataMuta(elem, context, data, SORTER));
+        if(elem.type === 2){ // saving type
+            setNSavingsItems(List.updateDataMuta(elem, context, nSavingsItems));
+        }
         setElement(null);
     }
 
