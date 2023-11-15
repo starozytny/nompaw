@@ -14,7 +14,7 @@ import {Button, ButtonIcon} from "@commonComponents/Elements/Button";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
-import {SavingForm} from "@userPages/Budget/SavingForm";
+import { SavingForm } from "@userPages/Budget/SavingForm";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
@@ -43,6 +43,9 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 
     let handleUpdateList = (elem, context) => {
         setData(List.updateDataMuta(elem, context, data, SORTER));
+        if(elem.type === 2){ // saving type
+            setNSavingsItems(List.updateDataMuta(elem, context, nSavingsItems));
+        }
         setElement(null);
     }
 
@@ -263,7 +266,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
     let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
 
     let cards = [
-        { value: 0, name: "Budget disponible",  total: totalDispo,    initial: initial, icon: "credit-card" },
+        { value: 0, name: "Budget disponible",  total: totalDispo,    initial: initial, icon: "cart" },
         { value: 1, name: "Dépenses",           total: totalExpense,  initial: null,    icon: "minus" },
         { value: 2, name: "Revenus",            total: totalIncome,   initial: null,    icon: "add" },
         { value: 3, name: "Economies",          total: totalSaving,   initial: null,    icon: "time" },
@@ -309,12 +312,20 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
                                 let total = 0, used = 0;
                                 nSavingsItems.forEach(s => {
                                     if(s.category.id === sa.id){
-                                        total += s.price;
+                                        if(s.year <= year){
+                                            if(s.year < year || (s.year === year && s.month <= month)){
+                                                total += s.price;
+                                            }
+                                        }
                                     }
                                 })
                                 nSavingsUsed.forEach(s => {
                                     if(s.category.id === sa.id){
-                                        used += s.price;
+                                        if(s.year <= year){
+                                            if(s.year < year || (s.year === year && s.month <= month)){
+                                                used += s.price;
+                                            }
+                                        }
                                     }
                                 })
 
@@ -325,7 +336,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
                                         <div className="sub">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
                                     </div>
                                     <div className="actions">
-                                        <ButtonIcon icon="cart" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
+                                        <ButtonIcon icon="credit-card" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
                                     </div>
                                 </div>
                             })}
