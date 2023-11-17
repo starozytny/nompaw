@@ -75,12 +75,6 @@ class FacebookAuthenticator extends OAuth2Authenticator
                     $existingUser->setPassword($this->passwordHasher->hashPassword($existingUser, uniqid()));
                     $this->entityManager->persist($existingUser);
                 }
-                if($user->getPictureUrl()){
-                    $fileName = $this->fileUploader->downloadImgURL($user->getPictureUrl().'/picture', User::FOLDER, $oldAvatar);
-                    if($fileName){
-                        $existingUser->setAvatar($fileName);
-                    }
-                }
                 $existingUser->setLastLoginAt(new \DateTime());
                 $this->entityManager->flush();
 

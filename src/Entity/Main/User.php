@@ -6,6 +6,7 @@ use App\Entity\Birthday\BiBirthday;
 use App\Entity\Birthday\BiPresent;
 use App\Entity\Budget\BuCategory;
 use App\Entity\Budget\BuItem;
+use App\Entity\Budget\BuRecurrent;
 use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
@@ -191,12 +192,21 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Mail::class)]
     private Collection $mails;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $budgetYear = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $budgetInit = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuRecurrent::class)]
+    private Collection $buRecurrents;
+
     /**
      * @throws Exception
      */
     public function __construct()
     {
-        $this->createdAt = $this->initNewDateImmutable();
+        $this->createdAt = new \DateTimeImmutable();
         $this->token = $this->initToken();
         $this->coRecipes = new ArrayCollection();
         $this->coCommentaries = new ArrayCollection();
@@ -217,6 +227,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->buItems = new ArrayCollection();
         $this->buCategories = new ArrayCollection();
         $this->mails = new ArrayCollection();
+        $this->buRecurrents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -394,7 +405,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
     public function setUpdatedAt(?\DateTime $updatedAt): self
     {
-        $updatedAt->setTimezone(new \DateTimeZone("Europe/Paris"));
         $this->updatedAt = $updatedAt;
 
         return $this;
@@ -407,7 +417,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
     public function setLastLoginAt(?\DateTime $lastLoginAt): self
     {
-        $lastLoginAt->setTimezone(new \DateTimeZone("Europe/Paris"));
         $this->lastLoginAt = $lastLoginAt;
 
         return $this;
@@ -1133,6 +1142,60 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($mail->getUser() === $this) {
                 $mail->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getBudgetYear(): ?int
+    {
+        return $this->budgetYear;
+    }
+
+    public function setBudgetYear(?int $budgetYear): static
+    {
+        $this->budgetYear = $budgetYear;
+
+        return $this;
+    }
+
+    public function getBudgetInit(): ?float
+    {
+        return $this->budgetInit;
+    }
+
+    public function setBudgetInit(?float $budgetInit): static
+    {
+        $this->budgetInit = $budgetInit;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BuRecurrent>
+     */
+    public function getBuRecurrents(): Collection
+    {
+        return $this->buRecurrents;
+    }
+
+    public function addBuRecurrent(BuRecurrent $buRecurrent): static
+    {
+        if (!$this->buRecurrents->contains($buRecurrent)) {
+            $this->buRecurrents->add($buRecurrent);
+            $buRecurrent->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBuRecurrent(BuRecurrent $buRecurrent): static
+    {
+        if ($this->buRecurrents->removeElement($buRecurrent)) {
+            // set the owning side to null (unless already changed)
+            if ($buRecurrent->getUser() === $this) {
+                $buRecurrent->setUser(null);
             }
         }
 

@@ -1,0 +1,15 @@
+{% extends 'user/pages/budget/categories/template.html.twig' %}
+
+{% set page_title %}Modifier {{ elem.name }} #{{ elem.id }}{% endset %}
+{% set page_subtitle %}Modifier les informations relatives à {{ elem.name }}.{% endset %}
+
+{% block main_content %}
+    {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_budget_categories_index', {'h': elem.id}) } %}
+
+    <div id="categories_update"
+         data-obj="{{ obj }}"
+    >
+        {% include "layout/components/loader.html.twig" %}
+    </div>
+{% endblock %}
+

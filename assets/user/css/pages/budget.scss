@@ -1,19 +1,76 @@
 @import "../vars/vars";
 
+@import "js-datepicker/src/datepicker.scss";
+
+@import "./components/components";
+
 @import "./components/budget/planning";
 @import "./components/budget/card";
+@import "./components/budget/form";
+@import "./components/budget/list";
+
+.budget-init-infos{
+  margin-bottom: var(--espaceDiv);
+}
 
 .budget, .budget > .col-2{
   @include flex(column, flex-start, flex-start, var(--espaceDiv));
 }
 
+.budget{
+  max-width: 1440px;
+  margin: 0 auto;
+
+  & > .col-1{
+    width: 100%;
+
+    .card{
+      width: 100%;
+    }
+  }
+
+  & > .col-2{
+    .list{
+      padding: 0;
+    }
+    & > .col-1, & > .col-2{
+      width: 100%;
+    }
+    & > .col-1{
+      @include flex(column, flex-start, flex-start, var(--espaceDiv));
+    }
+  }
+}
+
 @media (min-width:768px) {
   .budget{
     flex-direction: row;
+
+    & > .col-1{
+      max-width: 351px;
+    }
+    & > .col-2{
+      width: calc(100% - 351px);
+    }
   }
 }
 @media (min-width:1280px) {
+  .budget > .col-1{
+    max-width: 294px;
+  }
   .budget > .col-2{
     flex-direction: row;
+    width: calc(100% - 294px);
+
+    & > .col-1{
+      width: 345px;
+    }
+  }
+}
+@media (min-width:1600px) {
+  .budget > .col-2{
+    & > .col-1{
+      width: 360px;
+    }
   }
 }

@@ -21,6 +21,24 @@ class BuCategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, BuCategory::class);
     }
 
+    public function save(BuCategory $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(BuCategory $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
 //    /**
 //     * @return BuCategory[] Returns an array of BuCategory objects
 //     */

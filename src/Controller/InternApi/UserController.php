@@ -43,7 +43,8 @@ class UserController extends AbstractController
 
     public function submitForm($type, UserRepository $repository, User $obj, Request $request, ApiResponse $apiResponse,
                                ValidatorService $validator, DataMain $dataEntity, ObjectManager $em,
-                               UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader, MailerService $mailerService): JsonResponse
+                               UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader,
+                               MailerService $mailerService, SettingsService $settingsService): JsonResponse
     {
         $data = json_decode($request->get('data'));
         if ($data === null) {
@@ -103,7 +104,7 @@ class UserController extends AbstractController
             "Bienvenue sur Nompaw.fr",
             "Message de bienvenue.",
             'app/email/security/welcome.html.twig',
-            ['user' => $obj]))
+            ['user' => $obj, 'settings' => $settingsService->getSettings()]))
         {
             return $apiResponse->apiJsonResponseValidationFailed([[
                 'name' => 'username',
@@ -117,22 +118,28 @@ class UserController extends AbstractController
     #[Route('/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, ManagerRegistry $doctrine, ApiResponse $apiResponse,
                            ValidatorService $validator, DataMain$dataEntity, UserRepository $repository,
-                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader, MailerService $mailerService): Response
+                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader,
+                           MailerService $mailerService, SettingsService $settingsService): Response
     {
         $em = $doctrine->getManager();
-        return $this->submitForm("create", $repository, new User(), $request, $apiResponse, $validator, $dataEntity,
-            $em, $passwordHasher, $fileUploader, $mailerService);
+        return $this->submitForm(
+            "create", $repository, new User(), $request, $apiResponse, $validator, $dataEntity,
+            $em, $passwordHasher, $fileUploader, $mailerService, $settingsService
+        );
     }
 
     #[Route('/update/{id}', name: 'update', options: ['expose' => true], methods: 'POST')]
     #[IsGranted('ROLE_USER')]
     public function update(Request $request, User $obj, ManagerRegistry $doctrine, ApiResponse $apiResponse,
                            ValidatorService $validator, DataMain$dataEntity, UserRepository $repository,
-                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader, MailerService $mailerService): Response
+                           UserPasswordHasherInterface $passwordHasher, FileUploader $fileUploader,
+                           MailerService $mailerService, SettingsService $settingsService): Response
     {
         $em = $doctrine->getManager();
-        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity,
-            $em, $passwordHasher, $fileUploader, $mailerService);
+        return $this->submitForm(
+            "update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity,
+            $em, $passwordHasher, $fileUploader, $mailerService, $settingsService
+        );
     }
 
     #[Route('/password/forget', name: 'password_forget', options: ['expose' => true], methods: 'post')]
@@ -165,7 +172,7 @@ class UserController extends AbstractController
 
         $code = uniqid($user->getId());
 
-        $user->setLostAt(new \DateTime()); // no set timezone to compare expired
+        $user->setLostAt(new \DateTime());
         $user->setLostCode($code);
         $url = $this->generateUrl(
             'app_password_reinit',

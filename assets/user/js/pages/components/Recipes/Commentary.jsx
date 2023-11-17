@@ -22,7 +22,7 @@ export class Commentary extends Component {
 
         this.state = {
             message: {value: '', html: ''},
-            rate: 1,
+            rate: 0,
             errors: [],
             loadData: false,
             data: props.coms
@@ -54,7 +54,7 @@ export class Commentary extends Component {
                 let self = this;
                 axios({ method: 'POST', url: Routing.generate(URL_CREATE_ELEMENT, {'recipe': recipe.id}), data: this.state })
                     .then(function (response) {
-                        self.setState({ data: [...self.state.data, ...[response.data]], message: {value: '', html: ''}, loadData: false })
+                        location.reload();
                     })
                     .catch(function (error) { Formulaire.displayErrors(self, error); })
                 ;

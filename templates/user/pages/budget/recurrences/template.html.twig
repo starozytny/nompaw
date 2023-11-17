@@ -1,0 +1,12 @@
+{% extends 'user/pages/budget/template.html.twig' %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([
+            { text: "Récurrences", url: path('user_budget_recurrences_index') },
+            { text: page_title }
+        ])
+    %}
+    {{ parent() }}
+{% endblock %}
+
+{% set half_width = true %}

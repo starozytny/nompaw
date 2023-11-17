@@ -1,0 +1,12 @@
+{% extends 'user/pages/budget/template.html.twig' %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([
+            { text: "Categories", url: path('user_budget_categories_index') },
+            { text: page_title }
+        ])
+    %}
+    {{ parent() }}
+{% endblock %}
+
+{% set half_width = true %}

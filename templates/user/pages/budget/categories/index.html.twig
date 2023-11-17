@@ -1,0 +1,29 @@
+{% extends 'user/pages/budget/template.html.twig' %}
+
+{% set page_title %}Catégories{% endset %}
+{% set page_subtitle %}Liste des catégories disponibles{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([{ text: page_title }]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% set half_width = true %}
+
+{% block main_content %}
+    <div class="page-actions">
+        <div class="col-1">
+            <a href="{{ path('user_budget_index', {'year': 'now'|date('Y')}) }}" class="btn btn-default">
+                <span>Retourner au planificateur</span>
+            </a>
+            <a href="{{ path('user_budget_recurrences_index') }}" class="btn btn-default">
+                <span>Voir les récurrences</span>
+            </a>
+            <a href="{{ path('user_budget_categories_create') }}" class="btn btn-primary">Créer une catégorie</a>
+        </div>
+    </div>
+
+    <div id="categories_list" data-highlight="{{ highlight }}">
+        {% include "layout/components/loader.html.twig" %}
+    </div>
+{% endblock %}

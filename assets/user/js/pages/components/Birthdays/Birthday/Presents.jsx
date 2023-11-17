@@ -68,8 +68,8 @@ export class Presents extends Component{
         let name  = e.currentTarget.name;
         let value = e.currentTarget.value;
 
-        if(name === "price"){
-            value = Inputs.textMoneyMinusInput(e, this.state[name])
+        if(name === "price" || name === "priceMax"){
+            value = Inputs.textMoneyMinusInput(value, this.state[name])
         }
 
         this.setState({[name]: value})

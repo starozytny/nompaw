@@ -1,20 +1,15 @@
-
 .planning{
-  @include flex(row, center, flex-start);
+  @include flex(row, center, flex-start, var(--espaceDiv));
   overflow-x: auto;
   border-bottom: 1px solid var(--grey0Opacity1);
-  padding-bottom: 24px;
-  margin-bottom: 12px;
-
-  .planning-item:not(:last-child){
-    margin-right: 12px;
-  }
+  padding-bottom: var(--espaceLayout);
+  margin-bottom: var(--espaceDiv);
 
   .planning-item{
     padding: 8px 12px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    border-radius: 4px;
+    border-radius: var(--radius);
     min-width: 64px;
     text-align: center;
 
@@ -22,9 +17,20 @@
       transform: translateY(-5px);
     }
 
+    &.today{
+      background-color: var(--color0Opacity4);
+    }
     &.active{
-      background: var(--primary);
+      background-color: var(--primary);
       color: var(--alpha);
+
+      .totaux{
+        color: var(--grey2);
+      }
+
+      &.danger{
+        background-color: var(--dangerOpacity6);
+      }
     }
     &.disabled{
       opacity: 0.5;
@@ -33,6 +39,12 @@
       &:hover{
         transform: none;
       }
+    }
+
+
+    .totaux{
+      color: var(--grey3);
+      @include overflowText();
     }
   }
 

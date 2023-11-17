@@ -91,6 +91,7 @@ Encore
     .addEntry('user_holidays', './assets/user/js/pages/holidays.js')
     .addEntry('user_birthdays', './assets/user/js/pages/birthdays.js')
     .addEntry('user_budget', './assets/user/js/pages/budget.js')
+    .addEntry('user_blog', './assets/user/js/pages/blog.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     // .enableStimulusBridge('./assets/controllers.json')

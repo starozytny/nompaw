@@ -5,7 +5,7 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import {Input, InputView, Radiobox, Select} from "@commonComponents/Elements/Fields";
+import { Input, Radiobox, Select } from "@commonComponents/Elements/Fields";
 import { Button }           from "@commonComponents/Elements/Button";
 import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
 
@@ -39,6 +39,7 @@ export function RandoFormulaire ({ context, element, groupeId, users, userId })
         adventure={element ? element.adventure : null}
         referent={element ? Formulaire.setValue(element.author.id) : userId}
         googlePhotos={element ? Formulaire.setValue(element.googlePhotos) : ""}
+        story={element ? Formulaire.setValue(element.story) : ""}
 
         users={users}
     />
@@ -68,6 +69,7 @@ class Form extends Component {
             distance: props.distance,
             referent: props.referent,
             googlePhotos: props.googlePhotos,
+            story: props.story,
             errors: [],
         }
     }
@@ -106,7 +108,7 @@ class Form extends Component {
 
     render () {
         const { context, status, adventure, users } = this.props;
-        const { errors, name, description, level, altitude, devPlus, distance, referent, googlePhotos } = this.state;
+        const { errors, name, description, level, altitude, devPlus, distance, referent, googlePhotos, story } = this.state;
 
         let params  = { errors: errors, onChange: this.handleChange };
 
@@ -172,6 +174,11 @@ class Form extends Component {
                             </div>
                             <div className="line line-3">
                                 <Input identifiant="googlePhotos" valeur={googlePhotos} {...params}>Lien Google photos</Input>
+                                <div className="form-group" />
+                                <div className="form-group" />
+                            </div>
+                            <div className="line line-3">
+                                <Input identifiant="story" valeur={story} {...params}>Storytelling</Input>
                                 <div className="form-group" />
                                 <div className="form-group" />
                             </div>

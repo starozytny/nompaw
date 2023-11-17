@@ -1,6 +1,6 @@
 {% extends 'user/layout/layout.html.twig' %}
 
-{% set breadcrumbs = [{ text: "Planificateur", icon: "heart", url: path('user_budget_index') }] %}
+{% set breadcrumbs = [{ text: "Planificateur", icon: "calculator", url: path('user_budget_index', {'year': 'now'|date('Y')}) }] %}
 
 {% block stylesheets %}
     {{ parent() }}

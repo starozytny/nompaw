@@ -52,7 +52,7 @@ export class ProjectHouse extends Component{
         let value = e.currentTarget.value;
 
         if(name === "price"){
-            value = Inputs.textMoneyMinusInput(e, this.state[name])
+            value = Inputs.textMoneyMinusInput(value, this.state[name])
         }
 
         this.setState({[name]: value})

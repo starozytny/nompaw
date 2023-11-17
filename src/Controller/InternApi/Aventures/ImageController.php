@@ -27,16 +27,27 @@ class ImageController extends AbstractController
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
     {
         if($request->files){
-            foreach($request->files as $file){
-                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES);
-                $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES, RaRando::FOLDER_THUMBS);
+            $randoFile = '/' . $obj->getId();
+            foreach($request->files as $key => $file){
+                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, true, false, true);
+                $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
+                    ->setMTime($request->get($key . "-time"))
                     ->setThumbs($filenameThumb)
                     ->setAuthor($this->getUser())
                     ->setRando($obj)
                 ;
+
+                $mime = mime_content_type($this->getParameter('public_directory') . $image->getFileFile());
+                if(str_contains($mime, "image/")){
+                    $image->setType(0);
+                }elseif(str_contains($mime, "video/")){
+                    $image->setType(1);
+                }else{
+                    $image->setType(99);
+                }
 
                 $imageRepository->save($image);
             }
@@ -47,21 +58,44 @@ class ImageController extends AbstractController
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
-    #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
+    #[Route('/image/delete/{id}', name: 'image_delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(RaImage $obj, ApiResponse $apiResponse, RaImageRepository $repository,
                            FileUploader $fileUploader): Response
     {
-        $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES);
-        $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS);
+        $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId());
+        $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId());
 
         $repository->remove($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
+    #[Route('/delete', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
+    public function deletes(Request $request, ApiResponse $apiResponse, RaImageRepository $repository,
+                           FileUploader $fileUploader): Response
+    {
+        $data = json_decode($request->getContent());
+
+        if($data == null || !isset($data->selected)){
+            return $apiResponse->apiJsonResponseBadRequest("Mauvaise données.");
+        }
+
+        $objs = $repository->findBy(['id' => $data->selected]);
+
+        foreach($objs as $obj){
+            $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId());
+            $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId());
+
+            $repository->remove($obj);
+        }
+
+        $repository->flush();
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
     #[Route('/download/{id}', name: 'download', options: ['expose' => true], methods: 'GET')]
     public function download(RaImage $obj): Response
     {
-        return $this->file(RaRando::FOLDER_IMAGES . '/' . $obj->getFile());
+        return $this->file(RaRando::FOLDER_IMAGES . '/' . $obj->getRando()->getId() . '/' . $obj->getFile());
     }
 }

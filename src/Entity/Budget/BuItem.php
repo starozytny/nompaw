@@ -7,38 +7,46 @@ use App\Entity\Main\User;
 use App\Repository\Budget\BuItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BuItemRepository::class)]
 class BuItem extends DataEntity
 {
+    const LIST = ['buitem_list'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $year = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $month = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?int $type = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?float $price = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['buitem_list'])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['buitem_list'])]
     private ?bool $isActive = false;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['buitem_list'])]
     private ?\DateTimeInterface $dateAt = null;
-
-    #[ORM\Column]
-    private ?bool $useSaving = false;
 
     #[ORM\ManyToOne(inversedBy: 'buItems')]
     #[ORM\JoinColumn(nullable: false)]
@@ -51,7 +59,19 @@ class BuItem extends DataEntity
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'buItems')]
+    #[Groups(['buitem_list'])]
     private ?BuCategory $category = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['buitem_list'])]
+    private ?int $recurrenceId = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['buitem_list'])]
+    private ?float $recurrencePrice = null;
+
+    #[ORM\Column]
+    private ?int $lastType = null;
 
     public function __construct()
     {
@@ -97,6 +117,14 @@ class BuItem extends DataEntity
         $this->type = $type;
 
         return $this;
+    }
+
+    #[Groups(['buitem_list'])]
+    public function getTypeIcon(): ?string
+    {
+        $values = ['minus', 'add', 'time', '', ''];
+
+        return $values[$this->type];
     }
 
     public function getPrice(): ?float
@@ -147,18 +175,6 @@ class BuItem extends DataEntity
         return $this;
     }
 
-    public function isUseSaving(): ?bool
-    {
-        return $this->useSaving;
-    }
-
-    public function setUseSaving(bool $useSaving): static
-    {
-        $this->useSaving = $useSaving;
-
-        return $this;
-    }
-
     public function getUser(): ?User
     {
         return $this->user;
@@ -203,6 +219,42 @@ class BuItem extends DataEntity
     public function setCategory(?BuCategory $category): static
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getRecurrenceId(): ?int
+    {
+        return $this->recurrenceId;
+    }
+
+    public function setRecurrenceId(?int $recurrenceId): static
+    {
+        $this->recurrenceId = $recurrenceId;
+
+        return $this;
+    }
+
+    public function getRecurrencePrice(): ?float
+    {
+        return $this->recurrencePrice;
+    }
+
+    public function setRecurrencePrice(?float $recurrencePrice): static
+    {
+        $this->recurrencePrice = $recurrencePrice;
+
+        return $this;
+    }
+
+    public function getLastType(): ?int
+    {
+        return $this->lastType;
+    }
+
+    public function setLastType(int $lastType): static
+    {
+        $this->lastType = $lastType;
 
         return $this;
     }

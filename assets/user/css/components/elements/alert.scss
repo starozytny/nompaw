@@ -19,7 +19,7 @@ $data:
         "warning" var(--warningOpacity1) var(--warning) var(--warningOpacity4),
         "danger" var(--dangerOpacity1) var(--danger) var(--dangerOpacity4),
         "success" var(--successOpacity1) var(--success) var(--successOpacity4),
-        "grey4" var(--grey4Opacity1) var(--grey4) var(--grey4Opacity4),
+        "grey4" var(--color0Opacity1) var(--alpha) var(--alpha),
 ;
 
 @each $name, $bg, $txt, $border in $data {

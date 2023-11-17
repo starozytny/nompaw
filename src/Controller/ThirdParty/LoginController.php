@@ -15,6 +15,7 @@ class LoginController extends AbstractController
         //Redirect to google
         return $clientRegistry->getClient('google')->redirect([], []);
     }
+
     #[Route('/connect/facebook', name: 'connect_facebook')]
     public function connectFacebook(ClientRegistry $clientRegistry): RedirectResponse
     {

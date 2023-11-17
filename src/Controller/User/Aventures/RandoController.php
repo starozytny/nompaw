@@ -33,7 +33,7 @@ class RandoController extends AbstractController
         $obj = $repository->findOneBy(['slug' => $slug]);
         $propalDates = $propalDateRepository->findBy(['rando' => $obj]);
         $propalAdvs  = $adventureRepository->findBy(['rando' => $obj]);
-        $images      = $imageRepository->findBy(['rando' => $obj]);
+        $images      = $imageRepository->findBy(['rando' => $obj], ['mTime' => 'ASC']);
         $users       = $userRepository->findAll();
 
         $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);

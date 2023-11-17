@@ -4,7 +4,34 @@
 {% set page_subtitle %}Planifie ton budget au cours de l'année{% endset %}
 
 {% block main_content %}
-    <div id="budget">
-        {% include "layout/components/loader.html.twig" %}
-    </div>
+    {% if app.user.budgetInit != null %}
+        <div class="page-actions">
+            <div class="col-1">
+                <a href="{{ path('user_budget_recurrences_index') }}" class="btn btn-default">
+                    <span>Voir les récurrences</span>
+                </a>
+                <a href="{{ path('user_budget_categories_index') }}" class="btn btn-default">
+                    <span>Voir les catégories</span>
+                </a>
+            </div>
+        </div>
+        <div id="budget"
+             data-donnees="{{ donnees }}"
+             data-categories="{{ categories }}"
+             data-savings="{{ savings }}"
+             data-savings-items="{{ savingsItems }}"
+             data-savings-used="{{ savingsUsed }}"
+             data-recurrences="{{ recurrences }}"
+             data-y="{{ year }}"
+             data-m="{{ month }}"
+             data-year-min="{{ app.user.budgetYear }}"
+             data-init-total="{{ initTotal }}"
+        >
+            {% include "layout/components/loader.html.twig" %}
+        </div>
+    {% else %}
+        <div id="budget_init">
+            {% include "layout/components/loader.html.twig" %}
+        </div>
+    {% endif %}
 {% endblock %}

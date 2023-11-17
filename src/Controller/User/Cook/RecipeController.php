@@ -69,11 +69,14 @@ class RecipeController extends AbstractController
         $coms  = $commentaryRepository->findBy(['recipe' => $obj]);
         $fav   = $favoriteRepository->findOneBy(['user' => $this->getUser(), 'identifiant' => $obj->getId()]);
 
-        $rate = 0;
+        $rate = 0; $totalComs = 0;
         foreach($coms as $com){
-            $rate += $com->getRate();
+            if($com->getRate() && $com->getRate() > 0){
+                $rate += $com->getRate();
+                $totalComs++;
+            }
         }
-        $rate = $rate / (count($coms) > 0 ? count($coms) : 1);
+        $rate = $rate / ($totalComs > 0 ? $totalComs : 1);
 
         $elem  = $serializer->serialize($obj,   'json', ['groups' => CoRecipe::READ]);
         $steps = $serializer->serialize($steps, 'json', ['groups' => CoStep::FORM]);

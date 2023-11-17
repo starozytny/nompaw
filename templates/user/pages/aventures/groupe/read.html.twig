@@ -173,7 +173,16 @@
                                                 <span class="tooltip" style="width: 104px">Google Photos</span>
                                             </a>
                                         </div>
+                                        {% if rando.story %}
+                                            <div class="link-story">
+                                                <a href="{{ path('user_homepage') ~ "blog/" ~ rando.story }}" class="btn-icon btn-icon-success" target="_blank">
+                                                    <span class="icon-book-1"></span>
+                                                    <span class="tooltip" style="width: 104px">Histoire</span>
+                                                </a>
+                                            </div>
+                                        {% endif %}
                                     {% endif %}
+
                                 </div>
                             {% endfor %}
                         </div>
