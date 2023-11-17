@@ -5,6 +5,7 @@ namespace App\Entity\Cook;
 use App\Entity\DataEntity;
 use App\Entity\Main\User;
 use App\Repository\Cook\CoCommentaryRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -49,7 +50,7 @@ class CoCommentary extends DataEntity
 
     public function __construct()
     {
-        $this->createdAt = $this->initNewDateImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int

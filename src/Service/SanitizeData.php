@@ -5,6 +5,8 @@ namespace App\Service;
 
 
 use DateTime;
+use DateTimeZone;
+use Exception;
 use Symfony\Component\String\AbstractUnicodeString;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
@@ -70,10 +72,18 @@ class SanitizeData
         return $return;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createTime($value, $return = null): ?DateTime
     {
         if($value != "" && $value != null){
-            return DateTime::createFromFormat('H:i', $value);
+            $value = DateTime::createFromFormat('H:i', $value);
+            $value = new DateTime($value->format('Y-m-d H:i'), new DateTimeZone('Europe/Paris'));
+            $value->setTimezone(new DateTimeZone('Europe/Paris'));
+
+            $value->setTimezone(new DateTimeZone('UTC'));
+            return $value;
         }
 
         return $return;
