@@ -4,6 +4,9 @@ namespace App\Controller\InternApi\Holidays;
 
 use App\Entity\Holiday\HoProject;
 use App\Repository\Holiday\HoProjectRepository;
+use App\Repository\Holiday\HoPropalActivityRepository;
+use App\Repository\Holiday\HoPropalDateRepository;
+use App\Repository\Holiday\HoPropalHouseRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataHolidays;
 use App\Service\FileUploader;
@@ -111,9 +114,27 @@ class ProjectController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(HoProject $obj, HoProjectRepository $repository, ApiResponse $apiResponse, FileUploader $fileUploader): Response
+    public function delete(HoProject $obj, HoProjectRepository $repository, ApiResponse $apiResponse,
+                           FileUploader $fileUploader,
+                           HoPropalDateRepository $dateRepository,
+                           HoPropalHouseRepository $houseRepository,
+                           HoPropalActivityRepository $activityRepository): Response
     {
         $image = $obj->getImage();
+        $obj->setPropalDate(null);
+        $obj->setPropalHouse(null);
+
+        $repository->save($obj, true);
+
+        foreach($dateRepository->findBy(['project' => $obj]) as $item){
+            $dateRepository->remove($item);
+        }
+        foreach($houseRepository->findBy(['project' => $obj]) as $item){
+            $houseRepository->remove($item);
+        }
+        foreach($activityRepository->findBy(['project' => $obj]) as $item){
+            $activityRepository->remove($item);
+        }
 
         $repository->remove($obj, true);
 
