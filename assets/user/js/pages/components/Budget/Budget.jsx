@@ -311,7 +311,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 
                                 let total = 0, used = 0;
                                 nSavingsItems.forEach(s => {
-                                    if(s.category.id === sa.id){
+                                    if(s.category && s.category.id === sa.id){
                                         if(s.year <= year){
                                             if(s.year < year || (s.year === year && s.month <= month)){
                                                 total += s.price;
@@ -320,7 +320,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
                                     }
                                 })
                                 nSavingsUsed.forEach(s => {
-                                    if(s.category.id === sa.id){
+                                    if(s.category && s.category.id === sa.id){
                                         if(s.year <= year){
                                             if(s.year < year || (s.year === year && s.month <= month)){
                                                 used += s.price;
