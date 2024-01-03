@@ -5,6 +5,7 @@ namespace App\Entity\Cook;
 use App\Entity\DataEntity;
 use App\Entity\Main\User;
 use App\Repository\Cook\CoRecipeRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -83,7 +84,7 @@ class CoRecipe extends DataEntity
 
     public function __construct()
     {
-        $this->createdAt = $this->initNewDateImmutable();
+        $this->createdAt = new DateTimeImmutable();
         $this->steps = new ArrayCollection();
         $this->ingredients = new ArrayCollection();
         $this->commentaries = new ArrayCollection();

@@ -32,11 +32,11 @@ class BiBirthday extends DataEntity
     #[Groups(['bibirth_form'])]
     private ?string $image = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['bibirth_form'])]
     private ?\DateTimeInterface $startAt = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['bibirth_form'])]
     private ?\DateTimeInterface $timeAt = null;
 

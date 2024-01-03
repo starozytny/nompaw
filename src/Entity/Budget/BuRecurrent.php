@@ -5,6 +5,7 @@ namespace App\Entity\Budget;
 use App\Entity\DataEntity;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuRecurrentRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -61,7 +62,7 @@ class BuRecurrent extends DataEntity
 
     public function __construct()
     {
-        $this->createdAt = $this->initNewDateImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
