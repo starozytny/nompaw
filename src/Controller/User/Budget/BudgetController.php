@@ -60,30 +60,32 @@ class BudgetController extends AbstractController
             }
 
             foreach($items as $item){
-                $substractTotal = false;
-                if($item->getType() !== TypeType::Deleted){
-                    if($item->getYear() < $year){
-                        if($item->getType() != TypeType::Income){
-                            $totalExpense += $item->getPrice();
-                        }else{
-                            $totalIncome += $item->getPrice();
-                        }
+                if($item->getType() !== TypeType::Used){
+                    $substractTotal = false;
+                    if($item->getType() !== TypeType::Deleted){
+                        if($item->getYear() < $year){
+                            if($item->getType() != TypeType::Income){
+                                $totalExpense += $item->getPrice();
+                            }else{
+                                $totalIncome += $item->getPrice();
+                            }
 
+                            if($item->getRecurrenceId()){
+                                $substractTotal = true;
+                            }
+                        }
+                    }else{
                         if($item->getRecurrenceId()){
                             $substractTotal = true;
                         }
                     }
-                }else{
-                    if($item->getRecurrenceId()){
-                        $substractTotal = true;
-                    }
-                }
 
-                if($substractTotal){
-                    if($item->getType() != TypeType::Income){
-                        $totalExpense -= $item->getRecurrencePrice();
-                    }else{
-                        $totalIncome -= $item->getRecurrencePrice();
+                    if($substractTotal){
+                        if($item->getType() != TypeType::Income){
+                            $totalExpense -= $item->getRecurrencePrice();
+                        }else{
+                            $totalIncome -= $item->getRecurrencePrice();
+                        }
                     }
                 }
             }
