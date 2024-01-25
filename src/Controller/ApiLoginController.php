@@ -20,10 +20,8 @@ class ApiLoginController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ApiLoginController.php',
             'user' => $user->getUserIdentifier(),
-//            'token' => $user->getToken()
+            'token' => $user->getToken()
         ]);
     }
 
