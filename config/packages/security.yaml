@@ -12,6 +12,16 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        api_login:
+            pattern: ^/api/login_check
+            stateless: true
+            json_login:
+                check_path: api_login_check
+        api:
+            pattern: ^/api(?!/doc$)
+            stateless: true
+            access_token:
+                token_handler: App\Security\AccessTokenHandler
         main:
             lazy: true
             provider: app_user_provider
@@ -43,6 +53,7 @@ security:
          - { path: ^/espace-membre/projets/projet,              roles: PUBLIC_ACCESS }
          - { path: ^/intern/api/users/password,                 roles: PUBLIC_ACCESS }
          - { path: ^/intern/api/users/create,                   roles: PUBLIC_ACCESS }
+         - { path: ^/api/login_check,                           roles: PUBLIC_ACCESS }
          - { path: ^/intern/api,                                roles: ROLE_USER }
          - { path: ^/api,                                       roles: ROLE_USER }
          - { path: ^/espace-membre,                             roles: ROLE_USER }
