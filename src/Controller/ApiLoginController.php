@@ -30,6 +30,8 @@ class ApiLoginController extends AbstractController
     #[Route('/api/test', name: 'api_test', methods: 'GET')]
     public function test(): Response
     {
-        return $this->json("test");
+        return $this->json([
+            'message' => 'TEST',
+        ]);
     }
 }

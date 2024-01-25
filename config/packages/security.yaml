@@ -22,6 +22,7 @@ security:
             stateless: true
             access_token:
                 token_handler: App\Security\AccessTokenHandler
+                failure_handler: App\Security\AuthenticationFailureHandler
         main:
             lazy: true
             provider: app_user_provider
