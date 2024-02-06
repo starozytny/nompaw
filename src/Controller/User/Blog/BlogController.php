@@ -5,7 +5,7 @@ namespace App\Controller\User\Blog;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/espace-membre/blog', name: 'user_blog_')]
 class BlogController extends AbstractController
