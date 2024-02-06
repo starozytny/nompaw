@@ -20,16 +20,16 @@ class ApiLoginController extends AbstractController
         }
 
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ApiLoginController.php',
             'user' => $user->getUserIdentifier(),
-//            'token' => $user->getToken()
+            'token' => $user->getToken()
         ]);
     }
 
     #[Route('/api/test', name: 'api_test', methods: 'GET')]
     public function test(): Response
     {
-        return $this->json("test");
+        return $this->json([
+            'message' => 'TEST',
+        ]);
     }
 }
