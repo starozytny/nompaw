@@ -16,16 +16,17 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/planificateur', name: 'api_budget_')]
+#[Route('/api/budget', name: 'api_budget_')]
 class BudgetController extends AbstractController
 {
-    #[Route('/planning/{year}', name: 'index', options: ['expose' => true])]
-    public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
+    #[Route('/planning', name: 'index', options: ['expose' => true])]
+    public function list(BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
                          BuCategoryRepository $categoryRepository, SerializerInterface $serializer,
                          ApiResponse $apiResponse): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
+        $year = (new \DateTime())->format('Y');
         if($year < $user->getBudgetYear()){
             $year = $user->getBudgetYear();
         }
@@ -104,12 +105,12 @@ class BudgetController extends AbstractController
         return $apiResponse->apiJsonResponseCustom([
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
-            'donnees' => $data,
-            'categories' => $categories,
-            'savings' => $savings,
-            'savingsItems' => $savingsItems,
-            'savingsUsed' => $savingsUsed,
-            'recurrences' => $recurrences,
+            'donnees' => json_decode($data),
+            'categories' => json_decode($categories),
+            'savings' => json_decode($savings),
+            'savingsItems' => json_decode($savingsItems),
+            'savingsUsed' => json_decode($savingsUsed),
+            'recurrences' => json_decode($recurrences),
             'initTotal' => $totalInit,
         ]);
     }
