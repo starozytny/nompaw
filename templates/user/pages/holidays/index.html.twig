@@ -16,16 +16,19 @@
 <div class="flex flex-wrap gap-4">
     {% for elem in projects %}
         <div class="w-full max-w-80 bg-white rounded-md shadow">
-            <div class="p-4 border-b">
+            <div class="p-4">
                 <div class="font-medium text-lg">
                     <div>{{ elem.name }}</div>
                 </div>
             </div>
-            <a href="{{ path('user_projects_read', {'slug': elem.slug}) }}" style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}">
-                <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
-            </a>
+            <div class="relative cursor-pointer group">
+                <div class="bg-gray-800/15 absolute w-full h-full group-hover:opacity-0 transition-opacity"></div>
+                <a href="{{ path('user_projects_read', {'slug': elem.slug}) }}" style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}">
+                    <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
+                </a>
+            </div>
             {% if app.user.id == elem.author.id %}
-                <div class="border-t flex justify-between divide-x py-2">
+                <div class="flex justify-between divide-x py-2">
                     <div class="w-full text-center">
                         {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
                             btn_link: path('user_projects_update', {slug: elem.slug}),
