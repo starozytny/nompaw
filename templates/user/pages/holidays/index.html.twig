@@ -3,50 +3,53 @@
 {% set page_title %}Projets{% endset %}
 {% set page_subtitle %}Liste des projets{% endset %}
 
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_projects_create'),
+        btn_type: 'blue',
+        btn_icon: 'add',
+        btn_text: 'Ajouter un projet'
+    } %}
+{% endset %}
+
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_projects_create') }}" class="btn btn-primary">
-                <span>Ajouter un projet</span>
-            </a>
-        </div>
-    </div>
-    <div class="page-default">
-        <div class="projects">
-            {% for elem in projects %}
-                <div class="card">
-                    <div class="card-header">
-                        <div class="name">
-                            <div>{{ elem.name }}</div>
-                        </div>
-                    </div>
-                    <a
-                            href="{{ path('user_projects_read', {'slug': elem.slug}) }}"
-                            class="card-body"
-                            style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}"
-                    >
-                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
-                    </a>
-                    {% if app.user.id == elem.author.id %}
-                        <div class="card-footer">
-                            <a
-                                    href="{{ path('user_projects_update', {'slug': elem.slug}) }}"
-                                    class="btn-icon"
-                            >
-                                <span class="icon-pencil"></span>
-                                <span class="tooltip">Modifier</span>
-                            </a>
-                            <div class="delete-project"
-                                 data-context="projects"
-                                 data-id="{{ elem.id }}"
-                                 data-name="{{ elem.name }}"
-                            >
-                                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
-                            </div>
-                        </div>
-                    {% endif %}
+<div class="flex flex-wrap gap-4">
+    {% for elem in projects %}
+        <div class="w-full max-w-80 bg-white rounded-md shadow">
+            <div class="p-4 border-b">
+                <div class="font-medium text-lg">
+                    <div>{{ elem.name }}</div>
                 </div>
-            {% endfor %}
+            </div>
+            <a href="{{ path('user_projects_read', {'slug': elem.slug}) }}" style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}">
+                <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
+            </a>
+            {% if app.user.id == elem.author.id %}
+                <div class="border-t flex justify-between divide-x py-2">
+                    <div class="w-full text-center">
+                        {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                            btn_link: path('user_projects_update', {slug: elem.slug}),
+                            btn_type: 'transparent',
+                            btn_icon: 'pencil',
+                            btn_text: 'Modifier'
+                        } %}
+                    </div>
+                    <div class="delete-project w-full text-center"
+                         data-context="projects"
+                         data-id="{{ elem.id }}"
+                         data-name="{{ elem.name }}"
+                    >
+
+                        {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                            btn_link: "",
+                            btn_type: 'transparent',
+                            btn_icon: 'chart-3',
+                            btn_text: 'Supprimer'
+                        } %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
-    </div>
+    {% endfor %}
+</div>
 {% endblock %}

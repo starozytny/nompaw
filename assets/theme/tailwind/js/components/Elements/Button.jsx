@@ -64,10 +64,11 @@ Button.propTypes = {
 
 export function ButtonIcon ({ type, icon, onClick, children, tooltipWidth }) {
 	const colorVariants = {
-		red: 'bg-red-600 text-slate-50 hover:bg-red-500',
-		blue: 'bg-blue-600 text-slate-50 hover:bg-blue-500 ring-1 ring-inset ring-blue-600',
-		menu: 'bg-gray-800 text-gray-900 hover:bg-gray-700 ring-1 ring-inset ring-gray-700',
-		default: 'bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300',
+		red: 'bg-red-600 shadow-sm text-slate-50 hover:bg-red-500',
+		blue: 'bg-blue-600 shadow-sm text-slate-50 hover:bg-blue-500 ring-1 ring-inset ring-blue-600',
+		menu: 'bg-gray-800 shadow-sm text-gray-900 hover:bg-gray-700 ring-1 ring-inset ring-gray-700',
+		default: 'bg-white shadow-sm text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300',
+		transparent: 'bg-transparent text-gray-900 hover:bg-gray-50 ring-0 ring-inset ring-transparent',
 	}
 
 	const iconColorVariants = {
@@ -75,12 +76,13 @@ export function ButtonIcon ({ type, icon, onClick, children, tooltipWidth }) {
 		blue: 'text-slate-50',
 		menu: 'text-gray-300',
 		default: 'text-gray-600',
+		transparent: 'text-gray-600',
 	}
 
 	let divStyle = tooltipWidth ? { width: tooltipWidth + "px" } : null;
 
 	return <button onClick={onClick}
-				   className={`relative inline-flex justify-center rounded-md text-lg px-2 py-2 shadow-sm ${colorVariants[type]}`}>
+				   className={`relative inline-flex justify-center rounded-md text-lg px-2 py-2 ${colorVariants[type]}`}>
 		<span className={`icon-${icon} ${iconColorVariants[type]}`}></span>
 		{children
 			? <span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden"

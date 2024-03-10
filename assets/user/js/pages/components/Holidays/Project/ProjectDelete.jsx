@@ -6,8 +6,8 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal } from "@commonComponents/Elements/Modal";
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 const URL_INDEX_ELEMENTS = 'user_projects_index';
 const URL_DELETE_ELEMENT = 'intern_api_projects_delete';
@@ -32,12 +32,12 @@ export function ProjectDelete ({ context, id, name })
 
     return <>
         {context === "read"
-            ? <Button icon="trash" type="danger" onClick={handleClick}>Supprimer</Button>
-            : <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
+            ? <Button type="red" icon="trash" onClick={handleClick}>Supprimer</Button>
+            : <ButtonIcon type="transparent" icon="trash" onClick={handleClick}>Supprimer</ButtonIcon>
         }
         <Modal ref={modalRef} identifiant={`delete-proj-${id}`} maxWidth={414} title="Supprimer le projet"
                content={<p>Etes-vous sûr de vouloir supprimer le projet : <b>{name}</b> ?</p>}
-               footer={<Button type="danger" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
+               footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
     </>
 }
 
