@@ -15,7 +15,7 @@ if(el){
     createRoot(el).render(<ContactFormulaire />)
 }
 
-let ck = document.getElementById("cookies");
-if(ck){
-    createRoot(ck).render(<Cookies {...ck.dataset} />)
-}
+// let ck = document.getElementById("cookies");
+// if(ck){
+//     createRoot(ck).render(<Cookies {...ck.dataset} />)
+// }

@@ -2,52 +2,21 @@
 
 {% block title %}Nompaw{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('app_homepage') }}
-{% endblock %}
-
 {% block main_content %}
-    <div class="homepage-header">
-        <div class="homepage-header-content">
-            <h1>Nompaw 👋</h1>
-            <div class="subtitle">
-                Retrouvez pleins de recettes, des randonnées et des systèmes de gestion d'évènements !
-            </div>
-
-            <div class="cta">
-                <a class="btn btn-primary" href="{{ path('app_login') }}">Accéder à mon espace</a>
-                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-                {% else %}
-                    <a class="btn btn-outline-primary" href="{{ path('app_registration') }}">Rejoindre la communauté</a>
-                    <a class="btn btn-outline-primary" href="{{ path('connect_google') }}">Se connecter avec Google</a>
-                    <a class="btn btn-outline-primary" href="{{ path('connect_facebook') }}">Se connecter avec Facebook</a>
-                {% endif %}
+    <div class="mx-auto max-w-2xl sm:py-48 lg:py-56 sm:flex sm:flex-col sm:justify-center sm:items-center">
+        <div class="hidden sm:mb-8 sm:flex sm:justify-center">
+            <div class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
+                Le site regroupe une communauté partageant des choses diverses. <a href="{{ path('app_registration') }}" class="font-semibold text-indigo-600"><span class="absolute inset-0" aria-hidden="true"></span>En savoir plus <span aria-hidden="true">&rarr;</span></a>
             </div>
         </div>
-    </div>
-    <div class="homepage-section homepage-section-0">
-        {% include 'app/layout/components/deco-0.html.twig' %}
-        {% include 'app/layout/components/deco-1.html.twig' %}
-        <div class="homepage-section-container">
-            <div class="homepage-section-title">
-                <h2>Recettes ⚒️</h2>
-                <div class="subtitle">Parcourez les recettes !</div>
-            </div>
-            <div class="recipes">
-                {% for elem in recipes %}
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="name">
-                                <div>{{ elem.name }}</div>
-                                <span class="difficulty">{{ elem.difficultyString }}</span>
-                            </div>
-                        </div>
-                        <a class="card-body">
-                            <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
-                        </a>
-                    </div>
-                {% endfor %}
+        <div class="text-center">
+            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Nompaw 👋</h1>
+            <p class="mt-6 text-lg leading-8 text-gray-600">Retrouvez pleins de recettes, des randonnées, des systèmes de gestion d'évènements et même un planificateur de budget !</p>
+            <div class="mt-10 flex items-center justify-center gap-x-6">
+                <a href="{{ path('app_login') }}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    Mon espace
+                </a>
+                <a href="{{ path('app_registration') }}" class="text-sm font-semibold leading-6 text-gray-900">Nous rejoindre <span aria-hidden="true">→</span></a>
             </div>
         </div>
     </div>

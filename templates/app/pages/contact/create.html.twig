@@ -1,9 +1,20 @@
 {% extends 'app/pages/contact/template.html.twig' %}
 
-{% block title %}Demande de contact {{ parent() }}{% endblock %}
+{% block title %}Demande des informations {{ parent() }}{% endblock %}
 
 {% block main_content %}
-    <div id="contacts_create">
-        {% include "layout/components/loader.html.twig" %}
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <h1 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Me contacter 🔒</h1>
+            <p class="text-gray-600 text-center text-sm mt-1">Vous pouvez utiliser ce formulaire pour communiquer avec moi et avoir des informations.</p>
+        </div>
+
+        <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-screen-sm">
+            <div class="space-y-6">
+                <div id="contacts_create">
+                    {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

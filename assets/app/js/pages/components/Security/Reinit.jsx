@@ -7,8 +7,8 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
-import { Button } from "@commonComponents/Elements/Button";
-import { Password } from "@commonComponents/Modules/User/Password";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { Password } from "@tailwindComponents/Modules/User/Password";
 
 const URL_PASSWORD_UPDATE = "intern_api_users_password_update";
 
@@ -36,12 +36,10 @@ export class Reinit extends Component {
 
 		this.setState({ errors: [], success: false });
 
-		// validate global
 		let validate = Validateur.validateur([
 			{ type: "password", id: 'password', value: password, idCheck: 'password2', valueCheck: password2 }
 		])
 
-		// check validate success
 		if (!validate.code) {
 			Formulaire.showErrors(this, validate);
 		} else {
@@ -67,27 +65,17 @@ export class Reinit extends Component {
 
 		let params = { errors: errors, onChange: this.handleChange }
 
-		return <>
-			<div className="title-page">
-				<h1>Réinitialiser son mot de passe</h1>
-			</div>
+		return <form onSubmit={this.handleSubmit}>
 
-			<div className="content">
-				<div className="form">
-					<form onSubmit={this.handleSubmit}>
+			{success !== false && <Alert type="blue">{success}</Alert>}
 
-						{success !== false && <Alert type="blue">{success}</Alert>}
+			{success === false && <>
+				<Password template="col" password={password} password2={password2} params={params} />
 
-						{success === false && <>
-							<Password template="col" password={password} password2={password2} params={params} />
-
-							<div className="line-buttons">
-								<Button isSubmit={true} type="primary">Modifier son mot de passe</Button>
-							</div>
-						</>}
-					</form>
+				<div className="mt-4 flex justify-end">
+					<Button type="blue" isSubmit={true}>Modifier son mot de passe</Button>
 				</div>
-			</div>
-		</>
+			</>}
+		</form>
 	}
 }

@@ -4,22 +4,19 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input, TextArea } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
-
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
+
+import { Button } from "@tailwindComponents/Elements/Button";
 import { Alert } from "@tailwindComponents/Elements/Alert";
+import { Input, TextArea } from "@tailwindComponents/Elements/Fields";
 
 const URL_CREATE_ELEMENT = "intern_api_contacts_create";
-const TEXT_CREATE = "Envoyer la demande";
 
 export function ContactFormulaire () {
-	let form = <Form
+	return <Form
 		url={Routing.generate(URL_CREATE_ELEMENT)}
 	/>
-
-	return <div className="formulaire">{form}</div>;
 }
 
 class Form extends Component {
@@ -82,32 +79,35 @@ class Form extends Component {
 	render () {
 		const { errors, messageAxios, name, email, message, critere } = this.state;
 
-		let params = { errors: errors, onChange: this.handleChange }
+		let params0 = { errors: errors, onChange: this.handleChange }
 
-		return <>
-			<form onSubmit={this.handleSubmit}>
+		return <form onSubmit={this.handleSubmit}>
+			<div className="flex flex-col gap-4">
+				{messageAxios && <div><Alert type={messageAxios.status} icon="check1">{messageAxios.msg}</Alert></div>}
 
-				{messageAxios && <div className="line"><Alert type={messageAxios.status}>{messageAxios.msg}</Alert></div>}
+				<div className="flex gap-2">
+					<div className="w-full">
+						<Input identifiant="name" valeur={name} {...params0}>Nom/Prénom</Input>
+					</div>
+					<div className="w-full">
+						<Input identifiant="email" valeur={email} type="email" {...params0}>Adresse e-mail</Input>
+					</div>
+				</div>
+				<div className="critere">
+					<Input type="hidden" identifiant="critere" valeur={critere} {...params0}>Critère</Input>
+				</div>
+				<div>
+					<TextArea identifiant="message" valeur={message} {...params0}>Message</TextArea>
+				</div>
+			</div>
 
-				<div className="line line-2">
-					<Input identifiant="name" valeur={name} {...params}>Nom/Prénom</Input>
-					<Input identifiant="email" valeur={email} type="email" {...params}>Adresse e-mail</Input>
-				</div>
-				<div className="line-critere">
-					<Input type="hidden" identifiant="critere" valeur={critere} {...params}>Critère</Input>
-				</div>
-				<div className="line line-fat-box">
-					<TextArea identifiant="message" valeur={message} {...params}>Message</TextArea>
-				</div>
-
-				<div className="line-buttons">
-					<Button isSubmit={true} type="primary">{TEXT_CREATE}</Button>
-				</div>
-			</form>
-		</>
+			<div className="mt-4 flex justify-end gap-2">
+				<Button type="blue" isSubmit={true} width="w-full">Discutons !</Button>
+			</div>
+		</form>
 	}
-}
+	}
 
-Form.propTypes = {
-	url: PropTypes.node.isRequired,
+	Form.propTypes = {
+		url: PropTypes.node.isRequired,
 }

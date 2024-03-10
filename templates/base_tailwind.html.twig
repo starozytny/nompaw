@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-gray-100">
+<html lang="fr" class="h-full {{ html_class is defined ? html_class : "bg-gray-100" }}">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
         {% block openGraph %}{% endblock %}
         <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/ico">
         <link rel="apple-touch-icon" href="{{ asset('logo-apple-touch.png') }}"/>
-        <title>{% block title %}{% endblock %}</title>
+        <title>{% block title %} | Nompaw.fr{% endblock %}</title>
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('tailwind_app') }}
