@@ -3,51 +3,81 @@
 {% set page_prefix = "Nompaw" %}
 
 {% set menu = [
-    { name: "Dashboard", icon: "home",
-        path: path('user_homepage'), matchRoute: ['user_homepage']
+    {
+        name: "Dashboard", icon: "home",
+        path: path('user_homepage'),
+        matchRoute: ['user_homepage']
     },
-    { name: "Recettes", icon: "book-1",
-        path: path('user_recipes_index'), matchRoute: ['user_recipes_index', 'user_recipes_read', 'user_recipes_create', 'user_recipes_update']
+    {
+        name: "Recettes", icon: "book-1",
+        path: path('user_recipes_index'),
+        matchRoute: ['user_recipes_index', 'user_recipes_read', 'user_recipes_create', 'user_recipes_update']
     },
-    { name: "Aventures", icon: "map",
-        path: path('user_aventures_groupes_index'), matchRoute: [
+    {
+        name: "Aventures", icon: "map",
+        path: path('user_aventures_groupes_index'),
+        matchRoute: [
             'user_aventures_groupes_index', 'user_aventures_groupes_read', 'user_aventures_groupes_create', 'user_aventures_groupes_update',
             'user_aventures_randos_read', 'user_aventures_randos_create', 'user_aventures_randos_update'
         ]
     },
-    { name: "Projets", icon: "calendar",
-        path: path('user_projects_index'), matchRoute: [
+    {
+        name: "Projets", icon: "calendar",
+        path: path('user_projects_index'),
+        matchRoute: [
             'user_projects_index', 'user_projects_read', 'user_projects_create', 'user_projects_update']
     },
-    { name: "Anniversaires", icon: "cake",
-        path: path('user_birthdays_index'), matchRoute: [
+    {
+        name: "Anniversaires", icon: "cake",
+        path: path('user_birthdays_index'),
+        matchRoute: [
             'user_birthdays_index', 'user_birthdays_read', 'user_birthdays_create', 'user_birthdays_update']
     },
-    { name: "Planificateur", icon: "calculator",
-        path: path('user_budget_index', {'year': 'now'|date('Y')}), matchRoute: [
+    {
+        name: "Planificateur", icon: "calculator",
+        path: path('user_budget_index', {'year': 'now'|date('Y')}),
+        matchRoute: [
             'user_budget_index',
             'user_budget_recurrences_index', 'user_budget_recurrences_create', 'user_budget_recurrences_update',
             'user_budget_categories_index', 'user_budget_categories_create', 'user_budget_categories_update'
-    ]
+        ]
     },
-    { name: "Mon profil", icon: "user-octagon",
-        path: path('user_profil_index'), matchRoute: ['user_profil_index', 'user_profil_update']
+    {
+        name: "Mon profil", icon: "user-octagon",
+        path: path('user_profil_index'),
+        matchRoute: ['user_profil_index', 'user_profil_update']
     },
 ] %}
 
 {% set menu_bottom = [] %}
 
- {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
-     {% set menu_bottom = menu_bottom | merge([
-         { name: "Espace admin", icon: "earth",
-             path: path('admin_homepage'), matchRoute: ['admin_homepage']
-         },
-         { name: "Page accueil", icon: "earth",
-             path: path('app_homepage'), matchRoute: ['app_homepage']
-         },
-     ]) %}
- {% endif %}
+{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
+    {% set menu_bottom = menu_bottom | merge([
+        {
+            name: "Espace admin", icon: "earth",
+            path: path('admin_homepage'),
+            matchRoute: ['admin_homepage']
+        },
+        {
+            name: "Page accueil", icon: "earth",
+            path: path('app_homepage'),
+            matchRoute: ['app_homepage']
+        },
+    ]) %}
+{% endif %}
 
 {% block footer %}
-    {% include "user/layout/components/footer.html.twig" %}
+    <div class="relative z-10 bg-white px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-screen-2xl flex flex-col text-center sm:flex-row sm:text-left gap-2 justify-center">
+            <p>&copy; 2024 - <a href="https://chanbora-chhun.fr" class="text-blue-600">Chanbora Chhun</a></p>
+            <span>-</span>
+            <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('app_mentions') }}">Mentions légales</a>
+            <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('app_politique') }}">Politique de confidentialité</a>
+            <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('app_cookies') }}">Gestion des cookies</a>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('admin_homepage') }}">Espace administrateur</a>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
+
