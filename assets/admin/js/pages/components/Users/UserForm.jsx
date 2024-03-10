@@ -4,14 +4,14 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Checkbox, Input, InputFile, SelectCustom } from "@tailwindComponents/Elements/Fields";
-import { Button } from "@tailwindComponents/Elements/Button";
-import { LoaderElements } from "@tailwindComponents/Elements/Loader";
-import { Password } from "@tailwindComponents/Modules/User/Password";
-
+import Sort from "@commonFunctions/sort";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
-import Sort from "@commonFunctions/sort";
+
+import { Button } from "@tailwindComponents/Elements/Button";
+import { Password } from "@tailwindComponents/Modules/User/Password";
+import { LoaderElements } from "@tailwindComponents/Elements/Loader";
+import { Checkbox, Input, InputFile, InputView, SelectCustom } from "@tailwindComponents/Elements/Fields";
 
 const URL_SELECT_SOCIETIES = "intern_api_selection_societies";
 const URL_INDEX_ELEMENTS = "admin_users_index";
@@ -168,7 +168,7 @@ class Form extends Component {
 	}
 
 	render () {
-		const { context, avatarFile } = this.props;
+		const { page, context, avatarFile } = this.props;
 		const { errors, loadData, username, firstname, lastname, email, password, password2, roles, societyName } = this.state;
 
 		let rolesItems = [
@@ -193,7 +193,10 @@ class Form extends Component {
 					<div className="bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
 						<div className="flex gap-4">
 							<div className="w-full">
-								<Input valeur={username} identifiant="username" {...params0}>Nom utilisateur</Input>
+								{page !== "profil"
+									? <Input valeur={username} identifiant="username" {...params0}>Nom utilisateur</Input>
+									: <InputView valeur={username} identifiant="username" {...params0}>Nom utilisateur</InputView>
+								}
 							</div>
 							<div className="w-full">
 								<Input valeur={email} identifiant="email" {...params0} type="email">Adresse e-mail</Input>
@@ -219,24 +222,29 @@ class Form extends Component {
 							</div>
 						</div>
 
-						<div>
-							<Checkbox identifiant="roles" valeur={roles} items={rolesItems} {...params0} classItems="flex gap-4">
-								Rôles
-							</Checkbox>
-						</div>
+						{page !== "profil"
+							? <>
+								<div>
+									<Checkbox identifiant="roles" valeur={roles} items={rolesItems} {...params0} classItems="flex gap-4">
+										Rôles
+									</Checkbox>
+								</div>
 
-						<div className="line">
-							{loadData
-								? <>
-									<label>Société</label>
-									<LoaderElements text="Récupération des sociétés..." />
-								</>
-								: <SelectCustom ref={this.select} identifiant="society" inputValue={societyName}
-												items={societies} {...params1}>
-									Société
-								</SelectCustom>
-							}
-						</div>
+								<div>
+									{loadData
+										? <>
+											<label>Société</label>
+											<LoaderElements text="Récupération des sociétés..." />
+										</>
+										: <SelectCustom ref={this.select} identifiant="society" inputValue={societyName}
+														items={societies} {...params1}>
+											Société
+										</SelectCustom>
+									}
+								</div>
+							</>
+							: null
+						}
 
 						<div>
 							<InputFile ref={this.file} type="simple" identifiant="avatar" valeur={avatarFile} {...params0}>

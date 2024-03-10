@@ -3,22 +3,19 @@
 {% set page_title %}Modifier son profil{% endset %}
 {% set page_subtitle %}Modification de votre profil : {{ app.user.lastname }} {{ app.user.firstname }}{% endset %}
 
-{% block breadcrumb %}
-    {% set breadcrumbs = [{ text: page_title }] %}
-    {{ parent() }}
-{% endblock %}
-
-{% set half_width = true %}
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_profil_index'),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner au profil'
+    } %}
+{% endset %}
 
 {% block main_content %}
-    {% include "layout/components/admin/page_toolbar.html.twig" with {
-        page_back: path('user_profil_index'),
-        page_back_text: "Retour au profil"
-    } %}
-
     <div id="profil_update"
          data-obj="{{ obj }}"
     >
-        {% include "layout/components/loader.html.twig" %}
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>
 {% endblock %}
