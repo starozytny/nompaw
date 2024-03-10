@@ -67,15 +67,15 @@
 {% endif %}
 
 {% block footer %}
-    <div class="relative z-10 bg-white px-4 py-8 sm:px-6 lg:px-8">
+    <div class="relative z-10 bg-gray-900 px-4 py-8 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-screen-2xl flex flex-col text-center sm:flex-row sm:text-left gap-2 justify-center">
-            <p>&copy; 2024 - <a href="https://chanbora-chhun.fr" class="text-blue-600">Chanbora Chhun</a></p>
-            <span>-</span>
-            <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('app_mentions') }}">Mentions légales</a>
-            <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('app_politique') }}">Politique de confidentialité</a>
-            <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('app_cookies') }}">Gestion des cookies</a>
+            <p class="text-slate-100">&copy; 2024 - <a href="https://chanbora-chhun.fr" class="text-blue-400">Chanbora Chhun</a></p>
+            <span class="text-slate-100">-</span>
+            <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('app_mentions') }}">Mentions légales</a>
+            <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('app_politique') }}">Politique de confidentialité</a>
+            <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('app_cookies') }}">Gestion des cookies</a>
             {% if is_granted('ROLE_ADMIN') %}
-                <a class="text-gray-700 hover:text-gray-900 hover:underline" href="{{ path('admin_homepage') }}">Espace administrateur</a>
+                <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('admin_homepage') }}">Espace administrateur</a>
             {% endif %}
         </div>
     </div>
