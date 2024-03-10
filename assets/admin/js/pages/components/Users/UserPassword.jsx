@@ -6,9 +6,9 @@ import Routing    from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
-import { Button }   from "@commonComponents/Elements/Button";
-import { Password } from "@commonComponents/Modules/User/Password";
-import { Alert }    from "@commonComponents/Elements/Alert";
+import { Button }   from "@tailwindComponents/Elements/Button";
+import { Password } from "@tailwindComponents/Modules/User/Password";
+import { Alert }    from "@tailwindComponents/Elements/Alert";
 
 const URL_PASSWORD_UPDATE = "intern_api_users_password_update";
 
@@ -65,7 +65,7 @@ export class UserPassword extends Component {
             <form onSubmit={this.handleSubmit}>
                 <div className="line-container">
                     <Password template="inline" context={context} password={password} password2={password2} params={params} />
-                    {success && <div className="line"><Alert type="info">{success}</Alert></div>}
+                    {success && <div className="line"><Alert type="blue">{success}</Alert></div>}
                 </div>
                 <div className="line-buttons">
                     <Button isSubmit={true} type="primary">Modifier son mot de passe</Button>

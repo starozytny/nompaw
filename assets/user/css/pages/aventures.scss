@@ -93,7 +93,7 @@
 
       .name{
         & > span:first-child{
-          @include fontSemibold();
+          font-weight: 600;
           font-size: 20px;
         }
       }
@@ -223,7 +223,7 @@
 
       .name{
         & > span:first-child{
-          @include fontSemibold();
+          font-weight: 600;
           font-size: 20px;
         }
       }

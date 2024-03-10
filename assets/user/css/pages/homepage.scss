@@ -39,7 +39,7 @@
         width: 100%;
 
         .name{
-          @include fontBold();
+          font-weight: bold;
           font-size: 26px;
         }
         [class^="icon-"]{
@@ -81,7 +81,7 @@
 
       .card-header{
         @include flex(row, flex-start, flex-start, 8px);
-        @include fontSemibold();
+        font-weight: 600;
         font-size: 18px;
         margin-bottom: var(--espaceDiv);
         border-bottom: 1px solid var(--color2Opacity4);

@@ -24,11 +24,11 @@ body {
 }
 
 h1, b{
-  @include fontBold();
+  font-weight: bold;
 }
 
-h2, h3{
-  @include fontSemibold();
+  h2, h3{
+  font-weight: 600;
 }
 
 .homepage-header{

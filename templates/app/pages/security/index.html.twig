@@ -1,16 +1,13 @@
 {% extends 'app/pages/security/template.html.twig' %}
 
-{% block title %}Connexion à son espace {{ parent() }}{% endblock %}
+{% block title %}Accéder à mon espace.{% endblock %}
 
 {% block main_content %}
-    <div class="homepage-header">
-        <div class="homepage-header-content">
+<div class="login-page">
+    <div class="col-1">
+        <div class="title-page">
             <h1>Espace membre 🔒</h1>
-            <div class="subtitle">
-                Accédez à la totalité des documents !
-            </div>
-
-            <div class="cta"></div>
+            <p>Renseignez votre identifiant et mot de passe pour accéder à votre espace.</p>
         </div>
     </div>
 
@@ -20,9 +17,9 @@
         <div class="homepage-section-container">
             <form action="{{ path('app_login') }}" method="post" class="form-login">
                 {% if error %}
-                    <div class="alert alert-danger">
-                        <div class="alert-container">
-                            <p>{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+                    <div class="flex flex-row gap-4 bg-red-50 text-red-700 rounded-md p-6 xl:p-4">
+                        <div class="leading-5">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
                         </div>
                     </div>
                 {% endif %}

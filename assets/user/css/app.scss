@@ -35,15 +35,15 @@ body {
 }
 
 h1{
-  @include fontBold();
+  font-weight: bold;
 }
 
 h2{
-  @include fontSemibold();
+  font-weight: 600;
 }
 
 b, strong{
-  @include fontBold();
+  font-weight: bold;
 }
 
 hr{
@@ -54,13 +54,13 @@ hr{
 }
 
 .semibold{
-  @include fontSemibold();
+  font-weight: 600;
 }
 
 #toast-container{
   .toast{
     .toast-title{
-      @include fontSemibold();
+      font-weight: 600;
     }
   }
 }

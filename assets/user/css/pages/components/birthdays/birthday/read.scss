@@ -62,7 +62,7 @@
     border-radius: calc(var(--radius) * 2) calc(var(--radius) * 2) 0 0;
 
     .name{
-      @include fontSemibold();
+      font-weight: 600;
       font-size: 20px;
     }
   }

@@ -108,7 +108,7 @@ html{
       }
 
       .nav-menu-item{
-        @include fontSemibold();
+        font-weight: 600;
       }
     }
 

@@ -37,12 +37,12 @@
   .name{
     opacity: 0.75;
     text-transform: uppercase;
-    @include fontSemibold();
+    font-weight: 600;
     margin-bottom: 4px;
   }
 
   .total{
-    @include fontBold();
+    font-weight: bold;
     font-size: 22px;
   }
 
