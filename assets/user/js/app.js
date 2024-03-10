@@ -5,12 +5,17 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min';
 
 import React from "react";
 import { createRoot } from "react-dom/client";
+
+import Menu from "@tailwindFunctions/menu";
+
 import { ContactFormulaire } from "@appFolder/pages/components/Contact/ContactForm";
 import { UserFormulaire } from "@adminPages/Users/UserForm";
 
 import "./functions/firebase-push";
 
 Routing.setRoutingData(routes);
+
+Menu.menuListener();
 
 let el = document.getElementById("contacts_create");
 if(el){

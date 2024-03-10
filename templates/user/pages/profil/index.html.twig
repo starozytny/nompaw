@@ -3,52 +3,43 @@
 {% set page_title %}{{ app.user.lastname }} {{ app.user.firstname }}{% endset %}
 {% set page_subtitle %}Profil de {{ app.user.lastname }} {{ app.user.firstname }}{% endset %}
 
-{% block breadcrumb %}
-    {% set breadcrumbs = [{ text: page_title }] %}
-    {{ parent() }}
-{% endblock %}
-
-{% set half_width = true %}
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_profil_update', {username: app.user.userIdentifier}),
+        btn_type: 'blue',
+        btn_icon: 'lock-1',
+        btn_text: 'Modifier mes informations'
+    } %}
+{% endset %}
 
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-        </div>
-        <div class="col-2">
-            <a href="{{ path('user_profil_update', {'username': app.user.username}) }}" class="btn btn-primary">
-                <span class="icon-lock-1"></span>
-                <span>Modifier mes informations</span>
-            </a>
-        </div>
-    </div>
-
-    <div class="page-profil-0">
-        <div class="page-profil-header">
-            <div class="profil-header-avatar">
+    <div class="flex flex-col gap-6">
+        <div class="relative bg-gray-300 rounded-md px-4 py-6 mt-12">
+            <div class="absolute -top-12 left-8">
                 {% if app.user.avatarFile %}
-                    <img src={{ app.user.avatarFile }} alt="avatar" />
+                    <img class="w-36 rounded-md" src="{{ app.user.avatarFile }}" alt="Avatar utilisateur">
                 {% else %}
-                    <div class="avatar-letter">{{ app.user.lastname | slice(0,1) }}{{ app.user.firstname | slice(0,1) }}</div>
-                {% endif %}
-            </div>
-            <div class="profil-header-infos">
-                <div class="name">
-                    <span>{{ app.user.lastname }} {{ app.user.firstname }}</span>
-                </div>
-                <div class="sub">ID: {{ app.user.username }}</div>
-            </div>
-        </div>
-
-        <div class="page-profil-body">
-            <div class="col-1">
-                <div class="profil-card">
-                    <div class="title">Détails</div>
-                    <div class="content-infos content-infos-details">
-                        <div class="item">
-                            <span class="icon-email"></span>
-                            <div>{{ app.user.email }}</div>
+                    <div class="w-56 rounded-md bg-gray-500 flex items-center justify-center font-semibold">
+                        <div>
+                            {{ app.user.lastname | slice(0, 1) }}{{ app.user.firstname | slice(0,1) }}
                         </div>
                     </div>
+                {% endif %}
+            </div>
+            <div class="pl-44">
+                <div class="font-semibold">
+                    <span>{{ app.user.lastname }} {{ app.user.firstname }}</span>
+                </div>
+                <div class="text-gray-600 text-sm">ID : {{ app.user.userIdentifier }}</div>
+            </div>
+        </div>
+
+        <div class="bg-gray-300 rounded-md px-4 py-6 mt-12">
+            <div class="font-semibold text-lg">Détails</div>
+            <div class="mt-2">
+                <div class="flex items-center gap-1">
+                    <span class="icon-email"></span>
+                    <div>{{ app.user.email }}</div>
                 </div>
             </div>
         </div>
