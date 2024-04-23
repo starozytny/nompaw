@@ -26,7 +26,7 @@ export function Trumb (props){
     }
 
     return <>
-        <label htmlFor={identifiant} className="block text-sm font-medium leading-6 text-gray-900">
+        <label htmlFor={identifiant} className="block text-sm font-medium leading-6 text-gray-800">
             {children}
         </label>
         <Trumbowyg id={identifiant}

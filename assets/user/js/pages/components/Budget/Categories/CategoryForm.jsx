@@ -7,8 +7,8 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Inputs from "@commonFunctions/inputs";
 
-import { Input, Radiobox, } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
+import { Input, Radiobox, } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
 
 const URL_INDEX_ELEMENTS    = "user_budget_categories_index";
 const URL_CREATE_ELEMENT    = "intern_api_budget_categories_create";

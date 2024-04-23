@@ -12,8 +12,8 @@ import Validateur from "@commonFunctions/validateur";
 import Inputs     from "@commonFunctions/inputs";
 import Sort       from "@commonFunctions/sort";
 
-import { Input, Radiobox, Checkbox, InputView, SelectCustom } from "@commonComponents/Elements/Fields";
-import { Button }           from "@commonComponents/Elements/Button";
+import { Input, Radiobox, Checkbox, InputView, SelectCustom } from "@tailwindComponents/Elements/Fields";
+import { Button }           from "@tailwindComponents/Elements/Button";
 
 const URL_CREATE_ELEMENT    = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT    = "intern_api_budget_items_update";

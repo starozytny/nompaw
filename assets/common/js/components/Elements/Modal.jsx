@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-import { Button } from "@commonComponents/Elements/Button";
+import { Button } from "@tailwindComponents/Elements/Button";
 
 export class Modal extends Component {
     constructor(props) {

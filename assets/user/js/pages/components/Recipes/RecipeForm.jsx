@@ -5,8 +5,8 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input, InputFile, Radiobox } from "@commonComponents/Elements/Fields";
-import { Button }           from "@commonComponents/Elements/Button";
+import { Input, InputFile, Radiobox } from "@tailwindComponents/Elements/Fields";
+import { Button }           from "@tailwindComponents/Elements/Button";
 
 import Formulaire           from "@commonFunctions/formulaire";
 import Validateur           from "@commonFunctions/validateur";

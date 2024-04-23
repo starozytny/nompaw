@@ -15,9 +15,9 @@ import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
 // import FirebaseConfig from "@userFunctions/firebase-config";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Input, InputFile, TextArea } from "@commonComponents/Elements/Fields";
-import { Modal } from "@commonComponents/Elements/Modal";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Input, InputFile, TextArea } from "@tailwindComponents/Elements/Fields";
+import { Modal } from "@tailwindComponents/Elements/Modal";
 
 const URL_CREATE_PROPAL = 'intern_api_birthdays_presents_create';
 const URL_UPDATE_PROPAL = 'intern_api_birthdays_presents_update';

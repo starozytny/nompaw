@@ -1,10 +1,10 @@
 {% extends 'app/pages/legales/template.html.twig' %}
 
-{% block title %}Politique de confidentialité {{ parent() }}{% endblock %}
+{% set page_title %}Politique de confidentialité{% endset %}
 
 {% block main_content %}
-    <div>
-        <h1 class="text-lg font-bold mb-4 uppercase">Politique de confidentialité</h1>
+    <div class="bg-white border p-4 rounded-xl shadow-xl text-sm lg:p-8">
+        <h1 class="text-3xl sm:text-4xl font-bold leading-9 tracking-tight text-gray-900 mb-4 uppercase">Politique de confidentialité</h1>
 
         <section class="flex flex-col gap-6">
             <div>
@@ -27,6 +27,11 @@
             <div>
                 <h2 class="text-lg font-semibold">Traitement des données personnelles</h2>
                 <p>
+                    Les données à caractère personnel collectées, par la Cité de la
+                    Musique de Marseille sont enregistrées dans un fichier informatisé.
+                    Ce fichier est hébergé en France par OVH, la Société Logilink assure la maintenance de notre serveur
+                    et la sécurité de celui-ci.
+                    <br><br>
                     Liste et descriptions des traitements de données personnelles effectués sur le site internet.
                 </p>
                 <ol class="mt-2">
@@ -100,27 +105,6 @@
                     et que l'utilisateur souhaite contester cette décision, ou, s'il pense qu'il est porté atteinte à l'un des
                     droits énumérés ci-dessus, il est en droit de saisir la CNIL (Commission Nationale de l'Informatique et des Libertés,
                     <a class="text-blue-700 hover:underline" href="https://www.cnil.fr" target="_blank" rel="external">https://www.cnil.fr</a>) ou tout juge compétent.
-                </p>
-
-            </div>
-
-            <div>
-                <h2 class="text-lg font-semibold">Mesures d'audience</h2>
-                <ul>
-                    <li>
-                        <b>Matomo</b> <br>
-                        <p>
-                            Matomo Analytics (anciennement Piwik Analytics) est une solution de mesure d'audience qui utilise des cookies.
-                            Ce site web utilise Matomo Analytics avec une configuration conforme à la réglementation sur la protection des
-                            données personnelles et aux recommandations de la CNIL (Commission Nationale de l'Informatique et des Libertés).
-                            Cette configuration permet notamment de rendre anonyme les données des visiteurs et de limiter le délai de
-                            conservation de ces données à 13 mois maximum.
-                        </p>
-                    </li>
-                </ul>
-                <p>
-                    L'utilisateur peut paramétrer les cookies utilisés par le site à l'adresse suivante :
-                    <a class="text-blue-700 hover:underline" href="{{ path('app_cookies') }}">{{ websiteUrl }}/legales/gestion-cookies</a>
                 </p>
             </div>
 

@@ -14,9 +14,9 @@ import Sanitaze     from "@commonFunctions/sanitaze";
 import Sort         from "@commonFunctions/sort";
 import Propals      from "@userFunctions/propals";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal }    from "@commonComponents/Elements/Modal";
-import { Input }    from "@commonComponents/Elements/Fields";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Modal }    from "@tailwindComponents/Elements/Modal";
+import { Input }    from "@tailwindComponents/Elements/Fields";
 
 const URL_CREATE_PROPAL = 'intern_api_aventures_propals_date_create';
 const URL_UPDATE_PROPAL = 'intern_api_aventures_propals_date_update';

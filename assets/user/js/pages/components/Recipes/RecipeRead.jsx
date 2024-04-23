@@ -13,9 +13,9 @@ import Validateur from "@commonFunctions/validateur";
 import Inputs     from "@commonFunctions/inputs";
 
 import { Radio, Rate } from "antd";
-import { Input, Radiobox } from "@commonComponents/Elements/Fields";
-import { ButtonIcon } from "@commonComponents/Elements/Button";
-import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
+import { Input, Radiobox } from "@tailwindComponents/Elements/Fields";
+import { ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
 import { Ingredients }  from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";

@@ -9,10 +9,10 @@ import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"
 
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { InputFile } from "@commonComponents/Elements/Fields";
-import { Modal } from "@commonComponents/Elements/Modal";
-import { Alert } from "@commonComponents/Elements/Alert";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { InputFile } from "@tailwindComponents/Elements/Fields";
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import { Alert } from "@tailwindComponents/Elements/Alert";
 
 const URL_UPLOAD_IMAGES  = "intern_api_aventures_images_upload_images";
 const URL_DELETE_IMAGE   = "intern_api_aventures_images_image_delete";

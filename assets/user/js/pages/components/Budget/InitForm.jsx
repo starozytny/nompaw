@@ -4,9 +4,9 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
-import { Alert } from "@commonComponents/Elements/Alert";
+import { Input } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { Alert } from "@tailwindComponents/Elements/Alert";
 
 import Formulaire  from "@commonFunctions/formulaire";
 import Validateur  from "@commonFunctions/validateur";

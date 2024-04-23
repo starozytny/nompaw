@@ -5,11 +5,11 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { LoaderTxt }  from "@commonComponents/Elements/Loader";
-import { TinyMCE }    from "@commonComponents/Elements/TinyMCE";
-import { Modal }      from "@commonComponents/Elements/Modal";
-import { InputFile }  from "@commonComponents/Elements/Fields";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { LoaderElements }  from "@tailwindComponents/Elements/Loader";
+import { TinyMCE }    from "@tailwindComponents/Elements/TinyMCE";
+import { Modal }      from "@tailwindComponents/Elements/Modal";
+import { InputFile }  from "@tailwindComponents/Elements/Fields";
 
 import Formulaire   from "@commonFunctions/formulaire";
 
@@ -137,7 +137,7 @@ class Form extends Component {
         return <div className="step-form">
             <div className="line line-tuto-step">
                 {loadData
-                    ? <LoaderTxt />
+                    ? <LoaderElements />
                     : <TinyMCE type={4} identifiant={`content-${step}`} valeur={this.state['content-' + step].value} params={{'id': recipe.id}}
                                errors={errors} onUpdateData={this.handleChangeTinyMCE}>
                         <span>Etape {step}</span>

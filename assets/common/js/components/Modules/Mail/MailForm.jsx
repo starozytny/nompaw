@@ -6,10 +6,10 @@ import toastr from 'toastr';
 import { uid } from 'uid'
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input, InputFile, InputView, SelectMultipleCustom } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
+import { Input, InputFile, InputView, SelectMultipleCustom } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
 import { Alert } from "@tailwindComponents/Elements/Alert";
-import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
 
 import Formulaire from "@commonFunctions/formulaire";

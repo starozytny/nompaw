@@ -2,7 +2,7 @@ import React from 'react';
 
 import Sanitaze from '@commonFunctions/sanitaze';
 
-import { ButtonIcon } from "@commonComponents/Elements/Button";
+import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel })
 {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { ButtonIcon } from "@commonComponents/Elements/Button";
+import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 export function Theme ()
 {

@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Checkbox, Input } from "@commonComponents/Elements/Fields";
-import { TinyMCE }         from "@commonComponents/Elements/TinyMCE";
-import { Button }          from "@commonComponents/Elements/Button";
+import { Checkbox, Input } from "@tailwindComponents/Elements/Fields";
+import { TinyMCE }         from "@tailwindComponents/Elements/TinyMCE";
+import { Button }          from "@tailwindComponents/Elements/Button";
 
 import Formulaire from "@commonFunctions/formulaire";
 import Inputs     from "@commonFunctions/inputs";

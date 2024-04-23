@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Alert } from "@commonComponents/Elements/Alert";
+import { Alert } from "@tailwindComponents/Elements/Alert";
 
 import { BudgetItem, BudgetItemRecurrent } from "@userPages/Budget/BudgetItem";
 

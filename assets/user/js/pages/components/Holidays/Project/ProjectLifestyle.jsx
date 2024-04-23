@@ -9,10 +9,10 @@ import Validateur   from "@commonFunctions/validateur";
 import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal } from "@commonComponents/Elements/Modal";
-import {Input, Radiobox} from "@commonComponents/Elements/Fields";
-import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import {Input, Radiobox} from "@tailwindComponents/Elements/Fields";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'intern_api_projects_lifestyle_create';
 const URL_UPDATE_PROPAL = 'intern_api_projects_lifestyle_update';

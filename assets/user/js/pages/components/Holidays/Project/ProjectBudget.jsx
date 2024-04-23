@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import Sanitaze   from "@commonFunctions/sanitaze";
-import {Input} from "@commonComponents/Elements/Fields";
+import {Input} from "@tailwindComponents/Elements/Fields";
 
 export class ProjectBudget extends Component{
     constructor(props) {

@@ -1,11 +1,10 @@
 {% extends 'app/pages/legales/template.html.twig' %}
 
-{% block title %}Mentions légales {{ parent() }}{% endblock %}
+{% set page_title %}Mentions légales{% endset %}
 
 {% block main_content %}
-    <div>
-        <h1 class="text-xl font-bold mb-4 uppercase">Mentions légales</h1>
-
+    <div class="bg-white border p-4 rounded-xl shadow-xl text-sm lg:p-8">
+        <h1 class="text-3xl sm:text-4xl font-bold leading-9 tracking-tight text-gray-900 mb-4 uppercase">Mentions légales</h1>
         <section class="flex flex-col gap-6">
             <div>
                 <h2 class="text-lg font-semibold">Éditeur du site</h2>

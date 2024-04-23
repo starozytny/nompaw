@@ -7,9 +7,9 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Inputs from "@commonFunctions/inputs";
 
-import { Checkbox, Input, InputView, Radiobox, SelectCustom } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
-import { Alert } from "@commonComponents/Elements/Alert";
+import { Checkbox, Input, InputView, Radiobox, SelectCustom } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { Alert } from "@tailwindComponents/Elements/Alert";
 
 const URL_INDEX_ELEMENTS    = "user_budget_recurrences_index";
 const URL_CREATE_ELEMENT    = "intern_api_budget_recurrences_create";

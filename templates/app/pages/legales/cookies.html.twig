@@ -1,10 +1,10 @@
 {% extends 'app/pages/legales/template.html.twig' %}
 
-{% block title %}Gestion des cookies {{ parent() }}{% endblock %}
+{% set page_title %}Gestion des cookies{% endset %}
 
 {% block main_content %}
-    <div>
-        <h1 class="text-lg font-bold mb-4 uppercase">Gestion des cookies</h1>
+    <div class="bg-white border p-4 rounded-xl shadow-xl text-sm lg:p-8">
+        <h1 class="text-3xl sm:text-4xl font-bold leading-9 tracking-tight text-gray-900 mb-4 uppercase">Gestion des cookies</h1>
 
         <section class="flex flex-col gap-6">
             <div>
@@ -36,15 +36,6 @@
                     <li><a class="text-blue-700 hover:underline" target="_blank" rel="external" href="https://support.mozilla.org/fr/kb/activer-desactiver-cookies">Désactivation des cookies sur Mozilla Firefox</a></li>
                     <li><a class="text-blue-700 hover:underline" target="_blank" rel="external" href="https://support.microsoft.com/hub/4338813/windows-help">Désactivation des cookies sur Internet Explorer</a></li>
                 </ul>
-            </div>
-
-            <div>
-                <h2 class="text-lg font-semibold">Choix d'utilisation global des cookies</h2>
-                <p style="margin-bottom: 12px;">
-                    Notre site internet utilise des cookies pour vous offrir la meilleure expérience utilisateur.
-                    Plus d'informations dans notre <a class="text-blue-700 hover:underline" href="{{ path('app_politique') }}">politique de confidentialité</a>
-                </p>
-                <div id="cookies-global-response" class="cookies-global-response" data-consent="{{ consent }}"></div>
             </div>
 
             <div>

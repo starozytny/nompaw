@@ -1,5 +1,7 @@
 {% extends 'base_tailwind.html.twig' %}
 
+{% block title %}{{ page_title }} | {{ page_prefix }}{% endblock %}
+
 {% block stylesheets %}
     {{ parent() }}
     {{ encore_entry_link_tags('app_app') }}
@@ -10,7 +12,7 @@
 {% block body %}
     {% include "layout/components/page-loader.html.twig" %}
 
-    <div class="bg-white max-w-screen-qhd mx-auto">
+    <div class="bg-white">
         <header class="relative z-10">
             <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
                 <div class="flex lg:flex-1">

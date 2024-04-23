@@ -161,7 +161,7 @@ export class Societies extends Component {
 		let self = this;
 		let instance = axios.create();
 		instance.interceptors.request.use((config) => {
-			self.generate.current.handleUpdateContent(<LoaderTxt text="En cours de génération" />);
+			self.generate.current.handleUpdateContent(<LoaderElements text="En cours de génération" />);
 			self.generate.current.handleUpdateFooter(null);
 			self.generate.current.handleUpdateCloseTxt("Fermer");
 			return config;

@@ -10,8 +10,8 @@ import parse from "html-react-parser";
 
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button }           from "@commonComponents/Elements/Button";
-import { LoaderTxt }        from "@commonComponents/Elements/Loader";
+import { Button }           from "@tailwindComponents/Elements/Button";
+import { LoaderElements }        from "@tailwindComponents/Elements/Loader";
 import { StepFormulaire }   from "@userPages/Recipes/StepForm";
 
 const URL_UPDATE_ELEMENT = "intern_api_cook_instructions_update";
@@ -165,7 +165,7 @@ export class Instructions extends Component {
 
         return <div className="steps">
             {loadStep
-                ? <LoaderTxt />
+                ? <LoaderElements />
                 : <>
                     {steps}
                     {mode

@@ -10,10 +10,10 @@ import Inputs       from "@commonFunctions/inputs";
 import Sanitaze     from "@commonFunctions/sanitaze";
 import Propals      from "@userFunctions/propals";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Input, InputFile, Radiobox, TextArea } from "@commonComponents/Elements/Fields";
-import { Modal } from "@commonComponents/Elements/Modal";
-import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Input, InputFile, Radiobox, TextArea } from "@tailwindComponents/Elements/Fields";
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
 const URL_CREATE_PROPAL = 'intern_api_projects_propals_activity_create';
 const URL_UPDATE_PROPAL = 'intern_api_projects_propals_activity_update';

@@ -4,7 +4,7 @@ import Routing   from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Sanitaze from '@commonFunctions/sanitaze';
 
-import { ButtonIcon } from "@commonComponents/Elements/Button";
+import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 const URL_UPDATE_PAGE   = "user_budget_recurrences_update";
 

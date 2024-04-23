@@ -4,8 +4,8 @@ import Formulaire  from "@commonFunctions/formulaire";
 import Validateur  from "@commonFunctions/validateur";
 import Inputs      from "@commonFunctions/inputs";
 
-import { Input } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
+import { Input } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
 
 export class SavingForm extends Component {
     constructor(props) {

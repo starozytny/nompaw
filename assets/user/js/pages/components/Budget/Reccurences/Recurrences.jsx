@@ -5,10 +5,10 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Sort         from "@commonFunctions/sort";
 import List         from "@commonFunctions/list";
 
-import { Pagination, TopSorterPagination } from "@commonComponents/Elements/Pagination";
-import { LoaderElements } from "@commonComponents/Elements/Loader";
-import { Search }         from "@commonComponents/Elements/Search";
-import { Filter }         from "@commonComponents/Elements/Filter";
+import { Pagination, TopSorterPagination } from "@tailwindComponents/Elements/Pagination";
+import { LoaderElements } from "@tailwindComponents/Elements/Loader";
+import { Search }         from "@tailwindComponents/Elements/Search";
+import { Filter }         from "@tailwindComponents/Elements/Filter";
 import { ModalDelete }    from "@commonComponents/Shortcut/Modal";
 
 import { RecurrencesList } from "@userPages/Budget/Reccurences/RecurrencesList";

@@ -7,10 +7,10 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze   from "@commonFunctions/sanitaze";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal } from "@commonComponents/Elements/Modal";
-import { Input } from "@commonComponents/Elements/Fields";
-import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import { Input } from "@tailwindComponents/Elements/Fields";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 import Inputs from "@commonFunctions/inputs";
 
 const URL_UPDATE_PROJECT = 'intern_api_projects_update_text';

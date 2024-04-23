@@ -6,8 +6,8 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal } from "@commonComponents/Elements/Modal";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Modal } from "@tailwindComponents/Elements/Modal";
 
 const URL_READ_GROUPE = 'user_aventures_groupes_read';
 const URL_END_ELEMENT = 'intern_api_aventures_randos_end';

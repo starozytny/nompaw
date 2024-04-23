@@ -9,8 +9,8 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import List from "@commonFunctions/list";
 import Sort from "@commonFunctions/sort";
 
-import { Modal } from "@commonComponents/Elements/Modal";
-import {Button, ButtonIcon} from "@commonComponents/Elements/Button";
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import {Button, ButtonIcon} from "@tailwindComponents/Elements/Button";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";

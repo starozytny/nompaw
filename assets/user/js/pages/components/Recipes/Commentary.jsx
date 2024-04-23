@@ -10,8 +10,8 @@ import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze   from "@commonFunctions/sanitaze";
 import Sort       from "@commonFunctions/sort";
 
-import { TinyMCE } from "@commonComponents/Elements/TinyMCE";
-import { Button }  from "@commonComponents/Elements/Button";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
+import { Button }  from "@tailwindComponents/Elements/Button";
 import { Rate }    from "antd";
 
 const URL_CREATE_ELEMENT = 'intern_api_cook_commentaries_create';
