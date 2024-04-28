@@ -14,7 +14,7 @@
 
 {% block main_content %}
     <div class="flex flex-col gap-6">
-        <div class="relative bg-gray-300 rounded-md px-4 py-6 mt-12">
+        <div class="relative bg-white shadow rounded-md px-4 py-6 mt-12">
             <div class="absolute -top-12 left-8">
                 {% if app.user.avatarFile %}
                     <img class="w-36 rounded-md" src="{{ app.user.avatarFile }}" alt="Avatar utilisateur">
@@ -34,7 +34,7 @@
             </div>
         </div>
 
-        <div class="bg-gray-300 rounded-md px-4 py-6 mt-12">
+        <div class="bg-white shadow rounded-md px-4 py-6 mt-12">
             <div class="font-semibold text-lg">Détails</div>
             <div class="mt-2">
                 <div class="flex items-center gap-1">
