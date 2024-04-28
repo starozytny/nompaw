@@ -37,8 +37,10 @@ function inputPassword () {
 
 function backTop () {
     let btn = document.querySelector('.back-top');
-    btn.addEventListener('click', () => {
-        document.body.scrollTop = 0; // For Safari
-        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-    })
+    if(btn){
+        btn.addEventListener('click', () => {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        })
+    }
 }
