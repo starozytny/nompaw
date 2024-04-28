@@ -3,8 +3,7 @@
 {% set groupe = elem.groupe %}
 {% set author = elem.author %}
 
-{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
-{% set page_title_alone %}{{ elem.name }}{% endset %}
+{% set page_title %}{{ elem.name }}{% endset %}
 {% set page_subtitle %}Groupe d'aventures : {{ groupe.name }}{% endset %}
 
 {% block breadcrumb %}
@@ -15,52 +14,50 @@
     {{ parent() }}
 {% endblock %}
 
-{% set half_width = true %}
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_aventures_groupes_read', {slug: groupe.slug}),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner au groupe'
+    } %}
+    {% if app.user.id == elem.author.id or app.user.admin %}
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_aventures_randos_update', {slug: elem.slug}),
+            btn_type: 'default',
+            btn_icon: 'pencil',
+            btn_text: 'Modifier'
+        } %}
+        {% if elem.status != 2 %}
+            <div class="delete-rando"
+                 data-context="read"
+                 data-id="{{ elem.id }}"
+                 data-name="{{ elem.name }}"
+                 data-groupe-slug="{{ groupe.slug }}"
+            >
+                <button class="btn btn-danger btn-loader-without-text">
+                    <span class="icon-chart-3"></span>
+                    <span>Supprimer</span>
+                </button>
+            </div>
+            {% if elem.startAt != null and elem.adventure != null %}
+                <div class="end-rando"
+                     data-context="read"
+                     data-id="{{ elem.id }}"
+                     data-name="{{ elem.name }}"
+                     data-groupe-slug="{{ groupe.slug }}"
+                >
+                    <button class="btn btn-success btn-loader-without-text">
+                        <span class="icon-chart-3"></span>
+                        <span>Terminer</span>
+                    </button>
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endset %}
 
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_aventures_groupes_read', {'slug': groupe.slug}) }}" class="btn btn-outline-default">
-                <span class="icon-left-arrow"></span>
-                <span>Retourner au groupe</span>
-            </a>
-        </div>
-        <div class="col-2">
-            {% if app.user.id == elem.author.id or app.user.admin %}
-                <a href="{{ path('user_aventures_randos_update', {'slug': elem.slug}) }}" class="btn btn-warning">
-                    <span class="icon-pencil"></span>
-                    <span>Modifier</span>
-                </a>
-                {% if elem.status != 2 %}
-                    <div class="delete-rando"
-                         data-context="read"
-                         data-id="{{ elem.id }}"
-                         data-name="{{ elem.name }}"
-                         data-groupe-slug="{{ groupe.slug }}"
-                    >
-                        <button class="btn btn-danger btn-loader-without-text">
-                            <span class="icon-chart-3"></span>
-                            <span>Supprimer</span>
-                        </button>
-                    </div>
-                    {% if elem.startAt != null and elem.adventure != null %}
-                        <div class="end-rando"
-                             data-context="read"
-                             data-id="{{ elem.id }}"
-                             data-name="{{ elem.name }}"
-                             data-groupe-slug="{{ groupe.slug }}"
-                        >
-                            <button class="btn btn-success btn-loader-without-text">
-                                <span class="icon-chart-3"></span>
-                                <span>Terminer</span>
-                            </button>
-                        </div>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-        </div>
-    </div>
-
     <div class="page-default">
         <div class="rando-read">
             <div class="rando-meta">

@@ -140,16 +140,18 @@
                                 </a>
                                 <div class="flex items-center justify-between gap-2 px-4 py-2 border-t">
                                     {% if rando.story %}
-                                        <div class="link-story">
-                                            <a href="{{ path('user_homepage') ~ "blog/" ~ rando.story }}" class="relative" target="_blank">
+                                        <div>
+                                            <a href="{{ path('user_homepage') ~ "blog/" ~ rando.story }}"
+                                               class="relative inline-flex items-center justify-center rounded-md text-lg px-2 py-2 bg-white shadow-sm text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+                                               target="_blank">
                                                 <span class="icon-book-1"></span>
-                                                <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="width: 104px">Histoire</span>
+                                                <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Histoire</span>
                                             </a>
                                         </div>
                                     {% else %}
                                         <div></div>
                                     {% endif %}
-                                    <a class="card-footer" href="{{ path('user_aventures_randos_read', {slug: rando.slug}) }}">
+                                    <a href="{{ path('user_aventures_randos_read', {slug: rando.slug}) }}">
                                         <div class="flex flex-col items-center justify-center gap-1">
                                             <span class="font-semibold text-sm">{{ rando.name }}</span>
                                             <span class="text-sm text-gray-600">{{ rando.startAt | format_datetime(locale='fr', timeFormat="none") }}</span>
@@ -157,12 +159,14 @@
                                     </a>
                                     {% if rando.googlePhotos %}
                                         <div class="link-google-photos">
-                                            <a href="{{ rando.googlePhotos }}" class="relative" target="_blank">
+                                            <a href="{{ rando.googlePhotos }}"
+                                               class="relative inline-flex items-center justify-center rounded-md text-lg px-2 py-2 bg-white shadow-sm text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+                                               target="_blank">
                                             <span class="icon-google">
                                                 <span class="path1"></span><span class="path2"></span><span class="path3"></span>
                                                 <span class="path4"></span><span class="path5"></span><span class="path6"></span>
                                             </span>
-                                                <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="width: 104px">Google Photos</span>
+                                                <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="width: 96px">Google Photos</span>
                                             </a>
                                         </div>
                                     {% else %}
