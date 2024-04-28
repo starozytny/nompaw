@@ -3,14 +3,16 @@
 {% set page_title %}Groupe d'aventures{% endset %}
 {% set page_subtitle %}Liste des groupes d'aventures disponibles !{% endset %}
 
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_aventures_groupes_create'),
+        btn_type: 'blue',
+        btn_icon: 'add',
+        btn_text: 'Ajouter un groupe'
+    } %}
+{% endset %}
+
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_aventures_groupes_create') }}" class="btn btn-primary">
-                <span>Ajouter un groupe</span>
-            </a>
-        </div>
-    </div>
     <div class="page-default">
         <div class="groupes">
             {% for elem in groupes %}

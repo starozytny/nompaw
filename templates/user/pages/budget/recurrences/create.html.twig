@@ -7,6 +7,6 @@
     {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_budget_recurrences_index') } %}
 
     <div id="recurrences_create" data-categories="{{ categories }}">
-        {% include "layout/components/loader.html.twig" %}
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>
 {% endblock %}

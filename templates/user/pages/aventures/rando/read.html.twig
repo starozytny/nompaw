@@ -106,7 +106,7 @@
                          data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : "" }}"
                          data-adventure-id="{{ elem.adventure ? elem.adventure.id : "" }}"
                     >
-                        {% include "layout/components/loader.html.twig" %}
+                        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
                     </div>
 
                     {% if elem.startAt %}
@@ -120,7 +120,7 @@
                              data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
                              data-status="{{ elem.status }}"
                         >
-                            {% include "layout/components/loader.html.twig" %}
+                            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
                         </div>
                     {% endif %}
                 </div>
@@ -229,7 +229,7 @@
                          data-user-id="{{ app.user.id }}"
                          data-images="{{ images }}"
                     >
-                        {% include "layout/components/loader.html.twig" %}
+                        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
                     </div>
                 {% endif %}
             </div>

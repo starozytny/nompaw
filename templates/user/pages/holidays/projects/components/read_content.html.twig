@@ -14,7 +14,7 @@
                      data-author-id="{{ elem.author.id }}"
                      data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
                 >
-                    {% include "layout/components/loader.html.twig" %}
+                    {% include "layout/components/tailwind/loaders/loader.html.twig" %}
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
                  data-lifestyle="{{ lifestyles }}"
                  data-activities="{{ propalActivities }}"
             >
-                {% include "layout/components/loader.html.twig" %}
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
             <div id="project_route"
                  data-project-id="{{ elem.id }}"
@@ -35,7 +35,7 @@
                  data-price="{{ elem.priceRoute }}"
                  data-user-id="{{ app.user ? app.user.id : null }}"
             >
-                {% include "layout/components/loader.html.twig" %}
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
             <div id="project_house"
                  data-project-id="{{ elem.id }}"
@@ -48,7 +48,7 @@
                  data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
                  data-texte="{{ elem.textHouse }}"
             >
-                {% include "layout/components/loader.html.twig" %}
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
             <div id="project_lifestyle"
                  data-project-id="{{ elem.id }}"
@@ -56,7 +56,7 @@
                  data-texte="{{ elem.textLifestyle }}"
                  data-user-id="{{ app.user ? app.user.id : null }}"
             >
-                {% include "layout/components/loader.html.twig" %}
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
             <div id="project_activities"
                  data-project-id="{{ elem.id }}"
@@ -66,7 +66,7 @@
                  data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
                  data-texte="{{ elem.textActivities }}"
             >
-                {% include "layout/components/loader.html.twig" %}
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
             <div id="project_todos"
                  data-project-id="{{ elem.id }}"
@@ -74,7 +74,7 @@
                  data-texte="{{ elem.textTodos }}"
                  data-user-id="{{ app.user ? app.user.id : null }}"
             >
-                {% include "layout/components/loader.html.twig" %}
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
         </div>
     </div>

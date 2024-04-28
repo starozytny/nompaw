@@ -44,7 +44,7 @@
                  data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
                  data-is-admin="{{ app.user and app.user.admin }}"
             >
-                {% include "layout/components/loader.html.twig" %}
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
         </div>
     </div>
