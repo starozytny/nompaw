@@ -26,7 +26,7 @@
                             {% set totalMembers = 1 %}
                             {% for member in elem.links %}
                                 {% if loop.index < 8 %}
-                                    <div class="avatar -ml-4">
+                                    <div class="avatar relative -ml-4">
                                         <div class="w-8 h-8 rounded-full shadow">
                                             {% if member.user.avatarFile %}
                                                 <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur" class="w-8 h-8 object-cover rounded-full">
@@ -43,7 +43,7 @@
                             {% endfor %}
                             {% if totalMembers >= 8 %}
                                 <div class="-ml-4">
-                                    <div class="w-8 h-8 shadow rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                                    <div class="w-8 h-8 text-sm shadow rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
                                         + {{ totalMembers - 7 }}
                                     </div>
                                 </div>
