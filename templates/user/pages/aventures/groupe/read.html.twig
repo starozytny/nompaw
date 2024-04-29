@@ -32,80 +32,97 @@
 {% block main_content %}
     <div class="flex flex-col gap-12">
         <div class="flex flex-col gap-4 sm:flex-row">
-            <div class="bg-white p-4 border rounded-md flex flex-col gap-2">
+            <div class="w-full max-w-screen-md bg-white p-4 border rounded-md flex flex-col gap-2">
                 {% if next %}
-                    <div class="col-1">
-                        <div>
-                            <h2>{{ next.name }}</h2>
-                            <div class="subtitle" style="margin-bottom: 12px;">{{ next.description | raw }}</div>
-                            <div class="subtitle sub-icon" style="margin-top: 4px;">
-                                <span class="icon-calendar"></span>
-                                <span>
+                   <div class="w-full grid grid-cols-3">
+                       <div class="flex flex-col gap-4 col-span-2">
+                           <div>
+                               <h2 class="text-xl font-semibold">{{ next.name }}</h2>
+                               <div class="text-sm mb-4">{{ next.description | raw }}</div>
+                               <div class="flex items-center gap-2 text-sm text-gray-600">
+                                   <span class="icon-calendar !text-sm"></span>
+                                   <span>
                                         {{ next.startAt ? next.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
                                     </span>
-                            </div>
-                            {% if next.adventure %}
-                                <div class="subtitle sub-icon" style="margin-top: 8px;">
-                                    <span class="icon-book-1"></span>
-                                    <span>{{ next.adventure.name }}</span>
-                                </div>
-                                {% if next.adventure.duration %}
-                                    <div class="subtitle sub-icon" style="margin-top: 6px;">
-                                        <span class="icon-time"></span>
-                                        <span>{{ next.adventure.duration | date('H\\hi') }}</span>
-                                    </div>
-                                {% endif %}
-                                {% if next.adventure.url and next.adventure.url != "https://" %}
-                                    <div class="subtitle sub-icon" style="margin-top: 6px;">
-                                        <span class="icon-link"></span>
-                                        <span><a href="{{ next.adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
-                                    </div>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                        <div class="actions">
-                            <a href="{{ path('user_aventures_randos_update', {'slug': next.slug}) }}" class="btn-icon btn-icon-warning">
-                                <span class="icon-pencil"></span>
-                                <span class="tooltip">Modifier</span>
-                            </a>
+                               </div>
+                               {% if next.adventure %}
+                                   <div class="flex items-center gap-2 text-sm mt-2 text-gray-600">
+                                       <span class="icon-book-1 !text-sm"></span>
+                                       <span>{{ next.adventure.name }}</span>
+                                   </div>
+                                   {% if next.adventure.duration %}
+                                       <div class="flex items-center gap-2 text-sm mt-2 text-gray-600">
+                                           <span class="icon-time !text-sm"></span>
+                                           <span>{{ next.adventure.duration | date('H\\hi') }}</span>
+                                       </div>
+                                   {% endif %}
+                                   {% if next.adventure.url and next.adventure.url != "https://" %}
+                                       <div class="flex items-center gap-2 text-sm mt-2 text-gray-600">
+                                           <span class="icon-link !text-sm"></span>
+                                           <span>
+                                               <a href="{{ next.adventure.url }}"
+                                                  class="text-blue-700 hover:text-blue-500 hover:underline"
+                                                  target="_blank">Lien du topo
+                                               </a>
+                                           </span>
+                                       </div>
+                                   {% endif %}
+                               {% endif %}
+                           </div>
+                           <div class="flex gap-1">
+                               {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                   btn_link: path('user_aventures_randos_update', {slug: next.slug}),
+                                   btn_type: 'default',
+                                   btn_icon: 'pencil',
+                                   btn_text: 'Modifier'
+                               } %}
 
-                            <div class="delete-rando"
-                                 data-context="randos"
-                                 data-id="{{ next.id }}"
-                                 data-name="{{ next.name }}"
-                                 data-groupe-slug="{{ elem.slug }}"
-                            >
-                                <button class="btn-icon btn-icon-danger btn-loader-without-text"><span class="icon-chart-3"></span></button>
-                            </div>
-                        </div>
-                    </div>
+                               <div class="delete-rando"
+                                    data-context="randos"
+                                    data-id="{{ next.id }}"
+                                    data-name="{{ next.name }}"
+                                    data-groupe-slug="{{ elem.slug }}"
+                               >
+                                   {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                       btn_link: "",
+                                       btn_type: 'transparent',
+                                       btn_icon: 'chart-3',
+                                       btn_text: 'Supprimer'
+                                   } %}
+                               </div>
+                           </div>
+                       </div>
 
-                    <div class="col-2">
-                        <div class="steps">
-                            <div class="ra-status {{- next.status == 0 ? ' active' : ''  -}}">
-                                <span>en proposition</span>
-                            </div>
-                            <div class="ra-status {{- next.status == 1 ? ' active' : '' -}}">
-                                <span>validée</span>
-                            </div>
-                            <div class="ra-status {{- next.status == 2 ? ' active' : '' -}}">
-                                <span>terminée</span>
-                            </div>
-                        </div>
+                       <div class="flex flex-col items-end justify-between gap-4">
+                           <div class="flex flex-col gap-2">
+                               <div class="flex items-center gap-2 text-xs rounded-2xl px-2 py-1 {{ next.status == 0 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-gray-500/10 text-gray-800'  -}}">
+                                   <div class="w-2 h-2 {{ next.status == 0 ? 'bg-yellow-500' : 'bg-gray-300'  }} rounded-full"></div>
+                                   <div>en proposition</div>
+                               </div>
+                               <div class="flex items-center gap-2 text-xs rounded-2xl px-2 py-1 {{ next.status == 1 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-gray-500/10 text-gray-800'  -}}">
+                                   <div class="w-2 h-2 {{ next.status == 1 ? 'bg-yellow-500' : 'bg-gray-300'  }} rounded-full"></div>
+                                   <div>validée</div>
+                               </div>
+                               <div class="flex items-center gap-2 text-xs rounded-2xl px-2 py-1 {{ next.status == 2 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-gray-500/10 text-gray-800'  -}}">
+                                   <div class="w-2 h-2 {{ next.status == 2 ? 'bg-yellow-500' : 'bg-gray-300'  }} rounded-full"></div>
+                                   <div>terminée</div>
+                               </div>
+                           </div>
 
-                        <div class="cta">
-                            <a href="{{ path('user_aventures_randos_read', {'slug': next.slug}) }}" class="btn btn-primary">
-                                <span>Voir l'aventure</span>
-                                <span class="icon-right-arrow"></span>
-                            </a>
-                        </div>
-                    </div>
+                           <div>
+                               {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                                   btn_link: path('user_aventures_randos_read', {slug: next.slug}),
+                                   btn_type: 'blue',
+                                   btn_icon: 'right-arrow',
+                                   btn_text: 'Voir l\'aventure'
+                               } %}
+                           </div>
+                       </div>
+                   </div>
                 {% else %}
-                    <div class="">
-                        <div>
-                            <h2 class="text-xl font-semibold">Aucune aventure de prévue.</h2>
-                            <div class="text-gray-600">Préparez la prochaine aventure en cliquant sur <i>Créer une aventure</i></div>
-                        </div>
+                    <div>
+                        <h2 class="text-xl font-semibold">Aucune aventure de prévue.</h2>
+                        <div class="text-gray-600">Préparez la prochaine aventure en cliquant sur <i>Créer une aventure</i></div>
                     </div>
 
                     <div>
@@ -118,7 +135,7 @@
                     </div>
                 {% endif %}
             </div>
-            <div class="bg-blue-500 p-4 rounded-md text-slate-50">
+            <div class="min-w-64 bg-blue-500 p-4 rounded-md text-slate-50">
                 <h2 class="font-semibold"><span class="icon-user-octagon"></span> {{ elem.author.displayName }}</h2>
                 <div class="text-sm">Référent.e du groupe d'aventures</div>
                 {% if next %}
