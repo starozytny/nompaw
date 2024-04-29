@@ -7,10 +7,6 @@
   @include flex(row, center, center);
 }
 
-.modal{
-  z-index: 10;
-}
-
 .birthdays{
   @include flex(row, flex-start, flex-start, var(--espaceDiv));
   flex-wrap: wrap;

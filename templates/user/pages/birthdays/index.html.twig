@@ -3,50 +3,53 @@
 {% set page_title %}Anniversaires{% endset %}
 {% set page_subtitle %}Liste des anniversaires{% endset %}
 
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_birthdays_create'),
+        btn_type: 'blue',
+        btn_icon: 'add',
+        btn_text: 'Ajouter un anniversaire'
+    } %}
+{% endset %}
+
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_birthdays_create') }}" class="btn btn-primary">
-                <span>Ajouter un anniversaire</span>
-            </a>
-        </div>
-    </div>
-    <div class="page-default">
-        <div class="birthdays">
-            {% for elem in birthdays %}
-                <div class="card">
-                    <div class="card-header">
-                        <div class="name">
-                            <div>{{ elem.name }}</div>
+    <div class="flex justify-center gap-4 flex-wrap 2xl:justify-start qhd:gap-6">
+        {% for elem in birthdays %}
+            <div class="bg-white rounded-md w-full sm:w-72 md:w-80 xl:w-72 shadow-sm">
+                <div class="p-4 border-b">
+                    <div class="font-semibold">{{ elem.name }}</div>
+                </div>
+                <div class="relative cursor-pointer group overflow-hidden {{ app.user.id == elem.author.id ? '' : 'rounded-b-md' }}">
+                    <div class="bg-gray-800/15 absolute w-full h-full group-hover:opacity-0 transition-opacity"></div>
+                    <a href="{{ path('user_birthdays_read', {slug: elem.slug}) }}" class="relative z-10">
+                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
+                    </a>
+                </div>
+                {% if app.user.id == elem.author.id %}
+                    <div class="relative z-10 flex justify-between divide-x py-2">
+                        <div class="w-full text-center">
+                            {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                btn_link: path('user_birthdays_update', {slug: elem.slug}),
+                                btn_type: 'transparent',
+                                btn_icon: 'pencil',
+                                btn_text: 'Modifier'
+                            } %}
+                        </div>
+                        <div class="delete-birthday w-full text-center"
+                             data-context="birthday"
+                             data-id="{{ elem.id }}"
+                             data-name="{{ elem.name }}"
+                        >
+                            {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                btn_link: "",
+                                btn_type: 'transparent',
+                                btn_icon: 'chart-3',
+                                btn_text: 'Supprimer'
+                            } %}
                         </div>
                     </div>
-                    <a
-                            href="{{ path('user_birthdays_read', {'slug': elem.slug}) }}"
-                            class="card-body"
-                            style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}"
-                    >
-                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
-                    </a>
-                    {% if app.user.id == elem.author.id %}
-                        <div class="card-footer">
-                            <a
-                                    href="{{ path('user_birthdays_update', {'slug': elem.slug}) }}"
-                                    class="btn-icon"
-                            >
-                                <span class="icon-pencil"></span>
-                                <span class="tooltip">Modifier</span>
-                            </a>
-                            <div class="delete-birthday"
-                                 data-context="birthdays"
-                                 data-id="{{ elem.id }}"
-                                 data-name="{{ elem.name }}"
-                            >
-                                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}
