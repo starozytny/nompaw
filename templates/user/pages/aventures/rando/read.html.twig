@@ -28,42 +28,50 @@
             btn_icon: 'pencil',
             btn_text: 'Modifier'
         } %}
-        {% if elem.status != 2 %}
-            <div class="delete-rando"
-                 data-context="read"
-                 data-id="{{ elem.id }}"
-                 data-name="{{ elem.name }}"
-                 data-groupe-slug="{{ groupe.slug }}"
-            >
-                <button class="btn btn-danger btn-loader-without-text">
-                    <span class="icon-chart-3"></span>
-                    <span>Supprimer</span>
-                </button>
-            </div>
-            {% if elem.startAt != null and elem.adventure != null %}
-                <div class="end-rando"
-                     data-context="read"
-                     data-id="{{ elem.id }}"
-                     data-name="{{ elem.name }}"
-                     data-groupe-slug="{{ groupe.slug }}"
-                >
-                    <button class="btn btn-success btn-loader-without-text">
-                        <span class="icon-chart-3"></span>
-                        <span>Terminer</span>
-                    </button>
-                </div>
-            {% endif %}
-        {% endif %}
     {% endif %}
 {% endset %}
 
 {% block main_content %}
     <div class="page-default">
-        <div class="rando-read">
-            <div class="rando-meta">
-                <div class="features">
-                    <div class="ra-status active">
-                        <span>{{ elem.statusString }}</span>
+        <div class="flex flex-col">
+            <div class="w-full flex gap-4 border-b pb-8 mb-8">
+                {% if elem.status != 2 %}
+                    <div class="delete-rando"
+                         data-context="read"
+                         data-id="{{ elem.id }}"
+                         data-name="{{ elem.name }}"
+                         data-groupe-slug="{{ groupe.slug }}"
+                    >
+                        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                            btn_link: "",
+                            btn_type: 'red',
+                            btn_icon: 'chart-3',
+                            btn_text: 'Supprimer'
+                        } %}
+                    </div>
+                    {% if elem.startAt != null and elem.adventure != null %}
+                        <div class="end-rando"
+                             data-context="read"
+                             data-id="{{ elem.id }}"
+                             data-name="{{ elem.name }}"
+                             data-groupe-slug="{{ groupe.slug }}"
+                        >
+                            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                                btn_link: "",
+                                btn_type: 'green',
+                                btn_icon: 'chart-3',
+                                btn_text: 'Terminer'
+                            } %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="w-full flex gap-4 border-b pb-8 mb-8">
+                <div class="w-full flex flex-col gap-2">
+                    <div class="flex items-center gap-2 text-xs rounded-2xl px-2 py-1 bg-yellow-500/10 text-yellow-600 max-w-28">
+                        <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <div>{{ elem.statusString }}</div>
                     </div>
                     <div class="flex ml-4">
                         {% for member in groupe.links %}
@@ -71,12 +79,10 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="author">
-                    <div class="flex items-center gap-2">
-                        <div class="font-semibold">{{ author.displayName }}</div>
-                        <div class="w-8 h-8 text-sm shadow rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
-                            {{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}
-                        </div>
+                <div class="w-full flex items-center justify-end gap-2">
+                    <div class="font-semibold">{{ author.displayName }}</div>
+                    <div class="w-8 h-8 text-sm shadow rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                        {{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}
                     </div>
                 </div>
             </div>
