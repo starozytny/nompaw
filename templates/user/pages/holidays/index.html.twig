@@ -21,9 +21,9 @@
                     <div>{{ elem.name }}</div>
                 </div>
             </div>
-            <div class="relative cursor-pointer group">
+            <div class="relative cursor-pointer group overflow-hidden {{ app.user.id == elem.author.id ? '' : 'rounded-b-md' }}">
                 <div class="bg-gray-800/15 absolute w-full h-full group-hover:opacity-0 transition-opacity"></div>
-                <a href="{{ path('user_projects_read', {'slug': elem.slug}) }}" style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}">
+                <a href="{{ path('user_projects_read', {slug: elem.slug}) }}" class="relative z-10">
                     <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
                 </a>
             </div>
@@ -42,7 +42,6 @@
                          data-id="{{ elem.id }}"
                          data-name="{{ elem.name }}"
                     >
-
                         {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
                             btn_link: "",
                             btn_type: 'transparent',
