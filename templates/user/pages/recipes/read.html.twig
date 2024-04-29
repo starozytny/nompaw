@@ -2,8 +2,7 @@
 
 {% set author = elem.author %}
 
-{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
-{% set page_title_alone %}{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}{% endset %}
+{% set page_title %}{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}{% endset %}
 {% set page_subtitle %}Recette {{ elem.name }}{% endset %}
 
 {% block breadcrumb %}
