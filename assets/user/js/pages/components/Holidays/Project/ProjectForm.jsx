@@ -7,7 +7,7 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-import { Input, InputFile, InputView, Radiobox, Select } from "@tailwindComponents/Elements/Fields";
+import { Input, InputFile } from "@tailwindComponents/Elements/Fields";
 
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
