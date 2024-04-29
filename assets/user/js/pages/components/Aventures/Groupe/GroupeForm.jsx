@@ -5,7 +5,7 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input, InputFile, InputView, Radiobox } from "@tailwindComponents/Elements/Fields";
+import { Input, InputFile, Radiobox } from "@tailwindComponents/Elements/Fields";
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
@@ -235,16 +235,4 @@ class Form extends Component {
             </div>
         </form>
     }
-}
-
-Form.propTypes = {
-    context: PropTypes.string.isRequired,
-    url: PropTypes.node.isRequired,
-    name: PropTypes.string.isRequired,
-    isVisible: PropTypes.number.isRequired,
-    level: PropTypes.number.isRequired,
-    description: PropTypes.string.isRequired,
-    imageFile: PropTypes.string.isRequired,
-    users: PropTypes.array.isRequired,
-    members: PropTypes.array.isRequired,
 }
