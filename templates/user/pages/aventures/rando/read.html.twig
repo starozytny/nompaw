@@ -33,7 +33,7 @@
 
 {% block main_content %}
     <div class="flex flex-col">
-        <div class="w-full flex gap-4 border-b pb-8 mb-8">
+        <div class="w-full flex gap-4 border-b pb-4 mb-4">
             {% if elem.status != 2 %}
                 <div class="delete-rando"
                      data-context="read"
@@ -66,7 +66,7 @@
             {% endif %}
         </div>
 
-        <div class="w-full flex gap-4 border-b pb-8 mb-8">
+        <div class="w-full flex gap-4 border-b pb-4 mb-4">
             <div class="w-full flex flex-col gap-4">
                 <div>
                     <div class="inline-block text-xs rounded-2xl px-2 py-1 bg-yellow-500/10 text-yellow-600">
@@ -89,8 +89,8 @@
             </div>
         </div>
 
-        <div class="flex flex-col gap-6">
-            <div class="flex flex-col gap-4 lg:flex-row">
+        <div class="flex flex-col gap-6 xl:grid xl:grid-cols-3">
+            <div class="flex flex-col gap-4 sm:flex-row xl:flex-col">
                 <div id="rando_date" class="w-full"
                      data-rando-id="{{ elem.id }}"
                      data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
@@ -124,7 +124,7 @@
             {% if elem.startAt and elem.adventure %}
                 {% set adventure = elem.adventure %}
 
-                <div class="rando-details">
+                <div class="xl:col-span-2">
                     <div class="bg-white border rounded-md">
                         <div class="p-4 bg-color0/80 text-slate-50 rounded-t-md">
                             <div class="font-semibold">{{ adventure.name }}</div>
@@ -133,7 +133,7 @@
                             </div>
                         </div>
                         <div class="p-4">
-                            <div class="rando-card-meta">
+                            <div class="flex flex-col gap-1">
                                 {% if adventure.duration %}
                                     <div class="flex items-center gap-1">
                                         <span class="icon-time"></span>
@@ -220,7 +220,7 @@
                     </div>
                 </div>
 
-                <div id="rando_images"
+                <div id="rando_images" class="xl:col-span-3"
                      data-rando-id="{{ elem.id }}"
                      data-user-id="{{ app.user.id }}"
                      data-images="{{ images }}"

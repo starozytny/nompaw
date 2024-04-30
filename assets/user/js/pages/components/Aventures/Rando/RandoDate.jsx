@@ -127,14 +127,14 @@ export class RandoDate extends Component {
 	handleEndPropal = () => {
 		const { propal } = this.state;
 
-		this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Clôturer</Button>);
+		this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="green">Clôturer</Button>);
 		Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
 	}
 
 	handleCancelDate = () => {
 		const { randoId } = this.props;
 
-		this.cancelDate.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
+		this.cancelDate.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer l'annulation</Button>);
 		Propals.cancel(this, randoId, URL_CANCEL_DATE, modalCancelDate);
 	}
 
@@ -155,50 +155,58 @@ export class RandoDate extends Component {
 			})
 		}
 
-		return <div className="rando-card">
-			<div className="rando-card-header">
-				<div className="name">{startAt ? "Date sélectionnée" : "Proposition de dates"}</div>
+		return <div className="bg-white border rounded-md">
+			<div className="p-4 bg-color0/80 text-slate-50 rounded-t-md">
+				<div className="font-semibold">{startAt ? "Date sélectionnée" : "Proposition de dates"}</div>
 			</div>
-			<div className={`rando-card-body${startAt ? " selected" : ""}`}>
+			<div className={`p-4 ${startAt ? "bg-white" : "bg-gray-50"}`}>
 				{startAt
-					? <div className="propals">
-						<div className="propal selected">
-							{Sanitaze.toDateFormat(startAt, 'LL', '', false)}
-						</div>
+					? <div className="text-center text-xl font-bold text-blue-700 py-4">
+						{Sanitaze.toDateFormat(startAt, 'LL', '', false)}
 					</div>
 					: <>
-						<div className="propals">
+						<div className="flex flex-col gap-2">
 							{data.map((el, index) => {
 
 								let onVote = () => this.handleVote(el);
 
-								let active = "";
+								let active = false;
 								el.votes.forEach(v => {
 									if (v === userId) {
-										active = " active"
+										active = true;
 									}
 								})
 
-								return <div className="propal" key={index}>
-									<div className={`selector${active}`} onClick={onVote}></div>
-									<div className="propal-body" onClick={onVote}>
-										<div className="name">{Sanitaze.toDateFormat(el.dateAt, 'LL', "", false)}</div>
+								return <div className="flex items-center justify-between gap-2" key={index}>
+									<div className="flex items-center gap-2 group">
+										<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+											 onClick={onVote}>
+											<span class={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
+										</div>
+										<div className="font-medium" onClick={onVote}>
+											{Sanitaze.toDateFormat(el.dateAt, 'LL', "", false)}
+										</div>
 									</div>
-									<div className="propal-actions">
-										{mode || el.author.id === parseInt(userId)
-											? <>
-												<ButtonIcon icon="pencil" type="warning" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-												<ButtonIcon icon="trash" type="danger" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-												{mode && <ButtonIcon icon="check1" type="success" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
-											</>
-											: null
-										}
-									</div>
-									<div className="propal-counter" onClick={onVote}>
-										{loadData
-											? <span className="icon-chart-3" />
-											: `+ ${el.votes.length}`
-										}
+
+									<div>
+										<div className="flex gap-2">
+											<div className="flex gap-1">
+												{mode || el.author.id === parseInt(userId)
+													? <>
+														<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+														<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+														{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
+													</>
+													: null
+												}
+											</div>
+											<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
+												{loadData
+													? <span className="icon-chart-3" />
+													: `+ ${el.votes.length}`
+												}
+											</div>
+										</div>
 									</div>
 								</div>
 							})}
@@ -207,38 +215,37 @@ export class RandoDate extends Component {
 				}
 			</div>
 			{startAt === ""
-				? <div className="rando-card-footer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-					<div style={{ display: 'flex', gap: '4px' }}>
-						<span className="icon-add"></span>
-						<span>Proposer une date</span>
-					</div>
+				? <div className="flex items-center justify-center gap-1 cursor-pointer text-center bg-blue-500 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4"
+					   onClick={() => this.handleModal('formPropal', 'create', null)}>
+					<span className="icon-add"></span>
+					<span>Proposer une date</span>
 				</div>
 				: (mode || authorId === parseInt(userId)
-					? <div className="rando-card-footer rando-card-footer-danger" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-						<div style={{ display: 'flex', gap: '4px' }}>
+						? <div className="flex items-center justify-center gap-1 cursor-pointer text-center bg-red-700 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4"
+							   onClick={() => this.handleModal('cancelDate', 'delete', null)}>
 							<span className="icon-close"></span>
 							<span>Annuler la date sélectionnée</span>
-						</div>
 					</div>
-					: null)
+					: null
+				)
 			}
 
 			<Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
-				   content={<div className="line">
+				   content={<div>
 					   <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
 				   </div>}
 				   footer={null} closeTxt="Annuler" />
 
 			<Modal ref={this.deletePropal} identifiant='delete-propal-date' maxWidth={414} title="Supprimer la date"
-				   content={<p>Etes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> ?</p>}
+				   content={<p>Êtes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> ?</p>}
 				   footer={null} closeTxt="Annuler" />
 
 			<Modal ref={this.endPropal} identifiant='end-propal-date' maxWidth={414} title="Sélectionner la date finale"
-				   content={<p>Etes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
+				   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
 				   footer={null} closeTxt="Annuler" />
 
 			<Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"
-				   content={<p>Etes-vous sûr de vouloir revenir sur les propositions de dates ?</p>}
+				   content={<p>Êtes-vous sûr de vouloir revenir sur les propositions de dates ?</p>}
 				   footer={null} closeTxt="Annuler" />
 		</div>
 	}
@@ -254,17 +261,17 @@ RandoDate.propTypes = {
 }
 
 function modalFormPropal (self) {
-	self.formPropal.current.handleUpdateFooter(<Button type="primary" onClick={self.handleSubmitPropal}>Confirmer</Button>)
+	self.formPropal.current.handleUpdateFooter(<Button type="blue" onClick={self.handleSubmitPropal}>Confirmer</Button>)
 }
 
 function modalDeletePropal (self) {
-	self.deletePropal.current.handleUpdateFooter(<Button type="danger" onClick={self.handleDeletePropal}>Confirmer la suppression</Button>)
+	self.deletePropal.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeletePropal}>Confirmer la suppression</Button>)
 }
 
 function modalEndPropal (self) {
-	self.endPropal.current.handleUpdateFooter(<Button type="success" onClick={self.handleEndPropal}>Clôturer</Button>)
+	self.endPropal.current.handleUpdateFooter(<Button type="green" onClick={self.handleEndPropal}>Clôturer</Button>)
 }
 
 function modalCancelDate (self) {
-	self.cancelDate.current.handleUpdateFooter(<Button type="danger" onClick={self.handleCancelDate}>Confirmer l'annulation</Button>)
+	self.cancelDate.current.handleUpdateFooter(<Button type="red" onClick={self.handleCancelDate}>Confirmer l'annulation</Button>)
 }

@@ -65,6 +65,8 @@ Button.propTypes = {
 
 export function ButtonIcon ({ type, icon, onClick, children, tooltipWidth, tooltipPosition, customBtn = "" }) {
 	const colorVariants = {
+		yellow: 'bg-yellow-500 shadow-sm text-slate-50 hover:bg-yellow-400',
+		green: 'bg-green-500 shadow-sm text-slate-50 hover:bg-green-400',
 		red: 'bg-red-600 shadow-sm text-slate-50 hover:bg-red-500',
 		blue: 'bg-blue-600 shadow-sm text-slate-50 hover:bg-blue-500 ring-1 ring-inset ring-blue-600',
 		menu: 'bg-gray-800 shadow-sm text-gray-900 hover:bg-gray-700 ring-1 ring-inset ring-gray-700',
