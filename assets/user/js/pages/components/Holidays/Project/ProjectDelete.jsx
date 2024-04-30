@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 
 import axios from "axios";
@@ -21,7 +22,7 @@ export function ProjectDelete ({ context, id, name })
     const handleDelete = () => {
         let self = this;
 
-        modalRef.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+        modalRef.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
         axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': id}), data: {} })
             .then(function (response) {
                 location.href = Routing.generate(URL_INDEX_ELEMENTS);
@@ -33,11 +34,14 @@ export function ProjectDelete ({ context, id, name })
     return <>
         {context === "read"
             ? <Button type="red" icon="trash" onClick={handleClick}>Supprimer</Button>
-            : <ButtonIcon type="transparent" icon="trash" onClick={handleClick}>Supprimer</ButtonIcon>
+            : <ButtonIcon type="none" icon="trash" onClick={handleClick}>Supprimer</ButtonIcon>
         }
-        <Modal ref={modalRef} identifiant={`delete-proj-${id}`} maxWidth={414} title="Supprimer le projet"
-               content={<p>Etes-vous sûr de vouloir supprimer le projet : <b>{name}</b> ?</p>}
-               footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
+        {createPortal(
+            <Modal ref={modalRef} identifiant={`delete-proj-${id}`} maxWidth={414} title="Supprimer le projet"
+                   content={<p>Êtes-vous sûr de vouloir supprimer le projet : <b>{name}</b> ?</p>}
+                   footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
+            , document.body)
+        }
     </>
 }
 

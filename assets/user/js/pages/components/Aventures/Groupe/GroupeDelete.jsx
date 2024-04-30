@@ -40,7 +40,7 @@ export function GroupeDelete ({ context, id, name }) {
 			: <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
 		}
 		<Modal ref={modalRef} identifiant={`delete-groupe-${id}`} maxWidth={414} title="Supprimer le groupe"
-			   content={<p>Etes-vous sûr de vouloir supprimer le groupe de randonnée : <b>{name}</b> ?</p>}
+			   content={<p>Êtes-vous sûr de vouloir supprimer le groupe de randonnée : <b>{name}</b> ?</p>}
 			   footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
 	</>
 }

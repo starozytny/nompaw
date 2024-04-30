@@ -34,7 +34,7 @@ export function RecipeDelete ({ context, id, name })
     return <>
         {context === "read"
             ? <Button iconLeft="trash" type="red" onClick={handleClick}>Supprimer</Button>
-            : <ButtonIcon icon="trash" type="default" onClick={handleClick}>Supprimer</ButtonIcon>
+            : <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
         }
         {createPortal(
             <Modal ref={modalRef} identifiant={`delete-recipe-${id}`} maxWidth={414} title="Supprimer la recette"
