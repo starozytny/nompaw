@@ -37,7 +37,7 @@ export function RandoDelete ({ context, id, name, groupeSlug }) {
 
 	return <>
 		{context === "read"
-			? <Button icon="trash" type="red" onClick={handleClick}>Supprimer</Button>
+			? <Button iconLeft="trash" type="red" onClick={handleClick}>Supprimer</Button>
 			: <ButtonIcon icon="trash" type="default" onClick={handleClick}>Supprimer</ButtonIcon>
 		}
 		{createPortal(

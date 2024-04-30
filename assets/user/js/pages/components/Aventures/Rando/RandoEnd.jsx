@@ -21,7 +21,7 @@ export function RandoEnd ({ context, id, name, groupeSlug })
     const handleDelete = () => {
         let self = this;
 
-        modalRef.current.handleUpdateFooter(<Button isLoader={true} type="success">Confirmer</Button>);
+        modalRef.current.handleUpdateFooter(<Button isLoader={true} type="green">Confirmer</Button>);
         axios({ method: "PUT", url: Routing.generate(URL_END_ELEMENT, {'id': id}), data: {} })
             .then(function (response) {
                 location.href = Routing.generate(URL_READ_GROUPE, {'slug': groupeSlug});
@@ -32,12 +32,12 @@ export function RandoEnd ({ context, id, name, groupeSlug })
 
     return <>
         {context === "read"
-            ? <Button icon="flag" type="success" onClick={handleClick}>Terminer</Button>
-            : <ButtonIcon icon="flag" type="success" onClick={handleClick}>Terminer</ButtonIcon>
+            ? <Button iconLeft="flag" type="green" onClick={handleClick}>Terminer</Button>
+            : <ButtonIcon icon="flag" type="default" onClick={handleClick}>Terminer</ButtonIcon>
         }
         <Modal ref={modalRef} identifiant={`end-rando-${id}`} maxWidth={414} title="Randonnée terminée"
-               content={<p>Etes-vous sûr de vouloir mettre fin à la randonnée : <b>{name}</b> ?</p>}
-               footer={<Button type="success" onClick={handleDelete}>Confirmer</Button>} closeTxt="Annuler" />
+               content={<p>Êtes-vous sûr de vouloir mettre fin à la randonnée : <b>{name}</b> ?</p>}
+               footer={<Button type="green" onClick={handleDelete}>Confirmer</Button>} closeTxt="Annuler" />
     </>
 }
 
