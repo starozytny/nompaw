@@ -95,7 +95,7 @@ export class RandoDate extends Component {
 				: Routing.generate(URL_UPDATE_PROPAL, { 'rando': randoId, 'id': propal.id })
 
 			const self = this;
-			this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+			this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="blue">Confirmer</Button>);
 			axios({ method: method, url: url, data: { dateAt: dateAt } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
@@ -113,7 +113,7 @@ export class RandoDate extends Component {
 	handleDeletePropal = () => {
 		const { propal, data } = this.state;
 
-		this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+		this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
 		Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
 	}
 
@@ -159,14 +159,20 @@ export class RandoDate extends Component {
 			<div className="p-4 bg-color0/80 text-slate-50 rounded-t-md">
 				<div className="font-semibold">{startAt ? "Date sélectionnée" : "Proposition de dates"}</div>
 			</div>
-			<div className={`p-4 ${startAt ? "bg-white" : "bg-gray-50"}`}>
+			<div className="p-4">
 				{startAt
-					? <div className="text-center text-xl font-bold text-blue-700 py-4">
-						{Sanitaze.toDateFormat(startAt, 'LL', '', false)}
+					? <div className="text-xl font-bold text-blue-700 py-4 flex items-center justify-center gap-2">
+						<div>{Sanitaze.toDateFormat(startAt, 'LL', '', false)}</div>
+						{mode || authorId === parseInt(userId)
+							? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+								<span class="icon-close"></span>
+							</div>
+							: null
+						}
 					</div>
 					: <>
 						<div className="flex flex-col gap-2">
-							{data.map((el, index) => {
+						{data.map((el, index) => {
 
 								let onVote = () => this.handleVote(el);
 
@@ -220,14 +226,7 @@ export class RandoDate extends Component {
 					<span className="icon-add"></span>
 					<span>Proposer une date</span>
 				</div>
-				: (mode || authorId === parseInt(userId)
-						? <div className="flex items-center justify-center gap-1 cursor-pointer text-center bg-red-700 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4"
-							   onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-							<span className="icon-close"></span>
-							<span>Annuler la date sélectionnée</span>
-					</div>
-					: null
-				)
+				: null
 			}
 
 			<Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"

@@ -28,6 +28,8 @@ export function UserFormulaire ({ context, element, page = 'user' }) {
 		url = Routing.generate(URL_UPDATE_ELEMENT, { 'id': element.id });
 	}
 
+	console.log(context)
+
 	return  <Form
         context={context}
         url={url}
@@ -54,10 +56,12 @@ class Form extends Component {
 		super(props);
 
 		this.state = {
+			context: props.context,
 			society: props.society,
 			username: props.username,
 			firstname: props.firstname,
 			lastname: props.lastname,
+			displayName: props.displayName,
 			email: props.email,
 			roles: props.roles,
 			password: '',
@@ -115,7 +119,7 @@ class Form extends Component {
 	handleSubmit = (e) => {
 		e.preventDefault();
 
-		const { context, url } = this.props;
+		const { page, context, url } = this.props;
 		const { username, firstname, lastname, password, password2, email, roles, society, } = this.state;
 
 		this.setState({ errors: [] });

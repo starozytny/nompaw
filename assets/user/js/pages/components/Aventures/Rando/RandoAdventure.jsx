@@ -94,7 +94,7 @@ export class RandoAdventure extends Component {
 				: Routing.generate(URL_UPDATE_PROPAL, { 'rando': randoId, 'id': propal.id })
 
 			const self = this;
-			this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+			this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="blue">Confirmer</Button>);
 			axios({ method: method, url: urlForm, data: { name: name, duration: duration, url: url } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
@@ -112,7 +112,7 @@ export class RandoAdventure extends Component {
 	handleDeletePropal = () => {
 		const { propal, data } = this.state;
 
-		this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+		this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
 		Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
 	}
 
@@ -126,14 +126,14 @@ export class RandoAdventure extends Component {
 	handleEndPropal = () => {
 		const { propal } = this.state;
 
-		this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Clôturer</Button>);
+		this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="green">Clôturer</Button>);
 		Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
 	}
 
 	handleCancelAdventure = () => {
 		const { randoId } = this.props;
 
-		this.cancelAdventure.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
+		this.cancelAdventure.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer l'annulation</Button>);
 		Propals.cancel(this, randoId, URL_CANCEL_ADV, modalCancelAdventure);
 	}
 
@@ -147,78 +147,76 @@ export class RandoAdventure extends Component {
             <div className="p-4 bg-color0/80 text-slate-50 rounded-t-md">
                 <div className="font-semibold">{haveAdventure ? "Aventure sélectionnée" : "Proposition d'aventures"}</div>
             </div>
-            <div className={`p-4 ${haveAdventure ? "bg-white" : "bg-gray-50"}`}>
+            <div className="p-4">
                 {haveAdventure
-                    ? <div className="text-center text-xl font-bold text-blue-700 py-4">
-                        {advName}
+                    ? <div className="text-xl font-bold text-blue-700 py-4 flex items-center justify-center gap-2">
+                        <div>{advName}</div>
+                        {mode || authorId === parseInt(userId)
+                            ? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+                                <span class="icon-close"></span>
+                            </div>
+                            : null
+                        }
                     </div>
                     : <>
                         <div className="flex flex-col gap-2">
-                            {data.map((el, index) => {
+                        {data.map((el, index) => {
+                            let onVote = () => this.handleVote(el);
 
-                                let onVote = () => this.handleVote(el);
+                            let active = false;
+                            el.votes.forEach(v => {
+                                if (v === userId) {
+                                    active = true;
+                                }
+                            })
 
-                                let active = false;
-                                el.votes.forEach(v => {
-                                    if (v === userId) {
-                                        active = true;
-                                    }
-                                })
-
-                                return <div className="flex items-center justify-between gap-2" key={index}>
-                                    <div className="flex items-center gap-2 group">
-                                        <div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-                                             onClick={onVote}>
-                                            <span class={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
-                                        </div>
-                                        <div>
-                                            <div className="font-medium flex items-center gap-2">
-                                                <span onClick={onVote}>{el.name}</span>
-                                                {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo relative text-blue-700" target="_blank">
-                                                    <span className="icon-link"></span>
-                                                    <span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Topo</span>
-                                                </a>}
-                                            </div>
-                                            <div className="text-gray-600 text-sm" onClick={onVote}>
-                                                {Sanitaze.toFormatDuration(Sanitaze.toDateFormat(el.duration, 'LT', "", false).replace(':', 'h'))}
-                                            </div>
-                                        </div>
+                            return <div className="flex items-center justify-between gap-2" key={index}>
+                                <div className="flex items-center gap-2 group">
+                                    <div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+                                         onClick={onVote}>
+                                        <span class={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
                                     </div>
                                     <div>
-                                        <div className="flex gap-2">
-                                            <div className="flex gap-1">
-                                                {mode || el.author.id === parseInt(userId)
-                                                    ? <>
-                                                        <ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-                                                        <ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-                                                        {mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
-                                                    </>
-                                                    : null
-                                                }
-                                            </div>
-                                            <div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
-                                                {loadData
-                                                    ? <span className="icon-chart-3" />
-                                                    : `+ ${el.votes.length}`
-                                                }
-                                            </div>
+                                        <div className="font-medium flex items-center gap-2">
+                                            <span onClick={onVote}>{el.name}</span>
+                                            {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo relative text-blue-700" target="_blank">
+                                                <span className="icon-link"></span>
+                                                <span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Topo</span>
+                                            </a>}
+                                        </div>
+                                        <div className="text-gray-600 text-sm" onClick={onVote}>
+                                            {Sanitaze.toFormatDuration(Sanitaze.toDateFormat(el.duration, 'LT', "", false).replace(':', 'h'))}
                                         </div>
                                     </div>
                                 </div>
-                            })}
+                                <div>
+                                    <div className="flex gap-2">
+                                        <div className="flex gap-1">
+                                            {mode || el.author.id === parseInt(userId)
+                                                ? <>
+                                                    <ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+                                                    <ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+                                                    {mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
+                                                </>
+                                                : null
+                                            }
+                                        </div>
+                                        <div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
+                                            {loadData
+                                                ? <span className="icon-chart-3" />
+                                                : `+ ${el.votes.length}`
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        })}
                         </div>
                     </>
                 }
             </div>
             {haveAdventure
-                ? (mode || authorId === parseInt(userId)
-                        ? <div className="flex items-center justify-center gap-1 cursor-pointer text-center bg-red-700 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4"
-                               onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
-                            <span className="icon-close"></span>
-                            <span>Annuler l'aventure sélectionnée</span>
-                        </div>
-                        : null
-                )
+                ? null
                 : <div className="flex items-center justify-center gap-1 cursor-pointer text-center bg-blue-500 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4"
                        onClick={() => this.handleModal('formPropal', 'create', null)}>
                     <span className="icon-add"></span>
