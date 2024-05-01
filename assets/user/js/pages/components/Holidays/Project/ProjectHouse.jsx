@@ -97,7 +97,7 @@ export class ProjectHouse extends Component {
 				: Routing.generate(URL_UPDATE_PROPAL, { 'project': projectId, 'id': propal.id })
 
 			const self = this;
-			this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+			this.formPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="primary">Confirmer</Button>);
 			axios({ method: method, url: urlName, data: { name: name, url: url, price: price } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
@@ -119,7 +119,7 @@ export class ProjectHouse extends Component {
 		const { texteHouse } = this.state;
 
 		const self = this;
-		this.formText.current.handleUpdateFooter(<Button isLoader={true} type="blue">Confirmer</Button>);
+		this.formText.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({
 			method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, { 'type': 'house', 'id': projectId }),
 			data: { texte: texteHouse }
@@ -144,7 +144,7 @@ export class ProjectHouse extends Component {
 	handleDeletePropal = () => {
 		const { propal, data } = this.state;
 
-		this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+		this.deletePropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
 	}
 
@@ -158,14 +158,14 @@ export class ProjectHouse extends Component {
 	handleEndPropal = () => {
 		const { propal } = this.state;
 
-		this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Clôturer</Button>);
+		this.endPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="green">Clôturer</Button>);
 		Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
 	}
 
 	handleCancelHouse = () => {
 		const { projectId } = this.props;
 
-		this.cancelHouse.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
+		this.cancelHouse.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer l'annulation</Button>);
 		Propals.cancel(this, projectId, URL_CANCEL_HOUSE, modalCancelHouse);
 	}
 
@@ -200,94 +200,92 @@ export class ProjectHouse extends Component {
                 }
             </div>
             <div className="p-4">
-                <div className="propals">
-                    {textHouse
-                        ? <div className="pb-4 mb-4 border-b text-gray-600">
-                            <div dangerouslySetInnerHTML={{ __html: textHouse }}></div>
-						</div>
-						: null
-					}
-					{houseName
-						? <div>
-							{houseUrl
-								? <a href={houseUrl} target="_blank" className="flex items-center gap-2 text-blue-700 hover:text-blue-500 hover:underline">
-									<span>{houseName}</span>
-									<span className="icon-link" />
-								</a>
-								: <span>{houseName}</span>
-							}
-						</div>
-						: <>
-                            <div className="flex flex-col gap-2">
-								{data.map((el, index) => {
+				{textHouse
+					? <div className="pb-4 mb-4 border-b text-gray-600">
+						<div dangerouslySetInnerHTML={{ __html: textHouse }}></div>
+					</div>
+					: null
+				}
+				{houseName
+					? <div>
+						{houseUrl
+							? <a href={houseUrl} target="_blank" className="flex items-center gap-2 text-blue-700 hover:text-blue-500 hover:underline">
+								<span>{houseName}</span>
+								<span className="icon-link" />
+							</a>
+							: <span>{houseName}</span>
+						}
+					</div>
+					: <>
+						<div className="flex flex-col gap-2">
+							{data.map((el, index) => {
 
-									let onVote = userId ? () => this.handleVote(el) : null;
+								let onVote = userId ? () => this.handleVote(el) : null;
 
-									let active = false;
-									el.votes.forEach(v => {
-										if (v === userId) {
-											active = true;
-										}
-									})
+								let active = false;
+								el.votes.forEach(v => {
+									if (v === userId) {
+										active = true;
+									}
+								})
 
-									return <div className="flex items-center justify-between gap-2" key={index}>
-										<div className="flex items-center gap-2 group">
-											<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-												 onClick={onVote}>
-												<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
-											</div>
-											<div>
-												<div className="flex items-center gap-2">
-													<div className="font-medium" onClick={onVote}>{el.name}</div>
-													{(el.url && el.url !== "https://") && <a href={el.url} className="url-topo relative text-blue-700" target="_blank">
-														<span className="icon-link"></span>
-														<span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden" style={{ width: '84px' }}>
-													Lien externe
-												</span>
-													</a>}
-												</div>
-												<div className="text-gray-600 text-sm" onClick={onVote}>
-													{el.price ? Sanitaze.toFormatCurrency(el.price) : ""}
-												</div>
-											</div>
+								return <div className="flex items-center justify-between gap-2" key={index}>
+									<div className="flex items-center gap-2 group">
+										<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+											 onClick={onVote}>
+											<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
 										</div>
 										<div>
-											<div className="flex gap-2">
-												<div className="flex gap-1">
-													{mode || el.author.id === parseInt(userId)
-														? <>
-															<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-															<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-															{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
-														</>
-														: null
-													}
-												</div>
-												<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
-													{loadData
-														? <span className="icon-chart-3" />
-														: `+ ${el.votes.length}`
-													}
-												</div>
+											<div className="flex items-center gap-2">
+												<div className="font-medium" onClick={onVote}>{el.name}</div>
+												{(el.url && el.url !== "https://") && <a href={el.url} className="url-topo relative text-blue-700" target="_blank">
+													<span className="icon-link"></span>
+													<span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden" style={{ width: '84px' }}>
+													Lien externe
+												</span>
+												</a>}
+											</div>
+											<div className="text-gray-600 text-sm" onClick={onVote}>
+												{el.price ? Sanitaze.toFormatCurrency(el.price) : ""}
 											</div>
 										</div>
 									</div>
-								})}
-                            </div>
+									<div>
+										<div className="flex gap-2">
+											<div className="flex gap-1">
+												{mode || el.author.id === parseInt(userId)
+													? <>
+														<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+														<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+														{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
+													</>
+													: null
+												}
+											</div>
+											<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
+												{loadData
+													? <span className="icon-chart-3" />
+													: `+ ${el.votes.length}`
+												}
+											</div>
+										</div>
+									</div>
+								</div>
+							})}
+						</div>
 
-                            {userId
-                                ? <div className="mt-4 flex justify-end">
-                                    <Button type="blue" iconLeft="add"
-                                            onClick={() => this.handleModal('formPropal', 'create', null)}
-                                    >
-                                        Proposer un hébergement
-                                    </Button>
-                                </div>
-                                : null
-                            }
-                        </>
-                    }
-                </div>
+						{userId
+							? <div className="mt-4 flex justify-end">
+								<Button type="blue" iconLeft="add"
+										onClick={() => this.handleModal('formPropal', 'create', null)}
+								>
+									Proposer un hébergement
+								</Button>
+							</div>
+							: null
+						}
+					</>
+				}
             </div>
 
             <div className="flex flex-col gap-2 justify-center items-center p-4 bg-color0/10 rounded-b-md">

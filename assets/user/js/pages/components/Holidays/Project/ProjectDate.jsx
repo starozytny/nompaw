@@ -100,7 +100,7 @@ export class ProjectDate extends Component {
 				: Routing.generate(URL_UPDATE_PROPAL, { 'project': projectId, 'id': propal.id })
 
 			const self = this;
-			this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="blue">Confirmer</Button>);
+			this.formPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 			axios({ method: method, url: url, data: { startAt: startAt, endAt: endAt } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
@@ -118,7 +118,7 @@ export class ProjectDate extends Component {
 	handleDeletePropal = () => {
 		const { propal, data } = this.state;
 
-		this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
+		this.deletePropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
 	}
 
@@ -132,14 +132,14 @@ export class ProjectDate extends Component {
 	handleEndPropal = () => {
 		const { propal } = this.state;
 
-		this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="green">Clôturer</Button>);
+		this.endPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="green">Clôturer</Button>);
 		Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
 	}
 
 	handleCancelDate = () => {
 		const { projectId } = this.props;
 
-		this.cancelDate.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer l'annulation</Button>);
+		this.cancelDate.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer l'annulation</Button>);
 		Propals.cancel(this, projectId, URL_CANCEL_DATE, modalCancelDate);
 	}
 

@@ -59,7 +59,7 @@ export class ProjectRoute extends Component {
 		const { texte, iframe, price } = this.state;
 
 		const self = this;
-		this.formText.current.handleUpdateFooter(<Button isLoader={true} type="blue">Confirmer</Button>);
+		this.formText.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({
 			method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, { 'type': 'route', 'id': projectId }),
 			data: { texte: texte, iframe: iframe, price: price }

@@ -23,7 +23,7 @@ export function RandoDelete ({ context, id, name, groupeSlug }) {
 	const handleDelete = () => {
 		let self = this;
 
-		modalRef.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
+		modalRef.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { id: id }), data: {} })
 			.then(function (response) {
 				location.href = Routing.generate(URL_READ_GROUPE, { slug: groupeSlug });

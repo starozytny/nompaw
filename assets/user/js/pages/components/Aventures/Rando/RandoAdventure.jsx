@@ -94,7 +94,7 @@ export class RandoAdventure extends Component {
 				: Routing.generate(URL_UPDATE_PROPAL, { 'rando': randoId, 'id': propal.id })
 
 			const self = this;
-			this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="blue">Confirmer</Button>);
+			this.formPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 			axios({ method: method, url: urlForm, data: { name: name, duration: duration, url: url } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
@@ -112,7 +112,7 @@ export class RandoAdventure extends Component {
 	handleDeletePropal = () => {
 		const { propal, data } = this.state;
 
-		this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
+		this.deletePropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
 	}
 
@@ -126,14 +126,14 @@ export class RandoAdventure extends Component {
 	handleEndPropal = () => {
 		const { propal } = this.state;
 
-		this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="green">Clôturer</Button>);
+		this.endPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="green">Clôturer</Button>);
 		Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal);
 	}
 
 	handleCancelAdventure = () => {
 		const { randoId } = this.props;
 
-		this.cancelAdventure.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer l'annulation</Button>);
+		this.cancelAdventure.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer l'annulation</Button>);
 		Propals.cancel(this, randoId, URL_CANCEL_ADV, modalCancelAdventure);
 	}
 

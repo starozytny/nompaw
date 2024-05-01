@@ -90,7 +90,7 @@ export class RandoImages extends Component {
 			})
 		}
 
-		this.formFiles.current.handleUpdateFooter(<Button isLoader={true} type="blue">Confirmer</Button>);
+		this.formFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({ method: "POST", url: Routing.generate(URL_UPLOAD_IMAGES, { 'id': randoId }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 			.then(function (response) {
 				toastr.info("Photos envoyées.");
@@ -109,7 +109,7 @@ export class RandoImages extends Component {
 
 		Formulaire.loader(true);
 		let self = this;
-		this.deleteImage.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
+		this.deleteImage.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { 'id': image.id }), data: {} })
 			.then(function (response) {
 				toastr.info('Photo supprimée.');
@@ -128,7 +128,7 @@ export class RandoImages extends Component {
 
 		Formulaire.loader(true);
 		let self = this;
-		this.deleteFiles.current.handleUpdateFooter(<Button isLoader={true} type="red">Confirmer la suppression</Button>);
+		this.deleteFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: selected } })
 			.then(function (response) {
 				toastr.info('Photos supprimées.');

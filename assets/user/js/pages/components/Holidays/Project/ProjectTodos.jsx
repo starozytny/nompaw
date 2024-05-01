@@ -75,7 +75,7 @@ export class ProjectTodos extends Component{
                 : Routing.generate(URL_UPDATE_PROPAL, {'project': projectId, 'id': element.id})
 
             const self = this;
-            this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+            this.formPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="primary">Confirmer</Button>);
             axios({ method: method, url: urlName, data: {name: name} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
@@ -93,7 +93,7 @@ export class ProjectTodos extends Component{
         const { texteTodos } = this.state;
 
         const self = this;
-        this.formText.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+        this.formText.current.handleUpdateFooter(<Button iconLeft="chart-3" type="primary">Confirmer</Button>);
         axios({
             method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, {'type': 'todos', 'id': projectId}),
             data: {texte: texteTodos}
@@ -114,7 +114,7 @@ export class ProjectTodos extends Component{
     handleDeletePropal = () => {
         const { element, data } = this.state;
 
-        this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+        this.deletePropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="danger">Confirmer la suppression</Button>);
         Propals.deletePropal(this, this.deletePropal, element, data, URL_DELETE_PROPAL, modalDeletePropal);
     }
 

@@ -21,7 +21,7 @@ export function RandoEnd ({ context, id, name, groupeSlug })
     const handleDelete = () => {
         let self = this;
 
-        modalRef.current.handleUpdateFooter(<Button isLoader={true} type="green">Confirmer</Button>);
+        modalRef.current.handleUpdateFooter(<Button iconLeft="chart-3" type="green">Confirmer</Button>);
         axios({ method: "PUT", url: Routing.generate(URL_END_ELEMENT, {'id': id}), data: {} })
             .then(function (response) {
                 location.href = Routing.generate(URL_READ_GROUPE, {'slug': groupeSlug});

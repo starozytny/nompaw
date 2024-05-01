@@ -123,7 +123,7 @@ export class Presents extends Component{
             }
 
             const self = this;
-            this.formPropal.current.handleUpdateFooter(<Button isLoader={true} type="primary">Confirmer</Button>);
+            this.formPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="primary">Confirmer</Button>);
             axios({ method: "POST", url: urlName, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
                 .then(function (response) {
                     self.formPropal.current.handleClose();
@@ -137,21 +137,21 @@ export class Presents extends Component{
     handleDeletePropal = () => {
         const { propal, data } = this.state;
 
-        this.deletePropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+        this.deletePropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="danger">Confirmer la suppression</Button>);
         Propals.deletePropal(this, this.deletePropal, propal, data, URL_DELETE_PROPAL, modalDeletePropal);
     }
 
     handleEndPropal = () => {
         const { propal, guest, guestName } = this.state;
 
-        this.endPropal.current.handleUpdateFooter(<Button isLoader={true} type="success">Valider</Button>);
+        this.endPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="success">Valider</Button>);
         Propals.endPropal(this, propal, URL_END_PROPAL, modalEndPropal, {guest: guest, guestName: guestName});
     }
 
     handleCancelPropal = () => {
         const { propal } = this.state;
 
-        this.cancelPropal.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer l'annulation</Button>);
+        this.cancelPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="danger">Confirmer l'annulation</Button>);
         Propals.cancel(this, propal.id, URL_CANCEL_PROPAL, modalCancelPropal);
     }
 
