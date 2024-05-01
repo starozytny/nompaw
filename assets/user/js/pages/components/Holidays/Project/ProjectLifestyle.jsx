@@ -224,13 +224,13 @@ export class ProjectLifestyle extends Component {
             <Modal ref={this.formPropal} identifiant="form-lifestyle" maxWidth={568} title="Ajouter une dépense"
                    content={<div className="flex flex-col gap-4">
                        <div className="flex flex-col gap-4 sm:flex-row">
-                           <div class="w-full">
+                           <div className="w-full">
                                <Input identifiant="name" valeur={name} {...params}>Intitulé</Input>
                            </div>
-                           <div class="w-full">
+                           <div className="w-full">
                                <Input identifiant="unit" valeur={unit} {...params}>Unité</Input>
                            </div>
-                           <div class="w-full">
+                           <div className="w-full">
                                <Input identifiant="price" valeur={price} {...params}>Prix</Input>
                            </div>
                        </div>

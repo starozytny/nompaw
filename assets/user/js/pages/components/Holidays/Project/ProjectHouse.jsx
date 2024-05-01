@@ -305,10 +305,10 @@ export class ProjectHouse extends Component {
             <Modal ref={this.formPropal} identifiant="form-house" maxWidth={568} title="Proposer un hébergement"
                    content={<div className="flex flex-col gap-4">
                        <div className="flex gap-4">
-                           <div class="w-full">
+                           <div className="w-full">
                                <Input identifiant="name" valeur={name} {...params}>Nom de l'hébergement</Input>
                            </div>
-                           <div class="w-full">
+                           <div className="w-full">
                                <Input identifiant="price" valeur={price} {...params}>Prix de l'hébergement</Input>
                            </div>
 					   </div>

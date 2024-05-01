@@ -327,13 +327,13 @@ export class ProjectActivities extends Component {
             <Modal ref={this.formPropal} identifiant="form-activities" maxWidth={568} margin={10} title="Proposer une activité"
                    content={<div className="flex flex-col gap-4">
                        <div className="flex flex-col gap-4 sm:flex-row">
-                           <div class="w-full">
+                           <div className="w-full">
                                <Input identifiant="name" valeur={name} {...params}>Nom de l'activité</Input>
                            </div>
-                           <div class="w-full">
+                           <div className="w-full">
                                <Input identifiant="price" valeur={price} {...params}>Prix</Input>
                            </div>
-                           <div class="w-full">
+                           <div className="w-full">
                                <Radiobox items={pricesType} identifiant="priceType" valeur={priceType} {...params}>
                                    Type de prix
                                </Radiobox>

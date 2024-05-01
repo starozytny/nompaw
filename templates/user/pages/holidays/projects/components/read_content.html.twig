@@ -27,46 +27,53 @@
         >
             {% include "layout/components/tailwind/loaders/loader.html.twig" %}
         </div>
-        <div id="project_route"
-             data-project-id="{{ elem.id }}"
-             data-texte="{{ elem.textRoute }}"
-             data-iframe="{{ elem.iframeRoute }}"
-             data-price="{{ elem.priceRoute }}"
-             data-user-id="{{ app.user ? app.user.id : null }}"
-        >
-            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+
+        <div class="flex flex-col gap-6 2xl:flex-row">
+            <div id="project_route" class="w-full"
+                 data-project-id="{{ elem.id }}"
+                 data-texte="{{ elem.textRoute }}"
+                 data-iframe="{{ elem.iframeRoute }}"
+                 data-price="{{ elem.priceRoute }}"
+                 data-user-id="{{ app.user ? app.user.id : null }}"
+            >
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+            </div>
+            <div id="project_house" class="w-full"
+                 data-project-id="{{ elem.id }}"
+                 data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"
+                 data-house-url="{{ elem.propalHouse ? elem.propalHouse.url : '' }}"
+                 data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
+                 data-propals="{{ propalHouses }}"
+                 data-user-id="{{ app.user ? app.user.id : null }}"
+                 data-author-id="{{ elem.author.id }}"
+                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+                 data-texte="{{ elem.textHouse }}"
+            >
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+            </div>
         </div>
-        <div id="project_house"
-             data-project-id="{{ elem.id }}"
-             data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"
-             data-house-url="{{ elem.propalHouse ? elem.propalHouse.url : '' }}"
-             data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
-             data-propals="{{ propalHouses }}"
-             data-user-id="{{ app.user ? app.user.id : null }}"
-             data-author-id="{{ elem.author.id }}"
-             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
-             data-texte="{{ elem.textHouse }}"
-        >
-            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+
+        <div class="flex flex-col gap-6 2xl:flex-row">
+            <div id="project_lifestyle" class="w-full"
+                 data-project-id="{{ elem.id }}"
+                 data-donnees="{{ lifestyles }}"
+                 data-texte="{{ elem.textLifestyle }}"
+                 data-user-id="{{ app.user ? app.user.id : null }}"
+            >
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+            </div>
+            <div id="project_activities" class="w-full"
+                 data-project-id="{{ elem.id }}"
+                 data-propals="{{ propalActivities }}"
+                 data-user-id="{{ app.user ? app.user.id : null }}"
+                 data-author-id="{{ elem.author.id }}"
+                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+                 data-texte="{{ elem.textActivities }}"
+            >
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+            </div>
         </div>
-        <div id="project_lifestyle"
-             data-project-id="{{ elem.id }}"
-             data-donnees="{{ lifestyles }}"
-             data-texte="{{ elem.textLifestyle }}"
-             data-user-id="{{ app.user ? app.user.id : null }}"
-        >
-            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-        </div>
-        <div id="project_activities"
-             data-project-id="{{ elem.id }}"
-             data-propals="{{ propalActivities }}"
-             data-user-id="{{ app.user ? app.user.id : null }}"
-             data-author-id="{{ elem.author.id }}"
-             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
-             data-texte="{{ elem.textActivities }}"
-        >
-            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-        </div>
+
         <div id="project_todos"
              data-project-id="{{ elem.id }}"
              data-donnees="{{ todos }}"
