@@ -100,7 +100,7 @@ export class ProjectRoute extends Component {
                 <div className="font-semibold text-xl">🚓 Trajet</div>
                 {userId
                     ? <div>
-                        <Button type="yellow" iconLeft="pencil" onClick={() => this.handleModal("formText")}>
+                        <Button type="default" iconLeft="pencil" onClick={() => this.handleModal("formText")}>
                             Modifier
                         </Button>
                     </div>
