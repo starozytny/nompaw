@@ -188,11 +188,11 @@ export class RandoImages extends Component {
 
             <div>
                 <ResponsiveMasonry
-                    columnsCountBreakPoints={{ 320: 2, 768: 2, 900: 3, 1500: 4, 1799: 5 }}
+                    columnsCountBreakPoints={{ 320: 2, 768: 2, 900: 3, 1500: 4, 1799: 5, 1920: 6 }}
                 >
                     <Masonry gutter={'1.2rem'}>
                         {data.map((elem, index) => {
-                            return <div className={`relative`} key={index}>
+                            return <div className="relative" key={index}>
                                 <div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
 									 style={elem.type === 1 ? { height: "87%" } : {}}
 								>

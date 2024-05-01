@@ -56,46 +56,37 @@ export class ProjectBudget extends Component {
 		totalPers += lifeStylePricePers + activitiesPricePers;
 		totalPPers += lifeStylePricePers + activitiesPricePers;
 
-		return <div className="bg-white border rounded-md">
-
+		return <div className="bg-white border rounded-md max-w-screen-lg">
             <div className="p-4 bg-color0/80 text-slate-50 rounded-t-md">
-                <div className="font-semibold">🏛️ Budget</div>
+                <div className="font-semibold text-xl">🏛️ Budget</div>
             </div>
             <div className="p-4">
-                <div className="propals propals-budget">
-                    <div>
-                        <div className="propal propal-text">
-                            <b>Récapitulatif des dépenses.</b>
+                <div className="flex flex-col gap-4 sm:flex-row">
+                    <div className="w-full flex flex-col gap-2">
+                        <div className="font-semibold">Récapitulatif des dépenses.</div>
+                        <div>
+                            <div>Trajet : {routePrice ? Sanitaze.toFormatCurrency(routePrice) : <span className="text-red-500">N.C</span>}</div>
                         </div>
-                        <div className="propal propal-text">
-                            <div>Trajet : {routePrice ? Sanitaze.toFormatCurrency(routePrice) : <span className="txt-danger">N.C</span>}</div>
+                        <div>
+							Hébergement : {housePrice ? Sanitaze.toFormatCurrency(housePrice) : <span className="text-red-500">N.C</span>}
+							{housePromo ? <span className="text-gray-600 text-xs"> (avec 30% : {housePromo})</span> : null}
                         </div>
-                        <div className="propal propal-text">
-                            <div>
-                                Hébergement : {housePrice ? Sanitaze.toFormatCurrency(housePrice) : <span className="txt-danger">N.C</span>}
-                                {housePromo ? <span style={{ opacity: "0.8", fontSize: "14px", paddingLeft: "8px" }}> (avec 30% : {housePromo})</span> : null}
-                            </div>
+                        <div>
+							Style de vie : {lifeStylePrice ? Sanitaze.toFormatCurrency(lifeStylePrice) : <span className="text-red-500">N.C</span>}
                         </div>
-                        <div className="propal propal-text">
-                            <div>Style de vie : {lifeStylePrice ? Sanitaze.toFormatCurrency(lifeStylePrice) : <span className="txt-danger">N.C</span>}</div>
-                        </div>
-                        <div className="propal propal-text">
-                            <div>
-                                Activités : {activitiesPrice ? Sanitaze.toFormatCurrency(activitiesPrice) : (activitesWithoutPrice === 0 ? <span className="txt-danger">N.C</span> : "0€")}
-                                {activitesWithoutPrice > 0 ? <span style={{ opacity: "0.8", fontSize: "14px", paddingLeft: "8px" }}> ({activitesWithoutPrice} sans prix)</span> : null}
-                            </div>
+                        <div>
+							Activités : {activitiesPrice ? Sanitaze.toFormatCurrency(activitiesPrice) : (activitesWithoutPrice === 0 ? <span className="text-red-500">N.C</span> : "0€")}
+							{activitesWithoutPrice > 0 ? <span className="text-gray-600 text-xs"> ({activitesWithoutPrice} sans prix)</span> : null}
                         </div>
                         <div className="text-red-500 text-sm">
                             Rafraichir la page pour voir les derniers calculs.
                         </div>
                     </div>
-                    <div className="flex flex-col gap-4">
+                    <div className="w-full flex flex-col gap-4">
                         <div>
                             <Input identifiant="nbPers" valeur={nbPers} {...params}>Pour combien de personnes</Input>
                         </div>
-                        <div>
-                            <div className="text-gray-600">{Sanitaze.toFormatCurrency(totalPers / nNbPers)} / pers.</div>
-                        </div>
+                        <div>{Sanitaze.toFormatCurrency(totalPers / nNbPers)} / pers.</div>
                         {housePromo ? <div className="text-gray-600 text-sm">
                             {Sanitaze.toFormatCurrency(totalPPers / nNbPers)} / pers. avec les 30%
                         </div> : null}
@@ -103,11 +94,9 @@ export class ProjectBudget extends Component {
                 </div>
             </div>
 
-            <div className="project-card-footer project-card-footer-total" style={{ flexDirection: "column" }}>
-            <div>{Sanitaze.toFormatCurrency(totalPrice)}</div>
-                {housePromo ? <div style={{ marginTop: "12px", fontSize: "16px", opacity: "0.8" }}>
-                    {Sanitaze.toFormatCurrency(totalPromo)} avec les 30%
-                </div> : null}
+            <div className="flex flex-col gap-2 justify-center items-center p-4 bg-color0/10 rounded-b-md">
+            	<div className="text-xl font-bold text-yellow-500">{Sanitaze.toFormatCurrency(totalPrice)}</div>
+                {housePromo ? <div  className="text-gray-600 text-xs">{Sanitaze.toFormatCurrency(totalPromo)} avec les 30%</div> : null}
             </div>
         </div>
     }
