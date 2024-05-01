@@ -9,6 +9,11 @@
         matchRoute: ['user_homepage']
     },
     {
+        name: "Recettes", icon: "book-1",
+        path: path('user_recipes_index'),
+        matchRoute: ['user_recipes_index', 'user_recipes_read', 'user_recipes_create', 'user_recipes_update']
+    },
+    {
         name: "Aventures", icon: "map",
         path: path('user_aventures_groupes_index'),
         matchRoute: [

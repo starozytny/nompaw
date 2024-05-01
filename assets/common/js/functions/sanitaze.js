@@ -114,7 +114,7 @@ function toDateFormat(date, format = 'LLL', retour = "", replaceHours = true, us
     return replaceHours
         ? date.format(format).replace(':', 'h')
         : date.format(format)
-        ;
+    ;
 }
 
 function toFormatDuration(value){
