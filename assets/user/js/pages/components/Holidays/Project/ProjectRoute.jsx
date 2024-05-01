@@ -109,8 +109,8 @@ export class ProjectRoute extends Component {
             </div>
             <div className="p-4">
                 <div className="flex flex-col gap-4 sm:flex-row">
-                    <div className="w-full" dangerouslySetInnerHTML={{ __html: textRoute }}></div>
-                    {/*<div className="w-full" dangerouslySetInnerHTML={{ __html: iframeRoute }}></div>*/}
+                    <div className="w-full text-sm" dangerouslySetInnerHTML={{ __html: textRoute }}></div>
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: iframeRoute }}></div>
                 </div>
             </div>
 

@@ -200,7 +200,7 @@ export class RandoImages extends Component {
                                         <div className="group">
                                             <div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
                                                  onClick={() => this.handleSelect(elem.id)}>
-                                                <span class={`icon-check1 text-sm ${selected.includes(elem.id) ? "text-white" : "text-transparent"}`}></span>
+                                                <span className={`icon-check1 text-sm ${selected.includes(elem.id) ? "text-white" : "text-transparent"}`}></span>
                                             </div>
                                         </div>
                                         <div className="flex gap-1">

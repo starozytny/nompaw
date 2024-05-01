@@ -236,7 +236,6 @@ export class ProjectActivities extends Component {
                         let descriptionFormatted = el.description ? el.description.replaceAll("\n", "<br />") : null;
 
                         return <div className="flex items-center justify-between gap-2" key={index}>
-
                             <div className="flex items-center gap-2 group">
                                 <div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
                                      onClick={onVote}>
@@ -244,7 +243,7 @@ export class ProjectActivities extends Component {
                                 </div>
                                 <div className="flex gap-2">
                                     <div className="h-40 w-40 overflow-hidden rounded-md bg-gray-100" onClick={onVote}>
-                                        <img src={el.imageFile} alt={"illustration " + el.name} className="h-40 object-contain" />
+                                        <img src={el.imageFile} alt={"illustration " + el.name} className="h-40 w-full object-contain" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">

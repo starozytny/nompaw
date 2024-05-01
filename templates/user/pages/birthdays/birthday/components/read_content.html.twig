@@ -1,51 +1,44 @@
-<div class="page-default">
-    <div class="birthday-read">
-        <div class="birthday-header">
-            <div class="birthday-title" style="background-image: url({{ elem.imageFile }})">
-                <h2>{{ elem.name }}</h2>
-            </div>
-            <div class="birthday-propals">
-                <div class="birthday-card birthday-card-date">
-                    <div class="birthday-card-header">
-                        <div class="name">Rendez-vous</div>
-                    </div>
-                    <div class="birthday-card-body {{ elem.startAt ? "selected" : "" }}">
-                        <div class="propals">
-                            <div class="propal selected">
-                                {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
-                                {{ elem.timeAt ? "à " ~ elem.timeAt | date('H\\hi') : '' }}
-                            </div>
-                        </div>
+<div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-4 sm:flex-row max-w-screen-lg">
+        <div class="project-title w-full max-w-screen-md bg-white p-4 border rounded-md flex flex-col gap-2" style="background-image: url({{ elem.imageFile }});">
+            <h2 class="text-2xl font-semibold text-slate-50">{{ elem.name }}</h2>
+        </div>
+        <div class="w-full">
+            <div class="bg-white border rounded-md">
+                <div class="p-4 bg-color0/80 text-slate-50 rounded-t-md">
+                    <div class="font-semibold text-xl">Rendez-vous</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-xl font-bold text-blue-700 py-4 text-center">
+                        {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
+                        {{ elem.timeAt ? "à " ~ elem.timeAt | date('H\\hi') : '' }}
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="birthday-content">
-            <div class="birthday-card">
-                <div class="birthday-card-header">
-                    <div class="name">🎂 Anniversaire</div>
-                </div>
-                <div class="birthday-card-body">
-                    <div class="propals">
-                        <div class="propal propal-route">
-                            <div>{{ elem.description | raw }}</div>
-                            <div class="iframe-route">{{ elem.iframeRoute | raw }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="birthdays_presents"
-                 data-birthday-id="{{ elem.id }}"
-                 data-donnees="{{ presents }}"
-                 data-user-id="{{ app.user ? app.user.id : null }}"
-                 data-user-display="{{ app.user ? app.user.displayName }}"
-                 data-author-id="{{ elem.author.id }}"
-                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
-                 data-is-admin="{{ app.user and app.user.admin }}"
-            >
-                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    <div class="bg-white border rounded-md max-w-screen-lg">
+        <div class="p-4 bg-color0/80 text-slate-50 rounded-t-md">
+            <div class="font-semibold text-xl">🎂 Anniversaire</div>
+        </div>
+        <div class="p-4">
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="w-full text-sm">{{ elem.description | raw }}</div>
+{#                <div class="w-full">{{ elem.iframeRoute | raw }}</div>#}
             </div>
         </div>
+    </div>
+
+    <div id="birthdays_presents"
+         data-birthday-id="{{ elem.id }}"
+         data-donnees="{{ presents }}"
+         data-user-id="{{ app.user ? app.user.id : null }}"
+         data-user-display="{{ app.user ? app.user.displayName }}"
+         data-author-id="{{ elem.author.id }}"
+         data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+         data-is-admin="{{ app.user and app.user.admin }}"
+    >
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>
 </div>

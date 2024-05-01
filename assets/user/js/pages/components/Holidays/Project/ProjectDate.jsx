@@ -162,7 +162,7 @@ export class ProjectDate extends Component {
 
 		return <div className="bg-white border rounded-md">
             <div className="p-4 bg-color0/80 text-slate-50 rounded-t-md">
-                <div className="font-semibold">{nStartAt ? "Date sélectionnée" : "Proposition de dates"}</div>
+                <div className="font-semibold text-xl">{nStartAt ? "Date sélectionnée" : "Proposition de dates"}</div>
             </div>
             <div className="p-4">
                 {nStartAt

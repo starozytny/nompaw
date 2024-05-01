@@ -165,7 +165,7 @@ export class RandoDate extends Component {
 						<div>{Sanitaze.toDateFormat(startAt, 'LL', '', false)}</div>
 						{mode || authorId === parseInt(userId)
 							? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-								<span class="icon-close"></span>
+								<span className="icon-close"></span>
 							</div>
 							: null
 						}
@@ -187,7 +187,7 @@ export class RandoDate extends Component {
 									<div className="flex items-center gap-2 group">
 										<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
 											 onClick={onVote}>
-											<span class={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
+											<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
 										</div>
 										<div className="font-medium" onClick={onVote}>
 											{Sanitaze.toDateFormat(el.dateAt, 'LL', "", false)}

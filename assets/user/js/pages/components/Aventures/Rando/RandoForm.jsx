@@ -175,7 +175,7 @@ class Form extends Component {
                                 <div className="w-full">
                                     <Input type="number" identifiant="devPlus" valeur={devPlus} {...params}>Dénivelé +</Input>
                                 </div>
-                                <div class="w-full">
+                                <div className="w-full">
                                     <Input type="number" identifiant="altitude" valeur={altitude} {...params}>Altitude</Input>
                                 </div>
                             </div>
