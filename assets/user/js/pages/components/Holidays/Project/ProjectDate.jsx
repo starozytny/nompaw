@@ -173,7 +173,7 @@ export class ProjectDate extends Component {
                         </div>
                         {mode || authorId === parseInt(userId)
                             ? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-                                <span class="icon-close"></span>
+                                <span className="icon-close"></span>
                             </div>
                             : null
                         }
@@ -195,7 +195,7 @@ export class ProjectDate extends Component {
 									<div className="flex items-center gap-2 group">
 										<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
 											 onClick={onVote}>
-											<span class={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
+											<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
 										</div>
 										<div className="font-medium" onClick={onVote}>
 											{Sanitaze.toDateFormat(el.startAt, 'LL', "", false)}
@@ -240,10 +240,10 @@ export class ProjectDate extends Component {
 
 			<Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
 				   content={<div className="flex gap-2">
-					   <div class="w-full">
+					   <div className="w-full">
 						   <Input type="js-date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
 					   </div>
-					   <div class="w-full">
+					   <div className="w-full">
 						   <Input type="js-date" identifiant="endAt" valeur={endAt} {...params}>Fini le</Input>
 					   </div>
 				   </div>}
