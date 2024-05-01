@@ -43,7 +43,7 @@ export class RecipeRead extends Component {
 
 		this.state = {
 			isMobile: !window.matchMedia("(min-width: 1280px)").matches,
-			context: window.matchMedia("(min-width: 1280px)").matches ? 'ingredients' : 'instructions',
+			context: window.matchMedia("(min-width: 1280px)").matches ? 'avis' : 'instructions',
 			elem: elem,
 			nbPerson: Formulaire.setValue(elem.nbPerson),
 			difficulty: Formulaire.setValue(elem.difficulty),
@@ -141,6 +141,9 @@ export class RecipeRead extends Component {
 		return <div className="flex flex-col gap-6 xl:grid xl:grid-cols-3">
 			<div className="flex flex-col gap-6 xl:col-span-2">
 				<img alt="example" src={elem.imageFile} className="h-64 w-full object-cover rounded-md" />
+				<div>
+					<Rate disabled allowHalf defaultValue={rate} />
+				</div>
 				<div className="flex flex-col gap-6">
 					{(mode || elem.content) && <div className="bg-white rounded-md border p-4">
 						{mode
@@ -164,9 +167,6 @@ export class RecipeRead extends Component {
 							: parse(elem.content)
 						}
 					</div>}
-					<div>
-						<Rate disabled allowHalf defaultValue={rate} />
-					</div>
 
 					{!isMobile
 						? <Instructions mode={mode} recipe={elem} steps={steps} />
@@ -204,13 +204,15 @@ export class RecipeRead extends Component {
 											Temps de préparation
 										</Input>
 									</div>
-									{loadData
-										? <Button type="blue" icon='chart-3' />
-										: <Button type="blue" icon='check1'
-												  onClick={(e) => this.handleSubmit(e, 'time', 'durationPrepare')}>
-											Enregistrer
-										</Button>
-									}
+									<div className="flex justify-end">
+										{loadData
+											? <Button type="blue" icon='chart-3' />
+											: <Button type="blue" icon='check1'
+													  onClick={(e) => this.handleSubmit(e, 'time', 'durationPrepare')}>
+												Enregistrer
+											</Button>
+										}
+									</div>
 								</div>
 								: <div className="flex items-center gap-2">
 									<span className="icon-time"></span>
@@ -226,13 +228,15 @@ export class RecipeRead extends Component {
 											Temps de cuisson
 										</Input>
 									</div>
-									{loadData
-										? <Button type="blue" icon='chart-3' />
-										: <Button type="blue" icon='check1'
-												  onClick={(e) => this.handleSubmit(e, 'time', 'durationCooking')}>
-											Enregistrer
-										</Button>
-									}
+									<div className="flex justify-end">
+										{loadData
+											? <Button type="blue" icon='chart-3' />
+											: <Button type="blue" icon='check1'
+													  onClick={(e) => this.handleSubmit(e, 'time', 'durationCooking')}>
+												Enregistrer
+											</Button>
+										}
+									</div>
 								</div>
 								: <div className="flex items-center gap-2">
 									<span className="icon-time"></span>
@@ -248,13 +252,15 @@ export class RecipeRead extends Component {
 											Nombre de personnes
 										</Input>
 									</div>
-									{loadData
-										? <Button type="blue" icon='chart-3' />
-										: <Button type="blue" icon='check1'
+									<div className="flex justify-end">
+										{loadData
+											? <Button type="blue" icon='chart-3' />
+											: <Button type="blue" icon='check1'
 													  onClick={(e) => this.handleSubmit(e, 'text', 'nbPerson')}>
-											Enregistrer
-										</Button>
-									}
+												Enregistrer
+											</Button>
+										}
+									</div>
 								</div>
 								: <div className="flex items-center gap-2">
 									<span className="icon-group"></span>

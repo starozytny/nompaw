@@ -7,9 +7,9 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
-import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Input } from "@tailwindComponents/Elements/Fields";
-import { ModalDelete } from "@commonComponents/Shortcut/Modal";
+import { ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
 
 const URL_CREATE_ELEMENT = 'intern_api_cook_ingredients_create';
 const URL_UPDATE_ELEMENT = 'intern_api_cook_ingredients_update';
