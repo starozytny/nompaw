@@ -155,7 +155,7 @@ export class ProjectLifestyle extends Component {
                 <div className="font-semibold text-xl">✨ Style de vie</div>
                 {userId
                     ? <div>
-                        <Button type="default" icon="pencil" onClick={() => this.handleModal("formText")}>
+                        <Button type="default" iconLeft="pencil" onClick={() => this.handleModal("formText")}>
                             Modifier
                         </Button>
                     </div>
