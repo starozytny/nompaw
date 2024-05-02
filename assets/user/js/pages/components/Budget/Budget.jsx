@@ -358,32 +358,35 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			</div>
 		</div>
 
-		<div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:px-8 2xl:grid-cols-4">
-			<div className="overflow-hidden w-screen lg:w-full">
-				<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 lg:flex-col">
-					{cards.map(item => {
-						return <div className={`bg-gray-50 p-4 rounded-md border flex gap-4 min-w-52 ${item.value === 0 ? item.total > 0 : ""}`} key={item.value}>
-							<div className={`w-20 h-20 rounded flex items-center justify-center ${item.classCustom}`}>
-								<span className={`icon-${item.icon} text-xl`}></span>
+		<div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:px-8 2xl:grid-cols-6">
+			<div className="flex flex-col gap-6 2xl:flex-row 2xl:col-span-3">
+				<div className="overflow-hidden w-screen lg:w-full 2xl:min-w-52 2xl:max-w-72">
+					<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 lg:flex-col">
+						{cards.map(item => {
+							return <div className={`bg-white p-4 rounded-md border flex gap-4 min-w-52 ${item.value === 0 ? item.total > 0 : ""}`} key={item.value}>
+								<div className={`w-20 h-20 rounded flex items-center justify-center ${item.classCustom}`}>
+									<span className={`icon-${item.icon} text-xl`}></span>
+								</div>
+								<div>
+									<div className="font-semibold text-gray-700">{item.name}</div>
+									<div className="font-bold text-xl">{Sanitaze.toFormatCurrency(item.total)}</div>
+									{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
+								</div>
 							</div>
-							<div>
-								<div className="font-semibold text-gray-700">{item.name}</div>
-								<div className="font-bold text-xl">{Sanitaze.toFormatCurrency(item.total)}</div>
-								{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
-							</div>
-						</div>
-					})}
+						})}
+					</div>
 				</div>
-			</div>
-			<div className="px-4 sm:px-6 lg:px-0 lg:col-span-2 2xl:col-span-3">
-				<div className="col-1">
-					<BudgetFormulaire context={element ? "update" : "create"} categories={JSON.parse(categories)}
-									  element={element} year={year} month={month}
-									  onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
-									  key={month + "-" + (element ? element.id : 0)} />
-					{nSavings.length !== 0 && <div className="savings">
-						<h3>Utilisation des économies</h3>
-						<div className="savings-list">
+
+				<div className="w-full flex flex-col gap-6 px-4 sm:px-6 lg:px-0">
+					<div className="bg-white border p-4 rounded-md">
+						<BudgetFormulaire context={element ? "update" : "create"} categories={JSON.parse(categories)}
+										  element={element} year={year} month={month}
+										  onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
+										  key={month + "-" + (element ? element.id : 0)} />
+					</div>
+					{nSavings.length !== 0 && <div className="bg-gray-50 rounded-md border">
+						<h3 className="font-semibold p-4 border-b">Utilisation des économies</h3>
+						<div className="p-4 flex flex-col gap-4">
 							{nSavings.map(sa => {
 
 								let total = 0, used = 0;
@@ -406,13 +409,13 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 									}
 								})
 
-								return <div className="savings-item" key={sa.id}>
-									<div className="name">{sa.name}</div>
-									<div className="total">
-										<div className="goal">{Sanitaze.toFormatCurrency(total - used)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
-										<div className="sub">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
+								return <div className="saving-item flex items-start justify-between gap-2" key={sa.id}>
+									<div className="col-1 font-medium text-sm">{sa.name}</div>
+									<div className="col-2">
+										<div className="font-medium text-sm">{Sanitaze.toFormatCurrency(total - used)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
+										<div className="text-xs text-gray-600">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
 									</div>
-									<div className="actions">
+									<div className="col-3">
 										<ButtonIcon type="default" icon="credit-card" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
 									</div>
 								</div>
@@ -420,11 +423,11 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 						</div>
 					</div>}
 				</div>
-				<div className="col-2">
-					<BudgetList data={nData} recurrencesData={nRecurrencesData}
-								onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
-								onActiveRecurrence={handleActiveRecurrence} key={month} />
-				</div>
+			</div>
+			<div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-0 xl:col-span-2 2xl:col-span-3">
+				<BudgetList data={nData} recurrencesData={nRecurrencesData}
+							onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
+							onActiveRecurrence={handleActiveRecurrence} key={month} />
 			</div>
 		</div>
 

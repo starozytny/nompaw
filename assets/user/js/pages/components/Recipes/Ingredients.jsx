@@ -172,13 +172,13 @@ export class Ingredients extends Component {
 		return <div className="bg-white rounded-md border p-4">
 			{mode && <div className="pb-4 mb-4 border-b">
 				<div className="flex gap-1">
-					<div class="w-full">
+					<div className="w-full">
                         <Input identifiant='ingreNombre' valeur={ingreNombre} placeholder='0' {...paramsInput0} />
                     </div>
-					<div class="w-full">
+					<div className="w-full">
                         <Input identifiant='ingreUnit' valeur={ingreUnit} placeholder='unité' {...paramsInput0} />
                     </div>
-					<div class="w-full">
+					<div className="w-full">
                         <Input identifiant='ingreName' valeur={ingreName} placeholder="Ingrédient" {...paramsInput0} />
                     </div>
 					<div className="w-full">
