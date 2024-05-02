@@ -62,12 +62,12 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			case 'deleteRef':
 				ref = deleteRef;
 				setElementToDelete(elem);
-				deleteRef.current.handleUpdateFooter(<Button type="danger" onClick={() => handleDelete(elem)}>Confirmer la suppression</Button>)
+				deleteRef.current.handleUpdateFooter(<Button type="red" onClick={() => handleDelete(elem)}>Confirmer la suppression</Button>)
 				break;
 			case 'trashRef':
 				ref = trashRef;
 				setElementToDelete(elem);
-				trashRef.current.handleUpdateFooter(<Button type="danger" onClick={() => handleDeleteRecurrence(elem)}>Confirmer la suppression</Button>)
+				trashRef.current.handleUpdateFooter(<Button type="red" onClick={() => handleDeleteRecurrence(elem)}>Confirmer la suppression</Button>)
 				break;
 			case 'savingRef':
 				ref = savingRef;
@@ -84,9 +84,9 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 	let handleDelete = (elem) => {
 		if (!load) {
 			setLoad(true)
-			deleteRef.current.handleUpdateFooter(<Button type="danger" isLoader={true}>Confirmer la suppression</Button>)
+			deleteRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
-			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { 'id': elem.id }), data: {} })
+			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { id: elem.id }), data: {} })
 				.then(function (response) {
 					if (elem.recurrenceId) {
 						handleUpdateList(response.data, "update")
@@ -112,7 +112,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		if (!load) {
 			setLoad(true)
 
-			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_ELEMENT, { 'id': elem.id }), data: {} })
+			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_ELEMENT, { id: elem.id }), data: {} })
 				.then(function (response) {
 					handleUpdateList(response.data, "update")
 				})
@@ -130,7 +130,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		if (!load) {
 			setLoad(true)
 
-			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_RECURRENCE, { 'id': elem.id }), data: { 'year': year, 'month': month } })
+			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_RECURRENCE, { id: elem.id }), data: { year: year, month: month } })
 				.then(function (response) {
 					handleUpdateList(response.data, "create")
 				})
@@ -147,9 +147,9 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 	let handleDeleteRecurrence = (elem) => {
 		if (!load) {
 			setLoad(true)
-			trashRef.current.handleUpdateFooter(<Button type="danger" isLoader={true}>Confirmer la suppression</Button>)
+			trashRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
-			axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, { 'id': elem.id }), data: { 'year': year, 'month': month } })
+			axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, { id: elem.id }), data: { year: year, month: month } })
 				.then(function (response) {
 					handleUpdateList(response.data, "create")
 					setElementToDelete(null);
@@ -169,7 +169,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		if (!load) {
 			setLoad(true)
 
-			axios({ method: "PUT", url: Routing.generate(URL_CANCEL_ELEMENT, { 'id': elem.id }), data: {} })
+			axios({ method: "PUT", url: Routing.generate(URL_CANCEL_ELEMENT, { id: elem.id }), data: {} })
 				.then(function (response) {
 					handleUpdateList(response.data, "update")
 				})
@@ -189,7 +189,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			Formulaire.loader(true)
 
 			let self = this;
-			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { 'id': sa.id }), data: { 'year': year, 'month': month, 'total': total } })
+			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total } })
 				.then(function (response) {
 					handleUpdateList(response.data, "create")
 					setNSavingsUsed(List.updateDataMuta(response.data, "create", nSavingsUsed));
@@ -343,16 +343,19 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		{ value: 0, name: "Budget disponible", total: totalDispo, initial: initial, icon: "cart" },
 		{ value: 1, name: "Dépenses", total: totalExpense, initial: null, icon: "minus" },
 		{ value: 2, name: "Revenus", total: totalIncome, initial: null, icon: "add" },
-		{ value: 3, name: "Economies", total: totalSaving, initial: null, icon: "time" },
+		{ value: 3, name: "Économies", total: totalSaving, initial: null, icon: "time" },
 	]
 
 	nData.sort(SORTER);
 
 	return <div className="page-default">
-		<div className="budget-planning">
-			<Year year={year} yearMin={parseInt(yearMin)} />
-			<Months year={year} active={month} onSelect={setMonth} totaux={totaux}
-					useShortName={window.matchMedia("(max-width: 768px)").matches} />
+		<div className="flex flex-col items-center justify-center gap-4 lg:w-[calc(100%-14rem)] lg:mx-auto">
+			<div>
+				<Year year={year} yearMin={parseInt(yearMin)} />
+			</div>
+			<div>
+				<Months year={year} active={month} onSelect={setMonth} totaux={totaux} />
+			</div>
 		</div>
 
 		<div className="budget">
@@ -410,7 +413,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 										<div className="sub">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
 									</div>
 									<div className="actions">
-										<ButtonIcon icon="credit-card" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
+										<ButtonIcon type="default" icon="credit-card" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
 									</div>
 								</div>
 							})}
@@ -452,23 +455,25 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 }
 
 function Year ({ year, yearMin }) {
-	return <div className="planning">
+	return <div className="flex items-center gap-4">
 		{year - 1 >= yearMin
-			? <a className="planning-item" href={Routing.generate(URL_INDEX_PAGE, { 'year': year - 1 })}>
+			? <a className="cursor-pointer flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+				 href={Routing.generate(URL_INDEX_PAGE, { year: year - 1 })}>
 				<span className="icon-left-arrow" />
 			</a>
-			: <div className="planning-item disabled">
+			: <div className="cursor-not-allowed flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-gray-100 text-gray-400 hover:bg-gray-50 ring-1 ring-inset ring-gray-300">
 				<span className="icon-left-arrow" />
 			</div>
 		}
-		<div className="planning-item active">{year}</div>
-		<a className="planning-item" href={Routing.generate(URL_INDEX_PAGE, { 'year': year + 1 })}>
+		<div className="p-2 font-medium text-lg text-blue-600">{year}</div>
+		<a className="cursor-pointer flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+		   href={Routing.generate(URL_INDEX_PAGE, { year: year + 1 })}>
 			<span className="icon-right-arrow" />
 		</a>
 	</div>
 }
 
-function Months ({ year, active, onSelect, useShortName, totaux }) {
+function Months ({ year, active, onSelect, totaux }) {
 	let data = [
 		{ id: 1, name: 'Janvier', shortName: 'Jan.' },
 		{ id: 2, name: 'Février', shortName: 'Fev.' },
@@ -486,21 +491,20 @@ function Months ({ year, active, onSelect, useShortName, totaux }) {
 
 	let today = new Date();
 
-	let items = data.map(elem => {
-		let activeMonth = elem.id === active ? " active" : "";
-		let todayMonth = (elem.id === today.getMonth() + 1 && year === today.getFullYear()) ? " today" : "";
-		let statutMonth = totaux[elem.id - 1] < 0 ? " danger" : "";
-		return <div className={"planning-item" + todayMonth + activeMonth + statutMonth}
-					onClick={() => onSelect(elem.id)}
-					key={elem.id}>
-			<div>{useShortName ? elem.shortName : elem.name}</div>
-			<div className="totaux">{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}</div>
-		</div>
-	})
-
-	return <>
-		<div className="planning">
-			{items}
-		</div>
-	</>
+	return <div className="flex items-center gap-4 overflow-auto border-y py-4 lg:flex-wrap lg:justify-center">
+		{data.map(elem => {
+			let todayMonth = (elem.id === today.getMonth() + 1 && year === today.getFullYear());
+			let activeMonth = elem.id === active;
+			let statutMonth = totaux[elem.id - 1] < 0;
+			return <div className={`cursor-pointer rounded-md p-2 font-medium text-center 2xl:min-w-20 ${todayMonth ? "bg-white" : "hover:bg-gray-50"} ${activeMonth ? (statutMonth ? "!bg-red-300" : "!bg-blue-300") : ""}`}
+						onClick={() => onSelect(elem.id)}
+						key={elem.id}>
+				<div className="text-sm">
+					<span className="xl:hidden">{elem.shortName}</span>
+					<span className="hidden xl:inline-block">{elem.name}</span>
+				</div>
+				<div className="text-xs text-gray-600">{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}</div>
+			</div>
+		})}
+	</div>
 }
