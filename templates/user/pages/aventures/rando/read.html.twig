@@ -34,7 +34,7 @@
 {% block main_content %}
     <div class="flex flex-col">
         {% if elem.status != 2 %}
-            <div class="w-full flex justify-end gap-4 border-b pb-4 mb-4">
+            <div class="w-full flex justify-end gap-1 border-b pb-4 mb-4">
                 <div class="delete-rando"
                      data-context="read"
                      data-id="{{ elem.id }}"
@@ -142,7 +142,7 @@
                                 {% if adventure.duration %}
                                     <div class="flex items-center gap-1">
                                         <span class="icon-time"></span>
-                                        <span>{{ adventure.duration | date('H\\hi') | duration }}</span>
+                                        <span>{{ adventure.duration | date('H\\hi', "UTC") | duration }}</span>
                                     </div>
                                 {% endif %}
                                 {% if adventure.url and adventure.url != "https://" %}

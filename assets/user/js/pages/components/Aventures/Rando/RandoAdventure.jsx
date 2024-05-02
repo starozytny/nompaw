@@ -64,7 +64,7 @@ export class RandoAdventure extends Component {
 		this.setState({
 			context: context, propal: propal,
 			name: propal ? propal.name : "",
-			duration: propal && propal.duration ? moment(propal.duration).format('LT').replace(':', 'h') : "",
+			duration: propal ? Formulaire.setValueTime(propal.duration) : "",
 			url: propal ? Formulaire.setValue(propal.url) : "https://",
 		})
 		this[identifiant].current.handleClick();
@@ -152,7 +152,7 @@ export class RandoAdventure extends Component {
                     ? <div className="text-xl font-bold text-blue-700 py-4 flex items-center justify-center gap-2">
                         <div>{advName}</div>
                         {mode || authorId === parseInt(userId)
-                            ? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+                            ? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
                                 <span className="icon-close"></span>
                             </div>
                             : null
@@ -185,7 +185,7 @@ export class RandoAdventure extends Component {
                                             </a>}
                                         </div>
                                         <div className="text-gray-600 text-sm" onClick={onVote}>
-                                            {Sanitaze.toFormatDuration(Sanitaze.toFormatDate(el.duration, 'LT', "", false).replace(':', 'h'))}
+                                            {Sanitaze.toFormatDuration(Sanitaze.toFormatDate(el.duration, 'LT', "", true, true).replace(':', 'h'))}
                                         </div>
                                     </div>
                                 </div>
@@ -231,7 +231,7 @@ export class RandoAdventure extends Component {
                                <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
                            </div>
                            <div className="w-full">
-                               <Input identifiant="duration" valeur={duration} placeholder="00h00" {...params}>Durée</Input>
+                               <Input type="time" identifiant="duration" valeur={duration} {...params}>Durée</Input>
                            </div>
                        </div>
                        <div>

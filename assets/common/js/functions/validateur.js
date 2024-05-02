@@ -27,7 +27,7 @@ function validateDate(value) {
 }
 
 function validateTime(value) {
-    let regex = /^([0-1][0-9]|2[0-3])h[0-5][0-9]$/;
+    let regex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
 
     if (!regex.test(value)) {
         return {'code': false, 'message': 'La valeur n\'est pas valide.'};

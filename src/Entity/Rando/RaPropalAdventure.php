@@ -36,7 +36,7 @@ class RaPropalAdventure
     #[Groups(['pr_adv_list'])]
     private ?User $author = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['pr_adv_list'])]
     private ?\DateTimeInterface $duration = null;
 

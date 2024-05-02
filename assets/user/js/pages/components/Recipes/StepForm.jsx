@@ -5,13 +5,13 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
-import { LoaderElements } from "@tailwindComponents/Elements/Loader";
-import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-import { Modal } from "@tailwindComponents/Elements/Modal";
-import { InputFile } from "@tailwindComponents/Elements/Fields";
-
 import Formulaire from "@commonFunctions/formulaire";
+
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
+import { InputFile } from "@tailwindComponents/Elements/Fields";
+import { LoaderElements } from "@tailwindComponents/Elements/Loader";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 const URL_DELETE_IMAGE = "intern_api_cook_instructions_delete_image";
 
@@ -83,7 +83,7 @@ class Form extends Component {
 			this.setState({ loadDelete: true })
 
 			let self = this;
-			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { 'recipe': recipe.id, 'position': step, 'nb': imageToDelete }), data: {} })
+			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { recipe: recipe.id, position: step, nb: imageToDelete }), data: {} })
 				.then(function (response) {
 					toastr.info('Illustration supprimée.');
 
@@ -121,7 +121,7 @@ class Form extends Component {
 
 	render () {
 		const { step, recipe } = this.props;
-		const { errors, loadData, loadDelete, image0File, image1File, image2File } = this.state;
+		const { errors, loadData, image0File, image1File, image2File } = this.state;
 
 		let params = { errors: errors };
 

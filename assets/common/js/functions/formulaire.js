@@ -8,7 +8,7 @@ const Validateur = require("@commonFunctions/validateur");
 function generiqueSendForm (self, context, paramsToValidate, url, data, urlReload) {
     let validate = Validateur.validateur(paramsToValidate)
     if(!validate.code){
-        showErrors(this, validate);
+        showErrors(self, validate);
     }else {
         loader(true);
         axios({ method: context === "update" ? "PUT" : "POST", url: url, data: data })
@@ -54,7 +54,7 @@ function setValueDate (value, defaultValue = "") {
 }
 
 function setValueTime (value, defaultValue = "") {
-    return value === null ? defaultValue : moment(value).format('HH[h]mm');
+    return value === null ? defaultValue : moment.utc(value).format('HH:mm');
 }
 
 function showErrors(self, validate, text="Veuillez vérifier les informations transmises.", toTop = false)

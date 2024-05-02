@@ -200,14 +200,14 @@ export class RecipeRead extends Component {
 							{mode
 								? <div className="flex flex-col gap-4">
 									<div>
-										<Input identifiant="durationPrepare" valeur={durationPrepare} placeholder="00h00 préparation" {...paramsInput0}>
+										<Input type="time" identifiant="durationPrepare" valeur={durationPrepare} placeholder="00h00 préparation" {...paramsInput0}>
 											Temps de préparation
 										</Input>
 									</div>
 									<div className="flex justify-end">
 										{loadData
-											? <Button type="blue" icon='chart-3' />
-											: <Button type="blue" icon='check1'
+											? <Button type="blue" iconLeft='chart-3' />
+											: <Button type="blue" iconLeft='check1'
 													  onClick={(e) => this.handleSubmit(e, 'time', 'durationPrepare')}>
 												Enregistrer
 											</Button>
@@ -216,7 +216,7 @@ export class RecipeRead extends Component {
 								</div>
 								: <div className="flex items-center gap-2">
 									<span className="icon-time"></span>
-									<span>{Sanitaze.toFormatDuration(Sanitaze.toFormatDate(elem.durationPrepare, 'LT', '', false))} de préparation</span>
+									<span>{Sanitaze.toFormatDuration(Sanitaze.toFormatDate(elem.durationPrepare, 'LT', '', true, true))} de préparation</span>
 								</div>
 							}
 						</div> : null}
@@ -224,14 +224,14 @@ export class RecipeRead extends Component {
 							{mode
 								? <div className="flex flex-col gap-4">
 									<div>
-										<Input identifiant="durationCooking" valeur={durationCooking} placeholder="00h00 cuisson" {...paramsInput0}>
+										<Input type="time" identifiant="durationCooking" valeur={durationCooking} placeholder="00h00 cuisson" {...paramsInput0}>
 											Temps de cuisson
 										</Input>
 									</div>
 									<div className="flex justify-end">
 										{loadData
-											? <Button type="blue" icon='chart-3' />
-											: <Button type="blue" icon='check1'
+											? <Button type="blue" iconLeft='chart-3' />
+											: <Button type="blue" iconLeft='check1'
 													  onClick={(e) => this.handleSubmit(e, 'time', 'durationCooking')}>
 												Enregistrer
 											</Button>
@@ -240,7 +240,7 @@ export class RecipeRead extends Component {
 								</div>
 								: <div className="flex items-center gap-2">
 									<span className="icon-time"></span>
-									<span>{Sanitaze.toFormatDuration(Sanitaze.toFormatDate(elem.durationCooking, 'LT', '', false))} de cuisson</span>
+									<span>{Sanitaze.toFormatDuration(Sanitaze.toFormatDate(elem.durationCooking, 'LT', '', true, true))} de cuisson</span>
 								</div>
 							}
 						</div> : null}
@@ -254,8 +254,8 @@ export class RecipeRead extends Component {
 									</div>
 									<div className="flex justify-end">
 										{loadData
-											? <Button type="blue" icon='chart-3' />
-											: <Button type="blue" icon='check1'
+											? <Button type="blue" iconLeft='chart-3' />
+											: <Button type="blue" iconLeft='check1'
 													  onClick={(e) => this.handleSubmit(e, 'text', 'nbPerson')}>
 												Enregistrer
 											</Button>

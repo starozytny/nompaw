@@ -163,7 +163,7 @@ class Form extends Component {
                                 <Input type="js-date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
                             </div>
                             <div className="w-full">
-                                <Input identifiant="timeAt" valeur={timeAt} placeholder="00h00" {...params}>À quelle heure</Input>
+                                <Input type="time" identifiant="timeAt" valeur={timeAt} placeholder="00h00" {...params}>À quelle heure</Input>
                             </div>
                         </div>
                         <div>

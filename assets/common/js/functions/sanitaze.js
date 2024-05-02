@@ -100,16 +100,16 @@ function toFormatBytesToSize(bytes) {
 
 function toFormatCalendar(value, retour = "") {
     if(value){
-        return moment(value).utc().calendar().replace(":", "h")
+        return moment(value).calendar().replace(":", "h")
     }
 
     return retour;
 }
 
-function toFormatDate(date, format = 'LLL', retour = "", replaceHours = true, useUtc = true) {
+function toFormatDate(date, format = 'LLL', retour = "", replaceHours = true, useUtc = false) {
     if(date === null) return retour;
 
-    date = useUtc ? moment(date).utc() : moment(date);
+    date = useUtc ? moment.utc(date) : moment(date);
 
     return replaceHours
         ? date.format(format).replace(':', 'h')

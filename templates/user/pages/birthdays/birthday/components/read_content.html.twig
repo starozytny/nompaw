@@ -10,8 +10,8 @@
                 </div>
                 <div class="p-4">
                     <div class="text-xl font-bold text-blue-700 py-4 text-center">
-                        {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
-                        {{ elem.timeAt ? "à " ~ elem.timeAt | date('H\\hi') : '' }}
+                        {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr', timezone='utc') | capitalize : 'Date indéfinie' }}
+                        {{ elem.timeAt ? "à " ~ elem.timeAt | date('H\\hi', 'utc') : '' }}
                     </div>
                 </div>
             </div>
@@ -25,7 +25,7 @@
         <div class="p-4">
             <div class="flex flex-col gap-4 sm:flex-row">
                 <div class="w-full text-sm">{{ elem.description | raw }}</div>
-{#                <div class="w-full">{{ elem.iframeRoute | raw }}</div>#}
+                <div class="w-full">{{ elem.iframeRoute | raw }}</div>
             </div>
         </div>
     </div>
