@@ -7,6 +7,7 @@ import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel }) {
 	let badgesBudget = ['red', 'blue', 'yellow', 'gray', 'gray'];
+	let typesBudget = ['text-red-600', 'text-blue-500', 'text-yellow-500', 'text-gray-700', 'text-gray-700'];
 
 	return <div className={`item border-t hover:bg-slate-50${!elem.isActive ? " opacity-50" : ""}${elem.type === 3 ? " opacity-80 line-through" : ""}`}>
 		<div className="item-content">
@@ -25,7 +26,7 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel }) {
 					</div>
 				</div>
 				<div className="col-3">
-					<div className={`font-semibold text-sm ${elem.type ? "text-blue-500" : "text-red-600"}`}>
+					<div className={`font-semibold text-sm ${typesBudget[elem.type]}`}>
 						<span className={`icon-${elem.typeIcon}`}></span> {Sanitaze.toFormatCurrency(elem.price)}
 					</div>
 				</div>
@@ -44,6 +45,7 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel }) {
 }
 
 export function BudgetItemRecurrent ({ elem, onModal, onActive }) {
+	let typesBudget = ['text-red-600', 'text-blue-500', 'text-yellow-500', 'text-gray-700', 'text-gray-700'];
 	return <div className="item border-t hover:bg-slate-50 opacity-50">
 		<div className="item-content">
 			<div className="item-infos">
@@ -61,7 +63,7 @@ export function BudgetItemRecurrent ({ elem, onModal, onActive }) {
 					</div>
 				</div>
 				<div className="col-3">
-					<div className={`font-semibold text-sm ${elem.type ? "text-blue-500" : "text-red-600"}`}>
+					<div className={`font-semibold text-sm ${typesBudget[elem.type]}`}>
 						<span className={`icon-${elem.typeIcon}`}></span> {Sanitaze.toFormatCurrency(elem.price)}
 					</div>
 				</div>
