@@ -4,88 +4,89 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input } from "@tailwindComponents/Elements/Fields";
-import { Button } from "@tailwindComponents/Elements/Button";
-import { Alert } from "@tailwindComponents/Elements/Alert";
+import Inputs from "@commonFunctions/inputs";
+import Formulaire from "@commonFunctions/formulaire";
+import Validateur from "@commonFunctions/validateur";
 
-import Formulaire  from "@commonFunctions/formulaire";
-import Validateur  from "@commonFunctions/validateur";
-import Inputs      from "@commonFunctions/inputs";
+import { Input } from "@tailwindComponents/Elements/Fields";
+import { Alert } from "@tailwindComponents/Elements/Alert";
+import { Button } from "@tailwindComponents/Elements/Button";
 
 const URL_INIT_BUDGET = "intern_api_budget_init_create";
 
 export class InitForm extends Component {
-    constructor(props) {
-        super(props);
+	constructor (props) {
+		super(props);
 
-        this.state = {
-            total: '',
-            errors: [],
-            load: false
-        }
-    }
+		this.state = {
+			total: '',
+			errors: [],
+			load: false
+		}
+	}
 
-    handleChange = (e) => {
-        let name = e.currentTarget.name;
-        let value = e.currentTarget.value;
+	handleChange = (e) => {
+		let name = e.currentTarget.name;
+		let value = e.currentTarget.value;
 
-        if(name === "total"){
-            value = Inputs.textMoneyMinusInput(value, this.state.total);
-        }
+		if (name === "total") {
+			value = Inputs.textMoneyMinusInput(value, this.state.total);
+		}
 
-        this.setState({[name]: value})
-    }
+		this.setState({ [name]: value })
+	}
 
-    handleSubmit = (e) => {
-        e.preventDefault();
+	handleSubmit = (e) => {
+		e.preventDefault();
 
-        const { load, total } = this.state;
+		const { load, total } = this.state;
 
-        this.setState({ errors: [] });
+		this.setState({ errors: [] });
 
-        let validate = Validateur.validateur([{type: "text",  id: 'total',  value: total}])
-        if(!validate.code){
-            Formulaire.showErrors(this, validate);
-        }else {
-            if(!load){
-                this.setState({ load: true })
-                Formulaire.loader(true);
+		let validate = Validateur.validateur([{ type: "text", id: 'total', value: total }])
+		if (!validate.code) {
+			Formulaire.showErrors(this, validate);
+		} else {
+			if (!load) {
+				this.setState({ load: true })
+				Formulaire.loader(true);
 
-                let self = this;
-                axios({ method: "PUT", url: Routing.generate(URL_INIT_BUDGET), data: this.state })
-                    .then(function (response) {
-                        toastr.info('Données enregistrées.');
-                        location.reload();
-                    })
-                    .catch(function (error) { Formulaire.displayErrors(self, error); })
-                    .then(function () { Formulaire.loader(false); self.setState({ load: false }) })
-                ;
-            }
-        }
-    }
+				let self = this;
+				axios({ method: "PUT", url: Routing.generate(URL_INIT_BUDGET), data: this.state })
+					.then(function (response) {
+						toastr.info('Données enregistrées.');
+						location.reload();
+					})
+					.catch(function (error) {
+						Formulaire.displayErrors(self, error);
+                        Formulaire.loader(false);
+					})
+					.then(function () {
+						self.setState({ load: false })
+					})
+				;
+			}
+		}
+	}
 
-    render () {
-        const { errors, load, total } = this.state;
+	render () {
+		const { errors, load, total } = this.state;
 
-        let params  = { errors: errors, onChange: this.handleChange };
+		let params = { errors: errors, onChange: this.handleChange };
 
-        return <div className="main-content" style={{ maxWidth: '568px'}}>
-            <div className="budget-init-infos">
-                <Alert type="info" title="Configurer le planificateur de budget">
+		return <div className="max-w-screen-md flex flex-col gap-6">
+            <div>
+                <Alert type="gray" icon="question" title="Configurer le planificateur de budget">
                     Renseignez votre solde initial pour commencer à planifier votre vie financière.
                 </Alert>
             </div>
-            <div className="formulaire">
-                <form onSubmit={this.handleSubmit}>
-                    <div className="line">
-                        <Input identifiant="total" valeur={total} {...params}>Solde initial</Input>
-                    </div>
+            <form onSubmit={this.handleSubmit} className="bg-white border p-4 rounded-md">
+                <Input identifiant="total" valeur={total} {...params}>Solde initial</Input>
 
-                    <div className="line-buttons">
-                        <Button isSubmit={true} isLoader={load} type="primary">Enregistrer</Button>
-                    </div>
-                </form>
-            </div>
+                <div className="mt-4">
+                    <Button type="blue" isSubmit={true} iconLeft={load ? "chart-3" : ""}>Valider le solde</Button>
+                </div>
+            </form>
         </div>
     }
 }
