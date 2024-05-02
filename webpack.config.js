@@ -21,7 +21,6 @@ Encore
         '@tailwindComponents': path.resolve(__dirname, './assets/theme/tailwind/js/components'),
         '@tailwindFunctions': path.resolve(__dirname, './assets/theme/tailwind/js/functions'),
         '@commonFolder': path.resolve(__dirname, './assets/common/js'),
-        '@commonComponents': path.resolve(__dirname, './assets/common/js/components'),
         '@commonFunctions': path.resolve(__dirname, './assets/common/js/functions'),
         '@commonHooks': path.resolve(__dirname, './assets/common/js/hooks'),
         '@appFolder': path.resolve(__dirname, './assets/app/js'),
