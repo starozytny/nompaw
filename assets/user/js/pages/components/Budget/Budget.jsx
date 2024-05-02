@@ -39,6 +39,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 	const [elementToDelete, setElementToDelete] = useState(null)
 	const [saving, setSaving] = useState(null)
 	const [load, setLoad] = useState(false)
+	const [openSaving, setOpenSaving] = useState(false)
 
 	let handleUpdateList = (elem, context) => {
 		setData(List.updateDataMuta(elem, context, data, SORTER));
@@ -330,6 +331,37 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		}
 	})
 
+	//totaux eco through months years
+	let totSavingAll = 0, totSavingAllUsed = 0, itemsSavings = [];
+	nSavings.forEach(sa => {
+
+		let total = 0, used = 0;
+		nSavingsItems.forEach(s => {
+			if (s.category && s.category.id === sa.id) {
+				if (s.year <= year) {
+					if (s.year < year || (s.year === year && s.month <= month)) {
+						total += s.price;
+						totSavingAll += s.price;
+					}
+				}
+			}
+		})
+		nSavingsUsed.forEach(s => {
+			if (s.category && s.category.id === sa.id) {
+				if (s.year <= year) {
+					if (s.year < year || (s.year === year && s.month <= month)) {
+						used += s.price;
+						totSavingAllUsed += s.price;
+					}
+				}
+			}
+		})
+
+		sa.total = total;
+		sa.used = used;
+		itemsSavings.push(sa);
+	})
+
 	let totaux = [];
 	for (let i = 0 ; i < 12 ; i++) {
 		let tmpDispo = (i === 0 ? parseFloat(initTotal) : 0) + totauxIncome[i] - totauxExpense[i];
@@ -384,30 +416,17 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 										  onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
 										  key={month + "-" + (element ? element.id : 0)} />
 					</div>
-					{nSavings.length !== 0 && <div className="bg-gray-50 rounded-md border">
-						<h3 className="font-semibold p-4 border-b">Utilisation des économies</h3>
-						<div className="p-4 flex flex-col gap-4">
-							{nSavings.map(sa => {
+					{itemsSavings.length !== 0 && <div className="bg-gray-50 rounded-md border">
+						<div className="cursor-pointer p-4 flex justify-between hover:opacity-80" onClick={() => setOpenSaving(!openSaving)}>
+							<h3 className="font-semibold">Utilisation des économies</h3>
+							<div className="lg:hidden">
+								<span class={`icon-${openSaving ? "minus" : "add"}`}></span>
+							</div>
+						</div>
+						<div className={`flex flex-col gap-4 border-t bg-white rounded-b-md ${openSaving ? "opacity-100 h-auto p-4" : "h-0 opacity-0 lg:h-auto lg:opacity-100 lg:p-4"}`}>
+							{itemsSavings.map(sa => {
 
-								let total = 0, used = 0;
-								nSavingsItems.forEach(s => {
-									if (s.category && s.category.id === sa.id) {
-										if (s.year <= year) {
-											if (s.year < year || (s.year === year && s.month <= month)) {
-												total += s.price;
-											}
-										}
-									}
-								})
-								nSavingsUsed.forEach(s => {
-									if (s.category && s.category.id === sa.id) {
-										if (s.year <= year) {
-											if (s.year < year || (s.year === year && s.month <= month)) {
-												used += s.price;
-											}
-										}
-									}
-								})
+								let total = sa.total, used = sa.used;
 
 								return <div className="saving-item flex items-start justify-between gap-2" key={sa.id}>
 									<div className="col-1 font-medium text-sm">{sa.name}</div>
@@ -420,6 +439,10 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 									</div>
 								</div>
 							})}
+						</div>
+						<div className="px-4 py-2 border-t flex flex-col items-center justify-center gap-2">
+							<div className="font-semibold">{Sanitaze.toFormatCurrency(totSavingAll)}</div>
+							<div className="text-sm text-gray-600">{Sanitaze.toFormatCurrency(totSavingAllUsed)} utilisé</div>
 						</div>
 					</div>}
 				</div>
