@@ -405,7 +405,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 				<div className="overflow-hidden w-screen lg:w-full 2xl:min-w-52 2xl:max-w-72">
 					<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 lg:flex-col">
 						{cards.map(item => {
-							return <div className={`bg-white p-4 rounded-md border flex gap-4 min-w-52 ${item.value === 0 ? item.total > 0 : ""}`} key={item.value}>
+							return <div className={`p-4 rounded-md border flex gap-4 min-w-52 ${item.value === 0 ? (item.total > 0 ? "bg-white" : "bg-red-50 border-red-500") : "bg-white"}`} key={item.value}>
 								<div className={`w-20 h-20 rounded flex items-center justify-center ${item.classCustom}`}>
 									<span className={`icon-${item.icon} text-xl`}></span>
 								</div>
