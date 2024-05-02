@@ -10,7 +10,6 @@ import { Input, InputFile, Radiobox } from "@tailwindComponents/Elements/Fields"
 
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
-import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
 const URL_INDEX_PAGE = "user_recipes_read";
 const URL_CREATE_ELEMENT = "intern_api_cook_recipes_create";

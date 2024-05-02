@@ -121,7 +121,7 @@ class Form extends Component {
 
 	render () {
 		const { step, recipe } = this.props;
-		const { errors, loadData, loadDelete, openImage2, image0File, image1File, image2File } = this.state;
+		const { errors, loadData, loadDelete, image0File, image1File, image2File } = this.state;
 
 		let params = { errors: errors };
 
@@ -142,33 +142,21 @@ class Form extends Component {
 			<div className="flex flex-col gap-4 sm:flex-row">
 				<div className="form-group">
 					<InputFile ref={this.file0} type="simple" identifiant={"image0File-" + step} valeur={image0File}
-							   placeholder="Glissez et déposer une image" {...params}>
+							   placeholder="Glissez et déposer une image" {...params} onDelete={() => this.handleDeleteFile(0)}>
 						Illustration 1
 					</InputFile>
-					{image0File
-						? <Button type="red" onClick={() => this.handleDeleteFile(0)} isLoader={loadDelete}>Supprimer l'illustration 1</Button>
-						: null
-					}
 				</div>
 				<div className="form-group">
 					<InputFile ref={this.file1} type="simple" identifiant={"image1File-" + step} valeur={image1File}
-							   placeholder="Glissez et déposer une image" {...params}>
+							   placeholder="Glissez et déposer une image" {...params} onDelete={() => this.handleDeleteFile(1)}>
 						Illustration 2
 					</InputFile>
-					{image1File
-						? <Button type="red" onClick={() => this.handleDeleteFile(1)} isLoader={loadDelete}>Supprimer l'illustration 2</Button>
-						: null
-					}
 				</div>
 				<div className="form-group">
 					<InputFile ref={this.file2} type="simple" identifiant={"image2File-" + step} valeur={image2File}
-							   placeholder="Glissez et déposer une image" {...params}>
+							   placeholder="Glissez et déposer une image" {...params} onDelete={() => this.handleDeleteFile(2)}>
 						Illustration 3
 					</InputFile>
-					{image2File
-						? <Button type="red" onClick={() => this.handleDeleteFile(2)} isLoader={loadDelete}>Supprimer l'illustration 3</Button>
-						: null
-					}
 				</div>
 			</div>
 
