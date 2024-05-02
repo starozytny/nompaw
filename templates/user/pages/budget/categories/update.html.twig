@@ -3,9 +3,16 @@
 {% set page_title %}Modifier {{ elem.name }} #{{ elem.id }}{% endset %}
 {% set page_subtitle %}Modifier les informations relatives à {{ elem.name }}.{% endset %}
 
-{% block main_content %}
-    {% include "layout/components/admin/page_toolbar.html.twig" with { page_back: path('user_budget_categories_index', {'h': elem.id}) } %}
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_budget_categories_index', {h: elem.id}),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner à liste'
+    } %}
+{% endset %}
 
+{% block main_content %}
     <div id="categories_update"
          data-obj="{{ obj }}"
     >

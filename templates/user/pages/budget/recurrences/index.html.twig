@@ -8,21 +8,30 @@
     {{ parent() }}
 {% endblock %}
 
-{% set half_width = true %}
+{% set page_actions %}
+    <div class="flex items-start justify-end flex-wrap gap-1">
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_budget_index', {year: 'now'|date('Y')}),
+            btn_type: 'default',
+            btn_icon: 'left-arrow',
+            btn_text: 'Retourner au planificateur'
+        } %}
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_budget_categories_index'),
+            btn_type: 'default',
+            btn_icon: 'vision',
+            btn_text: 'Voir les catégories'
+        } %}
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_budget_recurrences_create'),
+            btn_type: 'blue',
+            btn_icon: 'add',
+            btn_text: 'Créer une récurrence'
+        } %}
+    </div>
+{% endset %}
 
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_budget_index', {'year': 'now'|date('Y')}) }}" class="btn btn-default">
-                <span>Retourner au planificateur</span>
-            </a>
-            <a href="{{ path('user_budget_categories_index') }}" class="btn btn-default">
-                <span>Voir les catégories</span>
-            </a>
-            <a href="{{ path('user_budget_recurrences_create') }}" class="btn btn-primary">Créer une récurrence</a>
-        </div>
-    </div>
-
     <div id="recurrences_list" data-highlight="{{ highlight }}">
         {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>

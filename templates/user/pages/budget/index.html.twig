@@ -5,18 +5,20 @@
 
 {% set page_actions %}
     {% if app.user.budgetInit != null %}
-        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-            btn_link: path('user_budget_recurrences_index'),
-            btn_type: 'default',
-            btn_icon: '',
-            btn_text: 'Voir les récurrences'
-        } %}
-        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-            btn_link: path('user_budget_categories_index'),
-            btn_type: 'default',
-            btn_icon: '',
-            btn_text: 'Voir les catégories'
-        } %}
+        <div class="flex items-start justify-end flex-wrap gap-1">
+            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                btn_link: path('user_budget_recurrences_index'),
+                btn_type: 'default',
+                btn_icon: '',
+                btn_text: 'Voir les récurrences'
+            } %}
+            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                btn_link: path('user_budget_categories_index'),
+                btn_type: 'default',
+                btn_icon: '',
+                btn_text: 'Voir les catégories'
+            } %}
+        </div>
     {% endif %}
 {% endset %}
 
