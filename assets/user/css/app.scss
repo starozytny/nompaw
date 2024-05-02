@@ -3,4 +3,10 @@
 @import "vars/fonts";
 @import "vars/vars";
 
-@import "./components/loader";
+@import "components/loader";
+@import "components/pagination";
+@import "components/list";
+
+html{
+  @include fontRegular();
+}

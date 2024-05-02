@@ -6,10 +6,10 @@ import { Alert } from "@tailwindComponents/Elements/Alert";
 import { RecurrencesItem } from "@userPages/Budget/Reccurences/RecurrencesItem";
 
 export function RecurrencesList ({ data, highlight, onModal }) {
-    return <div className="list">
-        <div className="list-table">
+	return <div className="list my-4">
+        <div className="list-table bg-white rounded-md shadow">
             <div className="items items-budget">
-                <div className="item item-header">
+                <div className="item item-header uppercase text-sm text-gray-600">
                     <div className="item-content">
                         <div className="item-infos">
                             <div className="col-1">Type</div>
@@ -24,7 +24,9 @@ export function RecurrencesList ({ data, highlight, onModal }) {
                     ? data.map((elem) => {
                         return <RecurrencesItem key={elem.id} elem={elem} highlight={highlight} onModal={onModal} />;
                     })
-                    : <Alert>Aucune donnée enregistrée.</Alert>
+                    : <div className="item border-t">
+                        <Alert type="gray">Aucun résultat.</Alert>
+                    </div>
                 }
             </div>
         </div>
@@ -34,5 +36,5 @@ export function RecurrencesList ({ data, highlight, onModal }) {
 RecurrencesList.propTypes = {
     data: PropTypes.array.isRequired,
     onModal: PropTypes.func.isRequired,
-    highlight: PropTypes.number,
+	highlight: PropTypes.number,
 }

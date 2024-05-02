@@ -28,8 +28,6 @@ export function UserFormulaire ({ context, element, page = 'user' }) {
 		url = Routing.generate(URL_UPDATE_ELEMENT, { 'id': element.id });
 	}
 
-	console.log(context)
-
 	return  <Form
         context={context}
         url={url}

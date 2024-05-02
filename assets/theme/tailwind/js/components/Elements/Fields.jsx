@@ -416,6 +416,8 @@ Radiobox.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	children: PropTypes.node,
 	convertValToInt: PropTypes.bool,
+	classItems: PropTypes.string,
+	styleType: PropTypes.string
 }
 
 /***************************************
