@@ -22,6 +22,8 @@
     {% endif %}
 {% endset %}
 
+{% set div_class = "mx-auto max-w-screen-qhd py-8 min-h-screen" %}
+
 {% block main_content %}
     {% if app.user.budgetInit != null %}
         <div id="budget"

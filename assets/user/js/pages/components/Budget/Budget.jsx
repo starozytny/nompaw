@@ -340,42 +340,42 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
 
 	let cards = [
-		{ value: 0, name: "Budget disponible", total: totalDispo, initial: initial, icon: "cart" },
-		{ value: 1, name: "Dépenses", total: totalExpense, initial: null, icon: "minus" },
-		{ value: 2, name: "Revenus", total: totalIncome, initial: null, icon: "add" },
-		{ value: 3, name: "Économies", total: totalSaving, initial: null, icon: "time" },
+		{ value: 0, name: "Budget disponible", total: totalDispo, initial: initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
+		{ value: 1, name: "Dépenses", total: totalExpense, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
+		{ value: 2, name: "Revenus", total: totalIncome, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
+		{ value: 3, name: "Économies", total: totalSaving, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
 	]
 
 	nData.sort(SORTER);
 
-	return <div className="page-default">
-		<div className="flex flex-col items-center justify-center gap-4 lg:w-[calc(100%-14rem)] lg:mx-auto">
-			<div>
+	return <div className="flex flex-col gap-6">
+		<div className="flex flex-col items-center justify-center gap-4 w-full lg:mx-auto">
+			<div className="px-4 sm:px-6 lg:px-8">
 				<Year year={year} yearMin={parseInt(yearMin)} />
 			</div>
-			<div>
+			<div className="overflow-hidden w-screen lg:w-full lg:px-8">
 				<Months year={year} active={month} onSelect={setMonth} totaux={totaux} />
 			</div>
 		</div>
 
-		<div className="budget">
-			<div className="col-1">
-				<div className="cards">
+		<div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:px-8 2xl:grid-cols-4">
+			<div className="overflow-hidden w-screen lg:w-full">
+				<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 lg:flex-col">
 					{cards.map(item => {
-						return <div className={`card ${item.value === 0 ? item.total > 0 : ""}`} key={item.value}>
-							<div className="card-icon">
-								<span className={`icon-${item.icon}`}></span>
+						return <div className={`bg-gray-50 p-4 rounded-md border flex gap-4 min-w-52 ${item.value === 0 ? item.total > 0 : ""}`} key={item.value}>
+							<div className={`w-20 h-20 rounded flex items-center justify-center ${item.classCustom}`}>
+								<span className={`icon-${item.icon} text-xl`}></span>
 							</div>
-							<div className="card-body">
-								<div className="name">{item.name}</div>
-								<div className="total">{Sanitaze.toFormatCurrency(item.total)}</div>
-								{item.initial !== null && <div className="initial">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
+							<div>
+								<div className="font-semibold text-gray-700">{item.name}</div>
+								<div className="font-bold text-xl">{Sanitaze.toFormatCurrency(item.total)}</div>
+								{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
 							</div>
 						</div>
 					})}
 				</div>
 			</div>
-			<div className="col-2">
+			<div className="px-4 sm:px-6 lg:px-0 lg:col-span-2 2xl:col-span-3">
 				<div className="col-1">
 					<BudgetFormulaire context={element ? "update" : "create"} categories={JSON.parse(categories)}
 									  element={element} year={year} month={month}
@@ -491,17 +491,16 @@ function Months ({ year, active, onSelect, totaux }) {
 
 	let today = new Date();
 
-	return <div className="flex items-center gap-4 overflow-auto border-y py-4 lg:flex-wrap lg:justify-center">
+	return <div className="flex items-center gap-4 overflow-auto border-y py-4 px-4 sm:px-6 lg:px-0 lg:flex-wrap lg:justify-center">
 		{data.map(elem => {
 			let todayMonth = (elem.id === today.getMonth() + 1 && year === today.getFullYear());
 			let activeMonth = elem.id === active;
 			let statutMonth = totaux[elem.id - 1] < 0;
-			return <div className={`cursor-pointer rounded-md p-2 font-medium text-center 2xl:min-w-20 ${todayMonth ? "bg-white" : "hover:bg-gray-50"} ${activeMonth ? (statutMonth ? "!bg-red-300" : "!bg-blue-300") : ""}`}
+			return <div className={`cursor-pointer rounded-md p-2 font-medium text-center min-w-20 ${todayMonth ? "bg-white" : "hover:bg-gray-50"} ${activeMonth ? (statutMonth ? "!bg-red-300" : "!bg-blue-300") : ""}`}
 						onClick={() => onSelect(elem.id)}
 						key={elem.id}>
 				<div className="text-sm">
-					<span className="xl:hidden">{elem.shortName}</span>
-					<span className="hidden xl:inline-block">{elem.name}</span>
+					{elem.name}
 				</div>
 				<div className="text-xs text-gray-600">{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}</div>
 			</div>
