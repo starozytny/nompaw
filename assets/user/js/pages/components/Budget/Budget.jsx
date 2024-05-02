@@ -269,11 +269,15 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 	})
 
 	// update totaux with items and update with itemRecurrence
+	let totalExpenseReal = 0;
 	data.forEach(d => {
 		if (d.month === month) {
 			switch (d.type) {
 				case 0:
 					totalExpense += d.price;
+					if(d.isActive){
+						totalExpenseReal += d.price;
+					}
 					break;
 				case 1:
 					totalIncome += d.price;
@@ -292,6 +296,9 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 					case 3:
 					case 0:
 						totalExpense -= d.recurrencePrice;
+						if(d.isActive){
+							totalExpenseReal -= d.recurrencePrice;
+						}
 						break;
 					case 1:
 						totalIncome -= d.recurrencePrice;
@@ -372,12 +379,13 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 
 	let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
 	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
+	let totalDispoNow = initial + totalIncome - (totalExpenseReal + totalSaving);
 
 	let cards = [
-		{ value: 0, name: "Budget disponible", total: totalDispo, initial: initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
-		{ value: 1, name: "Dépenses", total: totalExpense, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
-		{ value: 2, name: "Revenus", total: totalIncome, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
-		{ value: 3, name: "Économies", total: totalSaving, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
+		{ value: 0, name: "Budget disponible", total: totalDispo, total2: totalDispoNow, initial: initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
+		{ value: 1, name: "Dépenses", total: totalExpense, total2: 0, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
+		{ value: 2, name: "Revenus", total: totalIncome, total2: 0, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
+		{ value: 3, name: "Économies", total: totalSaving, total2: 0, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
 	]
 
 	nData.sort(SORTER);
@@ -404,7 +412,8 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 								<div>
 									<div className="font-semibold text-gray-700">{item.name}</div>
 									<div className="font-bold text-xl">{Sanitaze.toFormatCurrency(item.total)}</div>
-									{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
+									{item.total2 !== 0 && <div className="text-gray-600 text-sm">Aujourd'hui : {Sanitaze.toFormatCurrency(totalDispoNow)}</div>}
+									{/*{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}*/}
 								</div>
 							</div>
 						})}
@@ -443,7 +452,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 							})}
 						</div>
 						<div className="px-4 py-2 border-t flex flex-col items-center justify-center gap-2">
-							<div className="font-semibold">{Sanitaze.toFormatCurrency(totSavingAll)}</div>
+							<div className="font-semibold">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</div>
 							<div className="text-sm text-gray-600">{Sanitaze.toFormatCurrency(totSavingAllUsed)} utilisé</div>
 						</div>
 					</div>}
