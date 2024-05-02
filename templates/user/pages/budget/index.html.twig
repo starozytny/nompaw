@@ -3,18 +3,29 @@
 {% set page_title %}Planificateur de budget{% endset %}
 {% set page_subtitle %}Planifie ton budget au cours de l'année{% endset %}
 
+{% set page_actions %}
+    {% if app.user.budgetInit != null %}
+        <div class="flex items-start justify-end flex-wrap gap-1">
+            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                btn_link: path('user_budget_recurrences_index'),
+                btn_type: 'default',
+                btn_icon: '',
+                btn_text: 'Voir les récurrences'
+            } %}
+            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                btn_link: path('user_budget_categories_index'),
+                btn_type: 'default',
+                btn_icon: '',
+                btn_text: 'Voir les catégories'
+            } %}
+        </div>
+    {% endif %}
+{% endset %}
+
+{% set div_class = "mx-auto max-w-screen-qhd py-8 min-h-screen" %}
+
 {% block main_content %}
     {% if app.user.budgetInit != null %}
-        <div class="page-actions">
-            <div class="col-1">
-                <a href="{{ path('user_budget_recurrences_index') }}" class="btn btn-default">
-                    <span>Voir les récurrences</span>
-                </a>
-                <a href="{{ path('user_budget_categories_index') }}" class="btn btn-default">
-                    <span>Voir les catégories</span>
-                </a>
-            </div>
-        </div>
         <div id="budget"
              data-donnees="{{ donnees }}"
              data-categories="{{ categories }}"
@@ -27,11 +38,13 @@
              data-year-min="{{ app.user.budgetYear }}"
              data-init-total="{{ initTotal }}"
         >
-            {% include "layout/components/loader.html.twig" %}
+            <div class="px-4 py-8 sm:px-6 lg:px-8">
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+            </div>
         </div>
     {% else %}
         <div id="budget_init">
-            {% include "layout/components/loader.html.twig" %}
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
         </div>
     {% endif %}
 {% endblock %}

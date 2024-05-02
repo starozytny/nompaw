@@ -2,8 +2,7 @@
 
 {% set author = elem.author %}
 
-{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
-{% set page_title_alone %}{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}{% endset %}
+{% set page_title %}{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}{% endset %}
 {% set page_subtitle %}Recette {{ elem.name }}{% endset %}
 
 {% block breadcrumb %}
@@ -13,67 +12,82 @@
     {{ parent() }}
 {% endblock %}
 
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_recipes_index'),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner aux recettes'
+    } %}
+    {% if app.user.id == elem.author.id or app.user.admin %}
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_recipes_update', {slug: elem.slug}),
+            btn_type: 'default',
+            btn_icon: 'pencil',
+            btn_text: 'Modifier'
+        } %}
+    {% endif %}
+{% endset %}
+
 {% block main_content %}
+<div class="flex flex-col">
     {% set force_user = app.request.get('force_user') %}
     {% if app.user.id == elem.author.id %}
-        <div class="page-actions">
+        <div class="w-full flex justify-between gap-1 border-b pb-4 mb-4">
             {% if force_user == null %}
-                {% set url = path('user_recipes_read', {'slug': elem.slug, 'force_user': true}) %}
+                {% set url = path('user_recipes_read', {slug: elem.slug, force_user: true}) %}
             {% else %}
-                {% set url = path('user_recipes_read', {'slug': elem.slug}) %}
+                {% set url = path('user_recipes_read', {slug: elem.slug}) %}
             {% endif %}
 
-            <div>Vue actuel : <span class="txt-danger">{{ force_user == null ? "Auteur" : "Utilisateur" }}</span></div>
+            <div class="text-sm">Vue actuel : <span class="text-red-500">{{ force_user == null ? "Auteur" : "Utilisateur" }}</span></div>
 
-            <a href="{{ url }}" class="btn btn-default">
-                <span class="icon-vision"></span>
-                <span>Activer le vue {{ force_user == null ? "utilisateur" : "auteur" }}</span>
-            </a>
-        </div>
-    {% endif %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_recipes_index') }}" class="btn btn-outline-default">
-                <span class="icon-left-arrow"></span>
-                <span>Retourner aux recettes</span>
-            </a>
-        </div>
-        <div class="col-2">
-            {% if app.user.id == elem.author.id and force_user != true %}
-                <a href="{{ path('user_recipes_update', {'slug': elem.slug}) }}" class="btn btn-warning">
-                    <span class="icon-pencil"></span>
-                    <span>Modifier</span>
-                </a>
+            <div class="flex gap-1">
+                {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                    btn_link: url,
+                    btn_type: 'default',
+                    btn_icon: 'vision',
+                    btn_text: 'Activer le vue ' ~ (force_user == null ? "utilisateur" : "auteur")
+                } %}
+
                 <div class="delete-recipe"
                      data-context="read"
                      data-id="{{ elem.id }}"
                      data-name="{{ elem.name }}"
                 >
-                    <button class="btn btn-danger btn-loader-without-text">
-                        <span class="icon-chart-3"></span>
-                        <span>Supprimer</span>
-                    </button>
+                    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                        btn_link: "",
+                        btn_type: 'red',
+                        btn_icon: 'chart-3',
+                        btn_text: 'Supprimer'
+                    } %}
                 </div>
-            {% endif %}
-            <div class="favorite"
-                 data-id="{{ elem.id }}"
-                 data-is-fav="{{ isFav ? 1 : 0 }}"
-            >
-                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
             </div>
+        </div>
+    {% endif %}
+    <div class="w-full flex justify-between gap-1 border-b pb-4 mb-4">
+        <div class="favorite"
+             data-id="{{ elem.id }}"
+             data-is-fav="{{ isFav ? 1 : 0 }}"
+        >
+            {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                btn_link: "",
+                btn_type: 'default',
+                btn_icon: 'chart-3',
+                btn_text: ''
+            } %}
         </div>
     </div>
 
-    <div class="page-default">
-        <div id="recipes_read"
-             data-element="{{ element }}"
-             data-steps="{{ steps }}"
-             data-ingre="{{ ingre }}"
-             data-coms="{{ coms }}"
-             data-rate="{{ rate }}"
-             data-mode="{{ app.user.id == elem.author.id and force_user != true }}"
-        >
-            {% include "layout/components/loader.html.twig" %}
-        </div>
+    <div id="recipes_read"
+         data-element="{{ element }}"
+         data-steps="{{ steps }}"
+         data-ingre="{{ ingre }}"
+         data-coms="{{ coms }}"
+         data-rate="{{ rate }}"
+         data-mode="{{ app.user.id == elem.author.id and force_user != true }}"
+    >
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>
+</div>
 {% endblock %}

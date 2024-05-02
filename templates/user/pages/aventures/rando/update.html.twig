@@ -11,27 +11,28 @@
     {{ parent() }}
 {% endblock %}
 
-{% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_aventures_groupes_read', {'slug': elem.groupe.slug}) }}" class="btn btn-outline-default">
-                <span class="icon-left-arrow"></span>
-                <span>Retourner à liste</span>
-            </a>
-            <a href="{{ path('user_aventures_randos_read', {'slug': elem.slug}) }}" class="btn btn-outline-default">
-                <span class="icon-left-arrow"></span>
-                <span>Voir la randonnée</span>
-            </a>
-        </div>
-        <div class="col-2"></div>
-    </div>
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_aventures_groupes_read', {slug: elem.groupe.slug}),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner à liste'
+    } %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_aventures_randos_read', {slug: elem.slug}),
+        btn_type: 'default',
+        btn_icon: 'vision',
+        btn_text: 'Voir la randonnée'
+    } %}
+{% endset %}
 
+{% block main_content %}
     <div id="randos_update"
          data-users="{{ users }}"
          data-user-id="{{ app.user.id }}"
          data-element="{{ element }}"
          data-groupe-id="{{ elem.groupe.id }}"
     >
-        {% include "layout/components/loader.html.twig" %}
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>
 {% endblock %}

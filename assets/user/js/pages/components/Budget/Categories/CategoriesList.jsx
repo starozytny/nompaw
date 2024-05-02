@@ -1,15 +1,15 @@
 import React from "react";
 import PropTypes from 'prop-types';
 
-import { Alert } from "@commonComponents/Elements/Alert";
+import { Alert } from "@tailwindComponents/Elements/Alert";
 
 import { CategoriesItem } from "@userPages/Budget/Categories/CategoriesItem";
 
 export function CategoriesList ({ data, highlight, onModal }) {
-    return <div className="list">
-        <div className="list-table">
+	return <div className="list my-4">
+        <div className="list-table bg-white rounded-md shadow">
             <div className="items items-budget">
-                <div className="item item-header">
+                <div className="item item-header uppercase text-sm text-gray-600">
                     <div className="item-content">
                         <div className="item-infos item-infos-categories">
                             <div className="col-1">Type</div>
@@ -24,7 +24,9 @@ export function CategoriesList ({ data, highlight, onModal }) {
                     ? data.map((elem) => {
                         return <CategoriesItem key={elem.id} elem={elem} highlight={highlight} onModal={onModal} />;
                     })
-                    : <Alert>Aucune donnée enregistrée.</Alert>
+                    : <div className="item border-t">
+                        <Alert type="gray">Aucun résultat.</Alert>
+                    </div>
                 }
             </div>
         </div>
@@ -34,5 +36,5 @@ export function CategoriesList ({ data, highlight, onModal }) {
 CategoriesList.propTypes = {
     data: PropTypes.array.isRequired,
     onModal: PropTypes.func.isRequired,
-    highlight: PropTypes.number,
+	highlight: PropTypes.number,
 }

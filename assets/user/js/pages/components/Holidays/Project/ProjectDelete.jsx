@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 
 import axios from "axios";
@@ -6,8 +7,8 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button, ButtonIcon } from "@commonComponents/Elements/Button";
-import { Modal } from "@commonComponents/Elements/Modal";
+import { Modal } from "@tailwindComponents/Elements/Modal";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 const URL_INDEX_ELEMENTS = 'user_projects_index';
 const URL_DELETE_ELEMENT = 'intern_api_projects_delete';
@@ -21,7 +22,7 @@ export function ProjectDelete ({ context, id, name })
     const handleDelete = () => {
         let self = this;
 
-        modalRef.current.handleUpdateFooter(<Button isLoader={true} type="danger">Confirmer la suppression</Button>);
+        modalRef.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
         axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, {'id': id}), data: {} })
             .then(function (response) {
                 location.href = Routing.generate(URL_INDEX_ELEMENTS);
@@ -32,12 +33,15 @@ export function ProjectDelete ({ context, id, name })
 
     return <>
         {context === "read"
-            ? <Button icon="trash" type="danger" onClick={handleClick}>Supprimer</Button>
-            : <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
+            ? <Button type="red" icon="trash" onClick={handleClick}>Supprimer</Button>
+            : <ButtonIcon type="none" icon="trash" onClick={handleClick}>Supprimer</ButtonIcon>
         }
-        <Modal ref={modalRef} identifiant={`delete-proj-${id}`} maxWidth={414} title="Supprimer le projet"
-               content={<p>Etes-vous sûr de vouloir supprimer le projet : <b>{name}</b> ?</p>}
-               footer={<Button type="danger" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
+        {createPortal(
+            <Modal ref={modalRef} identifiant={`delete-proj-${id}`} maxWidth={414} title="Supprimer le projet"
+                   content={<p>Êtes-vous sûr de vouloir supprimer le projet : <b>{name}</b> ?</p>}
+                   footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
+            , document.body)
+        }
     </>
 }
 

@@ -49,11 +49,9 @@ class DataRandos
 
     public function setDataPropalAdventure(RaPropalAdventure $obj, $data): RaPropalAdventure
     {
-        $duration = $data->duration ? str_replace('h', ':', $data->duration) : null;
-
         return ($obj)
             ->setName($this->sanitizeData->trimData($data->name))
-            ->setDuration($this->sanitizeData->createTime($duration))
+            ->setDuration($this->sanitizeData->createTime($data->duration))
             ->setUrl($this->sanitizeData->trimData($data->url))
         ;
     }

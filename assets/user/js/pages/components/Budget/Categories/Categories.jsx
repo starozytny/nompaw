@@ -2,101 +2,104 @@ import React, { Component } from "react";
 
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import Sort         from "@commonFunctions/sort";
-import List         from "@commonFunctions/list";
+import Sort from "@commonFunctions/sort";
+import List from "@commonFunctions/list";
 
-import { Pagination, TopSorterPagination } from "@commonComponents/Elements/Pagination";
-import { LoaderElements } from "@commonComponents/Elements/Loader";
-import { Search }         from "@commonComponents/Elements/Search";
-import { Filter }         from "@commonComponents/Elements/Filter";
-import { ModalDelete }    from "@commonComponents/Shortcut/Modal";
+import { Search } from "@tailwindComponents/Elements/Search";
+import { Filter } from "@tailwindComponents/Elements/Filter";
+import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
+import { LoaderElements } from "@tailwindComponents/Elements/Loader";
+import { Pagination, TopSorterPagination } from "@tailwindComponents/Elements/Pagination";
 
 import { CategoriesList } from "@userPages/Budget/Categories/CategoriesList";
 
-const URL_GET_DATA        = "intern_api_budget_categories_list";
-const URL_DELETE_ELEMENT  = "intern_api_budget_categories_delete";
+const URL_GET_DATA = "intern_api_budget_categories_list";
+const URL_DELETE_ELEMENT = "intern_api_budget_categories_delete";
 
-let SORTER = Sort.compareName;
+const SESSION_PERPAGE = "nompaw.perpage.cat";
+const SESSION_FILTERS = "nompaw.filters.cat";
 
 export class Categories extends Component {
-    constructor(props) {
-        super(props);
+	constructor (props) {
+		super(props);
 
-        this.state = {
-            perPage: 20,
-            currentPage: 0,
-            sorter: SORTER,
-            sessionName: "local.bucategories.list.pagination",
-            loadingData: true,
-            filters: [],
-            element: null
-        }
+		this.state = {
+            perPage: List.getSessionPerpage(SESSION_PERPAGE, 20),
+			currentPage: 0,
+			sorter: Sort.compareName,
+			loadingData: true,
+            filters: List.getSessionFilters(SESSION_FILTERS, [], props.highlight),
+			element: null
+		}
 
-        this.pagination = React.createRef();
-        this.delete = React.createRef();
-    }
+		this.pagination = React.createRef();
+		this.delete = React.createRef();
+	}
 
-    componentDidMount = () => { this.handleGetData(); }
+	componentDidMount = () => {
+		this.handleGetData();
+	}
 
     handleGetData = () => {
+        const { perPage, sorter, filters } = this.state;
+
         let url = this.props.urlGetData ? this.props.urlGetData : Routing.generate(URL_GET_DATA);
-        List.getData(this, url, this.state.perPage, this.state.sorter);
+        List.getData(this, url, perPage, sorter, this.props.highlight, filters, this.handleFilters);
     }
 
-    handleUpdateData = (currentData) => { this.setState({ currentData }) }
+	handleUpdateData = (currentData) => {
+		this.setState({ currentData })
+	}
 
-    handleSearch = (search) => {
-        const { perPage, sorter, dataImmuable, filters } = this.state;
-        List.search(this, 'category', search, dataImmuable, perPage, sorter, true, filters, this.handleFilters)
-    }
+	handleSearch = (search) => {
+		const { perPage, sorter, dataImmuable, filters } = this.state;
+		List.search(this, 'category', search, dataImmuable, perPage, sorter, true, filters, this.handleFilters)
+	}
 
-    handleFilters = (filters) => {
+    handleFilters = (filters, nData = null) => {
         const { dataImmuable, perPage, sorter } = this.state;
-        return List.filter(this, 'type', dataImmuable, filters, perPage, sorter);
+        return List.filter(this, 'type', nData ? nData : dataImmuable, filters, perPage, sorter, SESSION_FILTERS);
     }
+
+	handleUpdateList = (element, context) => {
+		const { data, dataImmuable, currentData, sorter } = this.state;
+		List.updateListPagination(this, element, context, data, dataImmuable, currentData, sorter)
+	}
+
+	handlePaginationClick = (e) => {
+		this.pagination.current.handleClick(e)
+	}
+
+	handleChangeCurrentPage = (currentPage) => {
+		this.setState({ currentPage });
+	}
+
+	handlePerPage = (perPage) => {
+        List.changePerPage(this, this.state.data, perPage, this.state.sorter, SESSION_PERPAGE);
+	}
 
     handleModal = (identifiant, elem) => {
-        let ref;
-
-        if (identifiant === "delete"){
-            ref = this.delete;
-        }
-        ref.current.handleClick();
+        this[identifiant].current.handleClick();
         this.setState({ element: elem })
     }
 
-    handleUpdateList = (element, context) => {
-        const { data, dataImmuable, currentData, sorter } = this.state;
-        List.updateListPagination(this, element, context, data, dataImmuable, currentData, sorter)
-    }
+	render () {
+		const { highlight } = this.props;
+		const { sessionName, data, currentData, element, loadingData, perPage, currentPage, filters } = this.state;
 
-    handlePaginationClick = (e) => { this.pagination.current.handleClick(e) }
+		let filtersItems = [
+			{ value: 0, label: "Dépenses", id: "f-0" },
+			{ value: 1, label: "Revenus", id: "f-1" },
+			{ value: 2, label: "Economies", id: "f-2" },
+		]
 
-    handleChangeCurrentPage = (currentPage) => { this.setState({ currentPage }); }
-
-    handlePerPage = (perPage) => { List.changePerPage(this, this.state.data, perPage, this.state.sorter); }
-
-    render () {
-        const { highlight } = this.props;
-        const { sessionName, data, currentData, element, loadingData, perPage, currentPage, filters } = this.state;
-
-        let filtersItems = [
-            {value: 0, label: "Dépenses",  id: "f-0"},
-            {value: 1, label: "Revenus",   id: "f-1"},
-            {value: 2, label: "Economies", id: "f-2"},
-        ]
-
-        return <>
-            {loadingData
-                ? <LoaderElements />
-                : <>
-                    <div className="toolbar">
-                        <div className="col-1">
-                            <div className="filters">
-                                <Filter filters={filters} items={filtersItems} onFilters={this.handleFilters}/>
-                            </div>
-                            <Search onSearch={this.handleSearch} placeholder="Rechercher pas intitulé.."/>
-                        </div>
+		return <>
+			{loadingData
+				? <LoaderElements />
+				: <>
+                    <div className="mb-2 flex flex-row">
+                        <Filter haveSearch={true} filters={filters} items={filtersItems} onFilters={this.handleFilters} />
+                        <Search haveFilter={true} onSearch={this.handleSearch} placeholder="Rechercher pas intitulé.." />
                     </div>
 
                     <TopSorterPagination taille={data.length} currentPage={currentPage} perPage={perPage}
@@ -106,13 +109,13 @@ export class Categories extends Component {
                     <CategoriesList data={currentData} highlight={parseInt(highlight)} onModal={this.handleModal} />
 
                     <Pagination ref={this.pagination} sessionName={sessionName} items={data} taille={data.length}
-                                perPage={perPage} onUpdate={this.handleUpdateData} onChangeCurrentPage={this.handleChangeCurrentPage}/>
+                                perPage={perPage} onUpdate={this.handleUpdateData} onChangeCurrentPage={this.handleChangeCurrentPage} />
 
 
                     <ModalDelete refModal={this.delete} element={element} routeName={URL_DELETE_ELEMENT}
                                  title="Supprimer cette catégorie" msgSuccess="Catégorie supprimée"
-                                 onUpdateList={this.handleUpdateList} >
-                        Etes-vous sûr de vouloir supprimer définitivement cette catégorie ?
+                                 onUpdateList={this.handleUpdateList}>
+                        Êtes-vous sûr de vouloir supprimer définitivement cette catégorie ?
                     </ModalDelete>
                 </>
             }

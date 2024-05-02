@@ -115,10 +115,6 @@ class RecipeController extends AbstractController
         $name  = $data->name;
         $value = $data->value;
 
-        if($name == "durationCooking" || $name == "durationPrepare"){
-            $value = str_replace('h', ':', $value);
-        }
-
         switch ($name){
             case 'nbPerson':
                 $obj->setNbPerson($value ? (int) $value : null);

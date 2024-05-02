@@ -5,27 +5,17 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min';
 
 import React from "react";
 import { createRoot } from "react-dom/client";
+
+import Menu from "@tailwindFunctions/menu";
+
 import { ContactFormulaire } from "@appFolder/pages/components/Contact/ContactForm";
-import { Notifications } from "@commonComponents/Elements/Notifications";
-import { Cookies } from "@commonComponents/Modules/Cookies/Cookies";
 import { UserFormulaire } from "@adminPages/Users/UserForm";
-import { Theme } from "@userPages/Theme/Theme";
 
 import "./functions/firebase-push";
 
 Routing.setRoutingData(routes);
 
-menu();
-
-let notifs = document.getElementById("notifs_list");
-if(notifs){
-    createRoot(notifs).render(<Notifications />)
-}
-
-let ck = document.getElementById("cookies");
-if(ck){
-    createRoot(ck).render(<Cookies {...ck.dataset} />)
-}
+Menu.menuListener();
 
 let el = document.getElementById("contacts_create");
 if(el){
@@ -35,23 +25,4 @@ if(el){
 el = document.getElementById("users_update");
 if(el){
     createRoot(el).render(<UserFormulaire context="update" element={JSON.parse(el.dataset.obj)} />)
-}
-
-function menu() {
-    let btn = document.querySelector('.nav-mobile');
-    if(btn){
-        btn.addEventListener('click', function () {
-            let content = document.querySelector('.nav-content');
-            if(content.classList.contains('active')){
-                content.classList.remove('active');
-            }else{
-                content.classList.add('active');
-            }
-        })
-    }
-}
-
-let theme = document.getElementById('theme');
-if(theme){
-    createRoot(theme).render(<Theme />)
 }

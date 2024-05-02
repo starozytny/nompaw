@@ -1,0 +1,12 @@
+<div class="avatar relative -ml-4">
+    <div class="w-8 h-8 rounded-full shadow">
+        {% if member.user.avatarFile %}
+            <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur" class="w-8 h-8 object-cover rounded-full">
+        {% else %}
+            <div class="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                {{ member.user.lastname | slice(0, 1) }}{{ member.user.firstname | slice(0,1) }}
+            </div>
+        {% endif %}
+    </div>
+    <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">{{ member.user.displayName }}</span>
+</div>

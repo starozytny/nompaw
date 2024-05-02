@@ -1,90 +1,90 @@
 import React, { Component } from 'react';
 
-import Formulaire  from "@commonFunctions/formulaire";
-import Validateur  from "@commonFunctions/validateur";
-import Inputs      from "@commonFunctions/inputs";
+import Inputs from "@commonFunctions/inputs";
+import Formulaire from "@commonFunctions/formulaire";
+import Validateur from "@commonFunctions/validateur";
 
-import { Input } from "@commonComponents/Elements/Fields";
-import { Button } from "@commonComponents/Elements/Button";
+import { Input } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { CloseModalBtn } from "@tailwindComponents/Elements/Modal";
 
 export class SavingForm extends Component {
-    constructor(props) {
-        super(props);
+	constructor (props) {
+		super(props);
 
-        this.state = {
-            total: '',
-            errors: [],
-        }
-    }
-    componentDidMount = () => {
-        if(!!this.props.saving){
-            let body = document.querySelector("body");
-            let modal = document.getElementById(this.props.identifiant);
-            let btns = document.querySelectorAll(".close-modal");
+		this.state = {
+			total: '',
+			errors: [],
+		}
+	}
 
-            btns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    body.style.overflow = "auto";
-                    modal.style.display = "none";
-                })
-            })
-        }
-    }
+	componentDidMount = () => {
+		if (!!this.props.saving) {
+			let body = document.querySelector("body");
+			let modal = document.getElementById(this.props.identifiant);
+			let btns = document.querySelectorAll(".close-modal");
 
-    handleCloseModal = () => {
-        let body = document.querySelector("body");
-        let modal = document.getElementById(this.props.identifiant);
+			btns.forEach(btn => {
+				btn.addEventListener('click', () => {
+					body.style.overflow = "auto";
+					modal.style.display = "none";
+				})
+			})
+		}
+	}
 
-        body.style.overflow = "auto";
-        modal.style.display = "none";
-    }
+	handleCloseModal = () => {
+		let body = document.querySelector("body");
+		let modal = document.getElementById(this.props.identifiant);
 
-    handleChange = (e) => {
-        let name = e.currentTarget.name;
-        let value = e.currentTarget.value;
+		body.style.overflow = "auto";
+		modal.style.display = "none";
+	}
 
-        if(name === "total"){
-            value = Inputs.textMoneyMinusInput(value, this.state.total);
-        }
+	handleChange = (e) => {
+		let name = e.currentTarget.name;
+		let value = e.currentTarget.value;
 
-        this.setState({[name]: value})
-    }
+		if (name === "total") {
+			value = Inputs.textMoneyMinusInput(value, this.state.total);
+		}
 
-    handleSubmit = (e) => {
-        e.preventDefault();
+		this.setState({ [name]: value })
+	}
 
-        const { saving } = this.props;
-        const { total } = this.state;
+	handleSubmit = (e) => {
+		e.preventDefault();
 
-        this.setState({ errors: [] });
+		const { saving } = this.props;
+		const { total } = this.state;
 
-        let validate = Validateur.validateur([{type: "text", id: 'total', value: total}])
-        if(!validate.code){
-            Formulaire.showErrors(this, validate);
-        }else {
-            this.props.onUseSaving(saving, total)
-        }
-    }
+		this.setState({ errors: [] });
 
-    render () {
-        const { saving } = this.props;
-        const { errors, total } = this.state;
+		let validate = Validateur.validateur([{ type: "text", id: 'total', value: total }])
+		if (!validate.code) {
+			Formulaire.showErrors(this, validate);
+		} else {
+			this.props.onUseSaving(saving, total)
+		}
+	}
 
-        let params = { errors: errors, onChange: this.handleChange };
+	render () {
+		const { identifiant, saving } = this.props;
+		const { errors, total } = this.state;
 
-        return <>
-            <div className="modal-body">
-                <p style={{marginBottom: '12px'}}>Combien souhaitez-vous utiliser depuis les économies de : <b>{saving ? saving.name : ""}</b> ?</p>
-                <form onSubmit={this.handleSubmit}>
-                    <div className="line">
-                        <Input identifiant="total" valeur={total} {...params}>Solde à utiliser</Input>
-                    </div>
-                </form>
-            </div>
-            <div className="modal-footer">
-                <Button type="primary" onClick={this.handleSubmit}>Confirmer</Button>
-                <div className="close-modal"><Button type="reverse" onClick={this.handleCloseModal}>Annuler</Button></div>
-            </div>
-        </>
-    }
+		let params = { errors: errors, onChange: this.handleChange };
+
+		return <>
+			<div className="px-4 pb-4 pt-5 sm:px-6 sm:pb-4">
+				<p className="mb-4">Combien souhaitez-vous utiliser depuis les économies de : <b>{saving ? saving.name : ""}</b> ?</p>
+				<form onSubmit={this.handleSubmit}>
+					<Input identifiant="total" valeur={total} {...params}>Solde à utiliser</Input>
+				</form>
+			</div>
+			<div className="bg-gray-50 px-4 py-3 flex flex-row justify-end gap-2 sm:px-6 border-t">
+				<CloseModalBtn identifiant={identifiant} />
+				<Button type="blue" onClick={this.handleSubmit}>Confirmer</Button>
+			</div>
+		</>
+	}
 }

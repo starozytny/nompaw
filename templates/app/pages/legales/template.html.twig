@@ -14,13 +14,3 @@
 {% set websiteSiret = "" %}
 {% set websiteTva = "" %}
 {% set websiteRcs = "" %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('app_legales') }}
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    {{ encore_entry_script_tags('app_legales') }}
-{% endblock %}

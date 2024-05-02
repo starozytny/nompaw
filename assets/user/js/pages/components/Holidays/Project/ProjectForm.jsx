@@ -5,142 +5,141 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input, InputFile } from "@commonComponents/Elements/Fields";
-import { Button }           from "@commonComponents/Elements/Button";
-import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
+import { Input, InputFile } from "@tailwindComponents/Elements/Fields";
 
-import Formulaire           from "@commonFunctions/formulaire";
-import Validateur           from "@commonFunctions/validateur";
+import Formulaire from "@commonFunctions/formulaire";
+import Validateur from "@commonFunctions/validateur";
 
-const URL_INDEX_PAGE        = "user_projects_read";
-const URL_CREATE_ELEMENT    = "intern_api_projects_create";
-const URL_UPDATE_ELEMENT    = "intern_api_projects_update";
-const TEXT_CREATE           = "Ajouter le projet";
-const TEXT_UPDATE           = "Enregistrer les modifications";
+const URL_INDEX_PAGE = "user_projects_read";
+const URL_CREATE_ELEMENT = "intern_api_projects_create";
+const URL_UPDATE_ELEMENT = "intern_api_projects_update";
+const TEXT_CREATE = "Ajouter le projet";
+const TEXT_UPDATE = "Enregistrer les modifications";
 
-export function ProjectFormulaire ({ context, element })
-{
-    let url = Routing.generate(URL_CREATE_ELEMENT);
+export function ProjectFormulaire ({ context, element }) {
+	let url = Routing.generate(URL_CREATE_ELEMENT);
 
-    if(context === "update"){
-        url = Routing.generate(URL_UPDATE_ELEMENT, {'id': element.id});
-    }
+	if (context === "update") {
+		url = Routing.generate(URL_UPDATE_ELEMENT, { id: element.id });
+	}
 
-    let form = <Form
+	return <Form
         context={context}
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
         description={element ? Formulaire.setValue(element.description) : ""}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
     />
-
-    return <div className="formulaire">{form}</div>;
 }
 
 ProjectFormulaire.propTypes = {
-    context: PropTypes.string.isRequired,
-    element: PropTypes.object,
+	context: PropTypes.string.isRequired,
+	element: PropTypes.object,
 }
 
 class Form extends Component {
-    constructor(props) {
-        super(props);
+	constructor (props) {
+		super(props);
 
-        let description = props.description ? props.description : "";
+		let description = props.description ? props.description : "";
 
-        this.state = {
-            name: props.name,
-            description: { value: description, html: description },
-            errors: [],
-        }
+		this.state = {
+			name: props.name,
+			description: { value: description, html: description },
+			errors: [],
+		}
 
-        this.file = React.createRef();
-    }
+		this.file = React.createRef();
+	}
 
-    handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
+	handleChange = (e) => {
+		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
+	}
 
-    handleChangeTinyMCE = (name, html) => {
-        this.setState({ [name]: {value: this.state[name].value, html: html} })
-    }
+	handleChangeTinyMCE = (name, html) => {
+		this.setState({ [name]: { value: this.state[name].value, html: html } })
+	}
 
-    handleSubmit = (e) => {
-        e.preventDefault();
+	handleSubmit = (e) => {
+		e.preventDefault();
 
-        const { url } = this.props;
-        const { name } = this.state;
+		const { url } = this.props;
+		const { name } = this.state;
 
-        this.setState({ errors: [] });
+		this.setState({ errors: [] });
 
-        let paramsToValidate = [ {type: "text",  id: 'name', value: name} ];
+		let paramsToValidate = [{ type: "text", id: 'name', value: name }];
 
-        let validate = Validateur.validateur(paramsToValidate)
-        if(!validate.code){
-            Formulaire.showErrors(this, validate);
-        }else {
-            Formulaire.loader(true);
-            let self = this;
+		let validate = Validateur.validateur(paramsToValidate)
+		if (!validate.code) {
+			Formulaire.showErrors(this, validate);
+		} else {
+			Formulaire.loader(true);
+			let self = this;
 
-            let formData = new FormData();
-            formData.append("data", JSON.stringify(this.state));
+			let formData = new FormData();
+			formData.append("data", JSON.stringify(this.state));
 
-            let file = this.file.current;
-            if(file.state.files.length > 0){
-                formData.append("image", file.state.files[0]);
-            }
+			let file = this.file.current;
+			if (file.state.files.length > 0) {
+				formData.append("image", file.state.files[0]);
+			}
 
-            axios({ method: "POST", url: url, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
-                .then(function (response) {
-                    toastr.info('Données enregistrées.');
-                    location.href = Routing.generate(URL_INDEX_PAGE, {'slug': response.data.slug});
-                })
-                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-            ;
-        }
-    }
+			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
+				.then(function (response) {
+					toastr.info('Données enregistrées.');
+					location.href = Routing.generate(URL_INDEX_PAGE, { 'slug': response.data.slug });
+				})
+				.catch(function (error) {
+					Formulaire.displayErrors(self, error);
+					Formulaire.loader(false);
+				})
+			;
+		}
+	}
 
-    render () {
+	render () {
         const { context, imageFile } = this.props;
         const { errors, name, description } = this.state;
 
-        let params  = { errors: errors, onChange: this.handleChange };
+        let params = { errors: errors, onChange: this.handleChange };
 
-        return <>
-            <form onSubmit={this.handleSubmit}>
-                <div className="line-container">
-                    <div className="line">
-                        <div className="line-col-1">
-                            <div className="title">Informations générales</div>
+        return <form onSubmit={this.handleSubmit}>
+            <div className="flex flex-col gap-4 xl:gap-6">
+                <div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
+                    <div>
+                        <div className="font-medium text-lg">Informations générales</div>
+                        <div className="text-gray-600 text-sm">
+                            Quelques détails sur le projet.
                         </div>
-                        <div className="line-col-2">
-                            <div className="line line-2">
+                    </div>
+                    <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
+                        <div className="flex gap-4">
+                            <div className="w-full">
                                 <Input identifiant="name" valeur={name} {...params}>Nom du projet *</Input>
+                            </div>
+                            <div className="w-full">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
                                            placeholder="Glissez et déposer une image" {...params}>
                                     Illustration
                                 </InputFile>
                             </div>
-                            <div className="line">
-                                <TinyMCE type={6} identifiant='description' valeur={description.value}
-                                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
-                                    Description
-                                </TinyMCE>
-                            </div>
+                        </div>
+                        <div>
+                            <TinyMCE type={6} identifiant='description' valeur={description.value}
+                                     errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                                Description
+                            </TinyMCE>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="line-buttons">
-                    <Button isSubmit={true} type="primary">{context === "create" ? TEXT_CREATE : TEXT_UPDATE}</Button>
-                </div>
-            </form>
-        </>
+            <div className="mt-4 flex justify-end gap-2">
+                <Button type="blue" isSubmit={true}>{context === "create" ? TEXT_CREATE : TEXT_UPDATE}</Button>
+            </div>
+        </form>
     }
-}
-
-Form.propTypes = {
-    context: PropTypes.string.isRequired,
-    url: PropTypes.node.isRequired,
-    name: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    imageFile: PropTypes.string.isRequired,
 }
