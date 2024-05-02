@@ -289,6 +289,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			if (d.recurrenceId) {
 				nRecurrencesData = nRecurrencesData.filter(r => r.id !== d.recurrenceId);
 				switch (d.type) {
+					case 3:
 					case 0:
 						totalExpense -= d.recurrencePrice;
 						break;
@@ -319,6 +320,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		if (d.recurrenceId) {
 			switch (d.type) {
 				case 0:
+				case 3:
 				case 2:
 					totauxExpense[d.month - 1] -= d.recurrencePrice;
 					break;
@@ -420,7 +422,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 						<div className="cursor-pointer p-4 flex justify-between hover:opacity-80" onClick={() => setOpenSaving(!openSaving)}>
 							<h3 className="font-semibold">Utilisation des économies</h3>
 							<div className="lg:hidden">
-								<span class={`icon-${openSaving ? "minus" : "add"}`}></span>
+								<span className={`icon-${openSaving ? "minus" : "add"}`}></span>
 							</div>
 						</div>
 						<div className={`flex flex-col gap-4 border-t bg-white rounded-b-md ${openSaving ? "opacity-100 h-auto p-4" : "h-0 opacity-0 lg:h-auto lg:opacity-100 lg:p-4"}`}>
