@@ -185,7 +185,7 @@ export class RandoAdventure extends Component {
                                             </a>}
                                         </div>
                                         <div className="text-gray-600 text-sm" onClick={onVote}>
-                                            {Sanitaze.toFormatDuration(Sanitaze.toDateFormat(el.duration, 'LT', "", false).replace(':', 'h'))}
+                                            {Sanitaze.toFormatDuration(Sanitaze.toFormatDate(el.duration, 'LT', "", false).replace(':', 'h'))}
                                         </div>
                                     </div>
                                 </div>

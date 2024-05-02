@@ -162,7 +162,7 @@ export class RandoDate extends Component {
 			<div className="p-4">
 				{startAt
 					? <div className="text-xl font-bold text-blue-700 py-4 flex items-center justify-center gap-2">
-						<div>{Sanitaze.toDateFormat(startAt, 'LL', '', false)}</div>
+						<div>{Sanitaze.toFormatDate(startAt, 'LL', '', false)}</div>
 						{mode || authorId === parseInt(userId)
 							? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
 								<span className="icon-close"></span>
@@ -190,7 +190,7 @@ export class RandoDate extends Component {
 											<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
 										</div>
 										<div className="font-medium" onClick={onVote}>
-											{Sanitaze.toDateFormat(el.dateAt, 'LL', "", false)}
+											{Sanitaze.toFormatDate(el.dateAt, 'LL', "", false)}
 										</div>
 									</div>
 
@@ -236,11 +236,11 @@ export class RandoDate extends Component {
 				   footer={null} closeTxt="Annuler" />
 
 			<Modal ref={this.deletePropal} identifiant='delete-propal-date' maxWidth={414} title="Supprimer la date"
-				   content={<p>Êtes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> ?</p>}
+				   content={<p>Êtes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toFormatDate(propal.dateAt, 'LL', "", false) : ""}</b> ?</p>}
 				   footer={null} closeTxt="Annuler" />
 
 			<Modal ref={this.endPropal} identifiant='end-propal-date' maxWidth={414} title="Sélectionner la date finale"
-				   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.dateAt, 'LL', "", false) : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
+				   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toFormatDate(propal.dateAt, 'LL', "", false) : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
 				   footer={null} closeTxt="Annuler" />
 
 			<Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"

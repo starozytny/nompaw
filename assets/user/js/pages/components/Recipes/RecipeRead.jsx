@@ -216,7 +216,7 @@ export class RecipeRead extends Component {
 								</div>
 								: <div className="flex items-center gap-2">
 									<span className="icon-time"></span>
-									<span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationPrepare, 'LT', '', false))} de préparation</span>
+									<span>{Sanitaze.toFormatDuration(Sanitaze.toFormatDate(elem.durationPrepare, 'LT', '', false))} de préparation</span>
 								</div>
 							}
 						</div> : null}
@@ -240,7 +240,7 @@ export class RecipeRead extends Component {
 								</div>
 								: <div className="flex items-center gap-2">
 									<span className="icon-time"></span>
-									<span>{Sanitaze.toFormatDuration(Sanitaze.toDateFormat(elem.durationCooking, 'LT', '', false))} de cuisson</span>
+									<span>{Sanitaze.toFormatDuration(Sanitaze.toFormatDate(elem.durationCooking, 'LT', '', false))} de cuisson</span>
 								</div>
 							}
 						</div> : null}

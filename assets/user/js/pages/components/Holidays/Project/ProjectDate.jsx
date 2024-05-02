@@ -168,8 +168,8 @@ export class ProjectDate extends Component {
                 {nStartAt
                     ? <div className="text-xl font-bold text-blue-700 py-4 flex items-center justify-center gap-2">
                         <div>
-                            {Sanitaze.toDateFormat(nStartAt, 'LL', '', false, false)}
-                            {nEndAt ? " au " + Sanitaze.toDateFormat(nEndAt, 'LL', "", false, false) : ""}
+                            {Sanitaze.toFormatDate(nStartAt, 'LL', '', false, false)}
+                            {nEndAt ? " au " + Sanitaze.toFormatDate(nEndAt, 'LL', "", false, false) : ""}
                         </div>
                         {mode || authorId === parseInt(userId)
                             ? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
@@ -198,8 +198,8 @@ export class ProjectDate extends Component {
 											<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
 										</div>
 										<div className="font-medium" onClick={onVote}>
-											{Sanitaze.toDateFormat(el.startAt, 'LL', "", false)}
-											{el.endAt ? " au " + Sanitaze.toDateFormat(el.endAt, 'LL', "", false) : ""}
+											{Sanitaze.toFormatDate(el.startAt, 'LL', "", false)}
+											{el.endAt ? " au " + Sanitaze.toFormatDate(el.endAt, 'LL', "", false) : ""}
 										</div>
 									</div>
 
@@ -250,11 +250,11 @@ export class ProjectDate extends Component {
 				   footer={null} closeTxt="Annuler" />
 
 			<Modal ref={this.deletePropal} identifiant='delete-propal-date' maxWidth={414} title="Supprimer la date"
-				   content={<p>Êtes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toDateFormat(propal.startAt, 'LL', "", false) : ""}</b> ?</p>}
+				   content={<p>Êtes-vous sûr de vouloir supprimer <b>{propal ? Sanitaze.toFormatDate(propal.startAt, 'LL', "", false) : ""}</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.endPropal} identifiant='end-propal-date' maxWidth={414} title="Sélectionner la date finale"
-                   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toDateFormat(propal.startAt, 'LL', "", false) : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
+                   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? Sanitaze.toFormatDate(propal.startAt, 'LL', "", false) : ""}</b> comme étant la date <b>FINALE</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"

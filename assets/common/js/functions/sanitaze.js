@@ -106,7 +106,7 @@ function toFormatCalendar(value, retour = "") {
     return retour;
 }
 
-function toDateFormat(date, format = 'LLL', retour = "", replaceHours = true, useUtc = true) {
+function toFormatDate(date, format = 'LLL', retour = "", replaceHours = true, useUtc = true) {
     if(date === null) return retour;
 
     date = useUtc ? moment(date).utc() : moment(date);
@@ -147,6 +147,6 @@ module.exports = {
     toFormatCalendar,
     capitalize,
     removeAccents,
-    toDateFormat,
+    toFormatDate,
     toFormatDuration,
 }

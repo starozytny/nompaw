@@ -13,7 +13,7 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel }) {
 			<div className="item-infos">
 				<div className="col-1">
 					<div className="font-medium text-sm">
-						<span>{Sanitaze.toDateFormat(elem.dateAt, 'Do MMM')}</span>
+						<span>{Sanitaze.toFormatDate(elem.dateAt, 'Do MMM')}</span>
 					</div>
 				</div>
 				<div className="col-2">
