@@ -14,8 +14,6 @@ import { Checkbox, Input, InputView, Radiobox, SelectCustom } from "@tailwindCom
 const URL_INDEX_ELEMENTS = "user_budget_recurrences_index";
 const URL_CREATE_ELEMENT = "intern_api_budget_recurrences_create";
 const URL_UPDATE_ELEMENT = "intern_api_budget_recurrences_update";
-const TEXT_CREATE = "Ajouter la récurrence";
-const TEXT_UPDATE = "Enregistrer les modifications";
 
 export function RecurrentFormulaire ({ context, categories, element }) {
 	let url = Routing.generate(URL_CREATE_ELEMENT);
@@ -118,7 +116,7 @@ class Form extends Component {
 
 				axios({ method: context === "create" ? "POST" : "PUT", url: url, data: this.state })
 					.then(function (response) {
-						location.href = Routing.generate(URL_INDEX_ELEMENTS, { 'h': response.data.id });
+						location.href = Routing.generate(URL_INDEX_ELEMENTS, { h: response.data.id });
 					})
 					.catch(function (error) {
 						Formulaire.displayErrors(self, error);
@@ -258,8 +256,8 @@ class Form extends Component {
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
-                <Button type="blue" isSubmit={true}>
-                    {context === "create" ? "Enregistrer" : "Enregistrer les modifications"}
+                <Button type="blue" isSubmit={true} iconLeft={loadData ? "chart-3" : ""}>
+                    {context === "create" ? "Ajouter la récurrence" : "Enregistrer les modifications"}
                 </Button>
             </div>
         </form>
