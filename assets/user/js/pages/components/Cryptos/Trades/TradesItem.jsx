@@ -51,10 +51,7 @@ export function TradesItem ({ elem, onEditElement }) {
 					}
 				</div>
 				<div className="col-6">
-					{elem.type === DEPOT
-						? null
-						: <div className="text-sm">{elem.costPrice} {elem.costCoin}</div>
-					}
+					<div className="text-sm">{elem.costPrice} {elem.costCoin}</div>
 				</div>
 				<div className="col-7">
 					<div className={elem.type === RETRAIT ? "text-red-500" : (elem.type === DEPOT ? "text-indigo-600" : "")}>
