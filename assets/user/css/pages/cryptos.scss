@@ -30,6 +30,7 @@
   $col2: 130px; $col3: 120px;
   @media (min-width:1536px) {
     .item-infos{
+      & > .col-1{ width: 180px; }
       & > .col-2{ width: $col2; }
       & > .col-3{ width: $col3; }
     }

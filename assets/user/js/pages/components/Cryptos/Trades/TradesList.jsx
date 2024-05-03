@@ -4,7 +4,11 @@ import PropTypes from 'prop-types';
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import moment from "moment/moment";
+import "moment/locale/fr";
+
 import Inputs from "@commonFunctions/inputs";
+import Sanitaze from "@commonFunctions/sanitaze";
 import Validateur from "@commonFunctions/validateur";
 import Formulaire from "@commonFunctions/formulaire";
 
@@ -24,7 +28,8 @@ export class TradesList extends Component {
         this.state = {
             context : 'create',
             id: '',
-            tradeAt: '',
+            tradeAt: Formulaire.setDate(new Date()),
+            tradeTime: '',
             type: 0,
             fromCoin: '',
             toCoin: '',
@@ -38,10 +43,14 @@ export class TradesList extends Component {
     }
 
     handleEditElement = (element) => {
+        let tradeAt = element ? moment(element.tradeAt).toDate() : new Date();
+        let tradeTime = element ? `${Sanitaze.addZeroToNumber(tradeAt.getHours())}:${Sanitaze.addZeroToNumber(tradeAt.getMinutes())}` : ''
+
         this.setState({
             context: element ? "update" : "create",
             id: element ? element.id : "",
-            tradeAt: element ? Formulaire.setDate(element.tradeAt) : '',
+            tradeAt: Formulaire.setDate(tradeAt),
+            tradeTime: tradeTime,
             type: element ? Formulaire.setValue(element.type) : 0,
             fromCoin: element ? Formulaire.setValue(element.fromCoin) : '',
             toCoin: element ? Formulaire.setValue(element.toCoin) : '',
@@ -68,12 +77,13 @@ export class TradesList extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
-        const { context, loadData, id, tradeAt, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
+        const { context, loadData, id, tradeAt, tradeTime, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
             { type: "text", id: 'tradeAt', value: tradeAt },
+            { type: "text", id: 'tradeTime', value: tradeTime },
             { type: "text", id: 'type', value: type },
             { type: "text", id: 'fromCoin', value: fromCoin },
             { type: "text", id: 'toCoin', value: toCoin },
@@ -94,11 +104,14 @@ export class TradesList extends Component {
                 this.setState({ loadData: true })
                 Formulaire.loader(true);
 
+                this.state.tradeAt = new Date(tradeAt + ' ' + tradeTime);
+
                 let methode = context === "create" ? "POST" : "PUT";
                 let url = context === "create" ? Routing.generate(URL_CREATE_ELEMENT) : Routing.generate(URL_UPDATE_ELEMENT, {id: id})
 
                 axios({ method: methode, url: url, data: this.state })
                     .then(function (response) {
+                        self.handleEditElement(null)
                     })
                     .catch(function (error) {
                         Formulaire.displayErrors(self, error);
@@ -112,7 +125,7 @@ export class TradesList extends Component {
 
     render () {
         const { data } = this.props;
-        const { context, errors, tradeAt, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
+        const { context, errors, tradeAt, tradeTime, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
 
         let typeItems = [
             { value: 0, identifiant: 'type-0', label: 'Achat' },
@@ -143,8 +156,13 @@ export class TradesList extends Component {
                         <div className="item-content">
                             <div className="item-infos text-sm xl:text-base">
                                 <div className="col-1">
-                                    <div className="w-full">
-                                        <Input type="datetime-local" valeur={tradeAt} identifiant="tradeAt" {...params0} />
+                                    <div className="flex gap-1">
+                                        <div className="w-full">
+                                            <Input type="date" valeur={tradeAt} identifiant="tradeAt" {...params0} />
+                                        </div>
+                                        <div className="w-full">
+                                            <Input type="time" valeur={tradeTime} identifiant="tradeTime" {...params0} />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="col-2">
