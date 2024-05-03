@@ -18,6 +18,14 @@ import { Alert } from "@tailwindComponents/Elements/Alert";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Input, Radiobox } from "@tailwindComponents/Elements/Fields";
 
+const ACHAT = 0;
+const VENTE = 1;
+const DEPOT = 2;
+const RETRAIT = 3;
+const RECUP = 4;
+const STAKING = 5;
+const TRANSFERT = 6;
+
 const URL_CREATE_ELEMENT = "intern_api_cryptos_trades_create";
 const URL_UPDATE_ELEMENT = "intern_api_cryptos_trades_update";
 
@@ -183,6 +191,71 @@ export class TradesList extends Component {
             nData.push(item);
         })
 
+        let items = [];
+        nData.forEach((yItem, index) => {
+            let total = 0, totalRetrait = 0, totalBonus = 0;
+
+            let itemsMonth = [];
+            yItem.items.forEach((mItem, ind) => {
+
+                let itemsTrade = [];
+                mItem.trades.forEach(elem => {
+                    switch (elem.type){
+                        case DEPOT:
+                            total += elem.fromPrice;
+                            break;
+                        case ACHAT:
+                            total -= elem.fromPrice;
+                            break;
+                        case RETRAIT:
+                            total -= elem.fromPrice;
+                            totalRetrait += elem.fromPrice;
+                            break;
+                        case RECUP:
+                        case STAKING:
+                            totalBonus += elem.fromPrice;
+                            break;
+                        default: break;
+                    }
+
+                    itemsTrade.push(<TradesItem key={elem.id} elem={elem}
+                                       onEditElement={this.handleEditElement} />);
+                })
+
+                itemsMonth.push(<div key={ind}>
+                    <div className="list-trades">
+                        <div className="items-trades">
+                            {itemsTrade}
+                        </div>
+                    </div>
+                    <div className="item-month bg-red-400 text-slate-50">
+                        <div className="font-semibold text-xl">
+                            Fin {mItem.month}
+                        </div>
+                        <div>
+                            Dispo : {Sanitaze.toFormatCurrency(total)}
+                        </div>
+                        <div>
+                            Retrait : {Sanitaze.toFormatCurrency(totalRetrait)}
+                        </div>
+                        <div>
+                            Bonus : {Sanitaze.toFormatCurrency(totalBonus)}
+                        </div>
+                    </div>
+                </div>)
+            })
+
+            items.push(<div key={index}>
+                <div className="item-year bg-red-800 text-slate-50">
+                    <div className="font-semibold text-xl">
+                        {yItem.year}
+                    </div>
+                </div>
+                <div>
+                    {itemsMonth}
+                </div>
+            </div>)
+        })
         console.log(nData);
 
         return <div className="list">
@@ -283,35 +356,7 @@ export class TradesList extends Component {
                     {/*</div>*/}
 
                     {data.length > 0
-                        ? nData.map((yItem, index) => {
-                            return <div key={index}>
-                                <div className="item-year bg-red-800 text-slate-50">
-                                    <div className="font-semibold text-xl">
-                                        {yItem.year}
-                                    </div>
-                                </div>
-                                <div>
-                                    {yItem.items.map((mItem, ind) => {
-                                        return <div key={ind}>
-                                            <div className="list-trades">
-                                                <div className="items-trades">
-                                                    {mItem.trades.map(elem => {
-                                                        return <TradesItem key={elem.id} elem={elem}
-                                                                           onEditElement={this.handleEditElement} />;
-                                                    })}
-                                                </div>
-                                            </div>
-                                            <div className="item-month bg-red-400 text-slate-50">
-                                                <div className="font-semibold text-xl">
-                                                    Fin {mItem.month}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    })}
-                                </div>
-                            </div>
-
-                        })
+                        ? items
                         : <div className="item border-t">
                             <Alert type="gray">Aucun résultat.</Alert>
                         </div>

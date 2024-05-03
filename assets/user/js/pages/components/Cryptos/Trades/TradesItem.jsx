@@ -6,13 +6,13 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Badge } from "@tailwindComponents/Elements/Badge";
 
-const Achat = 0;
-const Vente = 1;
+const ACHAT = 0;
+const VENTE = 1;
 const DEPOT = 2;
 const RETRAIT = 3;
-const Recuperation = 4;
-const Stacking = 5;
-const Transfert = 6;
+const RECUP = 4;
+const STAKING = 5;
+const TRANSFERT = 6;
 
 export function TradesItem ({ elem, onEditElement }) {
 	let typesString = ['Achat', "Vente", "Dépôt", "Retrait", "Récup.", "Staking", "Transfert"];
