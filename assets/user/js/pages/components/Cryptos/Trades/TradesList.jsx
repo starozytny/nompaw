@@ -232,7 +232,7 @@ export class TradesList extends Component {
                             {itemsTrade}
                         </div>
                     </div>
-                    <div className="item-month bg-red-400 text-slate-50">
+                    <div className="item-month bg-color0/80 text-slate-50">
                         <div className="font-semibold text-xl">
                             Fin {mItem.month}
                         </div>
@@ -253,7 +253,7 @@ export class TradesList extends Component {
                 <div>
                     {itemsMonth}
                 </div>
-                <div className="item-year bg-red-800 text-slate-50">
+                <div className="item-year bg-color0 text-slate-50">
                     <div className="font-semibold text-xl">
                         Fin {yItem.year} - Retrait : {Sanitaze.toFormatCurrency(totalYRetrait)}
                     </div>
