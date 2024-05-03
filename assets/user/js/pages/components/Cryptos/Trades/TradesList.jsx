@@ -137,6 +137,54 @@ export class TradesList extends Component {
 
         let params0 = { errors: errors, onChange: this.handleChange }
 
+        let yData = [];
+        data.forEach(item => {
+            let year = moment(item.tradeAt).year();
+
+            let find = false;
+            yData.forEach(yItem => {
+                if(yItem.year === year){
+                    find = true;
+                    yItem.items.push(item);
+                }
+            })
+
+            if(!find){
+                yData.push({
+                    year: year,
+                    items: [item]
+                })
+            }
+        })
+
+        let nData = [];
+        yData.forEach(item => {
+            let nItems = [];
+            item.items.forEach(mItem => {
+                let month = moment(mItem.tradeAt).format('MMMM');
+
+                let find = false;
+                nItems.forEach(nItem => {
+                    if(nItem.month === month){
+                        find = true;
+                        nItem.trades.push(mItem);
+                    }
+                })
+
+                if(!find){
+                    nItems.push({
+                        month: month,
+                        trades: [mItem]
+                    })
+                }
+            })
+
+            item.items = nItems;
+            nData.push(item);
+        })
+
+        console.log(nData);
+
         return <div className="list">
             <div className="list-table bg-white rounded-md shadow">
                 <div className="items items-trades">
@@ -155,89 +203,114 @@ export class TradesList extends Component {
                         </div>
                     </div>
 
-                    <div className="item border-t border-b-2 hover:bg-slate-50">
-                        <div className="item-content">
-                            <div className="item-infos text-sm xl:text-base">
-                                <div className="col-1">
-                                    <div className="flex gap-1">
-                                        <div className="w-full">
-                                            <Input type="date" valeur={tradeAt} identifiant="tradeAt" {...params0} />
-                                        </div>
-                                        <div className="w-full">
-                                            <Input type="time" valeur={tradeTime} identifiant="tradeTime" {...params0} />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-2">
-                                    <Radiobox valeur={type} identifiant="type" items={typeItems} {...params0}
-                                              classItems="flex flex-wrap gap-1" styleType="fat" />
-                                </div>
-                                <div className="col-3">
-                                    <div className="flex gap-1">
-                                        <div className="w-full">
-                                            <Input valeur={fromCoin} identifiant="fromCoin" {...params0}>
-                                                <span className="xl:hidden">Token A</span>
-                                            </Input>
-                                        </div>
-                                        <div className="w-full">
-                                            <Input valeur={toCoin} identifiant="toCoin" {...params0}>
-                                                <span className="xl:hidden">Token B</span>
-                                            </Input>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-4">
-                                    <div className="w-full">
-                                        <Input type="number" valeur={fromPrice} identifiant="fromPrice" {...params0}>
-                                            <span className="xl:hidden">Prix A</span>
-                                        </Input>
-                                    </div>
-                                </div>
-                                <div className="col-5">
-                                    <div className="w-full">
-                                        <Input type="number" valeur={nbToken} identifiant="nbToken" {...params0}>
-                                            <span className="xl:hidden">Nb token</span>
-                                        </Input>
-                                    </div>
-                                </div>
-                                <div className="col-6">
-                                    <div className="flex gap-1">
-                                        <div className="w-full">
-                                            <Input type="number" valeur={costPrice} identifiant="costPrice" {...params0}>
-                                                <span className="xl:hidden">Frais</span>
-                                            </Input>
-                                        </div>
-                                        <div className="w-full">
-                                            <Input valeur={costCoin} identifiant="costCoin" {...params0}>
-                                                <span className="xl:hidden">Frais token</span>
-                                            </Input>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-7">
-                                    <div className="w-full">
-                                        <Input type="number" valeur={toPrice} identifiant="toPrice" {...params0}>
-                                            <span className="xl:hidden">Total B</span>
-                                        </Input>
-                                    </div>
-                                </div>
-                                <div className="col-8 actions">
-                                    {context === "update"
-                                        ? <>
-                                            <ButtonIcon type="blue" icon="check1" onClick={this.handleSubmit}>Modifier</ButtonIcon>
-                                            <ButtonIcon type="default" icon="close" onClick={() => this.handleEditElement(null)}>Annuler</ButtonIcon>
-                                        </>
-                                        : <ButtonIcon type="blue" icon="add" onClick={this.handleSubmit}>Ajouter</ButtonIcon>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {/*<div className="item border-t border-b-2 hover:bg-slate-50">*/}
+                    {/*    <div className="item-content">*/}
+                    {/*        <div className="item-infos text-sm xl:text-base">*/}
+                    {/*            <div className="col-1">*/}
+                    {/*                <div className="flex gap-1">*/}
+                    {/*                    <div className="w-full">*/}
+                    {/*                        <Input type="date" valeur={tradeAt} identifiant="tradeAt" {...params0} />*/}
+                    {/*                    </div>*/}
+                    {/*                    <div className="w-full">*/}
+                    {/*                        <Input type="time" valeur={tradeTime} identifiant="tradeTime" {...params0} />*/}
+                    {/*                    </div>*/}
+                    {/*                </div>*/}
+                    {/*            </div>*/}
+                    {/*            <div className="col-2">*/}
+                    {/*                <Radiobox valeur={type} identifiant="type" items={typeItems} {...params0}*/}
+                    {/*                          classItems="flex flex-wrap gap-1" styleType="fat" />*/}
+                    {/*            </div>*/}
+                    {/*            <div className="col-3">*/}
+                    {/*                <div className="flex gap-1">*/}
+                    {/*                    <div className="w-full">*/}
+                    {/*                        <Input valeur={fromCoin} identifiant="fromCoin" {...params0}>*/}
+                    {/*                            <span className="xl:hidden">Token A</span>*/}
+                    {/*                        </Input>*/}
+                    {/*                    </div>*/}
+                    {/*                    <div className="w-full">*/}
+                    {/*                        <Input valeur={toCoin} identifiant="toCoin" {...params0}>*/}
+                    {/*                            <span className="xl:hidden">Token B</span>*/}
+                    {/*                        </Input>*/}
+                    {/*                    </div>*/}
+                    {/*                </div>*/}
+                    {/*            </div>*/}
+                    {/*            <div className="col-4">*/}
+                    {/*                <div className="w-full">*/}
+                    {/*                    <Input type="number" valeur={fromPrice} identifiant="fromPrice" {...params0}>*/}
+                    {/*                        <span className="xl:hidden">Prix A</span>*/}
+                    {/*                    </Input>*/}
+                    {/*                </div>*/}
+                    {/*            </div>*/}
+                    {/*            <div className="col-5">*/}
+                    {/*                <div className="w-full">*/}
+                    {/*                    <Input type="number" valeur={nbToken} identifiant="nbToken" {...params0}>*/}
+                    {/*                        <span className="xl:hidden">Nb token</span>*/}
+                    {/*                    </Input>*/}
+                    {/*                </div>*/}
+                    {/*            </div>*/}
+                    {/*            <div className="col-6">*/}
+                    {/*                <div className="flex gap-1">*/}
+                    {/*                    <div className="w-full">*/}
+                    {/*                        <Input type="number" valeur={costPrice} identifiant="costPrice" {...params0}>*/}
+                    {/*                            <span className="xl:hidden">Frais</span>*/}
+                    {/*                        </Input>*/}
+                    {/*                    </div>*/}
+                    {/*                    <div className="w-full">*/}
+                    {/*                        <Input valeur={costCoin} identifiant="costCoin" {...params0}>*/}
+                    {/*                            <span className="xl:hidden">Frais token</span>*/}
+                    {/*                        </Input>*/}
+                    {/*                    </div>*/}
+                    {/*                </div>*/}
+                    {/*            </div>*/}
+                    {/*            <div className="col-7">*/}
+                    {/*                <div className="w-full">*/}
+                    {/*                    <Input type="number" valeur={toPrice} identifiant="toPrice" {...params0}>*/}
+                    {/*                        <span className="xl:hidden">Total B</span>*/}
+                    {/*                    </Input>*/}
+                    {/*                </div>*/}
+                    {/*            </div>*/}
+                    {/*            <div className="col-8 actions">*/}
+                    {/*                {context === "update"*/}
+                    {/*                    ? <>*/}
+                    {/*                        <ButtonIcon type="blue" icon="check1" onClick={this.handleSubmit}>Modifier</ButtonIcon>*/}
+                    {/*                        <ButtonIcon type="default" icon="close" onClick={() => this.handleEditElement(null)}>Annuler</ButtonIcon>*/}
+                    {/*                    </>*/}
+                    {/*                    : <ButtonIcon type="blue" icon="add" onClick={this.handleSubmit}>Ajouter</ButtonIcon>*/}
+                    {/*                }*/}
+                    {/*            </div>*/}
+                    {/*        </div>*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
 
                     {data.length > 0
-                        ? data.map((elem) => {
-                            return <TradesItem key={elem.id} elem={elem}
-                                               onEditElement={this.handleEditElement} />;
+                        ? nData.map((yItem, index) => {
+                            return <div key={index}>
+                                <div className="item-year bg-red-800 text-slate-50">
+                                    <div className="font-semibold text-xl">
+                                        {yItem.year}
+                                    </div>
+                                </div>
+                                <div>
+                                    {yItem.items.map((mItem, ind) => {
+                                        return <div key={ind}>
+                                            <div className="list-trades">
+                                                <div className="items-trades">
+                                                    {mItem.trades.map(elem => {
+                                                        return <TradesItem key={elem.id} elem={elem}
+                                                                           onEditElement={this.handleEditElement} />;
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className="item-month bg-red-400 text-slate-50">
+                                                <div className="font-semibold text-xl">
+                                                    Fin {mItem.month}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    })}
+                                </div>
+                            </div>
+
                         })
                         : <div className="item border-t">
                             <Alert type="gray">Aucun résultat.</Alert>

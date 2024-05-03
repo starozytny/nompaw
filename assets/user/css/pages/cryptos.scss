@@ -1,5 +1,17 @@
 @import "../vars/vars";
 
+.list-trades{
+  .items-trades{
+    & > .item{
+      padding: 12px;
+    }
+  }
+}
+
+.item-year, .item-month{
+  padding: 12px;
+}
+
 .items-trades{
   $col2: 50px; $col3: 70px; $col4: 100px; $col5: 80px; $col6: 70px; $col7: 100px; $col8: 72px; $colGap: 56px;
   @media (min-width:768px) {
@@ -44,3 +56,4 @@
     }
   }
 }
+
