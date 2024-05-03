@@ -1,0 +1,13 @@
+{% extends 'user/layout/layout.html.twig' %}
+
+{% set breadcrumbs = [{ text: "Cryptomonnaies", icon: "credit-card", url: path('user_cryptos_index') }] %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_holidays') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_holidays') }}
+{% endblock %}
