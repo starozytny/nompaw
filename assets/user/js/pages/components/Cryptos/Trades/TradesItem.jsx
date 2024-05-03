@@ -6,7 +6,7 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Badge } from "@tailwindComponents/Elements/Badge";
 
-export function TradesItem ({ elem, onModal }) {
+export function TradesItem ({ elem, onEditElement }) {
 	let typesString = ['Achat', "Vente"];
 	let typesBadge = ['blue', "red"];
 
@@ -29,13 +29,13 @@ export function TradesItem ({ elem, onModal }) {
 					<div>{elem.nbToken}</div>
 				</div>
 				<div className="col-6">
-					<div>{Sanitaze.toFormatCurrency(elem.cost)} {elem.costCoin}</div>
+					<div>{elem.costPrice} {elem.costCoin}</div>
 				</div>
 				<div className="col-7">
 					{Sanitaze.toFormatCurrency(elem.toPrice)}
 				</div>
 				<div className="col-8 actions">
-					<ButtonIcon type="default" icon="more">Actions</ButtonIcon>
+					<ButtonIcon type="default" icon="pencil" onClick={() => onEditElement(elem)}>Modifier</ButtonIcon>
 				</div>
 			</div>
 		</div>
@@ -44,5 +44,4 @@ export function TradesItem ({ elem, onModal }) {
 
 TradesItem.propTypes = {
 	elem: PropTypes.object.isRequired,
-	onModal: PropTypes.func.isRequired,
 }

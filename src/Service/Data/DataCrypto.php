@@ -25,7 +25,7 @@ class DataCrypto
             ->setFromPrice($this->sanitizeData->setFloatValue($data->fromPrice))
             ->setNbToken($this->sanitizeData->setFloatValue($data->nbToken))
             ->setToPrice($this->sanitizeData->setFloatValue($data->toPrice))
-            ->setCost($this->sanitizeData->setFloatValue($data->cost))
+            ->setCostPrice($this->sanitizeData->setFloatValue($data->costPrice))
             ->setCostCoin($this->sanitizeData->trimData($data->costCoin))
         ;
     }

@@ -18,12 +18,8 @@ export class Trades extends Component {
 
 		this.state = {
 			loadingData: true,
-			element: null,
 			errors: [],
 		}
-
-		this.pagination = React.createRef();
-		this.delete = React.createRef();
 	}
 
 	componentDidMount = () => {
@@ -49,18 +45,13 @@ export class Trades extends Component {
 		List.updateListPagination(this, element, context, data, dataImmuable, currentData, sorter)
 	}
 
-    handleModal = (identifiant, elem) => {
-        this[identifiant].current.handleClick();
-        this.setState({ element: elem })
-    }
-
 	render () {
 		const { data, loadingData } = this.state;
 
 		return <>
 			{loadingData
 				? <LoaderElements />
-				: <TradesList data={data} onModal={this.handleModal} />
+				: <TradesList data={data} />
             }
         </>
     }

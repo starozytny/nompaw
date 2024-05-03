@@ -1,45 +1,118 @@
 import React, { Component } from "react";
 import PropTypes from 'prop-types';
 
+import axios from "axios";
+import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
+
+import Inputs from "@commonFunctions/inputs";
+import Validateur from "@commonFunctions/validateur";
+import Formulaire from "@commonFunctions/formulaire";
+
 import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
-import { Input, Radiobox } from "@tailwindComponents/Elements/Fields";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
-import Inputs from "@commonFunctions/inputs";
+import { Input, Radiobox } from "@tailwindComponents/Elements/Fields";
+
+const URL_CREATE_ELEMENT = "intern_api_cryptos_trades_create";
+const URL_UPDATE_ELEMENT = "intern_api_cryptos_trades_update";
 
 export class TradesList extends Component {
     constructor (props) {
-        super(props);
+        super(props)
 
         this.state = {
+            context : 'create',
+            id: '',
             tradeAt: '',
             type: 0,
             fromCoin: '',
             toCoin: '',
             fromPrice: '',
             nbToken: '',
-            cost: '',
-            costType: '',
+            costPrice: '',
+            costCoin: '',
             toPrice: '',
             errors: [],
         }
+    }
+
+    handleEditElement = (element) => {
+        this.setState({
+            context: element ? "update" : "create",
+            id: element ? element.id : "",
+            tradeAt: element ? Formulaire.setDate(element.tradeAt) : '',
+            type: element ? Formulaire.setValue(element.type) : 0,
+            fromCoin: element ? Formulaire.setValue(element.fromCoin) : '',
+            toCoin: element ? Formulaire.setValue(element.toCoin) : '',
+            fromPrice: element ? Formulaire.setValue(element.fromPrice) : '',
+            nbToken: element ? Formulaire.setValue(element.nbToken) : '',
+            costPrice: element ? Formulaire.setValue(element.costPrice) : '',
+            costCoin: element ? Formulaire.setValue(element.costCoin) : '',
+            toPrice: element ? Formulaire.setValue(element.toPrice) : '',
+        })
+
     }
 
     handleChange = (e) => {
         let name = e.currentTarget.name;
         let value = e.currentTarget.value;
 
-        if(name === "fromPrice" || name === "nbToken" || name === "cost" || name === "toPrice"){
+        if(name === "fromPrice" || name === "nbToken" || name === "costPrice" || name === "toPrice"){
             value = Inputs.textNumericInput(value, this.state[name])
         }
 
         this.setState({ [name]: value })
     }
 
+    handleSubmit = (e) => {
+        e.preventDefault();
+
+        const { context, loadData, id, tradeAt, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
+
+        this.setState({ errors: [] });
+
+        let paramsToValidate = [
+            { type: "text", id: 'tradeAt', value: tradeAt },
+            { type: "text", id: 'type', value: type },
+            { type: "text", id: 'fromCoin', value: fromCoin },
+            { type: "text", id: 'toCoin', value: toCoin },
+            { type: "text", id: 'fromPrice', value: fromPrice },
+            { type: "text", id: 'nbToken', value: nbToken },
+            { type: "text", id: 'costPrice', value: costPrice },
+            { type: "text", id: 'costCoin', value: costCoin },
+            { type: "text", id: 'toPrice', value: toPrice },
+        ];
+
+        let validate = Validateur.validateur(paramsToValidate)
+        if (!validate.code) {
+            Formulaire.showErrors(this, validate);
+        } else {
+            let self = this;
+
+            if (!loadData) {
+                this.setState({ loadData: true })
+                Formulaire.loader(true);
+
+                let methode = context === "create" ? "POST" : "PUT";
+                let url = context === "create" ? Routing.generate(URL_CREATE_ELEMENT) : Routing.generate(URL_UPDATE_ELEMENT, {id: id})
+
+                axios({ method: methode, url: url, data: this.state })
+                    .then(function (response) {
+                    })
+                    .catch(function (error) {
+                        Formulaire.displayErrors(self, error);
+                        Formulaire.loader(false);
+                        self.setState({ loadData: false })
+                    })
+                ;
+            }
+        }
+    }
+
     render () {
-        const { data, onModal } = this.props;
-        const { errors, tradeAt, type, fromCoin, toCoin, fromPrice, nbToken, cost, costType, toPrice } = this.state;
+        const { data } = this.props;
+        const { context, errors, tradeAt, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
 
         let typeItems = [
             { value: 0, identifiant: 'type-0', label: 'Achat' },
@@ -70,8 +143,8 @@ export class TradesList extends Component {
                         <div className="item-content">
                             <div className="item-infos text-sm xl:text-base">
                                 <div className="col-1">
-                                    <div class="w-full">
-                                        <Input type="date" valeur={tradeAt} identifiant="tradeAt" {...params0} />
+                                    <div className="w-full">
+                                        <Input type="datetime-local" valeur={tradeAt} identifiant="tradeAt" {...params0} />
                                     </div>
                                 </div>
                                 <div className="col-2">
@@ -80,12 +153,12 @@ export class TradesList extends Component {
                                 </div>
                                 <div className="col-3">
                                     <div className="flex gap-1">
-                                        <div class="w-full">
+                                        <div className="w-full">
                                             <Input valeur={fromCoin} identifiant="fromCoin" {...params0}>
                                                 <span className="xl:hidden">Token A</span>
                                             </Input>
                                         </div>
-                                        <div class="w-full">
+                                        <div className="w-full">
                                             <Input valeur={toCoin} identifiant="toCoin" {...params0}>
                                                 <span className="xl:hidden">Token B</span>
                                             </Input>
@@ -93,14 +166,14 @@ export class TradesList extends Component {
                                     </div>
                                 </div>
                                 <div className="col-4">
-                                    <div class="w-full">
+                                    <div className="w-full">
                                         <Input type="number" valeur={fromPrice} identifiant="fromPrice" {...params0}>
                                             <span className="xl:hidden">Prix A</span>
                                         </Input>
                                     </div>
                                 </div>
                                 <div className="col-5">
-                                    <div class="w-full">
+                                    <div className="w-full">
                                         <Input type="number" valeur={nbToken} identifiant="nbToken" {...params0}>
                                             <span className="xl:hidden">Nb token</span>
                                         </Input>
@@ -108,27 +181,33 @@ export class TradesList extends Component {
                                 </div>
                                 <div className="col-6">
                                     <div className="flex gap-1">
-                                        <div class="w-full">
-                                            <Input type="number" valeur={cost} identifiant="cost" {...params0}>
+                                        <div className="w-full">
+                                            <Input type="number" valeur={costPrice} identifiant="costPrice" {...params0}>
                                                 <span className="xl:hidden">Frais</span>
                                             </Input>
                                         </div>
-                                        <div class="w-full">
-                                            <Input valeur={costType} identifiant="costType" {...params0}>
+                                        <div className="w-full">
+                                            <Input valeur={costCoin} identifiant="costCoin" {...params0}>
                                                 <span className="xl:hidden">Frais token</span>
                                             </Input>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-7">
-                                    <div class="w-full">
+                                    <div className="w-full">
                                         <Input type="number" valeur={toPrice} identifiant="toPrice" {...params0}>
                                             <span className="xl:hidden">Total B</span>
                                         </Input>
                                     </div>
                                 </div>
                                 <div className="col-8 actions">
-                                    <ButtonIcon type="blue" icon="add">Ajouter</ButtonIcon>
+                                    {context === "update"
+                                        ? <>
+                                            <ButtonIcon type="blue" icon="check1" onClick={this.handleSubmit}>Modifier</ButtonIcon>
+                                            <ButtonIcon type="default" icon="close" onClick={() => this.handleEditElement(null)}>Annuler</ButtonIcon>
+                                        </>
+                                        : <ButtonIcon type="blue" icon="add" onClick={this.handleSubmit}>Ajouter</ButtonIcon>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -136,7 +215,8 @@ export class TradesList extends Component {
 
                     {data.length > 0
                         ? data.map((elem) => {
-                            return <TradesItem key={elem.id} elem={elem} onModal={onModal} />;
+                            return <TradesItem key={elem.id} elem={elem}
+                                               onEditElement={this.handleEditElement} />;
                         })
                         : <div className="item border-t">
                             <Alert type="gray">Aucun résultat.</Alert>
@@ -150,5 +230,4 @@ export class TradesList extends Component {
 
 TradesList.propTypes = {
     data: PropTypes.array.isRequired,
-    onModal: PropTypes.func.isRequired,
 }

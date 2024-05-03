@@ -45,7 +45,7 @@ class CrTrade
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
-    private ?float $cost = null;
+    private ?float $costPrice = null;
 
     #[ORM\Column(length: 10)]
     #[Groups(['trade_list'])]
@@ -136,14 +136,14 @@ class CrTrade
         return $this;
     }
 
-    public function getCost(): ?float
+    public function getCostPrice(): ?float
     {
-        return $this->cost;
+        return $this->costPrice;
     }
 
-    public function setCost(float $cost): static
+    public function setCostPrice(float $costPrice): static
     {
-        $this->cost = $cost;
+        $this->costPrice = $costPrice;
 
         return $this;
     }
