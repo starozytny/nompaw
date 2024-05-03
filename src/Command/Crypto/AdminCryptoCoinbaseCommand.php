@@ -110,7 +110,7 @@ class AdminCryptoCoinbaseCommand extends Command
 
                         ->setCostPrice($type === TypeType::Depot ? $item[9] * (-1) : $item[9])
                         ->setTotalReal($type === TypeType::Achat ? $item[7] : $item[8])
-                        ->setTotal($item[7])
+                        ->setTotal($type === TypeType::Retrait ? $item[7] : $item[8])
                         ->setCostCoin('EUR')
                         ->setUser($user)
                     ;
