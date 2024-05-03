@@ -20,7 +20,7 @@ class TradeController extends AbstractController
     #[Route('/list', name: 'list', options: ['expose' => true], methods: 'GET')]
     public function cover(ApiResponse $apiResponse, CrTradeRepository $repository): Response
     {
-        return $apiResponse->apiJsonResponse($repository->findAll(), CrTrade::LIST);
+        return $apiResponse->apiJsonResponse($repository->findBy([], ['tradeAt' => 'ASC']), CrTrade::LIST);
     }
 
     /**

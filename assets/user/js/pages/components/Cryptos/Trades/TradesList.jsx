@@ -111,10 +111,13 @@ export class TradesList extends Component {
 
                 axios({ method: methode, url: url, data: this.state })
                     .then(function (response) {
-                        self.handleEditElement(null)
+                        self.props.onUpdateList(response.data, context);
+                        self.handleEditElement(null);
                     })
                     .catch(function (error) {
                         Formulaire.displayErrors(self, error);
+                    })
+                    .then(function () {
                         Formulaire.loader(false);
                         self.setState({ loadData: false })
                     })

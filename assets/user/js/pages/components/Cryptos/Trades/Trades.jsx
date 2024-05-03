@@ -41,8 +41,10 @@ export class Trades extends Component {
     }
 
 	handleUpdateList = (element, context) => {
-		const { data, dataImmuable, currentData, sorter } = this.state;
-		List.updateListPagination(this, element, context, data, dataImmuable, currentData, sorter)
+		const { data, sorter } = this.state;
+		let nData = List.updateData(element, context, data, sorter);
+
+		this.setState({ data: nData })
 	}
 
 	render () {
@@ -51,7 +53,7 @@ export class Trades extends Component {
 		return <>
 			{loadingData
 				? <LoaderElements />
-				: <TradesList data={data} />
+				: <TradesList data={data} onUpdateList={this.handleUpdateList} />
             }
         </>
     }
