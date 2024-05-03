@@ -21,6 +21,24 @@ class CrTradeRepository extends ServiceEntityRepository
         parent::__construct($registry, CrTrade::class);
     }
 
+    public function save(CrTrade $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(CrTrade $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     //    /**
     //     * @return CrTrade[] Returns an array of CrTrade objects
     //     */

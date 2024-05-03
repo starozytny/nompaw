@@ -2,6 +2,7 @@
 
 namespace App\Entity\Crypto;
 
+use App\Entity\Main\User;
 use App\Repository\Crypto\CrTradeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -53,6 +54,10 @@ class CrTrade
     #[ORM\Column]
     #[Groups(['trade_list'])]
     private ?float $nbToken = null;
+
+    #[ORM\ManyToOne(inversedBy: 'crTrades')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -163,6 +168,18 @@ class CrTrade
     public function setNbToken(float $nbToken): static
     {
         $this->nbToken = $nbToken;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }
