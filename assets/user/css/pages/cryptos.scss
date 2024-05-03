@@ -35,4 +35,12 @@
       & > .col-3{ width: $col3; }
     }
   }
+
+  $col3: 180px; $col6: 180px;
+  @media (min-width:1800px) {
+    .item-infos{
+      & > .col-3{ width: $col3; }
+      & > .col-6{ width: $col6; }
+    }
+  }
 }
