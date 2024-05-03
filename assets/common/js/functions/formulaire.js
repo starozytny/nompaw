@@ -49,6 +49,10 @@ function setValue (value, defaultValue = "") {
     return value === null ? defaultValue : value;
 }
 
+function setDate (value, retour = "") {
+    return value ? moment(value).format('YYYY-MM-DD') : retour;
+}
+
 function setValueDate (value, defaultValue = "") {
     return value === null ? defaultValue : moment(value).format('DD/MM/YYYY');
 }
@@ -90,6 +94,7 @@ module.exports = {
     axiosGetData,
     loader,
     setValue,
+    setDate,
     setValueDate,
     setValueTime,
     showErrors,

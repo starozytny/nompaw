@@ -1,0 +1,38 @@
+@import "../vars/vars";
+
+.items-trades{
+  $col2: 50px; $col3: 70px; $col4: 100px; $col5: 80px; $col6: 70px; $col7: 100px; $col8: 72px; $colGap: 56px;
+  @media (min-width:768px) {
+    .item-infos{
+      & > .col-1{ width: 130px; }
+      & > .col-2{ width: $col2; }
+      & > .col-3{ width: $col3; }
+      & > .col-4{ width: $col4; }
+      & > .col-5{ width: $col5; }
+      & > .col-6{ width: $col6; }
+      & > .col-7{ width: $col7; }
+      & > .col-8.actions{ width: $col8; }
+    }
+  }
+
+  $col2: 60px; $col3: 80px; $col4: 120px; $col5: 120px; $col6: 120px; $col7: 120px;
+  @media (min-width:1280px) {
+    .item-infos{
+      & > .col-2{ width: $col2; }
+      & > .col-3{ width: $col3; }
+      & > .col-4{ width: $col4; }
+      & > .col-5{ width: $col5; }
+      & > .col-6{ width: $col6; }
+      & > .col-7{ width: $col7; }
+    }
+  }
+
+  $col2: 130px; $col3: 120px;
+  @media (min-width:1536px) {
+    .item-infos{
+      & > .col-1{ width: 180px; }
+      & > .col-2{ width: $col2; }
+      & > .col-3{ width: $col3; }
+    }
+  }
+}

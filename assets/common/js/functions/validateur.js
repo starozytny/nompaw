@@ -1,3 +1,5 @@
+const Sanitaze = require('@commonFunctions/sanitaze');
+
 function validateDate(value) {
     let regex = /^\d{2}\/\d{2}\/\d{4}$/;
 
@@ -168,6 +170,27 @@ function validateMinMax($value, $valueCheck) {
     return {'code': true};
 }
 
+function validateDateLimitHoursMinutes($value, $minH, $maxH, $minM, $maxM) {
+    let $msg = 'L\'horaire doit être compris entre '
+        + $minH + 'h' + Sanitaze.addZeroToNumber($minM) +'min et ' + $maxH + 'h' + Sanitaze.addZeroToNumber($maxM) + 'min.';
+
+    if($value.getHours() < $minH || $value.getHours() > $maxH){
+        return {
+            'code': false,
+            'message': '[H]' + $msg
+        };
+    }else{
+        if($value.getMinutes() < $minM || $value.getMinutes() > $maxM){
+            return {
+                'code': false,
+                'message': '[M]' + $msg
+            };
+        }
+    }
+
+    return {'code': true};
+}
+
 function switchCase(element){
     let validate;
     switch (element.type) {
@@ -203,6 +226,9 @@ function switchCase(element){
             break;
         case 'uniqueLength':
             validate = validateUniqueLength(element.value, element.size);
+            break;
+        case 'dateLimitHM':
+            validate = validateDateLimitHoursMinutes(element.value, element.minH, element.maxH, element.minM, element.maxM);
             break;
     }
 
