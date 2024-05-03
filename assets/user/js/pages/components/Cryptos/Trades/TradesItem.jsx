@@ -27,6 +27,7 @@ export function TradesItem ({ elem, onEditElement }) {
 				</div>
 				<div className="col-2">
 					<Badge type={typesBadge[elem.type]}>{typesString[elem.type]}</Badge>
+					<div className="text-sm">{elem.importedFrom}</div>
 				</div>
 				<div className="col-3">
 					{elem.type === DEPOT
@@ -52,12 +53,12 @@ export function TradesItem ({ elem, onEditElement }) {
 				<div className="col-6">
 					<div className={`inline-block rounded-full py-1 px-2 ${elem.type === RETRAIT ? "bg-red-100" : (elem.type === DEPOT ? "bg-indigo-100" : "bg-gray-100")}`}>
 						<span className="inline-block mr-2 text-xs bg-white py-1 px-2 rounded-full">{elem.toCoin}</span>
-						<span className="text-sm">{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.toPrice)}</span>
+						<span className="text-sm">{elem.type === RETRAIT ? "-" : ""}{elem.toCoin === "EUR" ? Sanitaze.toFormatCurrency(elem.nbToken) : elem.nbToken}</span>
 					</div>
 				</div>
 				<div className="col-7">
 					<div className={elem.type === RETRAIT ? "text-red-500" : (elem.type === DEPOT ? "text-indigo-600" : "")}>
-						{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.toPrice)}
+						{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.total)}
 					</div>
 				</div>
 				<div className="col-8 actions">

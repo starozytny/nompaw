@@ -55,6 +55,10 @@ class CrTrade
     #[Groups(['trade_list'])]
     private ?float $nbToken = null;
 
+    #[ORM\Column]
+    #[Groups(['trade_list'])]
+    private ?float $total = null;
+
     #[ORM\ManyToOne(inversedBy: 'crTrades')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -63,6 +67,7 @@ class CrTrade
     private ?bool $isImported = false;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['trade_list'])]
     private ?string $importedFrom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -177,6 +182,18 @@ class CrTrade
     public function setNbToken(float $nbToken): static
     {
         $this->nbToken = $nbToken;
+
+        return $this;
+    }
+
+    public function getTotal(): ?float
+    {
+        return $this->total;
+    }
+
+    public function setTotal(float $total): static
+    {
+        $this->total = $total;
 
         return $this;
     }

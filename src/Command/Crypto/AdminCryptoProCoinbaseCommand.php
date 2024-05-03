@@ -21,10 +21,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'admin:crypto:coinbase',
-    description: 'Import data coinbase to user account',
+    name: 'admin:crypto:procoinbase',
+    description: 'Import data coinbase pro to user account',
 )]
-class AdminCryptoCoinbaseCommand extends Command
+class AdminCryptoProCoinbaseCommand extends Command
 {
     private string $privateDirectory;
     private ObjectManager $em;
@@ -43,6 +43,7 @@ class AdminCryptoCoinbaseCommand extends Command
     {
         $this
             ->addArgument('userId', InputArgument::REQUIRED, 'ID user')
+            ->addArgument('year', InputArgument::REQUIRED, 'année à traiter')
         ;
     }
 
@@ -56,6 +57,7 @@ class AdminCryptoCoinbaseCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $userId = $input->getArgument('userId');
+        $year = $input->getArgument('year');
 
         $user = $this->em->getRepository(User::class)->find($userId);
         if(!$user){
@@ -65,13 +67,13 @@ class AdminCryptoCoinbaseCommand extends Command
 
         $io->title('Synchronisation');
 
-        $file = $this->privateDirectory . "import/cryptos/" . $userId . "/coinbase/coinbase.csv";
+        $file = $this->privateDirectory . "import/cryptos/" . $userId . "/coinbase-pro/fills/" . $year . ".csv";
         if(!file_exists($file)){
-            $io->error("Fichier coinbase.csv introuvable.");
+            $io->error("Fichier coinbase pro " . $year . ".csv introuvable.");
             return Command::FAILURE;
         }
 
-        $trades = $this->em->getRepository(CrTrade::class)->findBy(['isImported' => true, 'importedFrom' => 'Coinbase']);
+        $trades = $this->em->getRepository(CrTrade::class)->findBy(['isImported' => true, 'importedFrom' => 'Coinbase Pro']);
 
         //read file
         $csv = Reader::createFromPath($file, 'r');
@@ -80,7 +82,7 @@ class AdminCryptoCoinbaseCommand extends Command
 
         $i = 0;
         foreach ($records as $item) {
-            if($i > 3){
+            if($i > 1){
                 $existe = false;
                 foreach($trades as $trade){
                     if($trade->getImportedId() == $item[0]){
@@ -90,21 +92,20 @@ class AdminCryptoCoinbaseCommand extends Command
 
                 if(!$existe){
 
-                    $type = $this->getType($item[2]);
+                    $type = $this->getType($item[3]);
 
                     $obj = (new CrTrade())
                         ->setIsImported(true)
-                        ->setImportedFrom('Coinbase')
-                        ->setImportedId($item[0])
-                        ->setTradeAt($this->sanitizeData->createDate($item[1]))
+                        ->setImportedFrom('Coinbase Pro')
+                        ->setImportedId($item[1])
+                        ->setTradeAt($this->sanitizeData->createDate($item[4]))
                         ->setType($type)
-                        ->setFromCoin($type == TypeType::Achat ? $item[5] : $item[3])
-                        ->setToCoin($item[3])
-                        ->setFromPrice($type == TypeType::Achat ? $item[8] : $item[7])
-                        ->setNbToken($item[4])
-                        ->setToPrice($item[7])
-                        ->setCostPrice($item[9])
-                        ->setTotal($item[8])
+                        ->setFromCoin($item[6])
+                        ->setToCoin($item[10])
+                        ->setFromPrice($item[7])
+                        ->setNbToken($item[5])
+                        ->setToPrice($item[9] - $item[8])
+                        ->setCostPrice($item[8])
                         ->setCostCoin('EUR')
                         ->setUser($user)
                     ;
@@ -126,12 +127,8 @@ class AdminCryptoCoinbaseCommand extends Command
     private function getType($value): ?int
     {
         return match ($value) {
-            'Receive' => TypeType::Recuperation,
-            'Buy' => TypeType::Achat,
-            'Deposit' => TypeType::Depot,
-            'Staking Income' => TypeType::Stacking,
-            'Send' => TypeType::Transfert,
-            'Withdrawal' => TypeType::Retrait,
+            'BUY' => TypeType::Achat,
+            'SELL' => TypeType::Vente,
             default => null,
         };
     }

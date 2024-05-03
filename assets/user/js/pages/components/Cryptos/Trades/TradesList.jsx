@@ -191,9 +191,12 @@ export class TradesList extends Component {
             nData.push(item);
         })
 
+        let total = 0, totalRetrait = 0, totalBonus = 0;
+
         let items = [];
         nData.forEach((yItem, index) => {
-            let total = 0, totalRetrait = 0, totalBonus = 0;
+
+            let totalYRetrait = 0;
 
             let itemsMonth = [];
             yItem.items.forEach((mItem, ind) => {
@@ -209,7 +212,8 @@ export class TradesList extends Component {
                             break;
                         case RETRAIT:
                             total -= elem.fromPrice;
-                            totalRetrait += elem.fromPrice;
+                            totalRetrait += elem.total;
+                            totalYRetrait += elem.total;
                             break;
                         case RECUP:
                         case STAKING:
@@ -246,13 +250,13 @@ export class TradesList extends Component {
             })
 
             items.push(<div key={index}>
-                <div className="item-year bg-red-800 text-slate-50">
-                    <div className="font-semibold text-xl">
-                        {yItem.year}
-                    </div>
-                </div>
                 <div>
                     {itemsMonth}
+                </div>
+                <div className="item-year bg-red-800 text-slate-50">
+                    <div className="font-semibold text-xl">
+                        Fin {yItem.year} - Retrait : {Sanitaze.toFormatCurrency(totalYRetrait)}
+                    </div>
                 </div>
             </div>)
         })
@@ -267,7 +271,7 @@ export class TradesList extends Component {
                                 <div className="col-1">Date</div>
                                 <div className="col-2">Type</div>
                                 <div className="col-3">Token A</div>
-                                <div className="col-4">Nb Token</div>
+                                <div className="col-4">Prix Token</div>
                                 <div className="col-5">Frais</div>
                                 <div className="col-6">Token B</div>
                                 <div className="col-7">Total</div>
