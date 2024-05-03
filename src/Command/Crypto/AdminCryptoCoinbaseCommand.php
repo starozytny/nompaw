@@ -51,6 +51,7 @@ class AdminCryptoCoinbaseCommand extends Command
      * @throws InvalidArgument
      * @throws UnavailableFeature
      * @throws Exception
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -84,27 +85,32 @@ class AdminCryptoCoinbaseCommand extends Command
                 $existe = false;
                 foreach($trades as $trade){
                     if($trade->getImportedId() == $item[0]){
-                        $existe = true;
+                        $existe = $trade;
                     }
                 }
 
-                if(!$existe){
+                if($existe){
 
                     $type = $this->getType($item[2]);
 
-                    $obj = (new CrTrade())
+                    $obj = ($existe)
                         ->setIsImported(true)
                         ->setImportedFrom('Coinbase')
                         ->setImportedId($item[0])
                         ->setTradeAt($this->sanitizeData->createDate($item[1]))
                         ->setType($type)
+
                         ->setFromCoin($type == TypeType::Achat ? $item[5] : $item[3])
+                        ->setFromPrice($item[6])
+                        ->setFromNbToken($type == TypeType::Achat ? $item[8] : $item[4])
+
                         ->setToCoin($item[3])
-                        ->setFromPrice($type == TypeType::Achat ? $item[8] : $item[7])
-                        ->setNbToken($item[4])
-                        ->setToPrice($item[7])
-                        ->setCostPrice($item[9])
-                        ->setTotal($item[8])
+                        ->setToPrice($item[6])
+                        ->setToNbToken($type == TypeType::Achat ? $item[4] : $item[7])
+
+                        ->setCostPrice($type === TypeType::Depot ? $item[9] * (-1) : $item[9])
+                        ->setTotalReal($type === TypeType::Achat ? $item[7] : $item[8])
+                        ->setTotal($item[7])
                         ->setCostCoin('EUR')
                         ->setUser($user)
                     ;

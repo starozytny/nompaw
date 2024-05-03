@@ -53,7 +53,15 @@ class CrTrade
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
-    private ?float $nbToken = null;
+    private ?float $fromNbToken = null;
+
+    #[ORM\Column]
+    #[Groups(['trade_list'])]
+    private ?float $toNbToken = null;
+
+    #[ORM\Column]
+    #[Groups(['trade_list'])]
+    private ?float $totalReal = null;
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
@@ -174,14 +182,38 @@ class CrTrade
         return $this;
     }
 
-    public function getNbToken(): ?float
+    public function getFromNbToken(): ?float
     {
-        return $this->nbToken;
+        return $this->fromNbToken;
     }
 
-    public function setNbToken(float $nbToken): static
+    public function setFromNbToken(float $fromNbToken): static
     {
-        $this->nbToken = $nbToken;
+        $this->fromNbToken = $fromNbToken;
+
+        return $this;
+    }
+
+    public function getToNbToken(): ?float
+    {
+        return $this->toNbToken;
+    }
+
+    public function setToNbToken(float $toNbToken): static
+    {
+        $this->toNbToken = $toNbToken;
+
+        return $this;
+    }
+
+    public function getTotalReal(): ?float
+    {
+        return $this->totalReal;
+    }
+
+    public function setTotalReal(float $totalReal): static
+    {
+        $this->totalReal = $totalReal;
 
         return $this;
     }

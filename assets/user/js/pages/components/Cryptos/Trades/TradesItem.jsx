@@ -32,33 +32,33 @@ export function TradesItem ({ elem, onEditElement }) {
 				<div className="col-3">
 					{elem.type === DEPOT
 						? null
-						: <div className="inline-block rounded-full bg-gray-100 py-1 px-2 min-w-24 text-right">
-							<span className="text-sm">{Sanitaze.toFormatCurrency(elem.fromPrice)}</span>
+						: <div className="inline-block rounded-full bg-gray-100 py-1 px-2 text-right">
+							<span className="text-sm">{elem.toCoin === "EUR" ? Sanitaze.toFormatCurrency(elem.fromNbToken) : elem.fromNbToken}</span>
 							<span className="inline-block ml-2 text-xs bg-white py-1 px-2 rounded-full">{elem.fromCoin}</span>
 						</div>
 					}
 				</div>
 				<div className="col-4">
-					{elem.type === DEPOT
-						? null
-						: <div className="text-sm">{elem.nbToken}</div>
-					}
+					<div className={`inline-block rounded-full py-1 px-2 ${elem.type === RETRAIT ? "bg-red-100" : (elem.type === DEPOT ? "bg-indigo-100" : "bg-gray-100")}`}>
+						<span className="inline-block mr-2 text-xs bg-white py-1 px-2 rounded-full">{elem.toCoin}</span>
+						<span className="text-sm">{elem.type === RETRAIT ? "-" : ""}{elem.toCoin === "EUR" ? Sanitaze.toFormatCurrency(elem.toNbToken) : elem.toNbToken}</span>
+					</div>
 				</div>
 				<div className="col-5">
+					{elem.type === DEPOT
+						? null
+						: <div className="text-sm">{elem.fromPrice}</div>
+					}
+				</div>
+				<div className="col-6">
 					{elem.type === DEPOT
 						? null
 						: <div className="text-sm">{elem.costPrice} {elem.costCoin}</div>
 					}
 				</div>
-				<div className="col-6">
-					<div className={`inline-block rounded-full py-1 px-2 ${elem.type === RETRAIT ? "bg-red-100" : (elem.type === DEPOT ? "bg-indigo-100" : "bg-gray-100")}`}>
-						<span className="inline-block mr-2 text-xs bg-white py-1 px-2 rounded-full">{elem.toCoin}</span>
-						<span className="text-sm">{elem.type === RETRAIT ? "-" : ""}{elem.toCoin === "EUR" ? Sanitaze.toFormatCurrency(elem.nbToken) : elem.nbToken}</span>
-					</div>
-				</div>
 				<div className="col-7">
 					<div className={elem.type === RETRAIT ? "text-red-500" : (elem.type === DEPOT ? "text-indigo-600" : "")}>
-						{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.total)}
+						{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.totalReal)}
 					</div>
 				</div>
 				<div className="col-8 actions">

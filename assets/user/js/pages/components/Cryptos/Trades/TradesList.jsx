@@ -205,19 +205,19 @@ export class TradesList extends Component {
                 mItem.trades.forEach(elem => {
                     switch (elem.type){
                         case DEPOT:
-                            total += elem.fromPrice;
+                            total += elem.total;
                             break;
                         case ACHAT:
-                            total -= elem.fromPrice;
+                            total -= elem.total;
                             break;
                         case RETRAIT:
-                            total -= elem.fromPrice;
-                            totalRetrait += elem.total;
-                            totalYRetrait += elem.total;
+                            total -= elem.total;
+                            totalRetrait += elem.totalReal;
+                            totalYRetrait += elem.totalReal;
                             break;
                         case RECUP:
                         case STAKING:
-                            totalBonus += elem.fromPrice;
+                            totalBonus += elem.total;
                             break;
                         default: break;
                     }
@@ -271,9 +271,9 @@ export class TradesList extends Component {
                                 <div className="col-1">Date</div>
                                 <div className="col-2">Type</div>
                                 <div className="col-3">Token A</div>
-                                <div className="col-4">Prix Token</div>
-                                <div className="col-5">Frais</div>
-                                <div className="col-6">Token B</div>
+                                <div className="col-4">Token B</div>
+                                <div className="col-5">Prix Token B</div>
+                                <div className="col-6">Frais</div>
                                 <div className="col-7">Total</div>
                                 <div className="col-8 actions" />
                             </div>

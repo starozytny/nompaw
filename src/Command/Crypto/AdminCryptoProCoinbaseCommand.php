@@ -52,6 +52,7 @@ class AdminCryptoProCoinbaseCommand extends Command
      * @throws InvalidArgument
      * @throws UnavailableFeature
      * @throws Exception
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -85,27 +86,28 @@ class AdminCryptoProCoinbaseCommand extends Command
             if($i > 1){
                 $existe = false;
                 foreach($trades as $trade){
-                    if($trade->getImportedId() == $item[0]){
-                        $existe = true;
+                    if($trade->getImportedId() == $item[1]){
+                        $existe = $trade;
                     }
                 }
 
-                if(!$existe){
+                if($existe){
 
                     $type = $this->getType($item[3]);
 
-                    $obj = (new CrTrade())
+                    $obj = ($existe)
                         ->setIsImported(true)
                         ->setImportedFrom('Coinbase Pro')
                         ->setImportedId($item[1])
                         ->setTradeAt($this->sanitizeData->createDate($item[4]))
                         ->setType($type)
-                        ->setFromCoin($item[6])
-                        ->setToCoin($item[10])
+                        ->setFromCoin($type == TypeType::Achat ? $item[10] : $item[6])
+                        ->setToCoin($type == TypeType::Achat ? $item[6] : $item[10])
                         ->setFromPrice($item[7])
-                        ->setNbToken($item[5])
-                        ->setToPrice($item[9] - $item[8])
+                        ->setNbToken($type == TypeType::Achat ? $item[9] * (-1) : $item[5])
+                        ->setToPrice($type == TypeType::Achat ? $item[5] : $item[9] * (-1))
                         ->setCostPrice($item[8])
+                        ->setTotal(($item[9] - $item[8]) * (-1))
                         ->setCostCoin('EUR')
                         ->setUser($user)
                     ;
