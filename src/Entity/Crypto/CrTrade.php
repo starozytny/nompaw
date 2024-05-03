@@ -5,40 +5,53 @@ namespace App\Entity\Crypto;
 use App\Repository\Crypto\CrTradeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CrTradeRepository::class)]
 class CrTrade
 {
+    const LIST = ["trade_list"];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['trade_list'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['trade_list'])]
     private ?\DateTimeInterface $tradeAt = null;
 
+    #[ORM\Column]
+    #[Groups(['trade_list'])]
+    private ?int $type = null;
+
     #[ORM\Column(length: 10)]
+    #[Groups(['trade_list'])]
     private ?string $fromCoin = null;
 
     #[ORM\Column(length: 10)]
+    #[Groups(['trade_list'])]
     private ?string $toCoin = null;
 
     #[ORM\Column]
-    private ?int $type = null;
+    #[Groups(['trade_list'])]
+    private ?float $fromPrice = null;
 
     #[ORM\Column]
-    private ?float $priceFrom = null;
+    #[Groups(['trade_list'])]
+    private ?float $toPrice = null;
 
     #[ORM\Column]
-    private ?float $priceTo = null;
-
-    #[ORM\Column]
+    #[Groups(['trade_list'])]
     private ?float $cost = null;
 
-    #[ORM\Column]
-    private ?int $costType = null;
+    #[ORM\Column(length: 10)]
+    #[Groups(['trade_list'])]
+    private ?string $costCoin = null;
 
     #[ORM\Column]
+    #[Groups(['trade_list'])]
     private ?float $nbToken = null;
 
     public function getId(): ?int
@@ -94,26 +107,26 @@ class CrTrade
         return $this;
     }
 
-    public function getPriceFrom(): ?float
+    public function getFromPrice(): ?float
     {
-        return $this->priceFrom;
+        return $this->fromPrice;
     }
 
-    public function setPriceFrom(float $priceFrom): static
+    public function setFromPrice(float $fromPrice): static
     {
-        $this->priceFrom = $priceFrom;
+        $this->fromPrice = $fromPrice;
 
         return $this;
     }
 
-    public function getPriceTo(): ?float
+    public function getToPrice(): ?float
     {
-        return $this->priceTo;
+        return $this->toPrice;
     }
 
-    public function setPriceTo(float $priceTo): static
+    public function setToPrice(float $toPrice): static
     {
-        $this->priceTo = $priceTo;
+        $this->toPrice = $toPrice;
 
         return $this;
     }
@@ -130,14 +143,14 @@ class CrTrade
         return $this;
     }
 
-    public function getCostType(): ?int
+    public function getCostCoin(): ?string
     {
-        return $this->costType;
+        return $this->costCoin;
     }
 
-    public function setCostType(int $costType): static
+    public function setCostCoin(string $costCoin): static
     {
-        $this->costType = $costType;
+        $this->costCoin = $costCoin;
 
         return $this;
     }
