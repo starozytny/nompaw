@@ -59,6 +59,15 @@ class CrTrade
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\Column]
+    private ?bool $isImported = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $importedFrom = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $importedId = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -180,6 +189,42 @@ class CrTrade
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function isIsImported(): ?bool
+    {
+        return $this->isImported;
+    }
+
+    public function setIsImported(bool $isImported): static
+    {
+        $this->isImported = $isImported;
+
+        return $this;
+    }
+
+    public function getImportedFrom(): ?string
+    {
+        return $this->importedFrom;
+    }
+
+    public function setImportedFrom(?string $importedFrom): static
+    {
+        $this->importedFrom = $importedFrom;
+
+        return $this;
+    }
+
+    public function getImportedId(): ?string
+    {
+        return $this->importedId;
+    }
+
+    public function setImportedId(?string $importedId): static
+    {
+        $this->importedId = $importedId;
 
         return $this;
     }

@@ -7,14 +7,14 @@ import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Badge } from "@tailwindComponents/Elements/Badge";
 
 export function TradesItem ({ elem, onEditElement }) {
-	let typesString = ['Achat', "Vente"];
-	let typesBadge = ['blue', "red"];
+	let typesString = ['Achat', "Vente", "Dépôt", "Retrait", "Récup.", "Staking", "Transfert"];
+	let typesBadge = ['blue', "red", "gray", "gray", "gray", "gray", "gray"];
 
 	return <div className="item border-t hover:bg-slate-50">
 		<div className="item-content">
 			<div className="item-infos text-sm xl:text-base">
 				<div className="col-1">
-					{Sanitaze.toFormatDate(elem.tradeAt)}
+					{Sanitaze.toFormatDate(elem.tradeAt, 'DD/MM/YYYY à hh:mm')}
 				</div>
 				<div className="col-2">
 					<Badge type={typesBadge[elem.type]}>{typesString[elem.type]}</Badge>
