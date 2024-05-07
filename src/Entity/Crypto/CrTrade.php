@@ -39,7 +39,7 @@ class CrTrade
     #[Groups(['trade_list'])]
     private ?float $fromPrice = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(['trade_list'])]
     private ?float $toPrice = null;
 
@@ -55,7 +55,7 @@ class CrTrade
     #[Groups(['trade_list'])]
     private ?float $fromNbToken = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(['trade_list'])]
     private ?float $toNbToken = null;
 
@@ -151,7 +151,7 @@ class CrTrade
         return $this->toPrice;
     }
 
-    public function setToPrice(float $toPrice): static
+    public function setToPrice(?float $toPrice): static
     {
         $this->toPrice = $toPrice;
 
@@ -199,7 +199,7 @@ class CrTrade
         return $this->toNbToken;
     }
 
-    public function setToNbToken(float $toNbToken): static
+    public function setToNbToken(?float $toNbToken): static
     {
         $this->toNbToken = $toNbToken;
 

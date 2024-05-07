@@ -87,27 +87,32 @@ class AdminCryptoProCoinbaseCommand extends Command
                 $existe = false;
                 foreach($trades as $trade){
                     if($trade->getImportedId() == $item[1]){
-                        $existe = $trade;
+                        $existe = true;
                     }
                 }
 
-                if($existe){
+                if(!$existe){
 
                     $type = $this->getType($item[3]);
 
-                    $obj = ($existe)
+                    $obj = (new CrTrade())
                         ->setIsImported(true)
                         ->setImportedFrom('Coinbase Pro')
                         ->setImportedId($item[1])
                         ->setTradeAt($this->sanitizeData->createDate($item[4]))
                         ->setType($type)
+
                         ->setFromCoin($type == TypeType::Achat ? $item[10] : $item[6])
+                        ->setFromPrice($type == TypeType::Achat ? ($item[10] === "EUR" ? 1 : null) : $item[7])
+                        ->setFromNbToken($type == TypeType::Achat ? abs($item[9]) : $item[5])
+
                         ->setToCoin($type == TypeType::Achat ? $item[6] : $item[10])
-                        ->setFromPrice($item[7])
-                        ->setNbToken($type == TypeType::Achat ? $item[9] * (-1) : $item[5])
-                        ->setToPrice($type == TypeType::Achat ? $item[5] : $item[9] * (-1))
-                        ->setCostPrice($item[8])
-                        ->setTotal(($item[9] - $item[8]) * (-1))
+                        ->setToPrice($type == TypeType::Achat ? $item[7] : ($item[10] === "EUR" ? 1 : null))
+                        ->setToNbToken($type == TypeType::Achat ? $item[5] : abs($item[9]))
+
+                        ->setCostPrice(round($item[8], 2))
+                        ->setTotalReal(abs($item[9]) - $item[8])
+                        ->setTotal(abs($item[9]))
                         ->setCostCoin('EUR')
                         ->setUser($user)
                     ;
