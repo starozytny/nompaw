@@ -85,15 +85,15 @@ class AdminCryptoCoinbaseCommand extends Command
                 $existe = false;
                 foreach($trades as $trade){
                     if($trade->getImportedId() == $item[0]){
-                        $existe = $trade;
+                        $existe = true;
                     }
                 }
 
-                if($existe){
+                if(!$existe){
                     $type = $this->getType($item[2]);
                     $fromCoin = $type == TypeType::Achat ? $item[5] : $item[3];
 
-                    $obj = ($existe)
+                    $obj = (new CrTrade())
                         ->setIsImported(true)
                         ->setImportedFrom('Coinbase')
                         ->setImportedId($item[0])

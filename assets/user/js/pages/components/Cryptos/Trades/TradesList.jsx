@@ -313,10 +313,9 @@ export class TradesList extends Component {
                             <div className="item-infos">
                                 <div className="col-1">Date</div>
                                 <div className="col-2">Type</div>
-                                <div className="col-5">Prix Token A</div>
                                 <div className="col-3">Token A</div>
                                 <div className="col-4">Token B</div>
-                                <div className="col-5">Prix Token B</div>
+                                <div className="col-5">Prix Transaction</div>
                                 <div className="col-6">Frais</div>
                                 <div className="col-7">Total</div>
                                 <div className="col-8 actions" />

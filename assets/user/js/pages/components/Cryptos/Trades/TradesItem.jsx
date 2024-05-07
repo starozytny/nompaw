@@ -29,12 +29,6 @@ export function TradesItem ({ elem, onEditElement }) {
 					<Badge type={typesBadge[elem.type]}>{typesString[elem.type]}</Badge>
 					<div className="text-sm">{elem.importedFrom}</div>
 				</div>
-				<div className="col-5">
-					{elem.type === DEPOT
-						? null
-						: <div className="text-sm">{elem.fromPrice}</div>
-					}
-				</div>
 				<div className="col-3">
 					{elem.type === DEPOT
 						? null
@@ -56,7 +50,7 @@ export function TradesItem ({ elem, onEditElement }) {
 				<div className="col-5">
 					{elem.type === DEPOT
 						? null
-						: <div className="text-sm">{elem.toPrice}</div>
+						: (elem.type === ACHAT ? <div className="text-sm">{elem.toPrice}</div> : <div className="text-sm">{elem.fromPrice}</div>)
 					}
 				</div>
 				<div className="col-6">

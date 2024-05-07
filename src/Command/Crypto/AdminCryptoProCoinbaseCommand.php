@@ -94,6 +94,8 @@ class AdminCryptoProCoinbaseCommand extends Command
                 if(!$existe){
 
                     $type = $this->getType($item[3]);
+                    $fromCoin = $type == TypeType::Achat ? $item[10] : $item[6];
+                    $toCoin = $type == TypeType::Achat ? $item[6] : $item[10];
 
                     $obj = (new CrTrade())
                         ->setIsImported(true)
@@ -102,16 +104,16 @@ class AdminCryptoProCoinbaseCommand extends Command
                         ->setTradeAt($this->sanitizeData->createDate($item[4]))
                         ->setType($type)
 
-                        ->setFromCoin($type == TypeType::Achat ? $item[10] : $item[6])
-                        ->setFromPrice($type == TypeType::Achat ? ($item[10] === "EUR" ? 1 : null) : $item[7])
-                        ->setFromNbToken($type == TypeType::Achat ? abs($item[9]) : $item[5])
+                        ->setFromCoin($fromCoin)
+                        ->setFromPrice($type == TypeType::Achat ? ($fromCoin === "EUR" ? 1 : null) : $item[7])
+                        ->setFromNbToken($type == TypeType::Achat ? abs((float) $item[9]) : $item[5])
 
-                        ->setToCoin($type == TypeType::Achat ? $item[6] : $item[10])
-                        ->setToPrice($type == TypeType::Achat ? $item[7] : ($item[10] === "EUR" ? 1 : null))
-                        ->setToNbToken($type == TypeType::Achat ? $item[5] : abs($item[9]))
+                        ->setToCoin($toCoin)
+                        ->setToPrice($type == TypeType::Achat ? $item[7] : ($toCoin === "EUR" ? 1 : null))
+                        ->setToNbToken($type == TypeType::Achat ? $item[5] : abs((float) $item[9]))
 
                         ->setCostPrice(round($item[8], 2))
-                        ->setTotalReal(abs($item[9]) - $item[8])
+                        ->setTotalReal(abs((float) $item[9]) - $item[8])
                         ->setTotal(abs($item[9]))
                         ->setCostCoin('EUR')
                         ->setUser($user)
