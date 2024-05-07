@@ -195,6 +195,8 @@ export class TradesList extends Component {
         let items = [];
         nData.forEach((yItem, index) => {
 
+
+            let cryptosY = [];
             let totalYRetrait = 0;
 
             let itemsMonth = [];
@@ -202,12 +204,47 @@ export class TradesList extends Component {
 
                 let itemsTrade = [];
                 mItem.trades.forEach(elem => {
+                    let findCryptoY = 2;
+
                     switch (elem.type){
+                        case VENTE:
+                            total += elem.total;
+
+                            findCryptoY = 0;
+                            cryptosY.forEach(cr => {
+                                if(cr.name === elem.fromCoin){
+                                    cr.total -= elem.fromNbToken;
+                                    findCryptoY = 1;
+                                }
+                            })
+
+                            if(findCryptoY === 0){
+                                cryptosY.push({
+                                    name: elem.fromCoin,
+                                    total: elem.fromNbToken
+                                })
+                            }
+                            break;
                         case DEPOT:
                             total += elem.total;
                             break;
                         case ACHAT:
                             total -= elem.total;
+
+                            findCryptoY = 0;
+                            cryptosY.forEach(cr => {
+                                if(cr.name === elem.toCoin){
+                                    cr.total += elem.toNbToken;
+                                    findCryptoY = 1;
+                                }
+                            })
+
+                            if(findCryptoY === 0){
+                                cryptosY.push({
+                                    name: elem.toCoin,
+                                    total: elem.toNbToken
+                                })
+                            }
                             break;
                         case RETRAIT:
                             total -= elem.total;
@@ -245,6 +282,13 @@ export class TradesList extends Component {
                             Bonus : {Sanitaze.toFormatCurrency(totalBonus)}
                         </div>
                     </div>
+                    <div className="item-month bg-color0/80 text-slate-50">
+                        {cryptosY.map(cr => {
+                            return <div key={cr.name}>
+                                {cr.name} : {cr.total}
+                            </div>
+                        })}
+                    </div>
                 </div>)
             })
 
@@ -269,9 +313,10 @@ export class TradesList extends Component {
                             <div className="item-infos">
                                 <div className="col-1">Date</div>
                                 <div className="col-2">Type</div>
+                                <div className="col-5">Prix Token A</div>
                                 <div className="col-3">Token A</div>
                                 <div className="col-4">Token B</div>
-                                <div className="col-5">Prix Token A</div>
+                                <div className="col-5">Prix Token B</div>
                                 <div className="col-6">Frais</div>
                                 <div className="col-7">Total</div>
                                 <div className="col-8 actions" />
