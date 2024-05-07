@@ -1,0 +1,10 @@
+{% extends 'user/pages/cryptos/template.html.twig' %}
+
+{% set page_title %}Cryptomonnaies{% endset %}
+{% set page_subtitle %}Liste des cryptos{% endset %}
+
+{% block main_content %}
+    <div id="cryptos_list">
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+{% endblock %}

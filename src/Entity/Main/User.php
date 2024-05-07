@@ -10,6 +10,7 @@ use App\Entity\Budget\BuRecurrent;
 use App\Entity\Cook\CoCommentary;
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
+use App\Entity\Crypto\CrTrade;
 use App\Entity\DataEntity;
 use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalActivity;
@@ -201,6 +202,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuRecurrent::class)]
     private Collection $buRecurrents;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CrTrade::class)]
+    private Collection $crTrades;
+
     /**
      * @throws Exception
      */
@@ -228,6 +232,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->buCategories = new ArrayCollection();
         $this->mails = new ArrayCollection();
         $this->buRecurrents = new ArrayCollection();
+        $this->crTrades = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -331,7 +336,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -1196,6 +1201,36 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($buRecurrent->getUser() === $this) {
                 $buRecurrent->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CrTrade>
+     */
+    public function getCrTrades(): Collection
+    {
+        return $this->crTrades;
+    }
+
+    public function addCrTrade(CrTrade $crTrade): static
+    {
+        if (!$this->crTrades->contains($crTrade)) {
+            $this->crTrades->add($crTrade);
+            $crTrade->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCrTrade(CrTrade $crTrade): static
+    {
+        if ($this->crTrades->removeElement($crTrade)) {
+            // set the owning side to null (unless already changed)
+            if ($crTrade->getUser() === $this) {
+                $crTrade->setUser(null);
             }
         }
 

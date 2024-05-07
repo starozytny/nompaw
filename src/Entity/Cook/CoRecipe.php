@@ -40,11 +40,11 @@ class CoRecipe extends DataEntity
     #[Groups(['recipe_list', 'recipe_read'])]
     private ?string $content = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['recipe_read'])]
     private ?\DateTimeInterface $durationPrepare = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['recipe_read'])]
     private ?\DateTimeInterface $durationCooking = null;
 

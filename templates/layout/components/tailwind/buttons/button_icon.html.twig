@@ -1,0 +1,24 @@
+{% set typeVariants = {
+    red: 'bg-red-600 shadow-sm text-slate-50 hover:bg-red-500',
+    blue: 'bg-blue-600 shadow-sm text-slate-50 hover:bg-blue-500 ring-1 ring-inset ring-blue-600',
+    menu: 'bg-gray-800 shadow-sm text-gray-900 hover:bg-gray-700 ring-1 ring-inset ring-gray-700',
+    default: 'bg-white shadow-sm text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300',
+    transparent: 'bg-transparent text-gray-900 hover:bg-gray-50 ring-0 ring-inset ring-transparent',
+} %}
+
+{% set typeVariantsText = {
+    red: 'text-slate-50',
+    blue: 'text-slate-50',
+    menu: 'text-gray-300',
+    default: 'text-gray-600',
+    transparent: 'text-gray-600',
+} %}
+
+<a href="{{ btn_link }}" target="{{ btn_target is defined ? btn_target : "" }}"
+   class="relative inline-flex justify-center rounded-md text-lg px-2 py-2  {{ btn_width is defined ? btn_width : "" }} {{ typeVariants[btn_type] }}"
+>
+    <span class="icon-{{ btn_icon}} {{ typeVariantsText[btn_type] }} inline-block translate-y-0.5"></span>
+    <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="{{ btn_style is defined ? btn_style : "" }}">
+        {{ btn_text }}
+    </span>
+</a>

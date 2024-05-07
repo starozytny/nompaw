@@ -5,28 +5,27 @@ import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input, InputFile, Radiobox } from "@commonComponents/Elements/Fields";
-import { Button }           from "@commonComponents/Elements/Button";
-import { TinyMCE }          from "@commonComponents/Elements/TinyMCE";
+import { Input, InputFile, Radiobox } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
-import Formulaire           from "@commonFunctions/formulaire";
-import Validateur           from "@commonFunctions/validateur";
+import Formulaire from "@commonFunctions/formulaire";
+import Validateur from "@commonFunctions/validateur";
 
-const URL_INDEX_PAGE        = "user_aventures_groupes_read";
-const URL_CREATE_ELEMENT    = "intern_api_aventures_groupes_create";
-const URL_UPDATE_ELEMENT    = "intern_api_aventures_groupes_update";
-const TEXT_CREATE           = "Ajouter le groupe";
-const TEXT_UPDATE           = "Enregistrer les modifications";
+const URL_INDEX_PAGE = "user_aventures_groupes_read";
+const URL_CREATE_ELEMENT = "intern_api_aventures_groupes_create";
+const URL_UPDATE_ELEMENT = "intern_api_aventures_groupes_update";
+const TEXT_CREATE = "Ajouter le groupe";
+const TEXT_UPDATE = "Enregistrer les modifications";
 
-export function GroupeFormulaire ({ context, element, users, members })
-{
-    let url = Routing.generate(URL_CREATE_ELEMENT);
+export function GroupeFormulaire ({ context, element, users, members }) {
+	let url = Routing.generate(URL_CREATE_ELEMENT);
 
-    if(context === "update"){
-        url = Routing.generate(URL_UPDATE_ELEMENT, {'id': element.id});
-    }
+	if (context === "update") {
+		url = Routing.generate(URL_UPDATE_ELEMENT, { id: element.id });
+	}
 
-    let form = <Form
+	return <Form
         context={context}
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
@@ -38,201 +37,202 @@ export function GroupeFormulaire ({ context, element, users, members })
         members={members}
         users={users}
     />
-
-    return <div className="formulaire">{form}</div>;
 }
 
 GroupeFormulaire.propTypes = {
-    context: PropTypes.string.isRequired,
-    users: PropTypes.array.isRequired,
-    members: PropTypes.array.isRequired,
-    element: PropTypes.object,
+	context: PropTypes.string.isRequired,
+	users: PropTypes.array.isRequired,
+	members: PropTypes.array.isRequired,
+	element: PropTypes.object,
 }
 
 class Form extends Component {
-    constructor(props) {
-        super(props);
+	constructor (props) {
+		super(props);
 
-        let description = props.description ? props.description : "";
+		let description = props.description ? props.description : "";
 
-        this.state = {
-            name: props.name,
-            isVisible: props.isVisible,
-            level: props.level,
-            description: { value: description, html: description },
-            members: props.members,
-            errors: [],
-        }
+		this.state = {
+			name: props.name,
+			isVisible: props.isVisible,
+			level: props.level,
+			description: { value: description, html: description },
+			members: props.members,
+			errors: [],
+		}
 
-        this.file = React.createRef();
-    }
+		this.file = React.createRef();
+	}
 
-    handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
+	handleChange = (e) => {
+		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
+	}
 
-    handleChangeTinyMCE = (name, html) => {
-        this.setState({ [name]: {value: this.state[name].value, html: html} })
-    }
+	handleChangeTinyMCE = (name, html) => {
+		this.setState({ [name]: { value: this.state[name].value, html: html } })
+	}
 
-    handleClickUser = (userId) => {
-        const { members } = this.state;
+	handleClickUser = (userId) => {
+		const { members } = this.state;
 
-        let find = false;
-        members.forEach(member => {
-            if(member === userId) find = true;
-        })
-        let nMembers;
-        if(find){
-            nMembers = members.filter(m => { return m !== userId });
-        }else{
-            nMembers = members;
-            nMembers.push(userId);
-        }
+		let find = false;
+		members.forEach(member => {
+			if (member === userId) find = true;
+		})
+		let nMembers;
+		if (find) {
+			nMembers = members.filter(m => {
+				return m !== userId
+			});
+		} else {
+			nMembers = members;
+			nMembers.push(userId);
+		}
 
-        this.setState({ members: nMembers });
-    }
+		this.setState({ members: nMembers });
+	}
 
-    handleSubmit = (e) => {
-        e.preventDefault();
+	handleSubmit = (e) => {
+		e.preventDefault();
 
-        const { url } = this.props;
-        const { name, isVisible, level, description } = this.state;
+		const { url } = this.props;
+		const { name, isVisible, level, description } = this.state;
 
-        this.setState({ errors: [] });
+		this.setState({ errors: [] });
 
-        let paramsToValidate = [
-            {type: "text",  id: 'name', value: name},
-            {type: "text",  id: 'isVisible', value: isVisible},
-            {type: "text",  id: 'level', value: level},
-            {type: "text",  id: 'description', value: description.html},
-        ];
+		let paramsToValidate = [
+			{ type: "text", id: 'name', value: name },
+			{ type: "text", id: 'isVisible', value: isVisible },
+			{ type: "text", id: 'level', value: level },
+			{ type: "text", id: 'description', value: description.html },
+		];
 
-        let validate = Validateur.validateur(paramsToValidate)
-        if(!validate.code){
-            Formulaire.showErrors(this, validate);
-        }else {
-            Formulaire.loader(true);
-            let self = this;
+		let validate = Validateur.validateur(paramsToValidate)
+		if (!validate.code) {
+			Formulaire.showErrors(this, validate);
+		} else {
+			Formulaire.loader(true);
+			let self = this;
 
-            let formData = new FormData();
-            formData.append("data", JSON.stringify(this.state));
+			let formData = new FormData();
+			formData.append("data", JSON.stringify(this.state));
 
-            let file = this.file.current;
-            if(file.state.files.length > 0){
-                formData.append("image", file.state.files[0]);
-            }
+			let file = this.file.current;
+			if (file.state.files.length > 0) {
+				formData.append("image", file.state.files[0]);
+			}
 
-            axios({ method: "POST", url: url, data: formData, headers: {'Content-Type': 'multipart/form-data'} })
-                .then(function (response) {
-                    toastr.info('Données enregistrées.');
-                    location.href = Routing.generate(URL_INDEX_PAGE, {'slug': response.data.slug});
-                })
-                .catch(function (error) { Formulaire.displayErrors(self, error); Formulaire.loader(false); })
-            ;
-        }
-    }
+			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
+				.then(function (response) {
+					toastr.info('Données enregistrées.');
+					location.href = Routing.generate(URL_INDEX_PAGE, { slug: response.data.slug });
+				})
+				.catch(function (error) {
+					Formulaire.displayErrors(self, error);
+					Formulaire.loader(false);
+				})
+			;
+		}
+	}
 
-    render () {
+	render () {
         const { context, imageFile, users } = this.props;
         const { errors, name, isVisible, level, description, members } = this.state;
 
-        let params  = { errors: errors, onChange: this.handleChange };
+        let params = { errors: errors, onChange: this.handleChange };
 
         let isVisibleItems = [
             { value: 0, label: 'Aux membres', identifiant: 'visible-0' },
-            { value: 1, label: 'Par tous',    identifiant: 'visible-1' },
+            { value: 1, label: 'Par tous', identifiant: 'visible-1' },
         ]
 
         let levelItems = [
-            { value: 0, label: 'Aucun',             identifiant: 'level-0' },
-            { value: 1, label: 'Facile',            identifiant: 'level-1' },
-            { value: 2, label: 'Moyen',             identifiant: 'level-2' },
-            { value: 3, label: 'Difficile',         identifiant: 'level-3' },
-            { value: 4, label: 'Très difficile',    identifiant: 'level-4' },
-            { value: 5, label: 'Extrême',           identifiant: 'level-5' },
+            { value: 0, label: 'Aucun', identifiant: 'level-0' },
+            { value: 1, label: 'Facile', identifiant: 'level-1' },
+            { value: 2, label: 'Moyen', identifiant: 'level-2' },
+            { value: 3, label: 'Difficile', identifiant: 'level-3' },
+            { value: 4, label: 'Très difficile', identifiant: 'level-4' },
+            { value: 5, label: 'Extrême', identifiant: 'level-5' },
         ]
 
-        return <>
-            <form onSubmit={this.handleSubmit}>
-                <div className="line-container">
-                    <div className="line">
-                        <div className="line-col-1">
-                            <div className="title">Informations générales</div>
-                        </div>
-                        <div className="line-col-2">
-                            <div className="line line-fat-box">
-                                <Radiobox items={isVisibleItems} identifiant="isVisible" valeur={isVisible} {...params}>
+        return <form onSubmit={this.handleSubmit}>
+            <div className="flex flex-col gap-4 xl:gap-6">
+                <div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
+                    <div>
+                        <div className="font-medium text-lg">Informations générales</div>
+                    </div>
+                    <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
+                        <div className="flex gap-4">
+                            <div className="w-full">
+                                <Radiobox items={isVisibleItems} identifiant="isVisible" valeur={isVisible} {...params}
+                                          classItems="flex gap-2" styleType="fat">
                                     Visibilité *
                                 </Radiobox>
                             </div>
-                            <div className="line">
-                                <Input identifiant="name" valeur={name} {...params}>Nom du groupe *</Input>
-                            </div>
-                            <div className="line line-2 line-fat-box">
-                                <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}>
+                            <div className="w-full">
+                                <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}
+                                          classItems="flex gap-2" styleType="fat">
                                     Niveau *
                                 </Radiobox>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <div className="w-full">
+                                <Input identifiant="name" valeur={name} {...params}>Nom du groupe *</Input>
+                            </div>
+                            <div className="w-full">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
                                            placeholder="Glissez et déposer une image" {...params}>
                                     Illustration
                                 </InputFile>
                             </div>
-                            <div className="line">
-                                <TinyMCE type={6} identifiant='description' valeur={description.value}
-                                         errors={errors} onUpdateData={this.handleChangeTinyMCE}>
-                                    Description du groupe
-                                </TinyMCE>
-                            </div>
+                        </div>
+                        <div>
+                            <TinyMCE type={6} identifiant='description' valeur={description.value}
+                                     errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+                                Description du groupe
+                            </TinyMCE>
                         </div>
                     </div>
+                </div>
 
-                    <div className="line">
-                        <div className="line-col-1">
-                            <div className="title">Membres du groupe</div>
-                            <div className="subtitle">
-                                Sélectionnez les membres du groupe d'aventures
-                            </div>
+                <div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
+                    <div>
+                        <div className="font-medium text-lg">Membres du groupe</div>
+                        <div className="text-gray-600 text-sm">
+                            Sélectionnez les membres du groupe d'aventures
                         </div>
-                        <div className="line-col-2">
-                            <div className="users-select">
-                                {users.map(user => {
-                                    let selected = false;
-                                    members.forEach(member => {
-                                        if(member === user.id) selected = true;
-                                    })
+                    </div>
+                    <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
+                        <div className="flex flex-wrap gap-2">
+                            {users.map(user => {
+                                let selected = false;
+                                members.forEach(member => {
+                                    if (member === user.id) selected = true;
+                                })
 
-                                    return <div className={`user-select${selected ? " active" : ""}`} key={user.id}
-                                                onClick={() => this.handleClickUser(user.id)}>
-                                        <div className="avatar">
-                                            {user.avatarFile
-                                                ? <img src={user.avatarFile} alt={`avatar de ${user.username}`}/>
-                                                : <div className="avatar-letter">{user.lastname.slice(0,1) + user.firstname.slice(0,1)}</div>
-                                            }
+                                return <div className={`cursor-pointer bg-gray-100 p-4 rounded flex items-center gap-2 border-2 ${selected ? "bg-blue-700/20 border-blue-500" : "hover:bg-gray-50"}`} key={user.id}
+                                            onClick={() => this.handleClickUser(user.id)}>
+                                    <div className="avatar">
+                                        {user.avatarFile
+                                            ? <img src={user.avatarFile} alt={`avatar de ${user.username}`} className="w-8 h-8 object-cover rounded-full" />
+                                            : <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                                                {user.lastname.slice(0, 1) + user.firstname.slice(0, 1)}
                                         </div>
-                                        <div className="username">{user.displayName}</div>
-                                        {selected && <div className="item-selected"><span className="icon-check-1" /></div>}
+                                        }
                                     </div>
-                                })}
-                            </div>
+                                    <div className="font-semibold">{user.displayName}</div>
+                                </div>
+                            })}
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="line-buttons">
-                    <Button isSubmit={true} type="primary">{context === "create" ? TEXT_CREATE : TEXT_UPDATE}</Button>
-                </div>
-            </form>
-        </>
+            <div className="mt-4 flex justify-end gap-2">
+                <Button type="blue" isSubmit={true}>{context === "create" ? TEXT_CREATE : TEXT_UPDATE}</Button>
+            </div>
+        </form>
     }
-}
-
-Form.propTypes = {
-    context: PropTypes.string.isRequired,
-    url: PropTypes.node.isRequired,
-    name: PropTypes.string.isRequired,
-    isVisible: PropTypes.number.isRequired,
-    level: PropTypes.number.isRequired,
-    description: PropTypes.string.isRequired,
-    imageFile: PropTypes.string.isRequired,
-    users: PropTypes.array.isRequired,
-    members: PropTypes.array.isRequired,
 }

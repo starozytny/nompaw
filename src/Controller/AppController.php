@@ -2,20 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\Enum\Cook\CookStatut;
-use App\Repository\Cook\CoRecipeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class AppController extends AbstractController
 {
     #[Route('/', name: 'app_homepage')]
-    public function index(CoRecipeRepository $recipeRepository): Response
+    public function index(): Response
     {
-        return $this->render('app/pages/index.html.twig', [
-            'recipes' => $recipeRepository->findBy(['status' => CookStatut::Active],[], 3)
-        ]);
+        return $this->render('app/pages/index.html.twig');
     }
 
     #[Route('/contact', name: 'app_contact')]

@@ -3,77 +3,89 @@
 {% set page_title %}{{ app.request.get('mine') ? "Mes r" : "R" }}ecettes{{ app.request.get('favorite') ? " favorites" : "" }}{% endset %}
 {% set page_subtitle %}Liste totale des recettes !{% endset %}
 
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_recipes_create'),
+        btn_type: 'blue',
+        btn_icon: 'add',
+        btn_text: 'Ajouter une recette'
+    } %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_recipes_index', {favorite: 1}),
+        btn_type: 'default',
+        btn_icon: 'heart1',
+        btn_text: 'Afficher mes favoris'
+    } %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_recipes_index', {mine: 1}),
+        btn_type: 'default',
+        btn_icon: 'book-1',
+        btn_text: 'Afficher mes recettes'
+    } %}
+{% endset %}
+
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_recipes_create') }}" class="btn btn-primary">
-                <span>Ajouter une recette</span>
-            </a>
-            <a href="{{ path('user_recipes_index', {'favorite': 1}) }}" class="btn btn-default">
-                <span class="icon-heart1"></span>
-                <span>Afficher mes favoris</span>
-            </a>
-            <a href="{{ path('user_recipes_index', {'mine': 1}) }}" class="btn btn-default">
-                <span class="icon-book-1"></span>
-                <span>Afficher mes recettes</span>
-            </a>
-        </div>
-    </div>
-    <div class="page-default">
-        <div class="recipes">
-            {% if recipes | length > 0 %}
-                {% for elem in recipes %}
+    <div class="flex justify-center gap-4 flex-wrap 2xl:justify-start qhd:gap-6">
+        {% if recipes | length > 0 %}
+            {% for elem in recipes %}
 
-                    {% set isFav = 0 %}
-                    {% for fav in favorites %}
-                        {% if fav.identifiant == elem.id %}
-                            {% set isFav = 1 %}
-                        {% endif %}
-                    {% endfor %}
+                {% set isFav = 0 %}
+                {% for fav in favorites %}
+                    {% if fav.identifiant == elem.id %}
+                        {% set isFav = 1 %}
+                    {% endif %}
+                {% endfor %}
 
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="name">
-                                <div>{{ elem.name }} {{ elem.status == 0 ? "<span class='txt-danger'>[HORS LIGNE]</span>" : "" }}</div>
-                                <span class="difficulty">{{ elem.difficultyString }}</span>
+                <div class="bg-white rounded-md w-full sm:w-72 md:w-80 xl:w-72 shadow-sm">
+                    <div class="p-4 border-b flex justify-between gap-4">
+                        <div class="flex flex-col">
+                            <div class="font-semibold">{{ elem.name }} {{ elem.status == 0 ? "<span class='text-red-500'>[HORS LIGNE]</span>" : "" }}</div>
+                            <div class="text-gray-600 text-sm">{{ elem.difficultyString }}</div>
+                        </div>
+                        <div class="favorite"
+                             data-id="{{ elem.id }}"
+                             data-is-fav="{{ isFav }}"
+                        >
+                            {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                btn_link: "",
+                                btn_type: 'transparent',
+                                btn_icon: 'chart-3',
+                                btn_text: ''
+                            } %}
+                        </div>
+                    </div>
+                    <div class="relative cursor-pointer group overflow-hidden {{ app.user.id == elem.author.id ? '' : 'rounded-b-md' }}">
+                        <a href="{{ path('user_recipes_read', {slug: elem.slug}) }}" class="bg-gray-800/15 absolute w-full h-full group-hover:opacity-0 transition-opacity"></a>
+                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
+                    </div>
+                    {% if app.user.id == elem.author.id %}
+                        <div class="relative z-10 flex justify-between divide-x py-2">
+                            <div class="w-full text-center">
+                                {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                    btn_link: path('user_recipes_update', {slug: elem.slug}),
+                                    btn_type: 'transparent',
+                                    btn_icon: 'pencil',
+                                    btn_text: 'Modifier'
+                                } %}
                             </div>
-                            <div class="favorite"
+                            <div class="delete-recipe w-full text-center"
+                                 data-context="recipes"
                                  data-id="{{ elem.id }}"
-                                 data-is-fav="{{ isFav }}"
+                                 data-name="{{ elem.name }}"
                             >
-                                <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
+                                {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                    btn_link: "",
+                                    btn_type: 'transparent',
+                                    btn_icon: 'chart-3',
+                                    btn_text: 'Supprimer'
+                                } %}
                             </div>
                         </div>
-                        <a
-                                href="{{ path('user_recipes_read', {'slug': elem.slug}) }}"
-                                class="card-body"
-                                style="{{ app.user.id == elem.author.id ? 'border-radius: 0' : '' }}"
-                        >
-                            <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}">
-                        </a>
-                        {% if app.user.id == elem.author.id %}
-                            <div class="card-footer">
-                                <a
-                                        href="{{ path('user_recipes_update', {'slug': elem.slug}) }}"
-                                        class="btn-icon"
-                                >
-                                    <span class="icon-pencil"></span>
-                                    <span class="tooltip">Modifier</span>
-                                </a>
-                                <div class="delete-recipe"
-                                     data-context="recipes"
-                                     data-id="{{ elem.id }}"
-                                     data-name="{{ elem.name }}"
-                                >
-                                    <button class="btn-icon btn-loader-without-text"><span class="icon-chart-3"></span></button>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div>Aucun recette trouvée.</div>
-            {% endif %}
-        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div>Aucun recette trouvée.</div>
+        {% endif %}
     </div>
 {% endblock %}

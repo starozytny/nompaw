@@ -33,10 +33,10 @@ class HoProject extends DataEntity
     #[Groups(['hopro_form'])]
     private ?string $image = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $startAt = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $endAt = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

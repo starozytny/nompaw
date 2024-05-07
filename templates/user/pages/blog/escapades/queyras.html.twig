@@ -4,9 +4,14 @@
 {% set page_subtitle %}Du 14 au 15 Octobre 2023{% endset %}
 
 {% block main_content %}
+    <style>
+        p{
+            color: #FFFFFF;
+        }
+    </style>
     <div id="mapSrc" data-map="escapades/queyras/map.svg"></div>
     <div id="article-loader">
-        {% include "layout/components/loader.html.twig" %}
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>
     <div class="main-content main-content-transparent" id="article" style="opacity: 0">
         <div class="article">

@@ -7,107 +7,109 @@ import List from "@commonFunctions/list";
 
 import { ContactsList } from "@adminPages/Contacts/ContactsList";
 
-import { Pagination, TopSorterPagination } from "@commonComponents/Elements/Pagination";
-import { Search }           from "@commonComponents/Elements/Search";
-import { LoaderElements }   from "@commonComponents/Elements/Loader";
-import { Filter }           from "@commonComponents/Elements/Filter";
-import { ModalDelete }      from "@commonComponents/Shortcut/Modal";
+import { Search } from "@tailwindComponents/Elements/Search";
+import { Filter } from "@tailwindComponents/Elements/Filter";
+import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
+import { LoaderElements } from "@tailwindComponents/Elements/Loader";
+import { Pagination, TopSorterPagination } from "@tailwindComponents/Elements/Pagination";
 
-const URL_GET_DATA        = "intern_api_contacts_list";
-const URL_DELETE_ELEMENT  = "intern_api_contacts_delete";
+const URL_GET_DATA = "intern_api_contacts_list";
+const URL_DELETE_ELEMENT = "intern_api_contacts_delete";
 
-let SORTER = Sort.compareCreatedAtInverse;
-let sorters = [
-    { value: 0, label: 'Création',  identifiant: 'sorter-created' },
-    { value: 1, label: 'Nom',       identifiant: 'sorter-nom' },
-]
-let sortersFunction = [Sort.compareCreatedAtInverse, Sort.compareName];
+const SESSION_PERPAGE = "project.perpage.contacts";
+const SESSION_FILTERS = "project.filters.contacts";
 
 export class Contacts extends Component {
-    constructor(props) {
-        super(props);
+	constructor (props) {
+		super(props);
 
-        this.state = {
-            perPage: 20,
-            currentPage: 0,
-            sorter: SORTER,
-            sessionName: "local.contacts.list.pagination",
-            loadingData: true,
-            filters: [],
-            element: null,
-        }
+		this.state = {
+            perPage: List.getSessionPerpage(SESSION_PERPAGE, 20),
+			currentPage: 0,
+			sorter: Sort.compareCreatedAtInverse,
+			loadingData: true,
+            filters: List.getSessionFilters(SESSION_FILTERS, [], props.highlight),
+			element: null,
+		}
 
-        this.pagination = React.createRef();
-        this.delete = React.createRef();
-    }
+		this.pagination = React.createRef();
+		this.delete = React.createRef();
+	}
 
-    componentDidMount = () => { this.handleGetData(); }
+	componentDidMount = () => {
+		this.handleGetData();
+	}
 
-    handleGetData = () => { List.getData(this, Routing.generate(URL_GET_DATA), this.state.perPage, this.state.sorter); }
+	handleGetData = () => {
+		const { perPage, sorter, filters } = this.state;
+		List.getData(this, Routing.generate(URL_GET_DATA), perPage, sorter, this.props.highlight, filters, this.handleFilters);
+	}
 
-    handleUpdateData = (currentData) => { this.setState({ currentData }) }
+	handleUpdateData = (currentData) => {
+		this.setState({ currentData })
+	}
 
-    handleSearch = (search) => {
-        const { perPage, sorter, dataImmuable, filters } = this.state;
-        List.search(this, 'contact', search, dataImmuable, perPage, sorter, true, filters, this.handleFilters)
-    }
+	handleSearch = (search) => {
+		const { perPage, sorter, dataImmuable, filters } = this.state;
+		List.search(this, 'contact', search, dataImmuable, perPage, sorter, true, filters, this.handleFilters)
+	}
 
-    handleFilters = (filters) => {
-        const { dataImmuable, perPage, sorter } = this.state;
-        return List.filter(this, 'seen', dataImmuable, filters, perPage, sorter);
-    }
+	handleFilters = (filters, nData = null) => {
+		const { dataImmuable, perPage, sorter } = this.state;
+		return List.filter(this, 'seen', nData ? nData : dataImmuable, filters, perPage, sorter, SESSION_FILTERS);
+	}
 
-    handleModal = (identifiant, elem) => {
-        this.delete.current.handleClick();
-        this.setState({ element: elem })
-    }
+	handleUpdateList = (element, context) => {
+		const { data, dataImmuable, currentData, sorter } = this.state;
+		List.updateListPagination(this, element, context, data, dataImmuable, currentData, sorter)
+	}
 
-    handleUpdateList = (element, context) => {
-        const { data, dataImmuable, currentData, sorter } = this.state;
-        List.updateListPagination(this, element, context, data, dataImmuable, currentData, sorter)
-    }
+	handlePaginationClick = (e) => {
+		this.pagination.current.handleClick(e)
+	}
 
-    handlePaginationClick = (e) => { this.pagination.current.handleClick(e) }
+	handleChangeCurrentPage = (currentPage) => {
+		this.setState({ currentPage });
+	}
 
-    handleChangeCurrentPage = (currentPage) => { this.setState({ currentPage }); }
+	handlePerPage = (perPage) => {
+		List.changePerPage(this, this.state.data, perPage, this.state.sorter, SESSION_PERPAGE);
+	}
 
-    handlePerPage = (perPage) => { List.changePerPage(this, this.state.data, perPage, this.state.sorter); }
+	handleModal = (identifiant, elem) => {
+		this.delete.current.handleClick();
+		this.setState({ element: elem })
+	}
 
-    handleSorter = (nb) => { List.changeSorter(this, this.state.data, this.state.perPage, sortersFunction, nb); }
+	render () {
+		const { data, currentData, element, loadingData, perPage, currentPage, filters } = this.state;
 
-    render () {
-        const { sessionName, data, currentData, element, loadingData, perPage, currentPage, filters } = this.state;
+		let filtersItems = [
+			{ value: 0, label: "A lire", id: "f-to-seen" },
+			{ value: 1, label: "Déjà lu", id: "f-seen" },
+		]
 
-        let filtersItems = [
-            {value: 0, label: "A lire",  id: "f-to-seen"},
-            {value: 1, label: "Déjà lu", id: "f-seen"},
-        ]
-
-        return <>
-            {loadingData
-                ? <LoaderElements />
-                : <>
-                    <div className="toolbar">
-                        <div className="col-1">
-                            <div className="filters">
-                                <Filter filters={filters} items={filtersItems} onFilters={this.handleFilters}/>
-                            </div>
-                            <Search onSearch={this.handleSearch} placeholder="Rechercher pas nom.."/>
-                        </div>
+		return <>
+			{loadingData
+				? <LoaderElements />
+				: <>
+                    <div className="mb-2 flex flex-row">
+                        <Filter haveSearch={true} filters={filters} items={filtersItems} onFilters={this.handleFilters} />
+                        <Search haveFilter={true} onSearch={this.handleSearch} placeholder="Rechercher par nom.." />
                     </div>
 
-                    <TopSorterPagination taille={data.length} currentPage={currentPage} perPage={perPage} sorters={sorters}
+                    <TopSorterPagination taille={data.length} currentPage={currentPage} perPage={perPage}
                                          onClick={this.handlePaginationClick}
-                                         onPerPage={this.handlePerPage} onSorter={this.handleSorter} />
+                                         onPerPage={this.handlePerPage} />
 
                     <ContactsList data={currentData} onDelete={this.handleModal} />
 
-                    <Pagination ref={this.pagination} sessionName={sessionName} items={data} taille={data.length}
-                                perPage={perPage} onUpdate={this.handleUpdateData} onChangeCurrentPage={this.handleChangeCurrentPage}/>
+                    <Pagination ref={this.pagination} items={data} taille={data.length} currentPage={currentPage}
+                                perPage={perPage} onUpdate={this.handleUpdateData} onChangeCurrentPage={this.handleChangeCurrentPage} />
 
                     <ModalDelete refModal={this.delete} element={element} routeName={URL_DELETE_ELEMENT}
                                  title="Supprimer ce message" msgSuccess="Message supprimé"
-                                 onUpdateList={this.handleUpdateList} >
+                                 onUpdateList={this.handleUpdateList}>
                         Etes-vous sûr de vouloir supprimer définitivement ce message ?
                     </ModalDelete>
                 </>

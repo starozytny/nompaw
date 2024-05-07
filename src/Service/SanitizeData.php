@@ -75,15 +75,24 @@ class SanitizeData
     /**
      * @throws Exception
      */
+    public function createDate($date, $return = null): ?DateTime
+    {
+        if($date == null || $date == ""){
+            return $return;
+        }
+
+        return new DateTime($date);
+    }
+
     public function createTime($value, $return = null): ?DateTime
     {
         if($value != "" && $value != null){
-            $value = DateTime::createFromFormat('H:i', $value);
-            $value = new DateTime($value->format('Y-m-d H:i'), new DateTimeZone('Europe/Paris'));
-            $value->setTimezone(new DateTimeZone('Europe/Paris'));
+            $time = explode(':', $value);
 
-            $value->setTimezone(new DateTimeZone('UTC'));
-            return $value;
+            $duration = new DateTime();
+            $duration->setTime($time[0], $time[1]);
+
+            return $duration;
         }
 
         return $return;

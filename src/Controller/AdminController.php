@@ -19,7 +19,7 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -130,12 +130,6 @@ class AdminController extends AbstractController
     public function storage(): Response
     {
         return $this->render('admin/pages/storage/index.html.twig');
-    }
-
-    #[Route('/styleguide', name: 'styleguide_index')]
-    public function styleguide(): Response
-    {
-        return $this->render('admin/pages/styleguide/index.html.twig');
     }
 
     #[Route('/mails/{type}', name: 'mails_index', options: ['expose' => true])]

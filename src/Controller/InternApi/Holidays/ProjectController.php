@@ -3,10 +3,12 @@
 namespace App\Controller\InternApi\Holidays;
 
 use App\Entity\Holiday\HoProject;
+use App\Repository\Holiday\HoLifestyleRepository;
 use App\Repository\Holiday\HoProjectRepository;
 use App\Repository\Holiday\HoPropalActivityRepository;
 use App\Repository\Holiday\HoPropalDateRepository;
 use App\Repository\Holiday\HoPropalHouseRepository;
+use App\Repository\Holiday\HoTodoRepository;
 use App\Service\ApiResponse;
 use App\Service\Data\DataHolidays;
 use App\Service\FileUploader;
@@ -16,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/intern/api/projects', name: 'intern_api_projects_')]
 class ProjectController extends AbstractController
@@ -118,7 +120,9 @@ class ProjectController extends AbstractController
                            FileUploader $fileUploader,
                            HoPropalDateRepository $dateRepository,
                            HoPropalHouseRepository $houseRepository,
-                           HoPropalActivityRepository $activityRepository): Response
+                           HoPropalActivityRepository $activityRepository,
+                           HoTodoRepository $todoRepository,
+                           HoLifestyleRepository $lifestyleRepository): Response
     {
         $image = $obj->getImage();
         $obj->setPropalDate(null);
@@ -134,6 +138,12 @@ class ProjectController extends AbstractController
         }
         foreach($activityRepository->findBy(['project' => $obj]) as $item){
             $activityRepository->remove($item);
+        }
+        foreach($todoRepository->findBy(['project' => $obj]) as $item){
+            $todoRepository->remove($item);
+        }
+        foreach($lifestyleRepository->findBy(['project' => $obj]) as $item){
+            $lifestyleRepository->remove($item);
         }
 
         $repository->remove($obj, true);

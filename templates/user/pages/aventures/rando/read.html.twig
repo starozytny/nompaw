@@ -3,8 +3,7 @@
 {% set groupe = elem.groupe %}
 {% set author = elem.author %}
 
-{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
-{% set page_title_alone %}{{ elem.name }}{% endset %}
+{% set page_title %}{{ elem.name }}{% endset %}
 {% set page_subtitle %}Groupe d'aventures : {{ groupe.name }}{% endset %}
 
 {% block breadcrumb %}
@@ -15,224 +14,216 @@
     {{ parent() }}
 {% endblock %}
 
-{% set half_width = true %}
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_aventures_groupes_read', {slug: groupe.slug}),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner au groupe'
+    } %}
+    {% if app.user.id == elem.author.id or app.user.admin %}
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_aventures_randos_update', {slug: elem.slug}),
+            btn_type: 'default',
+            btn_icon: 'pencil',
+            btn_text: 'Modifier'
+        } %}
+    {% endif %}
+{% endset %}
 
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_aventures_groupes_read', {'slug': groupe.slug}) }}" class="btn btn-outline-default">
-                <span class="icon-left-arrow"></span>
-                <span>Retourner au groupe</span>
-            </a>
-        </div>
-        <div class="col-2">
-            {% if app.user.id == elem.author.id or app.user.admin %}
-                <a href="{{ path('user_aventures_randos_update', {'slug': elem.slug}) }}" class="btn btn-warning">
-                    <span class="icon-pencil"></span>
-                    <span>Modifier</span>
-                </a>
-                {% if elem.status != 2 %}
-                    <div class="delete-rando"
+    <div class="flex flex-col">
+        {% if elem.status != 2 %}
+            <div class="w-full flex justify-end gap-1 border-b pb-4 mb-4">
+                <div class="delete-rando"
+                     data-context="read"
+                     data-id="{{ elem.id }}"
+                     data-name="{{ elem.name }}"
+                     data-groupe-slug="{{ groupe.slug }}"
+                >
+                    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                        btn_link: "",
+                        btn_type: 'red',
+                        btn_icon: 'chart-3',
+                        btn_text: 'Supprimer'
+                    } %}
+                </div>
+                {% if elem.startAt != null and elem.adventure != null %}
+                    <div class="end-rando"
                          data-context="read"
                          data-id="{{ elem.id }}"
                          data-name="{{ elem.name }}"
                          data-groupe-slug="{{ groupe.slug }}"
                     >
-                        <button class="btn btn-danger btn-loader-without-text">
-                            <span class="icon-chart-3"></span>
-                            <span>Supprimer</span>
-                        </button>
+                        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                            btn_link: "",
+                            btn_type: 'green',
+                            btn_icon: 'chart-3',
+                            btn_text: 'Terminer'
+                        } %}
                     </div>
-                    {% if elem.startAt != null and elem.adventure != null %}
-                        <div class="end-rando"
-                             data-context="read"
-                             data-id="{{ elem.id }}"
-                             data-name="{{ elem.name }}"
-                             data-groupe-slug="{{ groupe.slug }}"
-                        >
-                            <button class="btn btn-success btn-loader-without-text">
-                                <span class="icon-chart-3"></span>
-                                <span>Terminer</span>
-                            </button>
-                        </div>
-                    {% endif %}
                 {% endif %}
-            {% endif %}
-        </div>
-    </div>
+            </div>
+        {% endif %}
 
-    <div class="page-default">
-        <div class="rando-read">
-            <div class="rando-meta">
-                <div class="features">
-                    <div class="ra-status active">
-                        <span>{{ elem.statusString }}</span>
-                    </div>
-                    <div class="members">
-                        {% for member in groupe.links %}
-                            <div class="member">
-                                <div class="avatar">
-                                    {% if member.user.avatarFile %}
-                                        <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur">
-                                    {% else %}
-                                        <div class="avatar-letter">{{ member.user.lastname | slice(0, 1) }}{{ member.user.firstname | slice(0,1) }}</div>
-                                    {% endif %}
-                                </div>
-                                <span class="tooltip">{{ member.user.displayName }}</span>
-                            </div>
-                        {% endfor %}
+        <div class="w-full flex gap-4 border-b pb-4 mb-4">
+            <div class="w-full flex flex-col gap-4">
+                <div>
+                    <div class="inline-block text-xs rounded-2xl px-2 py-1 bg-yellow-500/10 text-yellow-600">
+                        <span class="inline-block w-2 h-2 bg-yellow-500 rounded-full"></span>
+                        <span class="pl-1">{{ elem.statusString }}</span>
                     </div>
                 </div>
-                <div class="author">
-                    <div class="user">
-                        <div class="name">{{ author.displayName }}</div>
-                        <div class="avatar">
-                            <div class="avatar-letter">{{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}</div>
-                        </div>
-                    </div>
+
+                <div class="flex ml-4">
+                    {% for member in groupe.links %}
+                        {% include "user/layout/components/elements/avatar.html.twig" %}
+                    {% endfor %}
                 </div>
             </div>
+            <div class="w-full flex items-center justify-end gap-2">
+                <div class="font-semibold">{{ author.displayName }}</div>
+                <div class="w-8 h-8 text-sm shadow rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                    {{ author.lastname | slice(0,1) }}{{ author.firstname | slice(0,1) }}
+                </div>
+            </div>
+        </div>
 
-            <div class="rando-content">
-                <div class="rando-col-propals {{- elem.startAt and elem.adventure ? ' to-line' : '' -}}">
-                    <div id="rando_date"
+        <div class="flex flex-col gap-6 xl:grid xl:grid-cols-3">
+            <div class="flex flex-col gap-4 sm:flex-row xl:flex-col">
+                <div id="rando_date" class="w-full"
+                     data-rando-id="{{ elem.id }}"
+                     data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                     data-propals="{{ propalDates }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-author-id="{{ elem.author.id }}"
+                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                     data-status="{{ elem.status }}"
+                     data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : "" }}"
+                     data-adventure-id="{{ elem.adventure ? elem.adventure.id : "" }}"
+                >
+                    {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+                </div>
+
+                {% if elem.startAt %}
+                    <div id="rando_adventures" class="w-full"
                          data-rando-id="{{ elem.id }}"
-                         data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
-                         data-propals="{{ propalDates }}"
                          data-user-id="{{ app.user.id }}"
+                         data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
+                         data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
+                         data-propals="{{ propalAdvs }}"
                          data-author-id="{{ elem.author.id }}"
                          data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
                          data-status="{{ elem.status }}"
-                         data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : "" }}"
-                         data-adventure-id="{{ elem.adventure ? elem.adventure.id : "" }}"
                     >
-                        {% include "layout/components/loader.html.twig" %}
-                    </div>
-
-                    {% if elem.startAt %}
-                        <div id="rando_adventures"
-                             data-rando-id="{{ elem.id }}"
-                             data-user-id="{{ app.user.id }}"
-                             data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
-                             data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
-                             data-propals="{{ propalAdvs }}"
-                             data-author-id="{{ elem.author.id }}"
-                             data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
-                             data-status="{{ elem.status }}"
-                        >
-                            {% include "layout/components/loader.html.twig" %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                {% if elem.startAt and elem.adventure %}
-                    {% set adventure = elem.adventure %}
-
-                    <div class="rando-details">
-                        <div class="rando-card">
-                            <div class="rando-card-header">
-                                <div class="name">{{ adventure.name }}</div>
-                                <div class="date">
-                                    {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
-                                </div>
-                            </div>
-                            <div class="rando-card-body selected">
-                                <div class="rando-card-meta">
-                                    {% if adventure.duration %}
-                                        <div class="sub-icon">
-                                            <span class="icon-time"></span>
-                                            <span>{{ adventure.duration | date('H\\hi') | duration }}</span>
-                                        </div>
-                                    {% endif %}
-                                    {% if adventure.url and adventure.url != "https://" %}
-                                        <div class="sub-icon">
-                                            <span class="icon-link"></span>
-                                            <span><a href="{{ adventure.url }}" class="url-topo" target="_blank">Lien du topo</a></span>
-                                        </div>
-                                    {% endif %}
-                                    {% if elem.distance %}
-                                        <div class="sub-icon">
-                                            <span class="icon-box"></span>
-                                            <span>Distance : {{ elem.distance }} km</span>
-                                        </div>
-                                    {% endif %}
-                                    {% if elem.devPlus %}
-                                        <div class="sub-icon">
-                                            <span class="icon-box"></span>
-                                            <span>D+ : {{ elem.devPlus }} m</span>
-                                        </div>
-                                    {% endif %}
-                                    {% if elem.altitude %}
-                                        <div class="sub-icon">
-                                            <span class="icon-box"></span>
-                                            <span>Altitude : {{ elem.altitude }} m</span>
-                                        </div>
-                                    {% endif %}
-                                    {% if elem.googlePhotos %}
-                                        <div class="sub-icon">
-                                            <span class="icon-google">
-                                                <span class="path1"></span><span class="path2"></span><span class="path3"></span>
-                                                <span class="path4"></span><span class="path5"></span><span class="path6"></span>
-                                            </span>
-                                            <span><a href="{{ elem.googlePhotos }}" target="_blank">{{ elem.googlePhotos }}</a></span>
-                                        </div>
-                                    {% endif %}
-                                    {% if elem.story %}
-                                        <div class="sub-icon">
-                                            <span class="icon-book-1">
-                                                <span class="path1"></span><span class="path2"></span><span class="path3"></span>
-                                                <span class="path4"></span><span class="path5"></span><span class="path6"></span>
-                                            </span>
-                                            <span><a href="{{ path('user_homepage') ~ "blog/" ~ elem.story }}" target="_blank">Lien vers l'histoire</a></span>
-                                        </div>
-                                    {% endif %}
-                                    {% if elem.description %}
-                                        <div class="sub-icon">
-                                            <span class="icon-file"></span>
-                                            <span>{{ elem.description | raw }}</span>
-                                        </div>
-                                    {% endif %}
-                                    <div class="members">
-                                        {% for v in adventure.votes %}
-                                            {% set participant = null %}
-                                            {% for u in users %}
-                                                {% if u.id == v %} {% set participant = u %} {% endif %}
-                                            {% endfor %}
-
-                                            <div class="member">
-                                                <div class="avatar">
-                                                    {% if participant.avatarFile %}
-                                                        <img src="{{ asset(participant.avatarFile) }}" alt="Avatar utilisateur">
-                                                    {% else %}
-                                                        <div class="avatar-letter">{{ participant.lastname | slice(0, 1) }}{{ participant.firstname | slice(0,1) }}</div>
-                                                    {% endif %}
-                                                </div>
-                                                <span class="tooltip">{{ participant.displayName }}</span>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% if app.user.id == elem.author.id or app.user.admin %}
-                                <a class="rando-card-footer" href="{{ path('user_aventures_randos_update', {'slug': elem.slug}) }}">
-                                    <div style="color: white">
-                                        <span class="icon-add"></span>
-                                        <span>Ajouter des informations</span>
-                                    </div>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div id="rando_images"
-                         data-rando-id="{{ elem.id }}"
-                         data-user-id="{{ app.user.id }}"
-                         data-images="{{ images }}"
-                    >
-                        {% include "layout/components/loader.html.twig" %}
+                        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
                     </div>
                 {% endif %}
             </div>
+
+            {% if elem.startAt and elem.adventure %}
+                {% set adventure = elem.adventure %}
+
+                <div class="xl:col-span-2">
+                    <div class="bg-white border rounded-md">
+                        <div class="p-4 bg-color0/80 text-slate-50 rounded-t-md">
+                            <div class="font-semibold">{{ adventure.name }}</div>
+                            <div class="text-gray-300 text-sm">
+                                {{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex flex-col gap-1">
+                                {% if elem.description %}
+                                    <div class="flex items-center gap-1 mb-4 text-sm">
+                                        {{ elem.description | raw }}
+                                    </div>
+                                {% endif %}
+                                {% if adventure.duration %}
+                                    <div class="flex items-center gap-1">
+                                        <span class="icon-time"></span>
+                                        <span>{{ adventure.duration | date('H\\hi', "UTC") | duration }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if adventure.url and adventure.url != "https://" %}
+                                    <div class="flex items-center gap-1">
+                                        <span class="icon-link"></span>
+                                        <span><a href="{{ adventure.url }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien du topo</a></span>
+                                    </div>
+                                {% endif %}
+                                {% if elem.distance %}
+                                    <div class="flex items-center gap-1">
+                                        <span class="icon-box"></span>
+                                        <span>Distance : {{ elem.distance }} km</span>
+                                    </div>
+                                {% endif %}
+                                {% if elem.devPlus %}
+                                    <div class="flex items-center gap-1">
+                                        <span class="icon-box"></span>
+                                        <span>D+ : {{ elem.devPlus }} m</span>
+                                    </div>
+                                {% endif %}
+                                {% if elem.altitude %}
+                                    <div class="flex items-center gap-1">
+                                        <span class="icon-box"></span>
+                                        <span>Altitude : {{ elem.altitude }} m</span>
+                                    </div>
+                                {% endif %}
+                                {% if elem.googlePhotos %}
+                                    <div class="flex items-center gap-1">
+                                            <span class="icon-google icon-google-ml">
+                                                <span class="path1"></span><span class="path2"></span><span class="path3"></span>
+                                                <span class="path4"></span><span class="path5"></span><span class="path6"></span>
+                                            </span>
+                                        <span><a href="{{ elem.googlePhotos }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">{{ elem.googlePhotos }}</a></span>
+                                    </div>
+                                {% endif %}
+                                {% if elem.story %}
+                                    <div class="flex items-center gap-1">
+                                            <span class="icon-book-1"></span>
+                                        <span><a href="{{ path('user_homepage') ~ "blog/" ~ elem.story }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien vers l'histoire</a></span>
+                                    </div>
+                                {% endif %}
+                                <div class="flex ml-4 mt-4">
+                                    {% for v in adventure.votes %}
+                                        {% set participant = null %}
+                                        {% for u in users %}
+                                            {% if u.id == v %} {% set participant = u %} {% endif %}
+                                        {% endfor %}
+
+                                        <div class="avatar relative -ml-4">
+                                            <div class="w-8 h-8 rounded-full shadow">
+                                                {% if participant.avatarFile %}
+                                                    <img src="{{ asset(participant.avatarFile) }}" alt="Avatar utilisateur" class="w-8 h-8 object-cover rounded-full">
+                                                {% else %}
+                                                    <div class="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                                                        {{ participant.lastname | slice(0, 1) }}{{ participant.firstname | slice(0,1) }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">{{ participant.displayName }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% if app.user.id == elem.author.id or app.user.admin %}
+                            <a class="block text-center bg-blue-500 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
+                                <span class="icon-add"></span>
+                                <span>Ajouter des informations</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="rando_images" class="xl:col-span-3"
+                     data-rando-id="{{ elem.id }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-images="{{ images }}"
+                >
+                    {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

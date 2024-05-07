@@ -2,8 +2,7 @@
 
 {% set author = elem.author %}
 
-{% block title %}{{ elem.name }} | {{ page_prefix }}{% endblock %}
-{% set page_title_alone %}{{ elem.name }}{% endset %}
+{% set page_title %}{{ elem.name }}{% endset %}
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
@@ -12,40 +11,46 @@
     {{ parent() }}
 {% endblock %}
 
-{% set half_width = true %}
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_birthdays_index'),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner aux anniversaires'
+    } %}
+    {% if app.user.id == elem.author.id or app.user.admin %}
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_birthdays_update', {slug: elem.slug}),
+            btn_type: 'default',
+            btn_icon: 'pencil',
+            btn_text: 'Modifier'
+        } %}
+    {% endif %}
+{% endset %}
 
 {% block main_content %}
-    <div class="page-actions">
-        <div class="col-1">
-            <a href="{{ path('user_birthdays_index') }}" class="btn btn-outline-default">
-                <span class="icon-left-arrow"></span>
-                <span>Retourner aux anniversaires</span>
-            </a>
-        </div>
-        <div class="col-2">
-            {% if app.user.id == elem.author.id or app.user.admin %}
-                <div id="share_link" class="btn btn-default"
-                     data-url="{{ path('user_birthdays_read', {'slug': elem.slug, 'code': elem.code}) }}"
-                >
-                    <span class="icon-share"></span>
-                    <span>Partager</span>
+    <div class="flex flex-col">
+        {% if app.user.id == elem.author.id or app.user.admin %}
+            <div class="w-full flex justify-end gap-1 border-b pb-4 mb-4">
+                <div id="share_link" class="cursor-pointer flex items-center justify-center text-center gap-1 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+                     data-url="{{ path('user_birthdays_read', {slug: elem.slug, code: elem.code}) }}">
+                    <span class="icon-share inline-block translate-y-0.5"></span>
+                    <span class="ml-1">Partager</span>
                 </div>
-                <a href="{{ path('user_birthdays_update', {'slug': elem.slug}) }}" class="btn btn-warning">
-                    <span class="icon-pencil"></span>
-                    <span>Modifier</span>
-                </a>
                 <div class="delete-birthday"
                      data-context="read"
                      data-id="{{ elem.id }}"
                      data-name="{{ elem.name }}"
                 >
-                    <button class="btn btn-danger btn-loader-without-text">
-                        <span class="icon-chart-3"></span>
-                        <span>Supprimer</span>
-                    </button>
+                    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                        btn_link: "",
+                        btn_type: 'red',
+                        btn_icon: 'chart-3',
+                        btn_text: 'Supprimer'
+                    } %}
                 </div>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     </div>
 
     {% include "user/pages/birthdays/birthday/components/read_content.html.twig" %}

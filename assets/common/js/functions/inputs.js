@@ -114,8 +114,8 @@ function timeInput (e, source) {
         let hours = value.slice(0,2);
         let minutes = value.slice(2,4);
 
-        if(minutes !== "h"){
-            return hours + "h" + minutes;
+        if(minutes !== ":"){
+            return hours + ":" + minutes;
         }
     }
 

@@ -8,7 +8,7 @@ const Validateur = require("@commonFunctions/validateur");
 function generiqueSendForm (self, context, paramsToValidate, url, data, urlReload) {
     let validate = Validateur.validateur(paramsToValidate)
     if(!validate.code){
-        showErrors(this, validate);
+        showErrors(self, validate);
     }else {
         loader(true);
         axios({ method: context === "update" ? "PUT" : "POST", url: url, data: data })
@@ -16,6 +16,24 @@ function generiqueSendForm (self, context, paramsToValidate, url, data, urlReloa
             .catch(function (error) { displayErrors(self, error); loader(false); })
         ;
     }
+}
+
+function axiosGetData(self, url, sorter = null){
+    axios.get(url, {})
+        .then(function (response) {
+            let data = response.data;
+            if(sorter !== null){
+                data.sort(sorter);
+            }
+            self.setState({ data: data });
+        })
+        .catch(function (error) {
+            displayErrors(self, error, "Une erreur est survenue lors de la récupération des données.")
+        })
+        .then(function () {
+            self.setState({ loadData: false });
+        })
+    ;
 }
 
 function loader(status){
@@ -31,12 +49,16 @@ function setValue (value, defaultValue = "") {
     return value === null ? defaultValue : value;
 }
 
+function setDate (value, retour = "") {
+    return value ? moment(value).format('YYYY-MM-DD') : retour;
+}
+
 function setValueDate (value, defaultValue = "") {
     return value === null ? defaultValue : moment(value).format('DD/MM/YYYY');
 }
 
 function setValueTime (value, defaultValue = "") {
-    return value === null ? defaultValue : moment(value).format('HH[h]mm');
+    return value === null ? defaultValue : moment.utc(value).format('HH:mm');
 }
 
 function showErrors(self, validate, text="Veuillez vérifier les informations transmises.", toTop = false)
@@ -67,14 +89,15 @@ function displayErrors(self, error, message="Veuillez vérifier les informations
 function updateValueCheckbox(e, items, value){
     return (e.currentTarget.checked) ? [...items, ...[value]] : items.filter(v => v !== value)
 }
-
 module.exports = {
     generiqueSendForm,
+    axiosGetData,
     loader,
     setValue,
+    setDate,
     setValueDate,
     setValueTime,
     showErrors,
     displayErrors,
-    updateValueCheckbox,
+    updateValueCheckbox
 }

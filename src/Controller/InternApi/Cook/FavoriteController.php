@@ -8,7 +8,7 @@ use App\Service\ApiResponse;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/intern/api/cook/favorites', name: 'intern_api_cook_favorites_')]
 class FavoriteController extends AbstractController

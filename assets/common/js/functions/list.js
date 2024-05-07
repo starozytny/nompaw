@@ -1,177 +1,284 @@
-const axios      = require("axios");
+const axios = require("axios");
 
-const Formulaire     = require("@commonFunctions/formulaire");
+const Formulaire = require("@commonFunctions/formulaire");
 const SearchFunction = require("@commonFunctions/search");
 const FilterFunction = require("@commonFunctions/filter");
 
-function getData (self, url, perPage, sorter, highlight) {
-    axios({ method: "GET", url: url, data: {} })
-        .then(function (response) {
-            let data = response.data;
-            if(sorter) data.sort(sorter);
-            let [currentData, currentPage] = setCurrentPage(highlight, data, perPage);
-            self.setState({ data: data, dataImmuable: data, currentData: currentData, currentPage: currentPage, loadingData: false })
-        })
-        .catch(function (error) { Formulaire.displayErrors(self, error); })
-    ;
+function getData (self, url, perPage, sorter, highlight = null, filters = null, filterFunction, nameHighlight = "id") {
+	axios({ method: "GET", url: url, data: {} })
+		.then(function (response) {
+			let data = response.data;
+			let dataImmuable = response.data;
+
+			if (filters) {
+				data = filterFunction(filters, dataImmuable);
+			}
+
+			if (sorter) data.sort(sorter);
+			if (sorter) dataImmuable.sort(sorter);
+
+			let [currentData, currentPage] = setCurrentPage(highlight, data, perPage, nameHighlight);
+
+			self.setState({ data: data, dataImmuable: dataImmuable, currentData: currentData, currentPage: currentPage, loadingData: false })
+		})
+		.catch(function (error) {
+			Formulaire.displayErrors(self, error);
+		})
+	;
 }
 
-function setCurrentPage (highlight, data, perPage) {
-    highlight = parseInt(highlight);
+function setCurrentPage (highlight, data, perPage, nameHighlight) {
+	let offset = 0, currentPage = 0;
+	if (highlight) {
+		highlight = parseInt(highlight);
+		data.forEach((elem, index) => {
+			if (elem[nameHighlight] === highlight) {
+				offset = index
+			}
+		})
+	}
 
-    let offset = 0, currentPage = 0;
-    if(highlight){
-        data.forEach((elem, index) => {
-            if(elem.id === highlight){
-                offset = index
-            }
-        })
-    }
+	let pageCount = Math.ceil(data.length / perPage);
+	if (pageCount !== 0) {
+		currentPage = Math.trunc(offset / perPage);
+	}
 
-    let pageCount = Math.ceil(data.length / perPage);
-    if(pageCount !== 0){
-        currentPage = Math.trunc(offset / perPage);
-    }
+	let start = currentPage * perPage;
+	let currentData = data.slice(start, start + perPage);
 
-    let start = currentPage * perPage;
-    let currentData = data.slice(start, start + perPage);
-
-    return [currentData, currentPage]
+	return [currentData, currentPage]
 }
 
-function search (self, type, search, dataImmuable, perPage, sorter, haveFilter=false, filters, filterFunction) {
-    if(haveFilter) {
-        dataImmuable = filterFunction(filters);
-    }
-    let newData = dataImmuable;
-    if(search !== ""){
-        newData = SearchFunction.search(type, dataImmuable, search);
-    }
-    if(sorter) newData.sort(sorter);
-    self.setState({ data: newData, currentData: newData.slice(0, perPage) });
+function search (self, type, search, dataImmuable, perPage, sorter, haveFilter = false, filters, filterFunction) {
+	if (haveFilter) {
+		dataImmuable = filterFunction(filters);
+	}
+	let newData = dataImmuable;
+	if (search !== "") {
+		newData = SearchFunction.search(type, dataImmuable, search);
+	} else {
+		if (self.pagination.current) {
+			self.pagination.current.handlePageOne();
+		}
+	}
+	if (sorter) newData.sort(sorter);
+	self.setState({ data: newData, currentData: newData.slice(0, perPage) });
 }
 
-function filter (self, property, dataImmuable, filters, perPage, sorter) {
-    let newData = FilterFunction.filter(property, dataImmuable, filters);
-    if(sorter) newData.sort(sorter);
+function filter (self, property, dataImmuable, filters, perPage, sorter, sessionName) {
+	let newData = FilterFunction.filter(dataImmuable, filters, property);
+	if (sorter) newData.sort(sorter);
 
-    self.pagination.current.handlePageOne();
-    self.setState({ data: newData, currentData: newData.slice(0, perPage), filters: filters });
-    return newData;
+	if (self.pagination.current) {
+		self.pagination.current.handlePageOne();
+	}
+	self.setState({ data: newData, currentData: newData.slice(0, perPage), filters: filters });
+
+	if (sessionName) {
+		sessionStorage.setItem(sessionName, JSON.stringify(filters));
+	}
+	return newData;
 }
 
-function changePerPage (self, data, perPage, sorter) {
-    self.pagination.current.handlePerPage(perPage);
-    updatePerPage(self, data, perPage, sorter)
+function filterCustom (self, filterFunction, dataImmuable, filters, perPage, sorter, sessionName) {
+	let newData = filterFunction(dataImmuable, filters);
+	if (sorter) newData.sort(sorter);
+
+	if (self.pagination.current) {
+		self.pagination.current.handlePageOne();
+	}
+	self.setState({ data: newData, currentData: newData.slice(0, perPage), filters: filters });
+
+	if (sessionName) {
+		sessionStorage.setItem(sessionName, JSON.stringify(filters));
+	}
+	return newData;
 }
 
-function changeSorter (self, data, perPage, sortersFunction, nb) {
-    let sorter = sortersFunction[nb];
-    updatePerPage(self, data, perPage, sorter)
+function changePerPage (self, data, perPage, sorter, sessionName) {
+	self.pagination.current.handlePerPage(perPage);
+	updatePerPage(self, data, perPage, sorter);
+
+	if (sessionName) {
+		sessionStorage.setItem(sessionName, perPage);
+	}
 }
 
-function update (context, data, element) {
-    let newData = [];
+function changeSorter (self, data, perPage, sortersFunction, nb, sessionName = null) {
+	let sorter = sortersFunction[nb];
+	updatePerPage(self, data, perPage, sorter);
 
-    switch (context){
-        case "delete_group":
-            data.forEach(el => {
-                if(!element.includes(el.id)){
-                    newData.push(el);
-                }
-            })
-            break;
-        case "delete":
-            newData = data.filter(el => el.id !== element.id);
-            break;
-        case "update":
-            data.forEach(el => {
-                if(el.id === element.id){
-                    el = element;
-                }
-                newData.push(el);
-            })
-            break;
-        default:
-            newData = data ? data : [];
-            newData.push(element);
-            break;
-    }
-
-    return newData;
+	if (sessionName) {
+		sessionStorage.setItem(sessionName, "" + nb);
+	}
+	self.setState({ nbSorter: nb, currentPage: 0 })
 }
 
-function updateDataMuta (element, context, data, sorter) {
-    let nData = [];
-    switch (context){
-        case "delete":
-            nData = data.filter(el => el.id !== element.id);
-            break;
-        case "update":
-            nData = data.map(el => {
-                if (el.id === element.id) {
-                    return { ...element, ...element };
-                } else {
-                    return el;
-                }
-            });
-            break;
-        default:
-            nData = [...data, element];
-            break;
-    }
+function update (context, data, element, nameProperty = "id") {
+	let newData = [];
 
-    if(sorter){
-        nData.sort(sorter);
-    }
+	switch (context) {
+		case "delete_group":
+			data.forEach(el => {
+				if (!element.includes(el[nameProperty])) {
+					newData.push(el);
+				}
+			})
+			break;
+		case "delete":
+			newData = data.filter(el => el[nameProperty] !== element[nameProperty]);
+			break;
+		case "update":
+			data.forEach(el => {
+				if (el[nameProperty] === element[nameProperty]) {
+					el = element;
+				}
+				newData.push(el);
+			})
+			break;
+		default:
+			newData = data ? data : [];
+			newData.push(element);
+			break;
+	}
 
-    return nData;
+	return newData;
+}
+
+function updateDataMuta (element, context, data, sorter, nameProperty = "id") {
+	let nData = [];
+	switch (context) {
+		case "delete":
+			nData = data.filter(el => el[nameProperty] !== element[nameProperty]);
+			break;
+		case "update":
+			nData = data.map(el => {
+				if (el[nameProperty] === element[nameProperty]) {
+					return { ...element, ...element };
+				} else {
+					return el;
+				}
+			});
+			break;
+		default:
+			nData = [...data, element];
+			break;
+	}
+
+	if (sorter) {
+		nData.sort(sorter);
+	}
+
+	return nData;
+}
+
+function update (context, data, element, nameProperty = "id") {
+	let newData = [];
+
+	switch (context) {
+		case "delete_group":
+			data.forEach(el => {
+				if (!element.includes(el[nameProperty])) {
+					newData.push(el);
+				}
+			})
+			break;
+		case "delete":
+			newData = data.filter(el => el[nameProperty] !== element[nameProperty]);
+			break;
+		case "update":
+			data.forEach(el => {
+				if (el[nameProperty] === element[nameProperty]) {
+					el = element;
+				}
+				newData.push(el);
+			})
+			break;
+		default:
+			newData = data ? data : [];
+			newData.push(element);
+			break;
+	}
+
+	return newData;
 }
 
 function updateData (element, context, data, sorter) {
-    let newData = update(context, data, element);
-    if(sorter){
-        newData.sort(sorter)
-    }
+	let newData = update(context, data, element);
+	if (sorter) {
+		newData.sort(sorter)
+	}
 
-    return newData;
+	return newData;
 }
 
-function updateListPagination (self, element, context, data, dataImmuable, currentData, sorter) {
-    let newData = updateData(element, context, data, sorter);
-    let newDataImmuable = updateData(element, context, dataImmuable, sorter);
-    let newCurrentData = updateData(element, context, currentData, sorter);
+function updateListPagination (self, element, context, data, dataImmuable, currentData, sorter, toHighlight = false, nameHighlight, perPage) {
+	let newData = updateData(element, context, data, sorter);
+	let newDataImmuable = updateData(element, context, dataImmuable, sorter);
+	let newCurrentData = updateData(element, context, currentData, sorter);
 
-    self.setState({
-        data: newData,
-        dataImmuable: newDataImmuable,
-        currentData: newCurrentData,
-        element: element
-    })
+	let currentPage;
+	if (toHighlight) {
+		[newCurrentData, currentPage] = setCurrentPage(element[nameHighlight], newData, perPage);
+
+		self.setState({ currentPage: currentPage, highlight: element[nameHighlight] })
+	}
+
+	self.setState({
+		data: newData,
+		dataImmuable: newDataImmuable,
+		currentData: newCurrentData,
+		element: element
+	})
 }
 
 function updatePerPage (self, data, perPage, sorter) {
-    if(sorter) {
-        data.sort(sorter)
-    }
+	if (sorter) {
+		data.sort(sorter)
+	}
 
-    self.setState({
-        data: data,
-        currentData: data.slice(0, perPage),
-        perPage: perPage,
-        sorter: sorter,
-    })
+	self.setState({
+		data: data,
+		currentData: data.slice(0, perPage),
+		perPage: perPage,
+		sorter: sorter,
+	})
+}
+
+function getSessionSorter (sessionName, sorter, sortersFunction, nb = 0) {
+	let saveNbSorter = sessionStorage.getItem(sessionName);
+	let nbSorter = saveNbSorter !== null ? parseInt(saveNbSorter) : nb;
+	if (nbSorter) {
+		sorter = sortersFunction[nbSorter];
+	}
+
+	return [sorter, nbSorter];
+}
+
+function getSessionPerpage (sessionName, perPage) {
+	let saveNbPerPage = sessionStorage.getItem(sessionName);
+	return saveNbPerPage !== null ? parseInt(saveNbPerPage) : perPage;
+}
+
+function getSessionFilters (sessionName, filters, highlight) {
+	let saveFilters = highlight ? sessionStorage.getItem(sessionName) : null;
+	return saveFilters !== null ? JSON.parse(saveFilters) : filters;
 }
 
 module.exports = {
-    getData,
-    search,
-    filter,
-    changePerPage,
-    changeSorter,
-    updateDataMuta,
-    updateData,
-    updateListPagination,
-    updatePerPage,
-    setCurrentPage,
+	getData,
+	search,
+	filter,
+	filterCustom,
+	changePerPage,
+	changeSorter,
+	update,
+	updateDataMuta,
+	updateData,
+	updateListPagination,
+	updatePerPage,
+	setCurrentPage,
+	getSessionSorter,
+	getSessionPerpage,
+	getSessionFilters,
 }

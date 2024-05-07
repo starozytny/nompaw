@@ -19,7 +19,7 @@ class RaPropalDate
     #[Groups(['pr_date_list'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['pr_date_list'])]
     private ?\DateTimeInterface $dateAt = null;
 
