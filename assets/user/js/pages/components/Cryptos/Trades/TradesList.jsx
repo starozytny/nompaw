@@ -190,14 +190,13 @@ export class TradesList extends Component {
             nData.push(item);
         })
 
-        let total = 0, totalRetrait = 0, totalBonus = 0;
+        let total = 0, totalDepot = 0, totalRetrait = 0, totalBonus = 0;
 
         let items = [];
         nData.forEach((yItem, index) => {
 
-
             let cryptosY = [];
-            let totalYRetrait = 0;
+            let totalYDepot = 0, totalYRetrait = 0;
 
             let itemsMonth = [];
             yItem.items.forEach((mItem, ind) => {
@@ -227,6 +226,8 @@ export class TradesList extends Component {
                             break;
                         case DEPOT:
                             total += elem.total;
+                            totalDepot += elem.total;
+                            totalYDepot += elem.total;
                             break;
                         case ACHAT:
                             total -= elem.total;
@@ -276,6 +277,9 @@ export class TradesList extends Component {
                             Dispo : {Sanitaze.toFormatCurrency(total)}
                         </div>
                         <div>
+                            Dépôt : {Sanitaze.toFormatCurrency(totalDepot)}
+                        </div>
+                        <div>
                             Retrait : {Sanitaze.toFormatCurrency(totalRetrait)}
                         </div>
                         <div>
@@ -298,7 +302,7 @@ export class TradesList extends Component {
                 </div>
                 <div className="item-year bg-color0 text-slate-50">
                     <div className="font-semibold text-xl">
-                        Fin {yItem.year} - Retrait : {Sanitaze.toFormatCurrency(totalYRetrait)}
+                        Fin {yItem.year} - Dépot: {Sanitaze.toFormatCurrency(totalYDepot)} - Retrait : {Sanitaze.toFormatCurrency(totalYRetrait)}
                     </div>
                 </div>
             </div>)

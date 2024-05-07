@@ -104,7 +104,7 @@ class AdminCryptoCoinbaseCommand extends Command
                         ->setFromPrice($fromCoin === "EUR" ? 1 : $item[6])
                         ->setFromNbToken($type == TypeType::Achat ? $item[8] : $item[4])
 
-                        ->setToCoin($item[3])
+                        ->setToCoin($item[5])
                         ->setToPrice($item[3] === "EUR" ? 1 : $item[6])
                         ->setToNbToken($type == TypeType::Achat ? $item[4] : $item[7])
 
