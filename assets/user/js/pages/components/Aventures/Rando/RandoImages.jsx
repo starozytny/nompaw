@@ -251,8 +251,8 @@ export class RandoImages extends Component {
 						   Les photos seront automatiquement redimensionnées s'ils sont trop grandes/lourdes.
 					   </Alert>
                        <div className="mt-4">
-                           <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={100} maxSize={95330000} {...params}>
-                               Photos (100 maximum par envoi)
+                           <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={50} maxSize={95330000} {...params}>
+                               Photos (50 maximum par envoi)
                            </InputFile>
                        </div>
                    </>}
