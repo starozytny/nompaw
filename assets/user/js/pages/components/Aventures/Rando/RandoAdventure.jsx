@@ -4,9 +4,6 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import moment from 'moment';
-import 'moment/locale/fr';
-
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Inputs from "@commonFunctions/inputs";
@@ -225,7 +222,7 @@ export class RandoAdventure extends Component {
             }
 
             <Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une aventure"
-                   content={<>
+                   content={<div className="flex flex-col gap-4">
                        <div className="flex gap-4">
                            <div className="w-full">
                                <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
@@ -237,7 +234,7 @@ export class RandoAdventure extends Component {
                        <div>
                            <Input identifiant="url" valeur={url} {...params}>Lien du topo</Input>
                        </div>
-                   </>}
+                   </div>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.deletePropal} identifiant='delete-propal-adventure' maxWidth={414} title="Supprimer l'aventure"

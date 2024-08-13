@@ -39,7 +39,7 @@ class CrTrade
     #[Groups(['trade_list'])]
     private ?float $fromPrice = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(['trade_list'])]
     private ?float $toPrice = null;
 
@@ -53,11 +53,33 @@ class CrTrade
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
-    private ?float $nbToken = null;
+    private ?float $fromNbToken = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['trade_list'])]
+    private ?float $toNbToken = null;
+
+    #[ORM\Column]
+    #[Groups(['trade_list'])]
+    private ?float $totalReal = null;
+
+    #[ORM\Column]
+    #[Groups(['trade_list'])]
+    private ?float $total = null;
 
     #[ORM\ManyToOne(inversedBy: 'crTrades')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    #[ORM\Column]
+    private ?bool $isImported = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['trade_list'])]
+    private ?string $importedFrom = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $importedId = null;
 
     public function getId(): ?int
     {
@@ -129,7 +151,7 @@ class CrTrade
         return $this->toPrice;
     }
 
-    public function setToPrice(float $toPrice): static
+    public function setToPrice(?float $toPrice): static
     {
         $this->toPrice = $toPrice;
 
@@ -160,14 +182,50 @@ class CrTrade
         return $this;
     }
 
-    public function getNbToken(): ?float
+    public function getFromNbToken(): ?float
     {
-        return $this->nbToken;
+        return $this->fromNbToken;
     }
 
-    public function setNbToken(float $nbToken): static
+    public function setFromNbToken(float $fromNbToken): static
     {
-        $this->nbToken = $nbToken;
+        $this->fromNbToken = $fromNbToken;
+
+        return $this;
+    }
+
+    public function getToNbToken(): ?float
+    {
+        return $this->toNbToken;
+    }
+
+    public function setToNbToken(?float $toNbToken): static
+    {
+        $this->toNbToken = $toNbToken;
+
+        return $this;
+    }
+
+    public function getTotalReal(): ?float
+    {
+        return $this->totalReal;
+    }
+
+    public function setTotalReal(float $totalReal): static
+    {
+        $this->totalReal = $totalReal;
+
+        return $this;
+    }
+
+    public function getTotal(): ?float
+    {
+        return $this->total;
+    }
+
+    public function setTotal(float $total): static
+    {
+        $this->total = $total;
 
         return $this;
     }
@@ -180,6 +238,42 @@ class CrTrade
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function isIsImported(): ?bool
+    {
+        return $this->isImported;
+    }
+
+    public function setIsImported(bool $isImported): static
+    {
+        $this->isImported = $isImported;
+
+        return $this;
+    }
+
+    public function getImportedFrom(): ?string
+    {
+        return $this->importedFrom;
+    }
+
+    public function setImportedFrom(?string $importedFrom): static
+    {
+        $this->importedFrom = $importedFrom;
+
+        return $this;
+    }
+
+    public function getImportedId(): ?string
+    {
+        return $this->importedId;
+    }
+
+    public function setImportedId(?string $importedId): static
+    {
+        $this->importedId = $importedId;
 
         return $this;
     }

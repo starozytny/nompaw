@@ -6,6 +6,7 @@
     "require": {
         "php": ">=8.1",
         "ext-ctype": "*",
+        "ext-fileinfo": "*",
         "ext-iconv": "*",
         "ext-openssl": "*",
         "doctrine/annotations": "^1.0",
@@ -15,11 +16,12 @@
         "fakerphp/faker": "^1.21",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "google/apiclient": "^2.15",
+        "knplabs/knp-paginator-bundle": "^6.2",
         "knpuniversity/oauth2-client-bundle": "^2.14",
+        "league/csv": "^9.0",
         "league/oauth2-facebook": "^2.2",
         "league/oauth2-google": "^4.0",
         "league/oauth2-instagram": "^3.1",
-        "knplabs/knp-paginator-bundle": "^6.2",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpoffice/phpspreadsheet": "^1.26",
         "phpstan/phpdoc-parser": "^1.13",
@@ -57,8 +59,7 @@
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.5",
-        "twig/twig": "^2.12|^3.0",
-        "ext-fileinfo": "*"
+        "twig/twig": "^2.12|^3.0"
     },
     "config": {
         "allow-plugins": {
