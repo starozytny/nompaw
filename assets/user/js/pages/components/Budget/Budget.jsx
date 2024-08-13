@@ -296,7 +296,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 					case 3:
 					case 0:
 						totalExpense -= d.recurrencePrice;
-						if(d.isActive){
+						if(!d.isActive){
 							totalExpenseReal -= d.recurrencePrice;
 						}
 						break;
@@ -376,6 +376,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		let tmpDispo = (i === 0 ? parseFloat(initTotal) : 0) + totauxIncome[i] - totauxExpense[i];
 		totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
 	}
+
 
 	let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
 	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
