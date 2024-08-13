@@ -251,19 +251,19 @@ export class RandoImages extends Component {
 						   Les photos seront automatiquement redimensionnées s'ils sont trop grandes/lourdes.
 					   </Alert>
                        <div className="mt-4">
-                           <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={30} {...params}>
-                               Photos (30 maximum par envoi)
+                           <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={100} {...params}>
+                               Photos (100 maximum par envoi)
                            </InputFile>
                        </div>
                    </>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.deleteImage} identifiant='delete-image' maxWidth={414} title="Supprimer cette photo"
-                   content={<p>Etes-vous sûr de vouloir supprimer cette image ?</p>}
+                   content={<p>Êtes-vous sûr de vouloir supprimer cette image ?</p>}
                    footer={null} closeTxt="Annuler" />
 
             <Modal ref={this.deleteFiles} identifiant='delete-files' maxWidth={414} title="Supprimer la sélection"
-                   content={<p>Etes-vous sûr de vouloir supprimer <b>la sélection</b> ?</p>}
+                   content={<p>Êtes-vous sûr de vouloir supprimer <b>la sélection</b> ?</p>}
                    footer={null} closeTxt="Annuler" />
         </div>
     }
