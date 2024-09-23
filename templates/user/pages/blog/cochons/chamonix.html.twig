@@ -4,6 +4,10 @@
 {% set page_subtitle %}Du 1er au 4 Août 2023{% endset %}
 
 {% block main_content %}
+
+    {% set groupe = "cochons" %}
+    {% set aventure = "chamonix" %}
+
     <style>
         p{
             color: #FFFFFF;
@@ -36,12 +40,12 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-1v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-2v-2.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-1v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-2v-2.jpg'}) }}"  />
                                 </div>
                                 <div class="js-gallery-content" style="margin-top: 10px;">
                                     <video controls>
-                                        <source src="{{ asset('storytelling/cochons/chamonix/v6.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v6.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                                 <figcaption>Chalet chaleureux, bien équipé et une magnifique vue sur le glacier des Bossons.</figcaption>
@@ -60,17 +64,17 @@
 
                             <figure class="js-image" data-pos="0.3">
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-4v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-5v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-6v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-7v-2.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-4v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-5v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-6v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-7v-2.jpg'}) }}"  />
                                 </div>
                                 <div class="js-gallery-content">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-3v-2.jpg') }}"  />
+                                    <img src="{{path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-3v-2.jpg'}) }}"  />
                                 </div>
                                 <div class="js-gallery-content">
                                     <video controls>
-                                        <source src="{{ asset('storytelling/cochons/chamonix/v2.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v2.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                                 <figcaption>Vue depuis la terrasse sur les monts enneigés.</figcaption>
@@ -82,7 +86,7 @@
                             </p>
 
                             <figure>
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-8v-2.jpg') }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-8v-2.jpg'}) }}"  />
                             </figure>
                         </section>
                         <section class="js-section" data-zoom-start="0.6">
@@ -93,8 +97,8 @@
                             </p>
 
                             <figure>
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-9v-2.jpg') }}"  />
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-10v-2.jpg') }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-9v-2.jpg'}) }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-10v-2.jpg'}) }}"  />
                                 <figcaption>Le fameux pont des amours.</figcaption>
                             </figure>
 
@@ -106,17 +110,17 @@
                             <figure>
 
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-11v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-12v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-13v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-14v-2.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-11v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-12v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-13v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-14v-2.jpg'}) }}"  />
                                 </div>
                                 <figcaption>La ville d'Annecy.</figcaption>
                             </figure>
 
                             <figure class="js-image" data-pos="0.5">
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-15v-2.jpg') }}"  />
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-16v-2.jpg') }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-15v-2.jpg'}) }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-16v-2.jpg'}) }}"  />
                                 <figcaption>Shooting groupé.</figcaption>
                             </figure>
 
@@ -126,11 +130,11 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-17v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-18v-2.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-17v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-18v-2.jpg'}) }}"  />
                                 </div>
                                 <div class="js-gallery-content">
-                                    <img class="js-image" data-pos="0.6" src="{{ asset('storytelling/cochons/chamonix/img-19v-2.jpg') }}"  />
+                                    <img class="js-image" data-pos="0.6" src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-19v-2.jpg'}) }}"  />
                                 </div>
                                 <figcaption>Le petit groupe avant d'aller graille.</figcaption>
                             </figure>
@@ -150,8 +154,8 @@
 
                             <figure class="js-image" data-pos="0.2">
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-20v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-21v-2.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-20v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-21v-2.jpg'}) }}"  />
                                 </div>
                                 <figcaption>L'attente est longue.</figcaption>
                             </figure>
@@ -168,10 +172,10 @@
 
                             <figure class="js-image" data-pos="0.1">
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-22v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-23v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-24v-2.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-25v-2.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-22v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-23v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-24v-2.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-25v-2.jpg'}) }}"  />
                                 </div>
                                 <figcaption>Vue depuis le refuge du Plan de l'Aiguille.</figcaption>
                             </figure>
@@ -182,33 +186,33 @@
                             </p>
 
                             <figure>
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-29.jpg') }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-29.jpg'}) }}"  />
 
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-26.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-27.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-28.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-33.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-26.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-27.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-28.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-33.jpg'}) }}"  />
                                 </div>
 
                                 <div class="gallery-2" style="margin-top: 10px">
                                     <video controls>
-                                        <source src="{{ asset('storytelling/cochons/chamonix/v3.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v3.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/cochons/chamonix/v5.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v5.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
 
                                 <div class="js-gallery-content">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-30.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-31.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-32.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-30.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-31.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-32.jpg'}) }}"  />
                                 </div>
 
                                 <div class="js-gallery-content">
                                     <video>
-                                        <source src="{{ asset('storytelling/cochons/chamonix/v1.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v1.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                                 <figcaption>On attend le feu vert pour aller à l'Aiguille du Midi.</figcaption>
@@ -219,10 +223,10 @@
                             </p>
 
                             <figure>
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-34.jpg') }}" />
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-35.jpg') }}" />
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-36.jpg') }}" />
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-37.jpg') }}" />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-34.jpg'}) }}" />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-35.jpg'}) }}" />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-36.jpg'}) }}" />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-37.jpg'}) }}" />
                                 <figcaption>Durant le trajet aux télécabines, on a la chance de voir un nuage traverse un pic.</figcaption>
                             </figure>
                         </section>
@@ -237,28 +241,28 @@
 
                             <figure class="js-image" data-pos="0.3">
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-38.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-39.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-40.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-78.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-38.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-39.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-40.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-78.jpg'}) }}"  />
                                 </div>
                                 <figcaption>La grandeur de la nature.</figcaption>
                             </figure>
 
                             <figure>
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-41.jpg') }}"  />
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-42.jpg') }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-41.jpg'}) }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-42.jpg'}) }}"  />
 
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-43.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-44.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-45.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-46.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-47.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-48.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-43.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-44.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-45.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-46.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-47.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-48.jpg'}) }}"  />
                                 </div>
                                 <div class="js-gallery-content">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-49.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-49.jpg'}) }}"  />
                                 </div>
                                 <figcaption>Le vent glacial.</figcaption>
                             </figure>
@@ -269,7 +273,7 @@
                             </p>
 
                             <figure>
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-50.jpg') }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-50.jpg'}) }}"  />
                                 <figcaption>Le vent glacial.</figcaption>
                             </figure>
                         </section>
@@ -283,10 +287,10 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-51.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-52.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-53.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-54.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-51.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-52.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-53.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-54.jpg'}) }}"  />
                                 </div>
                                 <figcaption>Le repos des guerriers</figcaption>
                             </figure>
@@ -299,13 +303,13 @@
 
                             <figure class="js-image" data-pos="0.3">
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-55.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-56.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-57.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-58.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-55.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-56.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-57.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-58.jpg'}) }}"  />
                                 </div>
                                 <div class="js-gallery-content">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-59.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-59.jpg'}) }}"  />
                                 </div>
                                 <figcaption>Le monde réunit</figcaption>
                             </figure>
@@ -316,16 +320,16 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-62.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-71.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-63.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-79.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-61.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-60.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-62.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-71.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-63.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-79.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-61.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-60.jpg'}) }}"  />
                                 </div>
                                 <div class="js-gallery-content" style="margin-top: 10px;">
                                     <video controls>
-                                        <source src="{{ asset('storytelling/cochons/chamonix/v4.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v4.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                                 <figcaption>Mérité !</figcaption>
@@ -341,15 +345,15 @@
                             </p>
 
                             <figure>
-                                <img src="{{ asset('storytelling/cochons/chamonix/img-64.jpg') }}"  />
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-64.jpg'}) }}"  />
 
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-65.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-66.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-67.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-68.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-69.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-70.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-65.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-66.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-67.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-68.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-69.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-70.jpg'}) }}"  />
                                 </div>
                                 <figcaption>Une eau glaciale.</figcaption>
                             </figure>
@@ -361,12 +365,12 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-72.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-73.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-74.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-75.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-76.jpg') }}"  />
-                                    <img src="{{ asset('storytelling/cochons/chamonix/img-77.jpg') }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-72.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-73.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-74.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-75.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-76.jpg'}) }}"  />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-77.jpg'}) }}"  />
                                 </div>
                                 <figcaption>Embrouille</figcaption>
                             </figure>

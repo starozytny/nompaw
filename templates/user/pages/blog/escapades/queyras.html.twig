@@ -4,6 +4,10 @@
 {% set page_subtitle %}Du 14 au 15 Octobre 2023{% endset %}
 
 {% block main_content %}
+
+    {% set groupe = "escapades" %}
+    {% set aventure = "queyras" %}
+
     <style>
         p{
             color: #FFFFFF;
@@ -30,18 +34,18 @@
                             <figure>
                                 <div class="gallery-2">
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v1.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v1.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v2.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v2.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/2.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/3.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '2.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '3.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v3.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v3.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v4.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v4.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                             </figure>
@@ -52,13 +56,13 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/escapades/queyras/5.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/6.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '5.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '6.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v5.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v5.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v6.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v6.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                             </figure>
@@ -69,16 +73,16 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/escapades/queyras/9.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/10.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '9.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '10.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v7.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v7.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v8.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v8.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/15.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/16.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '15.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '16.jpg'}) }}" loading="lazy" />
                                 </div>
                                 <figcaption>La forêt aux différentes couleurs.</figcaption>
                             </figure>
@@ -86,18 +90,18 @@
                             <figure>
                                 <div class="gallery-2">
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v9.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v9.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v10.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v10.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/17.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/18.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '17.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '18.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v11.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v11.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v12.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v12.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                                 <figcaption>Le chemin de randonnée longeant le haut de la cascade de la Pisse.</figcaption>
@@ -110,13 +114,13 @@
                             <figure>
                                 <div class="gallery-2">
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v13.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v13.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v14.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v14.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/19.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/20.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '19.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '20.jpg'}) }}" loading="lazy" />
                                 </div>
                             </figure>
                         </section>
@@ -125,26 +129,26 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/escapades/queyras/21.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/22.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '21.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '22.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v15.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v15.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v16.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v16.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/23.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/24.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '23.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '24.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v17.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v17.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v18.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v18.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/25.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/26.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/27.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/28.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '25.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '26.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '27.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '28.jpg'}) }}" loading="lazy" />
                                 </div>
                             </figure>
                         </section>
@@ -153,28 +157,28 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/escapades/queyras/29.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/30.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '29.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '30.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v19.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v19.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v20.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v20.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/31.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/32.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '31.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '32.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v21.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v21.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v22.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v22.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/33.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/34.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/35.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/36.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/37.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/38.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '33.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '34.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '35.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '36.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '37.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '38.jpg'}) }}" loading="lazy" />
                                 </div>
                             </figure>
                         </section>
@@ -183,19 +187,19 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/escapades/queyras/39.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/40.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '39.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '40.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v23.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v23.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v24.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v24.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v25.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v25.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v26.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v26.mp4'}) }}" type="video/mp4" />
                                     </video>
                                 </div>
                             </figure>
@@ -205,44 +209,44 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/escapades/queyras/45.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/46.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/41.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/42.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/44.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/43.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '45.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '46.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '41.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '42.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '44.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '43.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v30.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v30.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v27.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v27.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/47.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/48.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/49.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/50.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '47.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '48.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '49.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '50.jpg'}) }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v28.mp4') }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v29.mp4') }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/51.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/52.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/53.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/54.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/55.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/56.jpg') }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v31.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v28.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v32.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v29.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/57.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/58.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/59.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/60.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '51.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '52.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '53.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '54.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '55.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '56.jpg'}) }}" loading="lazy" />
+                                    <video controls>
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v31.mp4'}) }}" type="video/mp4" />
+                                    </video>
+                                    <video controls>
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v32.mp4'}) }}" type="video/mp4" />
+                                    </video>
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '57.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '58.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '59.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '60.jpg'}) }}" loading="lazy" />
                                 </div>
                             </figure>
 
@@ -252,21 +256,19 @@
 
                             <figure>
                                 <div class="gallery-2">
-                                    <img src="{{ asset('storytelling/escapades/queyras/59.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/60.jpg') }}" loading="lazy" />
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v33.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v33.mp4'}) }}" type="video/mp4" />
                                     </video>
                                     <video controls>
-                                        <source src="{{ asset('storytelling/escapades/queyras/v34.mp4') }}" type="video/mp4" />
+                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v34.mp4'}) }}" type="video/mp4" />
                                     </video>
-                                    <img src="{{ asset('storytelling/escapades/queyras/62.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/63.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/64.jpg') }}" loading="lazy" />
-                                    <img src="{{ asset('storytelling/escapades/queyras/65.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '62.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '63.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '64.jpg'}) }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '65.jpg'}) }}" loading="lazy" />
                                 </div>
                                 <div class="js-gallery-content">
-                                    <img src="{{ asset('storytelling/escapades/queyras/61.jpg') }}" loading="lazy" />
+                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '61.jpg'}) }}" loading="lazy" />
                                 </div>
                             </figure>
 
