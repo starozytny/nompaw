@@ -1,0 +1,30 @@
+{% extends 'user/pages/holidays/template.html.twig' %}
+
+{% set page_title %}Modifier : {{ elem.name }}{% endset %}
+{% set page_subtitle %}Modifiez les informations du projet : {{ elem.name }}.{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([{ text: page_title }]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_projects_index'),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner à liste'
+    } %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_projects_read', {slug: elem.slug}),
+        btn_type: 'default',
+        btn_icon: 'vision',
+        btn_text: 'Voir le projet'
+    } %}
+{% endset %}
+
+{% block main_content %}
+    <div id="projects_update" data-element="{{ element }}">
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'user/layout/layout.html.twig' %}
+
+{% set breadcrumbs = [{ text: "Projets", icon: "calendar", url: path('user_projects_index') }] %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_holidays') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_holidays') }}
+{% endblock %}

@@ -1,0 +1,79 @@
+<div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-4 sm:flex-row max-w-screen-lg">
+        <div class="project-title w-full max-w-screen-md bg-white p-4 border rounded-md flex flex-col gap-2" style="background-image: url({{ elem.imageFile }});">
+            <h2 class="text-2xl font-semibold text-slate-50">{{ elem.name }}</h2>
+        </div>
+        <div class="w-full">
+            <div id="project_date"
+                 data-project-id="{{ elem.id }}"
+                 data-n-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
+                 data-n-end-at="{{ elem.endAt ? elem.endAt | date('Y-m-d') : "" }}"
+                 data-propals="{{ propalDates }}"
+                 data-user-id="{{ app.user ? app.user.id : null }}"
+                 data-author-id="{{ elem.author.id }}"
+                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+            >
+                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-6">
+        <div id="project_budget"
+             data-route-price="{{ elem.priceRoute }}"
+             data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
+             data-lifestyle="{{ lifestyles }}"
+             data-activities="{{ propalActivities }}"
+        >
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+        <div id="project_route"
+             data-project-id="{{ elem.id }}"
+             data-texte="{{ elem.textRoute }}"
+             data-iframe="{{ elem.iframeRoute }}"
+             data-price="{{ elem.priceRoute }}"
+             data-user-id="{{ app.user ? app.user.id : null }}"
+        >
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+        <div id="project_house"
+             data-project-id="{{ elem.id }}"
+             data-house-name="{{ elem.propalHouse ? elem.propalHouse.name : '' }}"
+             data-house-url="{{ elem.propalHouse ? elem.propalHouse.url : '' }}"
+             data-house-price="{{ elem.propalHouse ? elem.propalHouse.price : '' }}"
+             data-propals="{{ propalHouses }}"
+             data-user-id="{{ app.user ? app.user.id : null }}"
+             data-author-id="{{ elem.author.id }}"
+             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+             data-texte="{{ elem.textHouse }}"
+        >
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+        <div id="project_lifestyle"
+             data-project-id="{{ elem.id }}"
+             data-donnees="{{ lifestyles }}"
+             data-texte="{{ elem.textLifestyle }}"
+             data-user-id="{{ app.user ? app.user.id : null }}"
+        >
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+        <div id="project_activities"
+             data-project-id="{{ elem.id }}"
+             data-propals="{{ propalActivities }}"
+             data-user-id="{{ app.user ? app.user.id : null }}"
+             data-author-id="{{ elem.author.id }}"
+             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+             data-texte="{{ elem.textActivities }}"
+        >
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+        <div id="project_todos"
+             data-project-id="{{ elem.id }}"
+             data-donnees="{{ todos }}"
+             data-texte="{{ elem.textTodos }}"
+             data-user-id="{{ app.user ? app.user.id : null }}"
+        >
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,57 @@
+{% extends 'user/pages/holidays/template.html.twig' %}
+
+{% set author = elem.author %}
+
+{% set page_title %}{{ elem.name }}{% endset %}
+
+{% block breadcrumb %}
+    {% set breadcrumbs = breadcrumbs | merge([
+        { text: page_title_alone, url: path('user_projects_read', {'slug': elem.slug}) },
+    ]) %}
+    {{ parent() }}
+{% endblock %}
+
+{% set page_actions %}
+    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+        btn_link: path('user_projects_index'),
+        btn_type: 'default',
+        btn_icon: 'left-arrow',
+        btn_text: 'Retourner aux projets'
+    } %}
+    {% if app.user.id == elem.author.id or app.user.admin %}
+        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+            btn_link: path('user_projects_update', {slug: elem.slug}),
+            btn_type: 'default',
+            btn_icon: 'pencil',
+            btn_text: 'Modifier'
+        } %}
+    {% endif %}
+{% endset %}
+
+{% block main_content %}
+<div class="flex flex-col">
+    {% if app.user.id == elem.author.id or app.user.admin %}
+        <div class="w-full flex justify-end gap-1 border-b pb-4 mb-4">
+            <div id="share_link" class="cursor-pointer flex items-center justify-center text-center gap-1 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+                 data-url="{{ path('user_projects_read', {slug: elem.slug, code: elem.code}) }}">
+                <span class="icon-share inline-block translate-y-0.5"></span>
+                <span class="ml-1">Partager</span>
+            </div>
+            <div class="delete-project"
+                 data-context="read"
+                 data-id="{{ elem.id }}"
+                 data-name="{{ elem.name }}"
+            >
+                {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                    btn_link: "",
+                    btn_type: 'red',
+                    btn_icon: 'chart-3',
+                    btn_text: 'Supprimer'
+                } %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% include "user/pages/holidays/projects/components/read_content.html.twig" %}
+</div>
+{% endblock %}
