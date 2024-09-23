@@ -7,12 +7,13 @@ import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
+import ModalFunctions from '@commonFunctions/modal';
 
-import { Button, ButtonIcon, ButtonIconA } from "@tailwindComponents/Elements/Button";
-import { InputFile } from "@tailwindComponents/Elements/Fields";
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Alert } from "@tailwindComponents/Elements/Alert";
 import { LightBox } from "@tailwindComponents/Elements/LightBox";
+import { InputFile } from "@tailwindComponents/Elements/Fields";
+import { Button, ButtonIcon, ButtonIconA } from "@tailwindComponents/Elements/Button";
 
 const URL_UPLOAD_IMAGES = "intern_api_aventures_images_upload_images";
 const URL_DELETE_IMAGE = "intern_api_aventures_images_image_delete";
@@ -40,6 +41,19 @@ export class RandoImages extends Component {
 		this.deleteImage = React.createRef();
 		this.deleteFiles = React.createRef();
 		this.lightbox = React.createRef();
+	}
+
+	componentDidMount () {
+		const { images } = this.props;
+
+		let data = JSON.parse(images);
+
+		let i = 1;
+		data.forEach(item => {
+			item.rankPhoto = i++;
+		})
+
+		this.setState({ data: data });
 	}
 
 	handleChange = (e) => {
@@ -165,7 +179,9 @@ export class RandoImages extends Component {
 	}
 
 	handleLightbox = (elem) => {
-		this.lightbox.current.handleUpdateContent(<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={images} elem={elem} />);
+		const { data } = this.state;
+
+		this.lightbox.current.handleUpdateContent(<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={data} elem={elem} />);
 		this.lightbox.current.handleClick();
 	}
 
@@ -195,7 +211,8 @@ export class RandoImages extends Component {
 
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
 				<LazyLoadingGalleryWithPlaceholder currentImages={data}
-												   onModal={this.handleModal} onCover={this.handleCover} onSelect={this.handleSelect}
+												   onModal={this.handleModal} onCover={this.handleCover}
+												   onSelect={this.handleSelect} onLightbox={this.handleLightbox}
 												   selected={selected} userId={userId} />
 			</div>
 
@@ -252,7 +269,7 @@ function modalDeleteImages (self) {
     self.deleteFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImages}>Confirmer la suppression</Button>)
 }
 
-function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, selected, userId }) {
+function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, selected, userId }) {
 	const [loaded, setLoaded] = useState(Array(currentImages.length).fill(false));
 	const [error, setError] = useState(Array(currentImages.length).fill(false));
 
@@ -286,7 +303,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, s
 
 	return <>
 		{currentImages.map((elem, index) => {
-			return <div className="relative flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] overflow-hidden" key={index}>
+			return <div key={elem.id} className="relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md" onClick={() => onLightbox(elem)}>
 				<div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && !error[index] ? "opacity-100" : "opacity-0"}`}>
 					<span className="icon-chart-3"></span>
 				</div>
@@ -510,7 +527,7 @@ class LightboxContent extends Component {
 					{images.map(image => {
 						return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
 							<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
-								 className="w-full h-full pointer-events-none object-contain select-none outline-none transition-transform"
+								 className="w-full h-full object-contain select-none outline-none transition-transform"
 								 style={{ transform: `translateX(${currentTranslate}px)` }} />
 						</div>
 					})}
