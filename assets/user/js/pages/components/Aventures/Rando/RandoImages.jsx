@@ -109,7 +109,7 @@ export class RandoImages extends Component {
 		}
 
 		this.formFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
-		axios({ method: "POST", url: Routing.generate(URL_UPLOAD_IMAGES, { 'id': randoId }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
+		axios({ method: "POST", url: Routing.generate(URL_UPLOAD_IMAGES, { id: randoId }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 			.then(function (response) {
 				toastr.info("Photos envoyées.");
 				location.reload();
@@ -128,7 +128,7 @@ export class RandoImages extends Component {
 		Formulaire.loader(true);
 		let self = this;
 		this.deleteImage.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
-		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { 'id': image.id }), data: {} })
+		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { id: image.id }), data: {} })
 			.then(function (response) {
 				toastr.info('Photo supprimée.');
 				location.reload();
@@ -165,7 +165,7 @@ export class RandoImages extends Component {
 
 		Formulaire.loader(true);
 		let self = this;
-		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { 'id': randoId }), data: { image: image.thumbs } })
+		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { id: randoId }), data: { image: image.thumbs } })
 			.then(function (response) {
 				toastr.info('Photo de couverture modifiée.');
 			})
@@ -222,16 +222,11 @@ export class RandoImages extends Component {
 			)}
 
 			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
-								 content={<>
-									 <Alert type="blue" title="Traitement des photos">
-										 Les photos seront automatiquement redimensionnées s'ils sont trop grandes/lourdes.
-									 </Alert>
-									 <div className="mt-4">
-										 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={30} maxSize={95330000} {...params}>
-											 Photos (30 maximum par envoi)
-										 </InputFile>
-									 </div>
-								 </>}
+								 content={<div>
+									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={50} maxSize={95330000} {...params}>
+										 Photos (50 maximum par envoi)
+									 </InputFile>
+								 </div>}
 								 footer={null} closeTxt="Annuler" />
 				, document.body
 			)}

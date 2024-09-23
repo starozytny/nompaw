@@ -807,17 +807,24 @@ export class InputFile extends Component {
 
 		this.state = {
 			files: [],
+			loading: false,
 		}
 
 		this.fileInput = React.createRef();
 	}
 
-	handleFileInput = (e) => {
+	handleFileInput = async (e) => {
 		const { type, max = 1, maxSize = 5330000 } = this.props;
 		const { files } = this.state;
 
 		const file = e.target.files[0];
 		if (file) {
+			this.setState({ loading: true });
+			const loadedFiles = await Promise.all(
+				Array.from(e.target.files).map(file => { readFile(file) })
+			);
+			this.setState({ loading: false });
+
 			if (type === "simple") {
 				if (file.size > maxSize) {
 					Toastr.toast('error', "Le fichier est trop volumineux.");
@@ -852,7 +859,7 @@ export class InputFile extends Component {
 
 	render () {
 		const { type, identifiant, format = "image", valeur, errors, onDelete, children, accept = "image/*" } = this.props;
-		const { files } = this.state;
+		const { files, loading } = this.state;
 
 		let error = getError(errors, identifiant);
 
@@ -872,22 +879,27 @@ export class InputFile extends Component {
 				</button>
 
 				{files.length > 0
-					? <div className="flex flex-wrap gap-4">
-						{files.map((file, index) => {
-							return <div className="flex gap-2" key={index}>
-								{format === "image" && <div className="h-16 w-16 rounded-md overflow-hidden bg-gray-200">
-									<img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-contain" />
-								</div>}
-								<div>
-									<div className="leading-5">
-										<div className="font-medium">{file.name}</div>
-										<div className="text-gray-600">{Sanitaze.toFormatBytesToSize(file.size)}</div>
+					? <>
+						{loading
+							? <div className="text-xs">Chargement..</div>
+							: <div className="flex flex-wrap gap-4">
+								{files.map((file, index) => {
+									return <div className="flex gap-2" key={index}>
+										{format === "image" && <div className="h-16 w-16 rounded-md overflow-hidden bg-gray-200">
+											<img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-contain" />
+										</div>}
+										<div>
+											<div className="leading-5">
+												<div className="font-medium">{file.name}</div>
+												<div className="text-gray-600">{Sanitaze.toFormatBytesToSize(file.size)}</div>
+											</div>
+											<div className="cursor-pointer text-red-600 hover:text-red-700" onClick={() => this.handleFileRemove(file)}>Supprimer</div>
+										</div>
 									</div>
-									<div className="cursor-pointer text-red-600 hover:text-red-700" onClick={() => this.handleFileRemove(file)}>Supprimer</div>
-								</div>
+								})}
 							</div>
-						})}
-					</div>
+						}
+					</>
 					: (valeur
 							? <div className="flex gap-2">
 								{format === "image"
@@ -923,6 +935,23 @@ InputFile.propTypes = {
 	format: PropTypes.string,
 	valeur: PropTypes.string,
 	accept: PropTypes.string,
+}
+
+
+function readFile (file) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+
+		reader.onload = () => {
+			resolve(reader.result); // Résout la promesse avec le contenu du fichier
+		};
+
+		reader.onerror = () => {
+			reject(reader.error); // Rejette la promesse en cas d'erreur
+		};
+
+		reader.readAsDataURL(file); // Lit le fichier comme une DataURL (image encodée en base64)
+	});
 }
 
 /***************************************
