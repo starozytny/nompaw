@@ -298,7 +298,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 
 	return <>
 		{currentImages.map((elem, index) => {
-			return <div key={elem.id} className="relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md" onClick={() => onLightbox(elem)}>
+			return <div key={elem.id} className="relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md">
 				<div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && !error[index] ? "opacity-100" : "opacity-0"}`}>
 					<span className="icon-chart-3"></span>
 				</div>
@@ -318,11 +318,14 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 									</div>
 								</div>
 								<div className="flex gap-1">
+									<ButtonIcon type="default" icon="zoom-in" tooltipWidth={80} onClick={() => onLightbox(elem)} tooltipPosition="-bottom-7 right-0">
+										Plein écran
+									</ButtonIcon>
 									{parseInt(userId) === elem.author.id && <>
-										<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={() => onCover(elem)}>
+										<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={() => onCover(elem)} tooltipPosition="-bottom-7 right-0">
 											Image de couverture
 										</ButtonIcon>
-										<ButtonIcon type="red" icon="trash" onClick={() => onModal('deleteImage', elem)}>
+										<ButtonIcon type="red" icon="trash" onClick={() => onModal('deleteImage', elem)} tooltipPosition="-bottom-7 right-0">
 											Supprimer
 										</ButtonIcon>
 									</>}
