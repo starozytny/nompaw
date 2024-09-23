@@ -9,7 +9,7 @@ import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"
 
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button, ButtonIcon, ButtonIconA } from "@tailwindComponents/Elements/Button";
 import { InputFile } from "@tailwindComponents/Elements/Fields";
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Alert } from "@tailwindComponents/Elements/Alert";
@@ -229,10 +229,10 @@ export class RandoImages extends Component {
                                             <div className="font-medium text-sm text-slate-50">{elem.author.displayName}</div>
                                         </div>
                                         <div>
-                                            <ButtonIcon type="default" icon="download" element="a" download={true}
-                                                        onClick={Routing.generate(URL_DOWNLOAD_IMAGE, { 'id': elem.id })}>
+                                            <ButtonIconA type="default" icon="download"
+                                                        onClick={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })}>
                                                 Télécharger
-                                            </ButtonIcon>
+                                            </ButtonIconA>
                                         </div>
                                     </div>
                                 </div>

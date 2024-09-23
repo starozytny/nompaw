@@ -84,15 +84,17 @@ class FileUploader
      * @throws ImageWorkshopLayerException
      * @throws ImageWorkshopException
      */
-    public function thumbs($fileName, $folderImages, $folderThumbs): string
+    public function thumbs($fileName, $folderImages, $folderThumbs, $isPublic = false): string
     {
+        $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
+
         if($folderThumbs){
-            if(!is_dir($folderThumbs)){
-                mkdir($folderThumbs, 0777, true);
+            if(!is_dir($directory . $folderThumbs)){
+                mkdir($directory . $folderThumbs, 0777, true);
             }
         }
 
-        $fileOri = $folderImages . "/" . $fileName;
+        $fileOri = $directory . $folderImages . "/" . $fileName;
         $mime = mime_content_type($fileOri);
 
         if(str_contains($mime, "image/")){
@@ -101,7 +103,7 @@ class FileUploader
 
             $fileName = "thumbs-" . $fileName;
 
-            $layer->save($folderThumbs, $fileName);
+            $layer->save($directory . $folderThumbs, $fileName);
         }
 
         return $fileName;

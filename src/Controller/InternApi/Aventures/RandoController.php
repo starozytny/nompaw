@@ -167,6 +167,10 @@ class RandoController extends AbstractController
     #[Route('/src/cover/{id}', name: 'cover_src', options: ['expose' => true], methods: 'GET')]
     public function getCover(RaRando $obj): Response
     {
-        return $this->file($this->getParameter('private_directory') . $obj->getCoverFile());
+        $file = $this->getParameter('private_directory') . $obj->getCoverFile();
+        if(!file_exists($file)){
+            return $this->file('placeholders/placeholder.jpg');
+        }
+        return $this->file($file);
     }
 }
