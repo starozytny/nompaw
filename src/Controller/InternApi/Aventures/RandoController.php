@@ -4,7 +4,6 @@ namespace App\Controller\InternApi\Aventures;
 
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
-use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaImageRepository;
@@ -114,8 +113,8 @@ class RandoController extends AbstractController
             $adventureRepository->remove($item);
         }
         foreach($imageRepository->findBy(['rando' => $obj]) as $item){
-            $fileUploader->deleteFile($item->getFile(), RaRando::FOLDER_IMAGES.'/'.$item->getRando()->getId());
-            $fileUploader->deleteFile($item->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$item->getRando()->getId());
+            $fileUploader->deleteFile($item->getFile(), RaRando::FOLDER_IMAGES.'/'.$item->getRando()->getId(), false);
+            $fileUploader->deleteFile($item->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$item->getRando()->getId(), false);
 
             $imageRepository->remove($item);
         }
@@ -163,5 +162,15 @@ class RandoController extends AbstractController
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/src/cover/{id}', name: 'cover_src', options: ['expose' => true], methods: 'GET')]
+    public function getCover(RaRando $obj): Response
+    {
+        $file = $this->getParameter('private_directory') . $obj->getCoverFile();
+        if(!file_exists($file)){
+            return $this->file('placeholders/placeholder.jpg');
+        }
+        return $this->file($file);
     }
 }
