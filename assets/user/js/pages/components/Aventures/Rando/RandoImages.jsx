@@ -19,6 +19,8 @@ const URL_DELETE_IMAGE = "intern_api_aventures_images_image_delete";
 const URL_DELETE_IMAGES = "intern_api_aventures_images_delete";
 const URL_DOWNLOAD_IMAGE = "intern_api_aventures_images_download";
 const URL_COVER_IMAGE = "intern_api_aventures_randos_cover";
+const URL_GET_FILE_SRC = "intern_api_aventures_images_file_src";
+const URL_GET_THUMBS_SRC = "intern_api_aventures_images_thumbs_src";
 
 export class RandoImages extends Component {
 	constructor (props) {
@@ -236,9 +238,9 @@ export class RandoImages extends Component {
                                 </div>
                                 {elem.type === 1
                                     ? <video controls>
-                                        <source src={elem.fileFile} type="video/mp4" />
+                                        <source src={Routing.generate(URL_GET_FILE_SRC, {id: elem.id})} type="video/mp4" />
                                     </video>
-                                    : <img src={elem.type === 3 ? elem.fileFile : elem.thumbsFile} alt="" />
+                                    : <img src={Routing.generate(URL_GET_THUMBS_SRC, {id: elem.id})} alt="" />
                                 }
                             </div>
                         })}

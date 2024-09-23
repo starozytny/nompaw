@@ -98,4 +98,16 @@ class ImageController extends AbstractController
     {
         return $this->file($this->getParameter('private_directory') . RaRando::FOLDER_IMAGES . '/' . $obj->getRando()->getId() . '/' . $obj->getFile());
     }
+
+    #[Route('/src/thumbs/{id}', name: 'thumbs_src', options: ['expose' => true], methods: 'GET')]
+    public function getThumbs(RaImage $obj): Response
+    {
+        return $this->file($this->getParameter('private_directory') . $obj->getThumbsFile());
+    }
+
+    #[Route('/src/file/{id}', name: 'file_src', options: ['expose' => true], methods: 'GET')]
+    public function getFile(RaImage $obj): Response
+    {
+        return $this->file($this->getParameter('private_directory') . $obj->getFileFile());
+    }
 }

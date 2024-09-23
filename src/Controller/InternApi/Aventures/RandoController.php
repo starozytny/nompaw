@@ -4,7 +4,6 @@ namespace App\Controller\InternApi\Aventures;
 
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
-use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaImageRepository;
@@ -163,5 +162,11 @@ class RandoController extends AbstractController
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/src/cover/{id}', name: 'cover_src', options: ['expose' => true], methods: 'GET')]
+    public function getCover(RaRando $obj): Response
+    {
+        return $this->file($this->getParameter('private_directory') . $obj->getCoverFile());
     }
 }
