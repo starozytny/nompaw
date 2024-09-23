@@ -1,11 +1,10 @@
-import React, { Component } from "react";
+import React, { Component, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 
 import axios from "axios";
 import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
-
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"
 
 import Formulaire from "@commonFunctions/formulaire";
 
@@ -13,6 +12,7 @@ import { Button, ButtonIcon, ButtonIconA } from "@tailwindComponents/Elements/Bu
 import { InputFile } from "@tailwindComponents/Elements/Fields";
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Alert } from "@tailwindComponents/Elements/Alert";
+import { LightBox } from "@tailwindComponents/Elements/LightBox";
 
 const URL_UPLOAD_IMAGES = "intern_api_aventures_images_upload_images";
 const URL_DELETE_IMAGE = "intern_api_aventures_images_image_delete";
@@ -21,6 +21,7 @@ const URL_DOWNLOAD_IMAGE = "intern_api_aventures_images_download";
 const URL_COVER_IMAGE = "intern_api_aventures_randos_cover";
 const URL_GET_FILE_SRC = "intern_api_aventures_images_file_src";
 const URL_GET_THUMBS_SRC = "intern_api_aventures_images_thumbs_src";
+const URL_READ_IMAGE_HD = "intern_api_aventures_images_file_hd_src";
 
 export class RandoImages extends Component {
 	constructor (props) {
@@ -38,6 +39,7 @@ export class RandoImages extends Component {
 		this.formFiles = React.createRef();
 		this.deleteImage = React.createRef();
 		this.deleteFiles = React.createRef();
+		this.lightbox = React.createRef();
 	}
 
 	handleChange = (e) => {
@@ -162,6 +164,11 @@ export class RandoImages extends Component {
 		;
 	}
 
+	handleLightbox = (elem) => {
+		this.lightbox.current.handleUpdateContent(<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={images} elem={elem} />);
+		this.lightbox.current.handleClick();
+	}
+
 	render () {
 		const { userId } = this.props;
 		const { errors, files, data, selected } = this.state;
@@ -169,8 +176,8 @@ export class RandoImages extends Component {
 		let params = { errors: errors, onChange: this.handleChange }
 
 		return <div className="flex flex-col gap-4">
-            <div>
-                <div className="flex gap-2">
+			<div>
+				<div className="flex gap-2">
 					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
 					{selected.length !== 0
 						? <>
@@ -179,106 +186,62 @@ export class RandoImages extends Component {
 						: null
 					}
 				</div>
-                <div className="mt-4">
-                    <Alert type="blue" icon="warning">
-                        <div className="text-sm">
-							Pour un tirage des photos contactez moi ! <br /> Pour voir l'intégralité des photos, rendez-vous sur le Google Photos, si le lien existe.
-						</div>
-                    </Alert>
-                </div>
-            </div>
+				<div className="mt-4">
+					<Alert type="blue" icon="warning">
+						<div className="text-sm">Pour un tirage des photos contactez moi !</div>
+					</Alert>
+				</div>
+			</div>
 
-            <div>
-                <ResponsiveMasonry
-                    columnsCountBreakPoints={{ 320: 2, 768: 2, 900: 3, 1500: 4, 1799: 5, 1920: 6 }}
-                >
-                    <Masonry gutter={'1.2rem'}>
-                        {data.map((elem, index) => {
-                            return <div className="relative" key={index}>
-                                <div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
-									 style={elem.type === 1 ? { height: "87%" } : {}}
-								>
-                                    <div className="flex justify-between gap-2 p-2">
-                                        <div className="group">
-                                            <div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-                                                 onClick={() => this.handleSelect(elem.id)}>
-                                                <span className={`icon-check1 text-sm ${selected.includes(elem.id) ? "text-white" : "text-transparent"}`}></span>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-1">
-                                            {parseInt(userId) === elem.author.id && <>
-                                                <ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={() => this.handleCover(elem)}>
-                                                    Image de couverture
-                                                </ButtonIcon>
-                                                <ButtonIcon type="red" icon="trash" onClick={() => this.handleModal('deleteImage', elem)}>
-                                                    Supprimer
-                                                </ButtonIcon>
-                                            </>}
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between gap-2 p-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full shadow">
-                                                {elem.author.avatarFile
-                                                    ? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`} className="w-8 h-8 object-cover rounded-full" />
-                                                    : <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
-                                                        {elem.author.lastname.slice(0, 1) + elem.author.firstname.slice(0, 1)}
-                                                </div>
-                                                }
-                                            </div>
-                                            <div className="font-medium text-sm text-slate-50">{elem.author.displayName}</div>
-                                        </div>
-                                        <div>
-                                            <ButtonIconA type="default" icon="download"
-                                                        onClick={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })}>
-                                                Télécharger
-                                            </ButtonIconA>
-                                        </div>
-                                    </div>
-                                </div>
-                                {elem.type === 1
-                                    ? <video controls>
-                                        <source src={Routing.generate(URL_GET_FILE_SRC, {id: elem.id})} type="video/mp4" />
-                                    </video>
-                                    : <img src={Routing.generate(URL_GET_THUMBS_SRC, {id: elem.id})} alt="" />
-                                }
-                            </div>
-                        })}
-                    </Masonry>
-                </ResponsiveMasonry>
-            </div>
-            <Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
-                   content={<>
-					   <Alert type="blue" title="Traitement des photos">
-						   Les photos seront automatiquement redimensionnées s'ils sont trop grandes/lourdes.
-					   </Alert>
-                       <div className="mt-4">
-                           <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={30} maxSize={95330000} {...params}>
-                               Photos (30 maximum par envoi)
-                           </InputFile>
-                       </div>
-                   </>}
-                   footer={null} closeTxt="Annuler" />
+			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
+				<LazyLoadingGalleryWithPlaceholder currentImages={data}
+												   onModal={this.handleModal} onCover={this.handleCover} onSelect={this.handleSelect}
+												   selected={selected} userId={userId} />
+			</div>
 
-            <Modal ref={this.deleteImage} identifiant='delete-image' maxWidth={414} title="Supprimer cette photo"
-                   content={<p>Êtes-vous sûr de vouloir supprimer cette image ?</p>}
-                   footer={null} closeTxt="Annuler" />
 
-            <Modal ref={this.deleteFiles} identifiant='delete-files' maxWidth={414} title="Supprimer la sélection"
-                   content={<p>Êtes-vous sûr de vouloir supprimer <b>la sélection</b> ?</p>}
-                   footer={null} closeTxt="Annuler" />
-        </div>
-    }
+			{createPortal(<LightBox ref={this.lightbox} identifiant="lightbox" content={null}  />
+				, document.body
+			)}
+
+			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
+								 content={<>
+									 <Alert type="blue" title="Traitement des photos">
+										 Les photos seront automatiquement redimensionnées s'ils sont trop grandes/lourdes.
+									 </Alert>
+									 <div className="mt-4">
+										 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={30} maxSize={95330000} {...params}>
+											 Photos (30 maximum par envoi)
+										 </InputFile>
+									 </div>
+								 </>}
+								 footer={null} closeTxt="Annuler" />
+				, document.body
+			)}
+
+			{createPortal(<Modal ref={this.deleteImage} identifiant='delete-image' maxWidth={414} title="Supprimer cette photo"
+								 content={<p>Êtes-vous sûr de vouloir supprimer cette image ?</p>}
+								 footer={null} closeTxt="Annuler" />
+				, document.body
+			)}
+
+			{createPortal(<Modal ref={this.deleteFiles} identifiant='delete-files' maxWidth={414} title="Supprimer la sélection"
+								 content={<p>Êtes-vous sûr de vouloir supprimer <b>la sélection</b> ?</p>}
+								 footer={null} closeTxt="Annuler" />
+				, document.body
+			)}
+		</div>
+	}
 }
 
 RandoImages.propTypes = {
-    userId: PropTypes.string.isRequired,
-    randoId: PropTypes.string.isRequired,
-    images: PropTypes.string.isRequired,
+	userId: PropTypes.string.isRequired,
+	randoId: PropTypes.string.isRequired,
+	images: PropTypes.string.isRequired,
 }
 
 function modalForm (self) {
-    self.formFiles.current.handleUpdateFooter(<Button type="blue" onClick={self.handleSubmit}>Confirmer</Button>)
+	self.formFiles.current.handleUpdateFooter(<Button type="blue" onClick={self.handleSubmit}>Confirmer</Button>)
 }
 
 function modalDeleteImage (self) {
@@ -287,4 +250,276 @@ function modalDeleteImage (self) {
 
 function modalDeleteImages (self) {
     self.deleteFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImages}>Confirmer la suppression</Button>)
+}
+
+function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, selected, userId }) {
+	const [loaded, setLoaded] = useState(Array(currentImages.length).fill(false));
+	const [error, setError] = useState(Array(currentImages.length).fill(false));
+
+	const handleImageLoad = (index) => {
+		const updatedLoaded = [...loaded];
+		updatedLoaded[index] = true;
+		setLoaded(updatedLoaded);
+	};
+
+	const handleImageError = (index) => {
+		const updatedError = [...error];
+		updatedError[index] = true;
+		setError(updatedError);
+	};
+
+	useEffect(() => {
+		// Timeout de 5 secondes pour chaque image
+		const timeoutId = currentImages.map((_, index) =>
+			setTimeout(() => {
+				if (!loaded[index]) {
+					handleImageError(index);
+				}
+			}, 2000) // 2 secondes
+		);
+
+		return () => {
+			// Nettoyer le timeout à la fin
+			timeoutId.forEach((id) => clearTimeout(id));
+		};
+	}, [loaded]);
+
+	return <>
+		{currentImages.map((elem, index) => {
+			return <div className="relative flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] overflow-hidden" key={index}>
+				<div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && !error[index] ? "opacity-100" : "opacity-0"}`}>
+					<span className="icon-chart-3"></span>
+				</div>
+				{error[index]
+					? <div className="w-full h-full bg-gray-900 text-white text-center flex items-center justify-center">
+						Cliquez pour voir la photo..
+					</div>
+					: <>
+						<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
+							 style={elem.type === 1 ? { height: "87%" } : {}}
+						>
+							<div className="flex justify-between gap-2 p-2">
+								<div className="group">
+									<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+										 onClick={() => onSelect(elem.id)}>
+										<span className={`icon-check1 text-sm ${selected.includes(elem.id) ? "text-white" : "text-transparent"}`}></span>
+									</div>
+								</div>
+								<div className="flex gap-1">
+									{parseInt(userId) === elem.author.id && <>
+										<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={() => onCover(elem)}>
+											Image de couverture
+										</ButtonIcon>
+										<ButtonIcon type="red" icon="trash" onClick={() => onModal('deleteImage', elem)}>
+											Supprimer
+										</ButtonIcon>
+									</>}
+								</div>
+							</div>
+							<div className="flex justify-between gap-2 p-2">
+								<div className="flex items-center gap-2">
+									<div className="w-8 h-8 rounded-full shadow">
+										{elem.author.avatarFile
+											? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`} className="w-8 h-8 object-cover rounded-full" />
+											: <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+												{elem.author.lastname.slice(0, 1) + elem.author.firstname.slice(0, 1)}
+											</div>
+										}
+									</div>
+									<div className="font-medium text-sm text-slate-50">{elem.author.displayName}</div>
+								</div>
+								<div>
+									<ButtonIconA type="default" icon="download"
+												 onClick={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })}>
+										Télécharger
+									</ButtonIconA>
+								</div>
+							</div>
+						</div>
+						{elem.type === 1
+							? <video controls>
+								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
+							</video>
+							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt=""
+								   loading="lazy"
+								   onLoad={() => handleImageLoad(index)} // Appelé quand l'image est chargée
+								   onError={() => handleImageError(index)} // En cas d'erreur de chargement
+							/>
+						}
+					</>
+				}
+			</div>
+		})}
+	</>
+}
+
+class LightboxContent extends Component {
+	constructor (props) {
+		super(props);
+
+		this.state = {
+			elem: props.elem ? props.elem : null,
+			actualRank: props.elem ? props.elem.rankPhoto : 1,
+			currentIndex: 0,
+			isDragging: false,
+			startX: 0,
+			currentTranslate: 0,
+		}
+
+		this.gallery = React.createRef();
+	}
+
+	handleCloseModal = (e) => {
+		e.preventDefault();
+
+		const { identifiant } = this.props;
+
+		let [body, modal, modalContent, btns] = ModalFunctions.getElements(identifiant);
+
+		ModalFunctions.closeM(body, modal, modalContent);
+	}
+
+	handleMouseDown = (e) => {
+		this.setState({
+			isDragging: true,
+			startX: e.clientX,
+		})
+		this.gallery.current.style.cursor = 'grabbing';
+	};
+
+	handleTouchStart = (e) => {
+		this.setState({ isDragging: true, startX: e.targetTouches[0].clientX })
+	};
+
+	handleMouseMove = (e) => {
+		const { isDragging, startX } = this.state;
+
+		if (!isDragging) return;
+		this.setState({ currentTranslate: e.clientX - startX })
+	};
+
+	handleTouchMove = (e) => {
+		const { isDragging, startX } = this.state;
+
+		if (!isDragging) return;
+		this.setState({ currentTranslate: e.touches[0].clientX - startX })
+	};
+
+	handleMouseUp = () => {
+		this.setState({ isDragging: false })
+		this.gallery.current.style.cursor = 'grab';
+		this.handleSwipeEnd();
+	};
+
+	handleTouchEnd = () => {
+		this.setState({ isDragging: false })
+		this.handleSwipeEnd();
+	};
+
+	handleSwipeEnd = () => {
+		const { actualRank, currentTranslate } = this.state;
+
+		if (currentTranslate > 50) {
+			this.handlePrev(actualRank);
+		} else if (currentTranslate < -50) {
+			this.handleNext(actualRank);
+		}
+		this.setState({ currentTranslate: 0 })
+	};
+
+	handleNext = (rankPhoto) => {
+		const { images } = this.props;
+		const { elem } = this.state;
+
+		let nRank = rankPhoto + 1;
+
+		if(nRank > images.length){
+			nRank = rankPhoto;
+		}
+
+		let nElem = elem;
+		images.forEach(image => {
+			if(image.rankPhoto === nRank){
+				nElem = image;
+			}
+		})
+
+		this.setState({ actualRank: nRank, elem: nElem })
+	}
+
+	handlePrev = (rankPhoto) => {
+		const { images } = this.props;
+		const { elem } = this.state;
+
+		let nRank = rankPhoto - 1;
+
+		if(nRank < 1){
+			nRank = rankPhoto;
+		}
+
+		let nElem = elem;
+		images.forEach(image => {
+			if(image.rankPhoto === nRank){
+				nElem = image;
+			}
+		})
+
+		this.setState({ actualRank: nRank, elem: nElem })
+	}
+
+	render () {
+		const { images } = this.props;
+		const { actualRank, elem, currentTranslate } = this.state;
+
+		if(!elem){
+			return;
+		}
+
+		return <>
+			<div className="fixed bg-gradient-to-t from-gray-800 to-black/30 bottom-0 md:bottom-auto md:top-0 md:bg-none left-0 w-full flex justify-between p-4 md:p-8 text-white z-20">
+				<div className="text-gray-400">{elem.rankPhoto} / {images.length}</div>
+				<div className="flex gap-4">
+					<div>
+						<a className="lightbox-action relative group" href={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })} download>
+							<span className="icon-download !text-2xl text-gray-400 group-hover:text-white" />
+							<span className="tooltip bg-gray-300 text-black py-1 px-2 rounded absolute -top-10 right-0 text-xs hidden">Télécharger</span>
+						</a>
+					</div>
+					<div>
+						<div className="lightbox-action relative group close-modal cursor-pointer" onClick={this.handleCloseModal}>
+							<span className="icon-close !text-2xl text-gray-400 group-hover:text-white" />
+							<span className="tooltip bg-gray-300 text-black py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Supprimer</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="flex justify-center items-center w-full h-full">
+				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full left-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
+					 onClick={() => this.handlePrev(actualRank > 1 ? actualRank : (images.length + 1))}>
+					<span className="icon-left-chevron !text-2xl text-gray-400 group-hover:text-white"></span>
+				</div>
+				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full"
+					 onMouseDown={this.handleMouseDown}
+					 onMouseMove={this.handleMouseMove}
+					 onMouseUp={this.handleMouseUp}
+					 onMouseLeave={this.handleMouseUp}
+					 onTouchStart={this.handleTouchStart}
+					 onTouchMove={this.handleTouchMove}
+					 onTouchEnd={this.handleTouchEnd}
+				>
+					{images.map(image => {
+						return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
+							<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
+								 className="w-full h-full pointer-events-none object-contain select-none outline-none transition-transform"
+								 style={{ transform: `translateX(${currentTranslate}px)` }} />
+						</div>
+					})}
+				</div>
+				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full right-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
+					 onClick={() => this.handleNext(actualRank < images.length ? actualRank : 1)}>
+					<span className="icon-right-chevron !text-2xl text-gray-400 group-hover:text-white"></span>
+				</div>
+			</div>
+		</>
+	}
 }

@@ -110,4 +110,10 @@ class ImageController extends AbstractController
     {
         return $this->file($this->getParameter('private_directory') . $obj->getFileFile());
     }
+
+    #[Route('/src/file-hd/{id}', name: 'file_hd_src', options: ['expose' => true], methods: 'GET')]
+    public function getFileHD(RaImage $obj): Response
+    {
+        return $this->file($this->getParameter('private_directory') . $obj->getFileFile());
+    }
 }
