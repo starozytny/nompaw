@@ -22,14 +22,16 @@ class FixBugDataCommand extends Command
     private ObjectManager $em;
     private DataMain $dataMain;
     private string $publicDirectory;
+    private string $privateDirectory;
 
-    public function __construct($publicDirectory, DatabaseService $databaseService, DataMain $dataMain)
+    public function __construct($publicDirectory, $privateDirectory, DatabaseService $databaseService, DataMain $dataMain)
     {
         parent::__construct();
 
         $this->em = $databaseService->getDefaultManager();
         $this->dataMain = $dataMain;
         $this->publicDirectory = $publicDirectory;
+        $this->privateDirectory = $privateDirectory;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -41,10 +43,11 @@ class FixBugDataCommand extends Command
         $data = $this->em->getRepository(RaImage::class)->findAll();
         foreach($data as $item){
 
-            $directory = $this->publicDirectory;
+            $publicDirectory = $this->publicDirectory;
+            $privateDirectory = $this->privateDirectory;
 
-            $newDirectoryImages = $directory . RaRando::FOLDER_IMAGES . '/' . $item->getRando()->getId();
-            $newDirectoryThumbs = $directory . RaRando::FOLDER_THUMBS . '/' . $item->getRando()->getId();
+            $newDirectoryImages = $privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getRando()->getId();
+            $newDirectoryThumbs = $privateDirectory . RaRando::FOLDER_THUMBS . '/' . $item->getRando()->getId();
 
             if($newDirectoryImages){
                 if(!is_dir($newDirectoryImages)){
@@ -57,11 +60,11 @@ class FixBugDataCommand extends Command
                 }
             }
 
-            $file = $directory . $item->getFileFile();
+            $file = $publicDirectory . $item->getFileFile();
             if(file_exists($file)){
                 rename($file, $newDirectoryImages . '/' . $item->getFile());
             }
-            $thumbs = $directory . $item->getThumbsFile();
+            $thumbs = $publicDirectory . $item->getThumbsFile();
             if(file_exists($thumbs)){
                 rename($thumbs, $newDirectoryThumbs . '/' . $item->getThumbs());
             }

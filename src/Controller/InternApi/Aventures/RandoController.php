@@ -114,8 +114,8 @@ class RandoController extends AbstractController
             $adventureRepository->remove($item);
         }
         foreach($imageRepository->findBy(['rando' => $obj]) as $item){
-            $fileUploader->deleteFile($item->getFile(), RaRando::FOLDER_IMAGES.'/'.$item->getRando()->getId());
-            $fileUploader->deleteFile($item->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$item->getRando()->getId());
+            $fileUploader->deleteFile($item->getFile(), RaRando::FOLDER_IMAGES.'/'.$item->getRando()->getId(), false);
+            $fileUploader->deleteFile($item->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$item->getRando()->getId(), false);
 
             $imageRepository->remove($item);
         }
