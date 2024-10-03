@@ -191,29 +191,22 @@ class Form extends Component {
 
 		return <div>
 			<div className="flex flex-col gap-4">
-				{recurrenceId
-					? <div className="flex gap-4">
-						<div className="w-full">
-							<InputView valeur={typeString[type]} errors={errors}>Type</InputView>
-						</div>
-						<div className="w-full">
-							<InputView valeur="Actif" errors={isActive}>Actif</InputView>
-						</div>
-					</div>
-					: <div className="flex gap-4">
-						<div className="w-full">
-							<Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
-									  classItems="flex flex-wrap gap-2" styleType="fat">
+				<div className="flex gap-4">
+					<div class="w-full">
+						{recurrenceId
+							? <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
+							: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
+										classItems="flex flex-wrap gap-2" styleType="fat">
 								Type
 							</Radiobox>
-						</div>
-						<div className="w-full max-w-20">
-							<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
-								Réel ?
-							</Switcher>
-						</div>
+						}
 					</div>
-				}
+					<div className="w-full max-w-20">
+						<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
+							Réel ?
+						</Switcher>
+					</div>
+				</div>
 
 				<div className="flex gap-4">
 					<div className="w-full">
