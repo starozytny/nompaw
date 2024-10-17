@@ -1,8 +1,10 @@
 import '../../css/pages/holidays.scss';
 
 import React from "react";
-import toastr from "toastr";
 import { createRoot } from "react-dom/client";
+
+import Toastr from "@tailwindFunctions/toastr";
+
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
 import { ProjectDate } from "@userPages/Holidays/Project/ProjectDate";
@@ -69,6 +71,6 @@ let share = document.getElementById('share_link');
 if(share){
     share.addEventListener('click', function () {
         navigator.clipboard.writeText(location.origin + share.dataset.url);
-        toastr.info('Lien de partage copié')
+        Toastr.toast('info', 'Lien de partage copié');
     })
 }

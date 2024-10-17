@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
@@ -97,7 +97,7 @@ class Form extends Component {
 			let self = this;
 			axios({ method: context === "create" ? "POST" : "PUT", url: url, data: this.state })
 				.then(function (response) {
-					toastr.info('Données enregistrées.');
+					Toastr.toast('info', "Données enregistrées.");
 					location.href = Routing.generate(URL_INDEX_PAGE, { 'slug': response.data.slug });
 				})
 				.catch(function (error) {
