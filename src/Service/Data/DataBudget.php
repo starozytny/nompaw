@@ -17,6 +17,12 @@ class DataBudget
 
     public function setDataItem(BuItem $obj, $data): BuItem
     {
+        $dateAt = $this->sanitizeData->createDatePicker($data->dateAt);
+        if($data->dateTime !== ""){
+            $dateTime = str_replace('h', ':', $data->dateTime);
+            $dateAt = $this->sanitizeData->createDateTimePicker($data->dateAt . " " . $dateTime);
+        }
+
         return ($obj)
             ->setYear($this->sanitizeData->setIntValue($data->year))
             ->setMonth($this->sanitizeData->setIntValue($data->month))
@@ -25,7 +31,7 @@ class DataBudget
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
             ->setName($this->sanitizeData->trimData($data->name))
             ->setIsActive((int) $data->isActive[0])
-            ->setDateAt($this->sanitizeData->createDatePicker($data->dateAt))
+            ->setDateAt($dateAt)
         ;
     }
 
