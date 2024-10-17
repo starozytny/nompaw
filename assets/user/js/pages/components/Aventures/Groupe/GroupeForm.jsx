@@ -2,15 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Input, InputFile, Radiobox } from "@tailwindComponents/Elements/Fields";
-import { Button } from "@tailwindComponents/Elements/Button";
-import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
+
+import { Button } from "@tailwindComponents/Elements/Button";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
+import { Input, InputFile, Radiobox } from "@tailwindComponents/Elements/Fields";
 
 const URL_INDEX_PAGE = "user_aventures_groupes_read";
 const URL_CREATE_ELEMENT = "intern_api_aventures_groupes_create";
@@ -124,7 +124,7 @@ class Form extends Component {
 
 			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 				.then(function (response) {
-					toastr.info('Données enregistrées.');
+					Toastr.toast('info', "Données enregistrées.");
 					location.href = Routing.generate(URL_INDEX_PAGE, { slug: response.data.slug });
 				})
 				.catch(function (error) {

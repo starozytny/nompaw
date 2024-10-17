@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Toastr from "@tailwindFunctions/toastr";
 import Inputs from "@commonFunctions/inputs";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
@@ -123,7 +123,7 @@ class Form extends Component {
 
 			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 				.then(function (response) {
-					toastr.info('Données enregistrées.');
+					Toastr.toast('info', "Donnée enregistrées.");
 					location.href = Routing.generate(URL_INDEX_PAGE, { 'slug': response.data.slug });
 				})
 				.catch(function (error) {

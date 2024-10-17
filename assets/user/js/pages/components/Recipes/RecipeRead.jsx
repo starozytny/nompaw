@@ -4,18 +4,18 @@ import PropTypes from "prop-types";
 import _ from "lodash";
 import parse from "html-react-parser"
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Toastr from "@tailwindFunctions/toastr";
+import Inputs from "@commonFunctions/inputs";
 import Sanitaze from '@commonFunctions/sanitaze';
 import Formulaire from '@commonFunctions/formulaire';
 import Validateur from "@commonFunctions/validateur";
-import Inputs from "@commonFunctions/inputs";
 
+import { Button } from "@tailwindComponents/Elements/Button";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 import { Radio, Rate } from "antd";
 import { Input, Radiobox } from "@tailwindComponents/Elements/Fields";
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
-import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
 import { Ingredients } from "@userPages/Recipes/Ingredients";
 import { Instructions } from "@userPages/Recipes/Instructions";
@@ -101,7 +101,7 @@ export class RecipeRead extends Component {
 				let self = this;
 				axios({ method: "PUT", url: Routing.generate(URL_UPDATE_DATA, { 'id': elem.id }), data: { name: name, value: value } })
 					.then(function (response) {
-						toastr.info('Recette mise à jour.');
+						Toastr.toast('info', 'Données enregistrées.');
 						self.setState({ [name]: value, elem: response.data, loadData: false })
 					})
 					.catch(function (error) {
