@@ -38,6 +38,7 @@ export function BudgetFormulaire ({ context, categories, element, year, month, o
 		category={element && element.category ? Formulaire.setValue(element.category.id) : ""}
 		isActive={element ? Formulaire.setValue(element.isActive) : false}
 		dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
+		dateTime={element ? Formulaire.setValueTime(element.dateAt) : ""}
 		recurrenceId={element ? Formulaire.setValue(element.recurrenceId) : ""}
 
 		onCancel={onCancel}
@@ -58,6 +59,7 @@ class Form extends Component {
 			category: props.category,
 			isActive: props.isActive ? [1] : [0],
 			dateAt: props.dateAt,
+			dateTime: props.dateTime,
 			errors: [],
 			load: false
 		}
@@ -85,6 +87,10 @@ class Form extends Component {
 			value = Inputs.dateInput(e, picker, this.state[name]);
 		}
 
+		if (name === "dateTime") {
+			value = Inputs.timeInput(e, this.state[name]);
+		}
+
 		if (name === "type") {
 			this.setState({ category: "" })
 			this.select.current.handleClose(null, "")
@@ -106,7 +112,7 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { context, url } = this.props;
-		const { load, type, price, name, dateAt, category } = this.state;
+		const { load, type, price, name, dateAt, dateTime, category } = this.state;
 
 		this.setState({ errors: [] });
 
@@ -120,6 +126,10 @@ class Form extends Component {
 
 		if (parseInt(type) === 2) {
 			paramsToValidate = [...paramsToValidate, ...[{ type: "text", id: 'category', value: category },]]
+		}
+
+		if(dateTime !== ""){
+			paramsToValidate = [...paramsToValidate, ...[{ type: "time", id: 'dateTime', value: dateTime }]]
 		}
 
 		let validate = Validateur.validateur(paramsToValidate)
@@ -152,7 +162,7 @@ class Form extends Component {
 
 	render () {
 		const { context, categories, onCancel, recurrenceId } = this.props;
-		const { errors, load, type, price, name, category, isActive, dateAt } = this.state;
+		const { errors, load, type, price, name, category, isActive, dateAt, dateTime } = this.state;
 
 		let typeItems = [
 			{ value: 0, label: 'Dépense', identifiant: 'it-depense' },
@@ -181,29 +191,22 @@ class Form extends Component {
 
 		return <div>
 			<div className="flex flex-col gap-4">
-				{recurrenceId
-					? <div className="flex gap-4">
-						<div className="w-full">
-							<InputView valeur={typeString[type]} errors={errors}>Type</InputView>
-						</div>
-						<div className="w-full">
-							<InputView valeur="Actif" errors={isActive}>Actif</InputView>
-						</div>
-					</div>
-					: <div className="flex gap-4">
-						<div className="w-full">
-							<Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
-									  classItems="flex flex-wrap gap-2" styleType="fat">
+				<div className="flex gap-4">
+					<div class="w-full">
+						{recurrenceId
+							? <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
+							: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
+										classItems="flex flex-wrap gap-2" styleType="fat">
 								Type
 							</Radiobox>
-						</div>
-						<div className="w-full max-w-20">
-							<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
-								Réel ?
-							</Switcher>
-						</div>
+						}
 					</div>
-				}
+					<div className="w-full max-w-20">
+						<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
+							Réel ?
+						</Switcher>
+					</div>
+				</div>
 
 				<div className="flex gap-4">
 					<div className="w-full">
@@ -224,6 +227,13 @@ class Form extends Component {
 							Catégorie
 						</SelectCustom>
 					</div>
+				</div>
+
+				<div className="flex gap-4">
+					<div className="w-full">
+						<Input type="time" identifiant="dateTime" valeur={dateTime} {...params}>Heure</Input>
+					</div>
+					<div className="w-full"></div>
 				</div>
 			</div>
 
