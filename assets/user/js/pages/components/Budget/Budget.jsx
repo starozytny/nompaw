@@ -269,7 +269,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 	})
 
 	// update totaux with items and update with itemRecurrence
-	let totalExpenseReal = 0;
+	let totalExpenseReal = 0, totalIncomeReal = 0, totalSavingReal = 0;
 	data.forEach(d => {
 		if (d.month === month) {
 			switch (d.type) {
@@ -281,9 +281,15 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 					break;
 				case 1:
 					totalIncome += d.price;
+					if(d.isActive){
+						totalIncomeReal += d.price;
+					}
 					break;
 				case 2:
 					totalSaving += d.price;
+					if(d.isActive){
+						totalSavingReal += d.price;
+					}
 					break;
 				default:
 					break;
@@ -302,9 +308,15 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 						break;
 					case 1:
 						totalIncome -= d.recurrencePrice;
+						if(!d.isActive){
+							totalIncomeReal -= d.recurrencePrice;
+						}
 						break;
 					case 2:
 						totalSaving -= d.recurrencePrice;
+						if(!d.isActive){
+							totalSavingReal -= d.recurrencePrice;
+						}
 						break;
 					default:
 						break;
@@ -380,13 +392,13 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 
 	let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
 	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
-	let totalDispoNow = initial + totalIncome - (totalExpenseReal + totalSaving);
+	let totalDispoNow = initial + totalIncomeReal - (totalExpenseReal + totalSavingReal);
 
 	let cards = [
 		{ value: 0, name: "Budget disponible", total: totalDispo, total2: totalDispoNow, initial: initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
-		{ value: 1, name: "Dépenses", total: totalExpense, total2: 0, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
-		{ value: 2, name: "Revenus", total: totalIncome, total2: 0, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
-		{ value: 3, name: "Économies", total: totalSaving, total2: 0, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
+		{ value: 1, name: "Dépenses", total: totalExpense, total2: totalExpenseReal, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
+		{ value: 2, name: "Revenus", total: totalIncome, total2: totalIncomeReal, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
+		{ value: 3, name: "Économies", total: totalSaving, total2: totalSavingReal, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
 	]
 
 	nData.sort(SORTER);
