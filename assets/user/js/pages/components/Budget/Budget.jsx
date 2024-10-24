@@ -414,7 +414,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 									<div className="font-semibold text-gray-700">{item.name}</div>
 									<div className="font-bold text-xl">{Sanitaze.toFormatCurrency(item.total)}</div>
 									{item.total2 !== 0 && <div className="text-gray-600 text-sm">Aujourd'hui : {Sanitaze.toFormatCurrency(totalDispoNow)}</div>}
-									{/*{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}*/}
+									{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
 								</div>
 							</div>
 						})}
