@@ -2,17 +2,16 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 // import { initializeApp } from "firebase/app";
 // import { getMessaging, getToken } from "firebase/messaging";
 
+import Inputs from "@commonFunctions/inputs";
+import Propals from "@userFunctions/propals";
+import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
-import Inputs from "@commonFunctions/inputs";
-import Sanitaze from "@commonFunctions/sanitaze";
-import Propals from "@userFunctions/propals";
 // import FirebaseConfig from "@userFunctions/firebase-config";
 
 import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
@@ -178,13 +177,13 @@ export class Presents extends Component {
 			//         if (currentToken) {
 			//             axios({ method: "POST", url: Routing.generate(URL_STORE_TOKEN, {'type': 'birthday', 'id': birthdayId}), data: {token: currentToken} })
 			//                 .then(function (response) { self.setState({ haveNotifPermission: 1 }) })
-			//                 .catch(function (error) { toastr.error(msgError); })
+			//                 .catch(function (error) { Toastr.toast('error', "erreur"); })
 			//                 .then(function () { self.setState({ loadData: false }) })
 			//             ;
 			//         } else {
-			//             toastr.error(msgError);
+			//             Toastr.toast('error', "erreur");
 			//         }
-			//     }).catch((err) => { console.log(err); toastr.error(msgError); })
+			//     }).catch((err) => { console.log(err); Toastr.toast('error', "erreur"); })
 			// ;
 		}
 	}

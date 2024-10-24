@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 
 import { Modal } from "@tailwindComponents/Elements/Modal";
@@ -85,7 +85,7 @@ class Form extends Component {
 			let self = this;
 			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { recipe: recipe.id, position: step, nb: imageToDelete }), data: {} })
 				.then(function (response) {
-					toastr.info('Illustration supprimée.');
+					Toastr.toast('info', 'Illustration supprimée.');
 
 					let name = 'image' + imageToDelete + 'File';
 					self.setState({ [name]: null })
@@ -108,7 +108,7 @@ class Form extends Component {
 		const { image0File, image1File, image2File } = this.state;
 
 		if (image0File || image1File || image2File) {
-			toastr.error('Veuillez supprimer les illustrations avant de supprimer l\'étape.');
+			Toastr.toast('error', 'Veuillez supprimer les illustrations avant de supprimer l\'étape.')
 		} else {
 			this.delete.current.handleClick();
 		}

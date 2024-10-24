@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import moment from "moment/moment";
 import 'moment/locale/fr';
 
+import Sort from "@commonFunctions/sort";
+import Inputs from "@commonFunctions/inputs";
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
-import Inputs from "@commonFunctions/inputs";
-import Sort from "@commonFunctions/sort";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Input, Radiobox, InputView, SelectCustom, Switcher } from "@tailwindComponents/Elements/Fields";
@@ -143,7 +143,7 @@ class Form extends Component {
 				let self = this;
 				axios({ method: context === "create" ? "POST" : "PUT", url: url, data: this.state })
 					.then(function (response) {
-						toastr.info('Données enregistrées.');
+						Toastr.toast('info', 'Données enregistrées.');
 						self.setState({ price: "", name: "" })
 
 						self.props.onUpdateList(response.data, context);

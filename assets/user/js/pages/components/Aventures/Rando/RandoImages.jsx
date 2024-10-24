@@ -3,9 +3,9 @@ import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 import ModalFunctions from '@commonFunctions/modal';
 
@@ -111,7 +111,7 @@ export class RandoImages extends Component {
 		this.formFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({ method: "POST", url: Routing.generate(URL_UPLOAD_IMAGES, { id: randoId }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 			.then(function (response) {
-				toastr.info("Photos envoyées.");
+				Toastr.toast('info', "Photos envoyées.");
 				location.reload();
 			})
 			.catch(function (error) {
@@ -130,7 +130,7 @@ export class RandoImages extends Component {
 		this.deleteImage.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { id: image.id }), data: {} })
 			.then(function (response) {
-				toastr.info('Photo supprimée.');
+				Toastr.toast('info', "Photos supprimée.");
 				location.reload();
 			})
 			.catch(function (error) {
@@ -149,7 +149,7 @@ export class RandoImages extends Component {
 		this.deleteFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: selected } })
 			.then(function (response) {
-				toastr.info('Photos supprimées.');
+				Toastr.toast('info', "Photos supprimée.");
 				location.reload();
 			})
 			.catch(function (error) {
@@ -167,7 +167,7 @@ export class RandoImages extends Component {
 		let self = this;
 		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { id: randoId }), data: { image: image.thumbs } })
 			.then(function (response) {
-				toastr.info('Photo de couverture modifiée.');
+				Toastr.toast('info', "Photo de couverture modifiée.");
 			})
 			.catch(function (error) {
 				Formulaire.displayErrors(self, error);

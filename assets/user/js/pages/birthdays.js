@@ -1,8 +1,10 @@
 import '../../css/pages/birthdays.scss';
 
 import React from "react";
-import toastr from "toastr";
 import { createRoot } from "react-dom/client";
+
+import Toastr from "@tailwindFunctions/toastr";
+
 import { BirthdayFormulaire } from "@userPages/Birthdays/Birthday/BirthdayForm";
 import { BirthdayDelete } from "@userPages/Birthdays/Birthday/BirthdayDelete";
 import { Presents } from "@userPages/Birthdays/Birthday/Presents";
@@ -33,6 +35,6 @@ let share = document.getElementById('share_link');
 if(share){
     share.addEventListener('click', function () {
         navigator.clipboard.writeText(location.origin + share.dataset.url);
-        toastr.info('Lien de partage copié')
+        Toastr.toast('info', 'Lien de partage copié');
     })
 }

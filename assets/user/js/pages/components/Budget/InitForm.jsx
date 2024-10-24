@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Inputs from "@commonFunctions/inputs";
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
@@ -54,7 +54,7 @@ export class InitForm extends Component {
 				let self = this;
 				axios({ method: "PUT", url: Routing.generate(URL_INIT_BUDGET), data: this.state })
 					.then(function (response) {
-						toastr.info('Données enregistrées.');
+						Toastr.toast('info', 'Données enregistrées.');
 						location.reload();
 					})
 					.catch(function (error) {

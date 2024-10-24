@@ -1,7 +1,7 @@
-@import "../vars/vars";
+@use "../vars/vars";
 
 .gallery-2{
-  @include flex(row, flex-start, flex-start, 10px);
+  @include vars.flex(row, flex-start, flex-start, 10px);
   flex-wrap: wrap;
 
   & > *{

@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import axios from 'axios';
-import toastr from 'toastr';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur"
 
@@ -57,7 +57,7 @@ class Form extends Component {
 		this.setState({ errors: [] });
 
 		if (critere !== "") {
-			toastr.error("Une erreur est survenue. Veuillez rafraichir la page.")
+			Toastr.toast('error', "Une erreur est survenue. Veuillez rafraichir la page.");
 		} else {
 			let paramsToValidate = [
 				{ type: "text", id: 'username', value: username },

@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import axios from "axios";
-import toastr from "toastr";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import { uid } from "uid";
 import parse from "html-react-parser";
 
+import Toastr from "@tailwindFunctions/toastr";
 import Formulaire from "@commonFunctions/formulaire";
 
 import { Button } from "@tailwindComponents/Elements/Button";
@@ -116,7 +116,7 @@ export class Instructions extends Component {
 
 			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 				.then(function (response) {
-					toastr.info('Recette mise à jour.');
+					Toastr.toast('info', 'Données enregistrées.');
 					self.setState({ loadData: false })
 				})
 				.catch(function (error) {
