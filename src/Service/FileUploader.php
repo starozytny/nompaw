@@ -98,7 +98,7 @@ class FileUploader
 
         if(str_contains($mime, "image/")){
             $layer = ImageWorkshop::initFromPath($fileOri);
-            $layer->resizeInPixel(null, 500, true);
+            $layer->resizeInPixel(null, 350, true);
 
             $fileName = "thumbs-" . $fileName;
 
