@@ -413,7 +413,7 @@ class RaRando extends DataEntity
 
     public function getCoverFile()
     {
-        return $this->getFileOrDefault($this->cover, RaRando::FOLDER_THUMBS . '/' . $this->id);
+        return $this->getFileOrDefault($this->cover, RaRando::FOLDER_COVER . '/' . $this->id);
     }
 
     public function getGooglePhotos(): ?string
