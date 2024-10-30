@@ -57,12 +57,16 @@ class FixTmpDataCommand extends Command
                 }
             }
 
-            $fileOri = $directoryImages . '/' . $item->getFile();
-            if(file_exists($fileOri)){
-                $randoFile = '/' . $item->getRando()->getId();
-                $filenameLightbox = $this->fileUploader->lightbox($item->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
+            if(file_exists($directoryLightbox . '/lightbox-' . $item->getFile())){
+                $item->setLightbox('/lightbox-' . $item->getFile());
+            }else{
+                $fileOri = $directoryImages . '/' . $item->getFile();
+                if(file_exists($fileOri)){
+                    $randoFile = '/' . $item->getRando()->getId();
+                    $filenameLightbox = $this->fileUploader->lightbox($item->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
 
-                $item->setLightbox($filenameLightbox);
+                    $item->setLightbox($filenameLightbox);
+                }
             }
         }
 
