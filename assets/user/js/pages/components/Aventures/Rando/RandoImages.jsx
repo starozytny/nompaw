@@ -10,7 +10,6 @@ import Formulaire from "@commonFunctions/formulaire";
 import ModalFunctions from '@commonFunctions/modal';
 
 import { Modal } from "@tailwindComponents/Elements/Modal";
-import { Alert } from "@tailwindComponents/Elements/Alert";
 import { LightBox } from "@tailwindComponents/Elements/LightBox";
 import { InputFile } from "@tailwindComponents/Elements/Fields";
 import { Button, ButtonIcon, ButtonIconA } from "@tailwindComponents/Elements/Button";
@@ -295,13 +294,12 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 	};
 
 	useEffect(() => {
-		// Timeout de 5 secondes pour chaque image
 		const timeoutId = currentImages.map((_, index) =>
 			setTimeout(() => {
 				if (!loaded[index]) {
 					handleImageError(index);
 				}
-			}, 2000) // 2 secondes
+			}, 500)
 		);
 
 		return () => {
@@ -345,6 +343,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 									</>}
 								</div>
 							</div>
+							<div className="absolute top-12 w-full h-[calc(100%-6rem)]" onClick={() => onLightbox(elem)}></div>
 							<div className="flex justify-between gap-2 p-2">
 								<div className="flex items-center gap-2">
 									<div className="w-8 h-8 rounded-full shadow">
@@ -539,7 +538,7 @@ class LightboxContent extends Component {
 					{images.map(image => {
 						return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
 							<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
-								 className="w-full h-full object-contain select-none outline-none transition-transform"
+								 className="max-w-[1440px] mx-auto w-full h-full object-contain select-none outline-none transition-transform"
 								 style={{ transform: `translateX(${currentTranslate}px)` }} />
 						</div>
 					})}

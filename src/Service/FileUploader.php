@@ -98,11 +98,44 @@ class FileUploader
 
         if(str_contains($mime, "image/")){
             $layer = ImageWorkshop::initFromPath($fileOri);
-            $layer->resizeInPixel(null, 350, true);
+            if($layer->getHeight() > 350){
+                $layer->resizeInPixel(null, 350, true);
+            }
 
             $fileName = "thumbs-" . $fileName;
 
             $layer->save($directory . $folderThumbs, $fileName);
+        }
+
+        return $fileName;
+    }
+
+    /**
+     * @throws ImageWorkshopLayerException
+     * @throws ImageWorkshopException
+     */
+    public function lightbox($fileName, $folderImages, $folderLightbox, $isPublic = false): string
+    {
+        $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
+
+        if($folderLightbox){
+            if(!is_dir($directory . $folderLightbox)){
+                mkdir($directory . $folderLightbox, 0777, true);
+            }
+        }
+
+        $fileOri = $directory . $folderImages . "/" . $fileName;
+        $mime = mime_content_type($fileOri);
+
+        if(str_contains($mime, "image/")){
+            $layer = ImageWorkshop::initFromPath($fileOri);
+            if($layer->getWidth() > 1440){
+                $layer->resizeInPixel(1440, null, true);
+            }
+
+            $fileName = "lightbox-" . $fileName;
+
+            $layer->save($directory . $folderLightbox, $fileName);
         }
 
         return $fileName;
