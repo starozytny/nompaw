@@ -68,6 +68,8 @@ class FixTmpDataCommand extends Command
 
                     $item->setCover($filenameLightbox);
                 }
+            }else{
+                $io->text($oldCover);
             }
         }
 
