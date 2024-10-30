@@ -44,29 +44,28 @@ class FixTmpDataCommand extends Command
 
         $io->title('Initialisation');
 
-        $data = $this->em->getRepository(RaImage::class)->findAll();
+        $data = $this->em->getRepository(RaRando::class)->findAll();
         foreach($data as $item){
             $privateDirectory = $this->privateDirectory;
 
-            $directoryImages = $privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getRando()->getId();
-            $directoryLightbox = $privateDirectory . RaRando::FOLDER_LIGHTBOX . '/' . $item->getRando()->getId();
+            $oldCover = $item->getCover();
+            $img = $this->em->getRepository(RaImage::class)->findOneBy(['thumbs' => $oldCover]);
 
-            if($directoryLightbox){
-                if(!is_dir($directoryLightbox)){
-                    mkdir($directoryLightbox, 0777, true);
+            $directoryImages = $privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getId();
+            $directoryCover = $privateDirectory . RaRando::FOLDER_COVER . '/' . $item->getId();
+
+            if($directoryCover){
+                if(!is_dir($directoryCover)){
+                    mkdir($directoryCover, 0777, true);
                 }
             }
 
-            if(file_exists($directoryLightbox . '/lightbox-' . $item->getFile())){
-                $item->setLightbox('lightbox-' . $item->getFile());
-            }else{
-                $fileOri = $directoryImages . '/' . $item->getFile();
-                if(file_exists($fileOri)){
-                    $randoFile = '/' . $item->getRando()->getId();
-                    $filenameLightbox = $this->fileUploader->lightbox($item->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
+            $fileOri = $directoryImages . '/' . $img->getFile();
+            if(file_exists($fileOri)){
+                $randoFile = '/' . $item->getId();
+                $filenameLightbox = $this->fileUploader->cover($img->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
 
-                    $item->setLightbox($filenameLightbox);
-                }
+                $item->setCover($filenameLightbox);
             }
         }
 
