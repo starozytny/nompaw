@@ -10,7 +10,6 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\Enum\Image\ImageType;
 use App\Entity\Main\Agenda\AgEvent;
 use App\Entity\Main\Changelog;
-use App\Entity\Main\Help\HeQuestion;
 use App\Entity\Main\Image;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
@@ -164,7 +163,6 @@ class FileUploader
             $folder = match ($type){
                 ImageType::Changelog => Changelog::FOLDER,
                 ImageType::AgEvent => AgEvent::FOLDER,
-                ImageType::Question => HeQuestion::FOLDER,
                 ImageType::Recipe => CoRecipe::FOLDER,
                 ImageType::Commentary => CoCommentary::FOLDER,
                 ImageType::Groupe => RaGroupe::FOLDER,
