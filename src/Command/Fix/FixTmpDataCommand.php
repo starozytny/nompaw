@@ -58,7 +58,7 @@ class FixTmpDataCommand extends Command
             }
 
             if(file_exists($directoryLightbox . '/lightbox-' . $item->getFile())){
-                $item->setLightbox('/lightbox-' . $item->getFile());
+                $item->setLightbox('lightbox-' . $item->getFile());
             }else{
                 $fileOri = $directoryImages . '/' . $item->getFile();
                 if(file_exists($fileOri)){
