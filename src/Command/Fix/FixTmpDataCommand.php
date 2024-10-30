@@ -68,6 +68,8 @@ class FixTmpDataCommand extends Command
                         $filenameLightbox = $this->fileUploader->cover($img->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
 
                         $item->setCover($filenameLightbox);
+                    }else{
+                        $io->text($fileOri);
                     }
                 }else{
                     $io->text($oldCover);
