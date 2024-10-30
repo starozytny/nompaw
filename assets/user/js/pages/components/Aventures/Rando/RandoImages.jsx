@@ -220,11 +220,6 @@ export class RandoImages extends Component {
 						: null
 					}
 				</div>
-				<div className="mt-4">
-					<Alert type="blue" icon="warning">
-						<div className="text-sm">Pour un tirage des photos contactez moi !</div>
-					</Alert>
-				</div>
 			</div>
 
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
