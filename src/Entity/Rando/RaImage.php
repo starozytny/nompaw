@@ -28,6 +28,10 @@ class RaImage extends DataEntity
     #[Groups(['ra_img_list'])]
     private ?string $thumbs = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['ra_img_list'])]
+    private ?string $lightbox = null;
+
     #[ORM\Column(nullable: true)]
     private ?int $mTime = null;
 
@@ -83,6 +87,24 @@ class RaImage extends DataEntity
     public function getThumbsFile()
     {
         return $this->getFileOrDefault($this->thumbs, RaRando::FOLDER_THUMBS . '/' . $this->rando->getId());
+    }
+
+    public function getLightbox(): ?string
+    {
+        return $this->lightbox;
+    }
+
+    public function setLightbox(string $lightbox): self
+    {
+        $this->lightbox = $lightbox;
+
+        return $this;
+    }
+
+    #[Groups(['ra_img_list'])]
+    public function getLightboxFile()
+    {
+        return $this->getFileOrDefault($this->lightbox, RaRando::FOLDER_LIGHTBOX . '/' . $this->rando->getId());
     }
 
     public function getAuthor(): ?User
