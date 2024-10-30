@@ -10,7 +10,6 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\Enum\Image\ImageType;
 use App\Entity\Main\Agenda\AgEvent;
 use App\Entity\Main\Changelog;
-use App\Entity\Main\Help\HeQuestion;
 use App\Entity\Main\Image;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
@@ -99,7 +98,71 @@ class FileUploader
 
         if(str_contains($mime, "image/")){
             $layer = ImageWorkshop::initFromPath($fileOri);
-            $layer->resizeInPixel(null, 500, true);
+            if($layer->getHeight() > 350){
+                $layer->resizeInPixel(null, 350, true);
+            }
+
+            $fileName = "thumbs-" . $fileName;
+
+            $layer->save($directory . $folderThumbs, $fileName);
+        }
+
+        return $fileName;
+    }
+
+    /**
+     * @throws ImageWorkshopLayerException
+     * @throws ImageWorkshopException
+     */
+    public function lightbox($fileName, $folderImages, $folderLightbox, $isPublic = false): string
+    {
+        $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
+
+        if($folderLightbox){
+            if(!is_dir($directory . $folderLightbox)){
+                mkdir($directory . $folderLightbox, 0777, true);
+            }
+        }
+
+        $fileOri = $directory . $folderImages . "/" . $fileName;
+        $mime = mime_content_type($fileOri);
+
+        if(str_contains($mime, "image/")){
+            $layer = ImageWorkshop::initFromPath($fileOri);
+            if($layer->getWidth() > 1440){
+                $layer->resizeInPixel(1440, null, true);
+            }
+
+            $fileName = "lightbox-" . $fileName;
+
+            $layer->save($directory . $folderLightbox, $fileName);
+        }
+
+        return $fileName;
+    }
+
+    /**
+     * @throws ImageWorkshopLayerException
+     * @throws ImageWorkshopException
+     */
+    public function cover($fileName, $folderImages, $folderThumbs, $isPublic = false): string
+    {
+        $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
+
+        if($folderThumbs){
+            if(!is_dir($directory . $folderThumbs)){
+                mkdir($directory . $folderThumbs, 0777, true);
+            }
+        }
+
+        $fileOri = $directory . $folderImages . "/" . $fileName;
+        $mime = mime_content_type($fileOri);
+
+        if(str_contains($mime, "image/")){
+            $layer = ImageWorkshop::initFromPath($fileOri);
+            if($layer->getWidth() > 320){
+                $layer->resizeInPixel(320, null, true);
+            }
 
             $fileName = "thumbs-" . $fileName;
 
@@ -164,7 +227,6 @@ class FileUploader
             $folder = match ($type){
                 ImageType::Changelog => Changelog::FOLDER,
                 ImageType::AgEvent => AgEvent::FOLDER,
-                ImageType::Question => HeQuestion::FOLDER,
                 ImageType::Recipe => CoRecipe::FOLDER,
                 ImageType::Commentary => CoCommentary::FOLDER,
                 ImageType::Groupe => RaGroupe::FOLDER,

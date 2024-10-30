@@ -10,7 +10,6 @@ import Formulaire from "@commonFunctions/formulaire";
 import ModalFunctions from '@commonFunctions/modal';
 
 import { Modal } from "@tailwindComponents/Elements/Modal";
-import { Alert } from "@tailwindComponents/Elements/Alert";
 import { LightBox } from "@tailwindComponents/Elements/LightBox";
 import { InputFile } from "@tailwindComponents/Elements/Fields";
 import { Button, ButtonIcon, ButtonIconA } from "@tailwindComponents/Elements/Button";
@@ -94,25 +93,43 @@ export class RandoImages extends Component {
 
 		const { randoId } = this.props;
 
+		this.handleUploadChunk(this, randoId, 0, 20, 0);
+	}
+
+	handleUploadChunk (self, randoId, iStart, iEnd, iProceed) {
 		Formulaire.loader(true);
-		let self = this;
 
 		let formData = new FormData();
 
-		let file = this.files.current;
+		let max = 0;
+
+		let file = self.files.current;
 		if (file.state.files.length > 0) {
 			file.state.files.forEach((f, index) => {
-				let lastMod = "" + f.lastModified
-				formData.append("file-" + index, f);
-				formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
+				max++;
+				if(index >= iStart && index < iEnd){
+					iProceed++;
+					let lastMod = "" + f.lastModified
+					formData.append("file-" + index, f);
+					formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
+				}
 			})
 		}
+
+		formData.append("max", max);
+		formData.append("iStart", iStart);
+		formData.append("iEnd", iEnd);
+		formData.append("iProceed", iProceed);
 
 		this.formFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({ method: "POST", url: Routing.generate(URL_UPLOAD_IMAGES, { id: randoId }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 			.then(function (response) {
-				Toastr.toast('info', "Photos envoyées.");
-				location.reload();
+				if(response.data.continue){
+					self.handleUploadChunk(self, randoId, response.data.iStart, response.data.iEnd, response.data.iProceed);
+				}else{
+					Toastr.toast('info', "Photos envoyées.");
+					location.reload();
+				}
 			})
 			.catch(function (error) {
 				modalForm(self);
@@ -165,7 +182,7 @@ export class RandoImages extends Component {
 
 		Formulaire.loader(true);
 		let self = this;
-		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { id: randoId }), data: { image: image.thumbs } })
+		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { id: randoId }), data: { image: image.file } })
 			.then(function (response) {
 				Toastr.toast('info', "Photo de couverture modifiée.");
 			})
@@ -202,11 +219,6 @@ export class RandoImages extends Component {
 						: null
 					}
 				</div>
-				<div className="mt-4">
-					<Alert type="blue" icon="warning">
-						<div className="text-sm">Pour un tirage des photos contactez moi !</div>
-					</Alert>
-				</div>
 			</div>
 
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
@@ -223,8 +235,9 @@ export class RandoImages extends Component {
 
 			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
 								 content={<div>
-									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={20} maxSize={95330000} {...params}>
-										 Photos (20 maximum par envoi)
+									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*"
+												max={300} maxSize={62914560} {...params}>
+										 Photos (300 maximum par envoi)
 									 </InputFile>
 								 </div>}
 								 footer={null} closeTxt="Annuler" />
@@ -281,13 +294,12 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 	};
 
 	useEffect(() => {
-		// Timeout de 5 secondes pour chaque image
 		const timeoutId = currentImages.map((_, index) =>
 			setTimeout(() => {
 				if (!loaded[index]) {
 					handleImageError(index);
 				}
-			}, 2000) // 2 secondes
+			}, 500)
 		);
 
 		return () => {
@@ -303,7 +315,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 					<span className="icon-chart-3"></span>
 				</div>
 				{error[index]
-					? <div className="w-full h-full bg-gray-900 text-white text-center flex items-center justify-center">
+					? <div className="w-full h-full bg-gray-900 text-white text-center flex items-center justify-center z-10" onClick={() => onLightbox(elem)}>
 						Cliquez pour voir la photo..
 					</div>
 					: <>
@@ -331,6 +343,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 									</>}
 								</div>
 							</div>
+							<div className="absolute top-12 w-full h-[calc(100%-6rem)]" onClick={() => onLightbox(elem)}></div>
 							<div className="flex justify-between gap-2 p-2">
 								<div className="flex items-center gap-2">
 									<div className="w-8 h-8 rounded-full shadow">
@@ -352,7 +365,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 							</div>
 						</div>
 						{elem.type === 1
-							? <video controls>
+							? <video className="h-[205px] md:h-[332px]" controls>
 								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
 							</video>
 							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt=""
@@ -525,7 +538,7 @@ class LightboxContent extends Component {
 					{images.map(image => {
 						return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
 							<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
-								 className="w-full h-full object-contain select-none outline-none transition-transform"
+								 className="max-w-[1440px] mx-auto w-full h-full object-contain select-none outline-none transition-transform"
 								 style={{ transform: `translateX(${currentTranslate}px)` }} />
 						</div>
 					})}

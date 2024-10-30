@@ -31,11 +31,13 @@ class ImageController extends AbstractController
             foreach($request->files as $key => $file){
                 $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
                 $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
+                $filenameLightbox = $fileUploader->lightbox($filenameImage, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
                     ->setMTime($request->get($key . "-time"))
                     ->setThumbs($filenameThumb)
+                    ->setLightbox($filenameLightbox)
                     ->setAuthor($this->getUser())
                     ->setRando($obj)
                 ;
@@ -55,7 +57,23 @@ class ImageController extends AbstractController
             $repository->save($obj, true);
         }
 
-        return $apiResponse->apiJsonResponseSuccessful('ok');
+        $max = $request->get('max');
+        $iEnd = $request->get('iEnd');
+        $iProceed = $request->get('iProceed');
+
+        if($iProceed < $max){
+            return $apiResponse->apiJsonResponseCustom([
+                'max' => $max,
+                'iStart' => $iEnd,
+                'iEnd' => $iEnd + 20,
+                'iProceed' => $iProceed,
+                'continue' => true
+            ]);
+        }
+
+        return $apiResponse->apiJsonResponseCustom([
+            'continue' => false
+        ]);
     }
 
     #[Route('/image/delete/{id}', name: 'image_delete', options: ['expose' => true], methods: 'DELETE')]
@@ -64,6 +82,7 @@ class ImageController extends AbstractController
     {
         $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId(), false);
         $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId(), false);
+        $fileUploader->deleteFile($obj->getLightbox(), RaRando::FOLDER_LIGHTBOX.'/'.$obj->getRando()->getId(), false);
 
         $repository->remove($obj, true);
 
@@ -85,6 +104,7 @@ class ImageController extends AbstractController
         foreach($objs as $obj){
             $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId(), false);
             $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId(), false);
+            $fileUploader->deleteFile($obj->getLightbox(), RaRando::FOLDER_LIGHTBOX.'/'.$obj->getRando()->getId(), false);
 
             $repository->remove($obj);
         }
@@ -114,6 +134,6 @@ class ImageController extends AbstractController
     #[Route('/src/file-hd/{id}', name: 'file_hd_src', options: ['expose' => true], methods: 'GET')]
     public function getFileHD(RaImage $obj): Response
     {
-        return $this->file($this->getParameter('private_directory') . $obj->getFileFile());
+        return $this->file($this->getParameter('private_directory') . $obj->getLightboxFile());
     }
 }

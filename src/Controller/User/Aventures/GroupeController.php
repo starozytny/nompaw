@@ -8,6 +8,7 @@ use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
 use App\Repository\Rando\RaRandoRepository;
+use App\Service\Aventures\GroupService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,21 +19,11 @@ use Symfony\Component\Serializer\SerializerInterface;
 class GroupeController extends AbstractController
 {
     #[Route('/', name: 'index', options: ['expose' => true])]
-    public function list(RaGroupeRepository $repository, RaLinkRepository $linkRepository): Response
+    public function list(GroupService $groupService): Response
     {
-        $groupes = $repository->findBy(['isVisible' => true]);
-
-        foreach($repository->findBy(['author' => $this->getUser()]) as $grp){
-            if(!in_array($grp, $groupes)){
-                $groupes[] = $grp;
-            }
-        }
-
-        foreach($linkRepository->findBy(['user' => $this->getUser()]) as $link){
-            if(!in_array($link->getGroupe(), $groupes)){
-                $groupes[] = $link->getGroupe();
-            }
-        }
+        /** @var User $user */
+        $user = $this->getUser();
+        $groupes = $groupService->getList($user);
 
         return $this->render('user/pages/aventures/index.html.twig', ['groupes' => $groupes]);
     }
