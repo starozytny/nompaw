@@ -164,7 +164,7 @@ class FileUploader
                 $layer->resizeInPixel(320, null, true);
             }
 
-            $fileName = "thumbs-" . $fileName;
+            $fileName = "cover-" . $fileName;
 
             $layer->save($directory . $folderThumbs, $fileName);
         }
