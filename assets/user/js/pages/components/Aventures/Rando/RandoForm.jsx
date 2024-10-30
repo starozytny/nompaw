@@ -181,7 +181,7 @@ class Form extends Component {
                             </div>
                             <div>
                                 <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}
-                                          classItems="flex gap-2" styleType="fat">
+                                          classItems="flex gap-2 flex-wrap" styleType="fat">
                                     Niveau *
                                 </Radiobox>
                             </div>
