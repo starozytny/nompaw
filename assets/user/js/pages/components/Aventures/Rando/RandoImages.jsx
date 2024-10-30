@@ -315,7 +315,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 					<span className="icon-chart-3"></span>
 				</div>
 				{error[index]
-					? <div className="w-full h-full bg-gray-900 text-white text-center flex items-center justify-center" onClick={() => onLightbox(elem)}>
+					? <div className="w-full h-full bg-gray-900 text-white text-center flex items-center justify-center z-10" onClick={() => onLightbox(elem)}>
 						Cliquez pour voir la photo..
 					</div>
 					: <>
