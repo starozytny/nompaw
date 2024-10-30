@@ -94,25 +94,43 @@ export class RandoImages extends Component {
 
 		const { randoId } = this.props;
 
+		this.handleUploadChunk(this, randoId, 0, 20, 0);
+	}
+
+	handleUploadChunk (self, randoId, iStart, iEnd, iProceed) {
 		Formulaire.loader(true);
-		let self = this;
 
 		let formData = new FormData();
 
-		let file = this.files.current;
+		let max = 0;
+
+		let file = self.files.current;
 		if (file.state.files.length > 0) {
 			file.state.files.forEach((f, index) => {
-				let lastMod = "" + f.lastModified
-				formData.append("file-" + index, f);
-				formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
+				max++;
+				if(index >= iStart && index < iEnd){
+					iProceed++;
+					let lastMod = "" + f.lastModified
+					formData.append("file-" + index, f);
+					formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
+				}
 			})
 		}
+
+		formData.append("max", max);
+		formData.append("iStart", iStart);
+		formData.append("iEnd", iEnd);
+		formData.append("iProceed", iProceed);
 
 		this.formFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({ method: "POST", url: Routing.generate(URL_UPLOAD_IMAGES, { id: randoId }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 			.then(function (response) {
-				Toastr.toast('info', "Photos envoyées.");
-				location.reload();
+				if(response.data.continue){
+					self.handleUploadChunk(self, randoId, response.data.iStart, response.data.iEnd, response.data.iProceed);
+				}else{
+					Toastr.toast('info', "Photos envoyées.");
+					location.reload();
+				}
 			})
 			.catch(function (error) {
 				modalForm(self);
@@ -223,8 +241,9 @@ export class RandoImages extends Component {
 
 			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
 								 content={<div>
-									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*" max={20} maxSize={95330000} {...params}>
-										 Photos (20 maximum par envoi)
+									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*"
+												max={300} maxSize={62914560} {...params}>
+										 Photos (300 maximum par envoi)
 									 </InputFile>
 								 </div>}
 								 footer={null} closeTxt="Annuler" />

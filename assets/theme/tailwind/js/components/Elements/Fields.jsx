@@ -817,6 +817,8 @@ export class InputFile extends Component {
 		const { type, max = 1, maxSize = 5330000 } = this.props;
 		const { files } = this.state;
 
+		//5 * 1024 * 1024 = 5242880; // 5 MB
+
 		const file = e.target.files[0];
 		if (file) {
 			this.setState({ loading: true });

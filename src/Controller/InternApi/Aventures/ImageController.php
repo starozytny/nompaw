@@ -55,7 +55,23 @@ class ImageController extends AbstractController
             $repository->save($obj, true);
         }
 
-        return $apiResponse->apiJsonResponseSuccessful('ok');
+        $max = $request->get('max');
+        $iEnd = $request->get('iEnd');
+        $iProceed = $request->get('iProceed');
+
+        if($iProceed < $max){
+            return $apiResponse->apiJsonResponseCustom([
+                'max' => $max,
+                'iStart' => $iEnd,
+                'iEnd' => $iEnd + 20,
+                'iProceed' => $iProceed,
+                'continue' => true
+            ]);
+        }
+
+        return $apiResponse->apiJsonResponseCustom([
+            'continue' => false
+        ]);
     }
 
     #[Route('/image/delete/{id}', name: 'image_delete', options: ['expose' => true], methods: 'DELETE')]
