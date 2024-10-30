@@ -182,7 +182,7 @@ export class RandoImages extends Component {
 
 		Formulaire.loader(true);
 		let self = this;
-		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { id: randoId }), data: { image: image.lightbox } })
+		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { id: randoId }), data: { image: image.file } })
 			.then(function (response) {
 				Toastr.toast('info', "Photo de couverture modifiée.");
 			})

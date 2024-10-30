@@ -173,7 +173,7 @@ class RandoController extends AbstractController
         }
 
         $randoFile = "/" . $obj->getId();
-        $filenameCover = $fileUploader->thumbs($data->image, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
+        $filenameCover = $fileUploader->cover($data->image, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
 
         $obj->setCover($filenameCover);
 
