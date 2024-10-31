@@ -49,23 +49,31 @@ class FixTmpDataCommand extends Command
             $privateDirectory = $this->privateDirectory;
 
             $oldCover = $item->getCover();
-            $img = $this->em->getRepository(RaImage::class)->findOneBy(['thumbs' => $oldCover]);
+            if($oldCover){
+                $img = $this->em->getRepository(RaImage::class)->findOneBy(['thumbs' => $oldCover]);
 
-            $directoryImages = $privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getId();
-            $directoryCover = $privateDirectory . RaRando::FOLDER_COVER . '/' . $item->getId();
+                if($img){
+                    $directoryImages = $privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getId();
+                    $directoryCover = $privateDirectory . RaRando::FOLDER_COVER . '/' . $item->getId();
 
-            if($directoryCover){
-                if(!is_dir($directoryCover)){
-                    mkdir($directoryCover, 0777, true);
+                    if($directoryCover){
+                        if(!is_dir($directoryCover)){
+                            mkdir($directoryCover, 0777, true);
+                        }
+                    }
+
+                    $fileOri = $directoryImages . '/' . $img->getFile();
+                    if(file_exists($fileOri)){
+                        $randoFile = '/' . $item->getId();
+                        $filenameLightbox = $this->fileUploader->cover($img->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
+
+                        $item->setCover($filenameLightbox);
+                    }else{
+                        $io->text($fileOri);
+                    }
+                }else{
+                    $io->text($oldCover);
                 }
-            }
-
-            $fileOri = $directoryImages . '/' . $img->getFile();
-            if(file_exists($fileOri)){
-                $randoFile = '/' . $item->getId();
-                $filenameLightbox = $this->fileUploader->cover($img->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
-
-                $item->setCover($filenameLightbox);
             }
         }
 
