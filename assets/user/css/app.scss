@@ -10,13 +10,3 @@
 html{
   @include vars.fontRegular();
 }
-
-.icon-google{
-  display: none;
-}
-
-@media (min-width:768px) {
-  .icon-google{
-    display: inline-block;
-  }
-}
