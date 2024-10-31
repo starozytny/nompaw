@@ -102,23 +102,31 @@ export class RandoImages extends Component {
 		let formData = new FormData();
 
 		let max = 0;
+		let postMaxSize = 524288000; // 500 MB
 
-		let file = self.files.current;
+		let nIEnd = iEnd;
+
+		let file = self.files.current, totalSize = 0;
 		if (file.state.files.length > 0) {
 			file.state.files.forEach((f, index) => {
 				max++;
 				if(index >= iStart && index < iEnd){
-					iProceed++;
-					let lastMod = "" + f.lastModified
-					formData.append("file-" + index, f);
-					formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
+					totalSize += f.size;
+					if(totalSize > postMaxSize){
+						nIEnd--;
+					}else{
+						iProceed++;
+						let lastMod = "" + f.lastModified
+						formData.append("file-" + index, f);
+						formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
+					}
 				}
 			})
 		}
 
 		formData.append("max", max);
 		formData.append("iStart", iStart);
-		formData.append("iEnd", iEnd);
+		formData.append("iEnd", nIEnd);
 		formData.append("iProceed", iProceed);
 
 		this.formFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
