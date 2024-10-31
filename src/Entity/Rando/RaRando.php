@@ -18,6 +18,7 @@ class RaRando extends DataEntity
     const FOLDER = "images/editor/randos";
     const FOLDER_IMAGES = "images/entity/randos/images";
     const FOLDER_THUMBS = "images/entity/randos/thumbs";
+    const FOLDER_COVER = "images/entity/randos/cover";
     const FOLDER_LIGHTBOX = "images/entity/randos/lightbox";
 
     const FORM = ['rando_form'];
@@ -412,7 +413,7 @@ class RaRando extends DataEntity
 
     public function getCoverFile()
     {
-        return $this->getFileOrDefault($this->cover, RaRando::FOLDER_THUMBS . '/' . $this->id);
+        return $this->getFileOrDefault($this->cover, RaRando::FOLDER_COVER . '/' . $this->id);
     }
 
     public function getGooglePhotos(): ?string

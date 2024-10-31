@@ -141,6 +141,37 @@ class FileUploader
         return $fileName;
     }
 
+    /**
+     * @throws ImageWorkshopLayerException
+     * @throws ImageWorkshopException
+     */
+    public function cover($fileName, $folderImages, $folderThumbs, $isPublic = false): string
+    {
+        $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
+
+        if($folderThumbs){
+            if(!is_dir($directory . $folderThumbs)){
+                mkdir($directory . $folderThumbs, 0777, true);
+            }
+        }
+
+        $fileOri = $directory . $folderImages . "/" . $fileName;
+        $mime = mime_content_type($fileOri);
+
+        if(str_contains($mime, "image/")){
+            $layer = ImageWorkshop::initFromPath($fileOri);
+            if($layer->getWidth() > 320){
+                $layer->resizeInPixel(320, null, true);
+            }
+
+            $fileName = "cover-" . $fileName;
+
+            $layer->save($directory . $folderThumbs, $fileName);
+        }
+
+        return $fileName;
+    }
+
     public function deleteFile($fileName, $folderName, $isPublic = true): void
     {
         if($fileName){

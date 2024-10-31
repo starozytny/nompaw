@@ -22,6 +22,7 @@ class RaImage extends DataEntity
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ra_img_list'])]
     private ?string $file = null;
 
     #[ORM\Column(length: 255)]

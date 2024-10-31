@@ -14,6 +14,8 @@ use App\Service\ApiResponse;
 use App\Service\Data\DataRandos;
 use App\Service\FileUploader;
 use App\Service\ValidatorService;
+use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
+use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -153,12 +155,27 @@ class RandoController extends AbstractController
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
+    /**
+     * @throws ImageWorkshopException
+     * @throws ImageWorkshopLayerException
+     */
     #[Route('/cover/{id}', name: 'cover', options: ['expose' => true], methods: 'PUT')]
-    public function cover(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
+    public function cover(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository, FileUploader $fileUploader): Response
     {
         $data = json_decode($request->getContent());
 
-        $obj->setCover($data->image);
+        $oldCover = $obj->getCover();
+        if($oldCover){
+            $oldCoverFile = $this->getParameter('private_directory') . RaRando::FOLDER_COVER . "/" . $oldCover;
+            if(file_exists($oldCoverFile)){
+                unlink($oldCoverFile);
+            }
+        }
+
+        $randoFile = "/" . $obj->getId();
+        $filenameCover = $fileUploader->cover($data->image, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
+
+        $obj->setCover($filenameCover);
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
