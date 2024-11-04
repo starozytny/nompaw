@@ -83,7 +83,7 @@ class FileUploader
      * @throws ImageWorkshopLayerException
      * @throws ImageWorkshopException
      */
-    public function thumbs($fileName, $folderImages, $folderThumbs, $isPublic = false): string
+    public function thumbs($fileName, $folderImages, $folderThumbs, $isPublic = false): void
     {
         $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
 
@@ -102,19 +102,15 @@ class FileUploader
                 $layer->resizeInPixel(null, 350, true);
             }
 
-            $fileName = "thumbs-" . $fileName;
-
             $layer->save($directory . $folderThumbs, $fileName);
         }
-
-        return $fileName;
     }
 
     /**
      * @throws ImageWorkshopLayerException
      * @throws ImageWorkshopException
      */
-    public function lightbox($fileName, $folderImages, $folderLightbox, $isPublic = false): string
+    public function lightbox($fileName, $folderImages, $folderLightbox, $isPublic = false): void
     {
         $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
 
@@ -133,12 +129,8 @@ class FileUploader
                 $layer->resizeInPixel(1440, null, true);
             }
 
-            $fileName = "lightbox-" . $fileName;
-
             $layer->save($directory . $folderLightbox, $fileName);
         }
-
-        return $fileName;
     }
 
     /**
