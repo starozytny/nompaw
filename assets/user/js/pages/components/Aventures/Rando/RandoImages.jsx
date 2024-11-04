@@ -32,7 +32,9 @@ export class RandoImages extends Component {
 			data: JSON.parse(props.images),
 			selected: [],
 			errors: [],
-			image: null
+			image: null,
+			nbProgress: 0,
+			nbTotal: 0
 		}
 
 		this.files = React.createRef();
@@ -97,8 +99,6 @@ export class RandoImages extends Component {
 	}
 
 	handleUploadChunk (self, randoId, iStart, iEnd, iProceed) {
-		Formulaire.loader(true);
-
 		let formData = new FormData();
 
 		let max = 0;
@@ -124,6 +124,8 @@ export class RandoImages extends Component {
 			})
 		}
 
+		this.setState({ nbTotal: max })
+
 		formData.append("max", max);
 		formData.append("iStart", iStart);
 		formData.append("iEnd", nIEnd);
@@ -134,7 +136,9 @@ export class RandoImages extends Component {
 			.then(function (response) {
 				if(response.data.continue){
 					self.handleUploadChunk(self, randoId, response.data.iStart, response.data.iEnd, response.data.iProceed);
+					self.setState({ nbProgress: response.data.iProceed })
 				}else{
+					self.setState({ nbProgress: max })
 					Toastr.toast('info', "Photos envoyées.");
 					location.reload();
 				}
@@ -142,7 +146,6 @@ export class RandoImages extends Component {
 			.catch(function (error) {
 				modalForm(self);
 				Formulaire.displayErrors(self, error);
-				Formulaire.loader(false);
 			})
 		;
 	}
@@ -212,7 +215,7 @@ export class RandoImages extends Component {
 
 	render () {
 		const { userId } = this.props;
-		const { errors, files, data, selected } = this.state;
+		const { errors, files, data, selected, nbProgress, nbTotal } = this.state;
 
 		let params = { errors: errors, onChange: this.handleChange }
 
@@ -237,7 +240,16 @@ export class RandoImages extends Component {
 			</div>
 
 
-			{createPortal(<LightBox ref={this.lightbox} identifiant="lightbox" content={null}  />
+
+			{nbProgress !== 0 && nbTotal !== 0
+				? <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800/80 z-30">
+					<div className="text-xl font-semibold text-white pt-24">{nbProgress} / {nbTotal}</div>
+				</div>
+				: null
+			}
+
+
+			{createPortal(<LightBox ref={this.lightbox} identifiant="lightbox" content={null} />
 				, document.body
 			)}
 
