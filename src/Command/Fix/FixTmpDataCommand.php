@@ -8,6 +8,7 @@ use App\Service\DatabaseService;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -29,75 +30,50 @@ class FixTmpDataCommand extends Command
         $this->privateDirectory = $privateDirectory;
     }
 
+    protected function configure(): void
+    {
+        $this
+            ->addArgument('rando_id', InputArgument::REQUIRED, 'rando id')
+        ;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Initialisation');
 
-        $data = $this->em->getRepository(RaImage::class)->findAll();
+        $randoId = $input->getArgument('rando_id');
 
-        $imagesFilename = [];
-        foreach($data as $item){
-            $imagesFilename[] = $item->getFile();
-            $imagesFilename[] = $item->getThumbs();
-            $imagesFilename[] = $item->getLightbox();
+        $rando = $this->em->getRepository(RaRando::class)->findOneBy(['id' => $randoId]);
+
+        $folderCover = $this->privateDirectory . RaRando::FOLDER_COVER . '/' . $randoId;
+        if(file_exists($folderCover . "/" . $rando->getCover())){
+            unlink($folderCover . "/" . $rando->getCover());
         }
 
-        $randos = $this->em->getRepository(RaRando::class)->findAll();
+        $images = $this->em->getRepository(RaImage::class)->findBy(['rando' => $rando]);
 
-        foreach($randos as $item){
-            $folderImages = $this->privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getId();
-            $folderThumbs = $this->privateDirectory . RaRando::FOLDER_THUMBS . '/' . $item->getId();
-            $folderLightbox = $this->privateDirectory . RaRando::FOLDER_LIGHTBOX . '/' . $item->getId();
+        foreach($images as $item){
+            $folderImages = $this->privateDirectory . RaRando::FOLDER_IMAGES . '/' . $randoId;
+            $folderThumbs = $this->privateDirectory . RaRando::FOLDER_THUMBS . '/' . $randoId;
+            $folderLightbox = $this->privateDirectory . RaRando::FOLDER_LIGHTBOX . '/' . $randoId;
 
-            $nbDeleted = 0;
-
-            if(is_dir($folderImages)){
-                $array = array_diff(scandir($folderImages), array('.', '..'));
-
-                foreach ($array as $entry) {
-                    if(!in_array($entry, $imagesFilename)){
-                        if(file_exists($folderImages . "/" . $entry)){
-                            unlink($folderImages . "/" . $entry);
-                            $nbDeleted++;
-                        }
-                    }
-                }
+            if(file_exists($folderImages . "/" . $item->getFile())){
+                unlink($folderImages . "/" . $item->getFile());
             }
 
-            if(is_dir($folderThumbs)){
-                $array = array_diff(scandir($folderThumbs), array('.', '..'));
-
-                foreach ($array as $entry) {
-                    if(!in_array($entry, $imagesFilename)){
-                        if(file_exists($folderThumbs . "/" . $entry)){
-                            unlink($folderThumbs . "/" . $entry);
-                            $nbDeleted++;
-                        }
-                    }
-                }
+            if(file_exists($folderThumbs . "/" . $item->getThumbs())){
+                unlink($folderThumbs . "/" . $item->getThumbs());
             }
 
-            if(is_dir($folderLightbox)){
-                $array = array_diff(scandir($folderLightbox), array('.', '..'));
-
-                foreach ($array as $entry) {
-                    if(!in_array($entry, $imagesFilename)){
-                        if(file_exists($folderLightbox . "/" . $entry)){
-                            unlink($folderLightbox . "/" . $entry);
-                            $nbDeleted++;
-                        }
-                    }
-                }
+            if(file_exists($folderLightbox . "/" . $item->getLightbox())){
+                unlink($folderLightbox . "/" . $item->getLightbox());
             }
 
-            if($nbDeleted > 0){
-                $io->text('- Rando : ' . $item->getId() . " - " . $item->getName());
-                $io->text("Photos supprimées : " . $nbDeleted);
-                $io->newLine();
-            }
+            $this->em->remove($item);
         }
+        $this->em->flush();
 
         $io->newLine();
         $io->comment('--- [FIN DE LA COMMANDE] ---');
