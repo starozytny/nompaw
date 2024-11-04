@@ -5,10 +5,7 @@ namespace App\Command\Fix;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Service\DatabaseService;
-use App\Service\FileUploader;
 use Doctrine\Persistence\ObjectManager;
-use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
-use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,53 +20,84 @@ class FixTmpDataCommand extends Command
 {
     private ObjectManager $em;
     private string $privateDirectory;
-    private FileUploader $fileUploader;
 
-    public function __construct($privateDirectory, DatabaseService $databaseService, FileUploader $fileUploader)
+    public function __construct($privateDirectory, DatabaseService $databaseService)
     {
         parent::__construct();
 
         $this->em = $databaseService->getDefaultManager();
         $this->privateDirectory = $privateDirectory;
-        $this->fileUploader = $fileUploader;
     }
 
-    /**
-     * @throws ImageWorkshopLayerException
-     * @throws ImageWorkshopException
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Initialisation');
 
-        $data = $this->em->getRepository(RaRando::class)->findAll();
+        $data = $this->em->getRepository(RaImage::class)->findAll();
+
+        $imagesFilename = [];
         foreach($data as $item){
-            $privateDirectory = $this->privateDirectory;
+            $imagesFilename[] = $item->getFile();
+            $imagesFilename[] = $item->getThumbs();
+            $imagesFilename[] = $item->getLightbox();
+        }
 
-            $oldCover = $item->getCover();
-            $img = $this->em->getRepository(RaImage::class)->findOneBy(['thumbs' => $oldCover]);
+        $randos = $this->em->getRepository(RaRando::class)->findAll();
 
-            $directoryImages = $privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getId();
-            $directoryCover = $privateDirectory . RaRando::FOLDER_COVER . '/' . $item->getId();
+        foreach($randos as $item){
+            $folderImages = $this->privateDirectory . RaRando::FOLDER_IMAGES . '/' . $item->getId();
+            $folderThumbs = $this->privateDirectory . RaRando::FOLDER_THUMBS . '/' . $item->getId();
+            $folderLightbox = $this->privateDirectory . RaRando::FOLDER_LIGHTBOX . '/' . $item->getId();
 
-            if($directoryCover){
-                if(!is_dir($directoryCover)){
-                    mkdir($directoryCover, 0777, true);
+            $nbDeleted = 0;
+
+            if(is_dir($folderImages)){
+                $array = array_diff(scandir($folderImages), array('.', '..'));
+
+                foreach ($array as $entry) {
+                    if(!in_array($entry, $imagesFilename)){
+                        if(file_exists($folderImages . "/" . $entry)){
+                            unlink($folderImages . "/" . $entry);
+                            $nbDeleted++;
+                        }
+                    }
                 }
             }
 
-            $fileOri = $directoryImages . '/' . $img->getFile();
-            if(file_exists($fileOri)){
-                $randoFile = '/' . $item->getId();
-                $filenameLightbox = $this->fileUploader->cover($img->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_COVER.$randoFile);
+            if(is_dir($folderThumbs)){
+                $array = array_diff(scandir($folderThumbs), array('.', '..'));
 
-                $item->setCover($filenameLightbox);
+                foreach ($array as $entry) {
+                    if(!in_array($entry, $imagesFilename)){
+                        if(file_exists($folderThumbs . "/" . $entry)){
+                            unlink($folderThumbs . "/" . $entry);
+                            $nbDeleted++;
+                        }
+                    }
+                }
+            }
+
+            if(is_dir($folderLightbox)){
+                $array = array_diff(scandir($folderLightbox), array('.', '..'));
+
+                foreach ($array as $entry) {
+                    if(!in_array($entry, $imagesFilename)){
+                        if(file_exists($folderLightbox . "/" . $entry)){
+                            unlink($folderLightbox . "/" . $entry);
+                            $nbDeleted++;
+                        }
+                    }
+                }
+            }
+
+            if($nbDeleted > 0){
+                $io->text('- Rando : ' . $item->getId() . " - " . $item->getName());
+                $io->text("Photos supprimées : " . $nbDeleted);
+                $io->newLine();
             }
         }
-
-        $this->em->flush();
 
         $io->newLine();
         $io->comment('--- [FIN DE LA COMMANDE] ---');
