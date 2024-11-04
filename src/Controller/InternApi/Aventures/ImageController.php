@@ -31,9 +31,7 @@ class ImageController extends AbstractController
 
             $randoFile = '/' . $obj->getId();
             foreach($request->files as $key => $file){
-//                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
-
-                $filenameImage = "test";
+                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
@@ -44,25 +42,25 @@ class ImageController extends AbstractController
                     ->setRando($obj)
                 ;
 
-//                $mime = mime_content_type($this->getParameter('private_directory') . $image->getFileFile());
-//                if(str_contains($mime, "image/")){
-//                    $image->setType(0);
-//                }elseif(str_contains($mime, "video/")){
-//                    $image->setType(1);
-//                }else{
-//                    $image->setType(99);
-//                }
-//
-//                $imageRepository->save($image);
-//                $images[] = $image;
+                $mime = mime_content_type($this->getParameter('private_directory') . $image->getFileFile());
+                if(str_contains($mime, "image/")){
+                    $image->setType(0);
+                }elseif(str_contains($mime, "video/")){
+                    $image->setType(1);
+                }else{
+                    $image->setType(99);
+                }
+
+                $imageRepository->save($image);
+                $images[] = $image;
             }
 
-//            $repository->save($obj, true);
+            $repository->save($obj, true);
 
-//            foreach($images as $image){
-//                $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
-//                $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
-//            }
+            foreach($images as $image){
+                $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
+                $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
+            }
         }
 
         $max = $request->get('max');
