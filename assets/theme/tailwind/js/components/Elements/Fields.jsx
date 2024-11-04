@@ -885,20 +885,23 @@ export class InputFile extends Component {
 						{loading
 							? <div className="text-xs">Chargement..</div>
 							: <div className="flex flex-wrap gap-4">
-								{files.map((file, index) => {
-									return <div className="flex gap-2" key={index}>
-										{format === "image" && <div className="h-16 w-16 rounded-md overflow-hidden bg-gray-200">
-											<img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-contain" />
-										</div>}
-										<div>
-											<div className="leading-5">
-												<div className="font-medium">{file.name}</div>
-												<div className="text-gray-600">{Sanitaze.toFormatBytesToSize(file.size)}</div>
+								{files.length > 20
+									? <div>{files.length} fichiers à téléverser.</div>
+									: files.map((file, index) => {
+										return <div className="flex gap-2" key={index}>
+											{format === "image" && <div className="h-16 w-16 rounded-md overflow-hidden bg-gray-200">
+												<img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-contain" />
+											</div>}
+											<div>
+												<div className="leading-5">
+													<div className="font-medium">{file.name}</div>
+													<div className="text-gray-600">{Sanitaze.toFormatBytesToSize(file.size)}</div>
+												</div>
+												<div className="cursor-pointer text-red-600 hover:text-red-700" onClick={() => this.handleFileRemove(file)}>Supprimer</div>
 											</div>
-											<div className="cursor-pointer text-red-600 hover:text-red-700" onClick={() => this.handleFileRemove(file)}>Supprimer</div>
 										</div>
-									</div>
-								})}
+									})
+								}
 							</div>
 						}
 					</>
