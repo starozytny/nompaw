@@ -19,9 +19,6 @@ class DataCrypto
     {
         $type = (int) $data->type;
 
-        $tradeTime = str_replace('h', ':', $data->tradeTime);
-        $tradeAt = $this->sanitizeData->createDateTimePicker($data->tradeAt . " " . $tradeTime);
-
         $totalReal = $this->sanitizeData->setFloatValue($data->totalReal);
         $costPrice = $this->sanitizeData->setFloatValue($data->costPrice);
         $costCoin = $this->sanitizeData->trimData($data->costCoin);
@@ -31,7 +28,7 @@ class DataCrypto
         }
 
         return ($obj)
-            ->setTradeAt($tradeAt)
+            ->setTradeAt($this->sanitizeData->createDate($data->tradeAt))
             ->setType($type)
             ->setFromCoin($this->sanitizeData->trimData($data->fromCoin))
             ->setToCoin($this->sanitizeData->trimData($data->toCoin))

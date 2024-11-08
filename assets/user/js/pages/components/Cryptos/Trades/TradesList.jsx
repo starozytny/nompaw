@@ -68,8 +68,8 @@ export class TradesList extends Component {
             costCoin: element ? Formulaire.setValue(element.costCoin) : '',
             fromNbToken: element ? Formulaire.setValue(element.fromNbToken) : '',
             toNbToken: element ? Formulaire.setValue(element.toNbToken) : '',
-            toPrice: element ? (element.type === ACHAT ? Formulaire.setValue(element.toPrice) : '') : '',
-            fromPrice: element ? (element.type === ACHAT ? '' : Formulaire.setValue(element.fromPrice)) : '',
+            toPrice: element ? Formulaire.setValue(element.toPrice) : '',
+            fromPrice: element ? Formulaire.setValue(element.fromPrice) : '',
             totalReal: element ? Formulaire.setValue(element.totalReal) : '',
         })
     }
@@ -107,17 +107,9 @@ export class TradesList extends Component {
             paramsToValidate = [...paramsToValidate, ...[
                 { type: "text", id: 'fromCoin', value: fromCoin },
                 { type: "text", id: 'fromNbToken', value: fromNbToken },
+                { type: "text", id: 'toPrice', value: toPrice },
+                { type: "text", id: 'fromPrice', value: fromPrice },
             ]]
-
-            if(parseInt(type) === ACHAT){
-                paramsToValidate = [...paramsToValidate, ...[
-                    { type: "text", id: 'toPrice', value: toPrice },
-                ]]
-            }else{
-                paramsToValidate = [...paramsToValidate, ...[
-                    { type: "text", id: 'fromPrice', value: fromPrice },
-                ]]
-            }
         }
 
         let validate = Validateur.validateur(paramsToValidate)
@@ -400,25 +392,26 @@ export class TradesList extends Component {
                                 <div className="col-5">
                                     {parseInt(type) === DEPOT
                                         ? null
-                                        : (parseInt(type) === ACHAT
-                                            ? <div className="w-full">
-                                                <Input type="number" valeur={toPrice} identifiant="toPrice" {...params0} placeholder="Prix transaction">
-                                                    <span className="xl:hidden">Prix transaction</span>
+                                        : <div className="flex gap-1">
+                                            <div className="w-full">
+                                                <Input type="number" valeur={fromPrice} identifiant="fromPrice" {...params0} placeholder="Prix transaction A">
+                                                    <span className="xl:hidden">Prix transaction A</span>
                                                 </Input>
                                             </div>
-                                            : <div className="w-full">
-                                                <Input type="number" valeur={fromPrice} identifiant="fromPrice" {...params0} placeholder="Prix transaction">
-                                                    <span className="xl:hidden">Prix transaction</span>
+                                            <div className="w-full">
+                                                <Input type="number" valeur={toPrice} identifiant="toPrice" {...params0} placeholder="Prix transaction B">
+                                                    <span className="xl:hidden">Prix transaction B</span>
                                                 </Input>
                                             </div>
-                                        )
+                                        </div>
                                     }
+
                                 </div>
                                 <div className="col-6">
                                     <div className="flex gap-1">
                                         <div className="w-full">
                                             <Input type="number" valeur={costPrice} identifiant="costPrice" {...params0} placeholder="Frais">
-                                                <span className="xl:hidden">Frais</span>
+                                            <span className="xl:hidden">Frais</span>
                                             </Input>
                                         </div>
                                         <div className="w-full">
