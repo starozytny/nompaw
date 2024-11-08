@@ -3,6 +3,7 @@
 namespace App\Service\Data;
 
 use App\Entity\Crypto\CrTrade;
+use App\Entity\Enum\Crypto\TypeType;
 use App\Service\SanitizeData;
 use Exception;
 
@@ -27,18 +28,28 @@ class DataCrypto
             $total += $costPrice;
         }
 
+        $fromNbToken = $this->sanitizeData->setFloatValue($data->fromNbToken);
+        $fromCoin = $this->sanitizeData->trimData($data->fromCoin);
+        $fromPrice = $this->sanitizeData->setFloatValue($data->fromPrice);
+        $toPrice = $this->sanitizeData->setFloatValue($data->toPrice);
+        if($type === TypeType::Depot){
+            $fromNbToken = $this->sanitizeData->setFloatValue($data->toNbToken);
+            $fromCoin = $this->sanitizeData->trimData($data->toCoin);
+            $fromPrice=1;
+            $toPrice=1;
+        }
+
         return ($obj)
             ->setTradeAt($this->sanitizeData->createDate($data->tradeAt))
             ->setType($type)
-            ->setFromCoin($this->sanitizeData->trimData($data->fromCoin))
+            ->setFromCoin($fromCoin)
             ->setToCoin($this->sanitizeData->trimData($data->toCoin))
             ->setCostPrice($costPrice)
             ->setCostCoin($costCoin)
-            ->setFromNbToken($this->sanitizeData->setFloatValue($data->fromNbToken))
+            ->setFromNbToken($fromNbToken)
             ->setToNbToken($this->sanitizeData->setFloatValue($data->toNbToken))
-            ->setToNbToken($this->sanitizeData->setFloatValue($data->toNbToken))
-            ->setFromPrice($this->sanitizeData->setFloatValue($data->fromPrice))
-            ->setToPrice($this->sanitizeData->setFloatValue($data->toPrice))
+            ->setFromPrice($fromPrice)
+            ->setToPrice($toPrice)
             ->setTotalReal($totalReal)
             ->setTotal($total)
         ;
