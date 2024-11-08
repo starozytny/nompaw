@@ -20,20 +20,20 @@ class DataCrypto
     {
         $type = (int) $data->type;
 
-        $totalReal = $this->sanitizeData->setFloatValue($data->totalReal);
-        $costPrice = $this->sanitizeData->setFloatValue($data->costPrice);
+        $totalReal = $this->sanitizeData->setFloatValueWithZero($data->totalReal);
+        $costPrice = $this->sanitizeData->setFloatValueWithZero($data->costPrice);
         $costCoin = $this->sanitizeData->trimData($data->costCoin);
         $total = $totalReal;
         if($costCoin == "EUR" && $costPrice){
             $total += $costPrice;
         }
 
-        $fromNbToken = $this->sanitizeData->setFloatValue($data->fromNbToken);
+        $fromNbToken = $this->sanitizeData->setFloatValueWithZero($data->fromNbToken);
         $fromCoin = $this->sanitizeData->trimData($data->fromCoin);
-        $fromPrice = $this->sanitizeData->setFloatValue($data->fromPrice);
-        $toPrice = $this->sanitizeData->setFloatValue($data->toPrice);
+        $fromPrice = $this->sanitizeData->setFloatValueWithZero($data->fromPrice);
+        $toPrice = $this->sanitizeData->setFloatValueWithZero($data->toPrice);
         if($type === TypeType::Depot){
-            $fromNbToken = $this->sanitizeData->setFloatValue($data->toNbToken);
+            $fromNbToken = $this->sanitizeData->setFloatValueWithZero($data->toNbToken);
             $fromCoin = $this->sanitizeData->trimData($data->toCoin);
             $fromPrice=1;
             $toPrice=1;
@@ -47,7 +47,7 @@ class DataCrypto
             ->setCostPrice($costPrice)
             ->setCostCoin($costCoin)
             ->setFromNbToken($fromNbToken)
-            ->setToNbToken($this->sanitizeData->setFloatValue($data->toNbToken))
+            ->setToNbToken($this->sanitizeData->setFloatValueWithZero($data->toNbToken))
             ->setFromPrice($fromPrice)
             ->setToPrice($toPrice)
             ->setTotalReal($totalReal)
