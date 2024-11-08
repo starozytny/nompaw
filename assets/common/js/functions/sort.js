@@ -94,6 +94,10 @@ function compareLabel(a, b){
     return comparison(a.label, b.label);
 }
 
+function compareTradeAt(a, b){
+    return comparison(a.tradeAt, b.tradeAt);
+}
+
 function comparison (objA, objB){
     if(objA === objB){
         return 0;
@@ -127,4 +131,5 @@ module.exports = {
     compareDateAtInverse,
     compareDateAtInverseThenId,
     compareStartAt,
+    compareTradeAt,
 }

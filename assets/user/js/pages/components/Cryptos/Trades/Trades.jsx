@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import Sort from "@commonFunctions/sort";
 import List from "@commonFunctions/list";
 import Formulaire from "@commonFunctions/formulaire";
 
@@ -19,6 +20,7 @@ export class Trades extends Component {
 		this.state = {
 			loadingData: true,
 			errors: [],
+			sorter: Sort.compareTradeAt
 		}
 	}
 
