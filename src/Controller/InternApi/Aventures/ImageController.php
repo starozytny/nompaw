@@ -27,17 +27,17 @@ class ImageController extends AbstractController
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
     {
         if($request->files){
+            $images = [];
+
             $randoFile = '/' . $obj->getId();
             foreach($request->files as $key => $file){
                 $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
-                $filenameThumb = $fileUploader->thumbs($filenameImage, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
-                $filenameLightbox = $fileUploader->lightbox($filenameImage, RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
                     ->setMTime($request->get($key . "-time"))
-                    ->setThumbs($filenameThumb)
-                    ->setLightbox($filenameLightbox)
+                    ->setThumbs($filenameImage)
+                    ->setLightbox($filenameImage)
                     ->setAuthor($this->getUser())
                     ->setRando($obj)
                 ;
@@ -52,9 +52,15 @@ class ImageController extends AbstractController
                 }
 
                 $imageRepository->save($image);
+                $images[] = $image;
             }
 
             $repository->save($obj, true);
+
+            foreach($images as $image){
+                $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
+                $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
+            }
         }
 
         $max = $request->get('max');
