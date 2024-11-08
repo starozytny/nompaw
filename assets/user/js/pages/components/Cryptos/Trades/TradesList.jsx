@@ -74,16 +74,7 @@ export class TradesList extends Component {
         })
     }
 
-    handleChange = (e) => {
-        let name = e.currentTarget.name;
-        let value = e.currentTarget.value;
-
-        if(name === "costPrice"){
-            value = Inputs.textNumericInput(value, this.state[name])
-        }
-
-        this.setState({ [name]: value })
-    }
+    handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
 
     handleSubmit = (e) => {
         e.preventDefault();
