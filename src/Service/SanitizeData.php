@@ -115,4 +115,17 @@ class SanitizeData
 
         return $return;
     }
+
+    public function setFloatValueWithZero($value, $return = null)
+    {
+        if($value == 0){
+            return 0;
+        }
+
+        if($value != "" && $value != null){
+            return (float) $value;
+        }
+
+        return $return;
+    }
 }
