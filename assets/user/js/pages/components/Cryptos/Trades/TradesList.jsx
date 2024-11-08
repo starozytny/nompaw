@@ -16,7 +16,7 @@ import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
-import { Input, Radiobox, Select } from "@tailwindComponents/Elements/Fields";
+import { Input, Select } from "@tailwindComponents/Elements/Fields";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -41,13 +41,12 @@ export class TradesList extends Component {
             type: 0,
             fromCoin: '',
             toCoin: '',
-            fromPrice: '',
             costPrice: '',
             costCoin: '',
-            toPrice: '',
             fromNbToken: '',
             toNbToken: '',
-            price: '',
+            toPrice: '',
+            fromPrice: '',
             totalReal: '',
             errors: [],
         }
@@ -69,7 +68,8 @@ export class TradesList extends Component {
             costCoin: element ? Formulaire.setValue(element.costCoin) : '',
             fromNbToken: element ? Formulaire.setValue(element.fromNbToken) : '',
             toNbToken: element ? Formulaire.setValue(element.toNbToken) : '',
-            price: element ? element.type === ACHAT ? Formulaire.setValue(element.toPrice) : Formulaire.setValue(element.fromPrice) : '',
+            toPrice: element ? (element.type === ACHAT ? Formulaire.setValue(element.toPrice) : '') : '',
+            fromPrice: element ? (element.type === ACHAT ? '' : Formulaire.setValue(element.fromPrice)) : '',
             totalReal: element ? Formulaire.setValue(element.totalReal) : '',
         })
     }
@@ -88,7 +88,7 @@ export class TradesList extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
-        const { context, loadData, id, tradeAt, tradeTime, type, fromCoin, fromNbToken, toCoin, toNbToken, price, costPrice, costCoin, totalReal } = this.state;
+        const { context, loadData, id, tradeAt, tradeTime, type, fromCoin, fromNbToken, toCoin, toNbToken, toPrice, fromPrice, costPrice, costCoin, totalReal } = this.state;
 
         this.setState({ errors: [] });
 
@@ -107,8 +107,17 @@ export class TradesList extends Component {
             paramsToValidate = [...paramsToValidate, ...[
                 { type: "text", id: 'fromCoin', value: fromCoin },
                 { type: "text", id: 'fromNbToken', value: fromNbToken },
-                { type: "text", id: 'price', value: price },
             ]]
+
+            if(parseInt(type) === ACHAT){
+                paramsToValidate = [...paramsToValidate, ...[
+                    { type: "text", id: 'toPrice', value: toPrice },
+                ]]
+            }else{
+                paramsToValidate = [...paramsToValidate, ...[
+                    { type: "text", id: 'fromPrice', value: fromPrice },
+                ]]
+            }
         }
 
         let validate = Validateur.validateur(paramsToValidate)
@@ -145,7 +154,7 @@ export class TradesList extends Component {
 
     render () {
         const { data } = this.props;
-        const { context, errors, tradeAt, tradeTime, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, price, totalReal } = this.state;
+        const { context, errors, tradeAt, tradeTime, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, toPrice, fromPrice, totalReal } = this.state;
 
         let typeItems = [
             { value: 0, identifiant: 'type-0', label: 'Achat' },
@@ -391,11 +400,18 @@ export class TradesList extends Component {
                                 <div className="col-5">
                                     {parseInt(type) === DEPOT
                                         ? null
-                                        : <div className="w-full">
-                                            <Input type="number" valeur={price} identifiant="price" {...params0} placeholder="Prix transaction">
-                                                <span className="xl:hidden">Prix transaction</span>
-                                            </Input>
-                                        </div>
+                                        : (parseInt(type) === ACHAT
+                                            ? <div className="w-full">
+                                                <Input type="number" valeur={toPrice} identifiant="toPrice" {...params0} placeholder="Prix transaction">
+                                                    <span className="xl:hidden">Prix transaction</span>
+                                                </Input>
+                                            </div>
+                                            : <div className="w-full">
+                                                <Input type="number" valeur={fromPrice} identifiant="fromPrice" {...params0} placeholder="Prix transaction">
+                                                    <span className="xl:hidden">Prix transaction</span>
+                                                </Input>
+                                            </div>
+                                        )
                                     }
                                 </div>
                                 <div className="col-6">
