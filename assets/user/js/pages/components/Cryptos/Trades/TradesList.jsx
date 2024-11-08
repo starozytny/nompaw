@@ -74,7 +74,16 @@ export class TradesList extends Component {
         })
     }
 
-    handleChange = (e) => { this.setState({ [e.currentTarget.name]: e.currentTarget.value }) }
+    handleChange = (e) => {
+        let name = e.currentTarget.name;
+        let value = e.currentTarget.value;
+
+        if(name === 'fromCoin' || name === 'toCoin' || name === 'costCoin'){
+            value = value !== "" ? valut.toUpperCase() : value;
+        }
+
+        this.setState({ [name]: value })
+    }
 
     handleSubmit = (e) => {
         e.preventDefault();
