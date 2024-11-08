@@ -81,7 +81,7 @@ class AdminCryptoKrakenCommand extends Command
 
         $i = 0;
         foreach ($records as $item) {
-            if($i > 3){
+            if($i > 1){
                 $existe = false;
                 foreach($trades as $trade){
                     if($trade->getImportedId() == $item[0]){
@@ -102,8 +102,8 @@ class AdminCryptoKrakenCommand extends Command
                         ->setFromPrice($item[6] === "EUR" ? 1 : null)
                         ->setFromNbToken(abs($item[8]))
 
-                        ->setToCoin($item[5])
-                        ->setToPrice($item[3] === "EUR" ? 1 : $item[6])
+                        ->setToCoin($item[6])
+                        ->setToPrice($item[6] === "EUR" ? 1 : $item[6])
                         ->setToNbToken($type == TypeType::Achat ? $item[4] : $item[7])
 
                         ->setCostPrice($item[9])
@@ -131,10 +131,10 @@ class AdminCryptoKrakenCommand extends Command
     {
         return match ($value) {
             'Receive' => TypeType::Recuperation,
-            'Buy' => TypeType::Achat,
+            'Buy', 'trade' => TypeType::Achat,
             'deposit' => TypeType::Depot,
             'Staking Income' => TypeType::Stacking,
-            'Send' => TypeType::Transfert,
+            'Send', 'transfer' => TypeType::Transfert,
             'withdrawal' => TypeType::Retrait,
             default => null,
         };

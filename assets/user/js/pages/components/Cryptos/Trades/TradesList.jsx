@@ -16,7 +16,7 @@ import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
-import { Input, Radiobox } from "@tailwindComponents/Elements/Fields";
+import { Input, Radiobox, Select } from "@tailwindComponents/Elements/Fields";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -42,10 +42,13 @@ export class TradesList extends Component {
             fromCoin: '',
             toCoin: '',
             fromPrice: '',
-            nbToken: '',
             costPrice: '',
             costCoin: '',
             toPrice: '',
+            fromNbToken: '',
+            toNbToken: '',
+            price: '',
+            totalReal: '',
             errors: [],
         }
     }
@@ -62,11 +65,12 @@ export class TradesList extends Component {
             type: element ? Formulaire.setValue(element.type) : 0,
             fromCoin: element ? Formulaire.setValue(element.fromCoin) : '',
             toCoin: element ? Formulaire.setValue(element.toCoin) : '',
-            fromPrice: element ? Formulaire.setValue(element.fromPrice) : '',
-            nbToken: element ? Formulaire.setValue(element.nbToken) : '',
             costPrice: element ? Formulaire.setValue(element.costPrice) : '',
             costCoin: element ? Formulaire.setValue(element.costCoin) : '',
-            toPrice: element ? Formulaire.setValue(element.toPrice) : '',
+            fromNbToken: element ? Formulaire.setValue(element.fromNbToken) : '',
+            toNbToken: element ? Formulaire.setValue(element.toNbToken) : '',
+            price: element ? element.type === ACHAT ? Formulaire.setValue(element.toPrice) : Formulaire.setValue(element.fromPrice) : '',
+            totalReal: element ? Formulaire.setValue(element.totalReal) : '',
         })
     }
 
@@ -74,7 +78,7 @@ export class TradesList extends Component {
         let name = e.currentTarget.name;
         let value = e.currentTarget.value;
 
-        if(name === "fromPrice" || name === "nbToken" || name === "costPrice" || name === "toPrice"){
+        if(name === "costPrice"){
             value = Inputs.textNumericInput(value, this.state[name])
         }
 
@@ -84,7 +88,7 @@ export class TradesList extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
-        const { context, loadData, id, tradeAt, tradeTime, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
+        const { context, loadData, id, tradeAt, tradeTime, type, fromCoin, fromNbToken, toCoin, toNbToken, price, costPrice, costCoin, totalReal } = this.state;
 
         this.setState({ errors: [] });
 
@@ -92,14 +96,20 @@ export class TradesList extends Component {
             { type: "text", id: 'tradeAt', value: tradeAt },
             { type: "text", id: 'tradeTime', value: tradeTime },
             { type: "text", id: 'type', value: type },
-            { type: "text", id: 'fromCoin', value: fromCoin },
             { type: "text", id: 'toCoin', value: toCoin },
-            { type: "text", id: 'fromPrice', value: fromPrice },
-            { type: "text", id: 'nbToken', value: nbToken },
+            { type: "text", id: 'toNbToken', value: toNbToken },
             { type: "text", id: 'costPrice', value: costPrice },
             { type: "text", id: 'costCoin', value: costCoin },
-            { type: "text", id: 'toPrice', value: toPrice },
+            { type: "text", id: 'totalReal', value: totalReal },
         ];
+
+        if(parseInt(type) !== DEPOT){
+            paramsToValidate = [...paramsToValidate, ...[
+                { type: "text", id: 'fromCoin', value: fromCoin },
+                { type: "text", id: 'fromNbToken', value: fromNbToken },
+                { type: "text", id: 'price', value: price },
+            ]]
+        }
 
         let validate = Validateur.validateur(paramsToValidate)
         if (!validate.code) {
@@ -135,11 +145,16 @@ export class TradesList extends Component {
 
     render () {
         const { data } = this.props;
-        const { context, errors, tradeAt, tradeTime, type, fromCoin, toCoin, fromPrice, nbToken, costPrice, costCoin, toPrice } = this.state;
+        const { context, errors, tradeAt, tradeTime, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, price, totalReal } = this.state;
 
         let typeItems = [
             { value: 0, identifiant: 'type-0', label: 'Achat' },
             { value: 1, identifiant: 'type-1', label: 'Vente' },
+            { value: 2, identifiant: 'type-2', label: 'Depot' },
+            { value: 3, identifiant: 'type-3', label: 'Retrait' },
+            { value: 4, identifiant: 'type-4', label: 'Récupération' },
+            { value: 5, identifiant: 'type-5', label: 'Stacking' },
+            { value: 6, identifiant: 'type-6', label: 'Transfert' },
         ]
 
         let params0 = { errors: errors, onChange: this.handleChange }
@@ -307,7 +322,6 @@ export class TradesList extends Component {
                 </div>
             </div>)
         })
-        console.log(nData);
 
         return <div className="list">
             <div className="list-table bg-white rounded-md shadow">
@@ -327,84 +341,96 @@ export class TradesList extends Component {
                         </div>
                     </div>
 
-                    {/*<div className="item border-t border-b-2 hover:bg-slate-50">*/}
-                    {/*    <div className="item-content">*/}
-                    {/*        <div className="item-infos text-sm xl:text-base">*/}
-                    {/*            <div className="col-1">*/}
-                    {/*                <div className="flex gap-1">*/}
-                    {/*                    <div className="w-full">*/}
-                    {/*                        <Input type="date" valeur={tradeAt} identifiant="tradeAt" {...params0} />*/}
-                    {/*                    </div>*/}
-                    {/*                    <div className="w-full">*/}
-                    {/*                        <Input type="time" valeur={tradeTime} identifiant="tradeTime" {...params0} />*/}
-                    {/*                    </div>*/}
-                    {/*                </div>*/}
-                    {/*            </div>*/}
-                    {/*            <div className="col-2">*/}
-                    {/*                <Radiobox valeur={type} identifiant="type" items={typeItems} {...params0}*/}
-                    {/*                          classItems="flex flex-wrap gap-1" styleType="fat" />*/}
-                    {/*            </div>*/}
-                    {/*            <div className="col-3">*/}
-                    {/*                <div className="flex gap-1">*/}
-                    {/*                    <div className="w-full">*/}
-                    {/*                        <Input valeur={fromCoin} identifiant="fromCoin" {...params0}>*/}
-                    {/*                            <span className="xl:hidden">Token A</span>*/}
-                    {/*                        </Input>*/}
-                    {/*                    </div>*/}
-                    {/*                    <div className="w-full">*/}
-                    {/*                        <Input valeur={toCoin} identifiant="toCoin" {...params0}>*/}
-                    {/*                            <span className="xl:hidden">Token B</span>*/}
-                    {/*                        </Input>*/}
-                    {/*                    </div>*/}
-                    {/*                </div>*/}
-                    {/*            </div>*/}
-                    {/*            <div className="col-4">*/}
-                    {/*                <div className="w-full">*/}
-                    {/*                    <Input type="number" valeur={fromPrice} identifiant="fromPrice" {...params0}>*/}
-                    {/*                        <span className="xl:hidden">Prix A</span>*/}
-                    {/*                    </Input>*/}
-                    {/*                </div>*/}
-                    {/*            </div>*/}
-                    {/*            <div className="col-5">*/}
-                    {/*                <div className="w-full">*/}
-                    {/*                    <Input type="number" valeur={nbToken} identifiant="nbToken" {...params0}>*/}
-                    {/*                        <span className="xl:hidden">Nb token</span>*/}
-                    {/*                    </Input>*/}
-                    {/*                </div>*/}
-                    {/*            </div>*/}
-                    {/*            <div className="col-6">*/}
-                    {/*                <div className="flex gap-1">*/}
-                    {/*                    <div className="w-full">*/}
-                    {/*                        <Input type="number" valeur={costPrice} identifiant="costPrice" {...params0}>*/}
-                    {/*                            <span className="xl:hidden">Frais</span>*/}
-                    {/*                        </Input>*/}
-                    {/*                    </div>*/}
-                    {/*                    <div className="w-full">*/}
-                    {/*                        <Input valeur={costCoin} identifiant="costCoin" {...params0}>*/}
-                    {/*                            <span className="xl:hidden">Frais token</span>*/}
-                    {/*                        </Input>*/}
-                    {/*                    </div>*/}
-                    {/*                </div>*/}
-                    {/*            </div>*/}
-                    {/*            <div className="col-7">*/}
-                    {/*                <div className="w-full">*/}
-                    {/*                    <Input type="number" valeur={toPrice} identifiant="toPrice" {...params0}>*/}
-                    {/*                        <span className="xl:hidden">Total B</span>*/}
-                    {/*                    </Input>*/}
-                    {/*                </div>*/}
-                    {/*            </div>*/}
-                    {/*            <div className="col-8 actions">*/}
-                    {/*                {context === "update"*/}
-                    {/*                    ? <>*/}
-                    {/*                        <ButtonIcon type="blue" icon="check1" onClick={this.handleSubmit}>Modifier</ButtonIcon>*/}
-                    {/*                        <ButtonIcon type="default" icon="close" onClick={() => this.handleEditElement(null)}>Annuler</ButtonIcon>*/}
-                    {/*                    </>*/}
-                    {/*                    : <ButtonIcon type="blue" icon="add" onClick={this.handleSubmit}>Ajouter</ButtonIcon>*/}
-                    {/*                }*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
+                    <div className="item border-t border-b-2 hover:bg-slate-50">
+                        <div className="item-content">
+                            <div className="item-infos text-sm xl:text-base">
+                                <div className="col-1">
+                                    <div className="flex gap-1">
+                                        <div className="w-full">
+                                            <Input type="date" valeur={tradeAt} identifiant="tradeAt" {...params0} />
+                                        </div>
+                                        <div className="w-full">
+                                            <Input type="time" valeur={tradeTime} identifiant="tradeTime" {...params0} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-2">
+                                    <Select identifiant="type" valeur={type} items={typeItems} noEmpty={true} noErrors={true} {...params0}></Select>
+                                </div>
+                                <div className="col-3">
+                                    {parseInt(type) === DEPOT
+                                        ? null
+                                        : <div className="flex gap-1">
+                                            <div className="w-full">
+                                                <Input type="number" valeur={fromNbToken} identifiant="fromNbToken" {...params0} placeholder="Nb token A">
+                                                    <span className="xl:hidden">Nb token A</span>
+                                                </Input>
+                                            </div>
+                                            <div className="w-full">
+                                                <Input valeur={fromCoin} identifiant="fromCoin" {...params0} placeholder="Token A">
+                                                    <span className="xl:hidden">Token A</span>
+                                                </Input>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div className="col-4">
+                                    <div className="flex gap-1">
+                                        <div className="w-full">
+                                            <Input valeur={toCoin} identifiant="toCoin" {...params0} placeholder="Token B">
+                                                <span className="xl:hidden">Token B</span>
+                                            </Input>
+                                        </div>
+                                        <div className="w-full">
+                                            <Input type="number" valeur={toNbToken} identifiant="toNbToken" {...params0} placeholder="Nb token B">
+                                                <span className="xl:hidden">Nb token B</span>
+                                            </Input>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-5">
+                                    {parseInt(type) === DEPOT
+                                        ? null
+                                        : <div className="w-full">
+                                            <Input type="number" valeur={price} identifiant="price" {...params0} placeholder="Prix transaction">
+                                                <span className="xl:hidden">Prix transaction</span>
+                                            </Input>
+                                        </div>
+                                    }
+                                </div>
+                                <div className="col-6">
+                                    <div className="flex gap-1">
+                                        <div className="w-full">
+                                            <Input type="number" valeur={costPrice} identifiant="costPrice" {...params0} placeholder="Frais">
+                                                <span className="xl:hidden">Frais</span>
+                                            </Input>
+                                        </div>
+                                        <div className="w-full">
+                                            <Input valeur={costCoin} identifiant="costCoin" {...params0} placeholder="Frais Token">
+                                                <span className="xl:hidden">Token Frais</span>
+                                            </Input>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-7">
+                                    <div className="w-full">
+                                        <Input type="number" valeur={totalReal} identifiant="totalReal" {...params0} placeholder="Total réel">
+                                            <span className="xl:hidden">Total réel</span>
+                                        </Input>
+                                    </div>
+                                </div>
+                                <div className="col-8 actions">
+                                    {context === "update"
+                                        ? <>
+                                            <ButtonIcon type="blue" icon="check1" onClick={this.handleSubmit}>Modifier</ButtonIcon>
+                                            <ButtonIcon type="default" icon="close" onClick={() => this.handleEditElement(null)}>Annuler</ButtonIcon>
+                                        </>
+                                        : <ButtonIcon type="blue" icon="add" onClick={this.handleSubmit}>Ajouter</ButtonIcon>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {data.length > 0
                         ? items

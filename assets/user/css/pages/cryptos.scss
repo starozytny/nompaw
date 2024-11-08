@@ -18,7 +18,7 @@
   $col2: 130px; $col3: 280px; $col4: 280px; $col5: 220px; $col6: 180px; $col7: 280px; $col8: 72px; $colGap: 56px;
   @media (min-width:768px) {
     .item-infos{
-      & > .col-1{ width: 130px; }
+      & > .col-1{ width: 240px; }
       & > .col-2{ width: $col2; }
       & > .col-3{ width: $col3; text-align: right; }
       & > .col-4{ width: $col4; }
