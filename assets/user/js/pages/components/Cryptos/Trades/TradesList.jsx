@@ -42,7 +42,7 @@ export class TradesList extends Component {
             fromCoin: '',
             toCoin: '',
             costPrice: '',
-            costCoin: 'EUR',
+            costCoin: '',
             fromNbToken: '',
             toNbToken: '',
             toPrice: '',
@@ -65,7 +65,7 @@ export class TradesList extends Component {
             fromCoin: element ? Formulaire.setValue(element.fromCoin) : '',
             toCoin: element ? Formulaire.setValue(element.toCoin) : '',
             costPrice: element ? Formulaire.setValue(element.costPrice) : '',
-            costCoin: element ? Formulaire.setValue(element.costCoin) : 'EUR',
+            costCoin: element ? Formulaire.setValue(element.costCoin) : '',
             fromNbToken: element ? Formulaire.setValue(element.fromNbToken) : '',
             toNbToken: element ? Formulaire.setValue(element.toNbToken) : '',
             toPrice: element ? Formulaire.setValue(element.toPrice) : '',
@@ -78,8 +78,8 @@ export class TradesList extends Component {
         let name = e.currentTarget.name;
         let value = e.currentTarget.value;
 
-        if(name === "costPrice"){
-            value = Inputs.textNumericInput(value, this.state[name])
+        if(name === 'fromCoin' || name === 'toCoin' || name === 'costCoin'){
+            value = value !== "" ? valut.toUpperCase() : value;
         }
 
         this.setState({ [name]: value })
