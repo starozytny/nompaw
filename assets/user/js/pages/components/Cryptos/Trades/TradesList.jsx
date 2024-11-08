@@ -7,7 +7,6 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import moment from "moment/moment";
 import "moment/locale/fr";
 
-import Inputs from "@commonFunctions/inputs";
 import Sanitaze from "@commonFunctions/sanitaze";
 import Validateur from "@commonFunctions/validateur";
 import Formulaire from "@commonFunctions/formulaire";
@@ -79,7 +78,7 @@ export class TradesList extends Component {
         let value = e.currentTarget.value;
 
         if(name === 'fromCoin' || name === 'toCoin' || name === 'costCoin'){
-            value = value !== "" ? valut.toUpperCase() : value;
+            value = value !== "" ? value.toUpperCase() : value;
         }
 
         this.setState({ [name]: value })
