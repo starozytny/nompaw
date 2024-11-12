@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api/budget', name: 'api_budget_')]
 class BudgetController extends AbstractController
 {
-    #[Route('/planning', name: 'index', options: ['expose' => true])]
+    #[Route('/planning', name: 'index', methods: 'GET')]
     public function list(BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
                          BuCategoryRepository $categoryRepository, SerializerInterface $serializer,
                          ApiResponse $apiResponse, BudgetService $budgetService): JsonResponse
