@@ -44,7 +44,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 	let handleUpdateList = (elem, context) => {
 		setData(List.updateDataMuta(elem, context, data, SORTER));
 		if (elem.type === 2) { // saving type
-			setNSavingsItems(List.updateDataMuta(elem, context, nSavingsItems));
+			setNSavingsItems(List.updateDataMuta(elem, context, nSavingsItems, SORTER));
 		}
 		setElement(null);
 	}
@@ -93,7 +93,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 						handleUpdateList(response.data, "update")
 					} else {
 						handleUpdateList(elem, "delete")
-						setNSavingsUsed(List.updateDataMuta(elem, "delete", nSavingsUsed));
+						setNSavingsUsed(List.updateDataMuta(elem, "delete", nSavingsUsed, SORTER));
 					}
 
 					setElementToDelete(null);
@@ -193,7 +193,7 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total } })
 				.then(function (response) {
 					handleUpdateList(response.data, "create")
-					setNSavingsUsed(List.updateDataMuta(response.data, "create", nSavingsUsed));
+					setNSavingsUsed(List.updateDataMuta(response.data, "create", nSavingsUsed, SORTER));
 					setSaving(null);
 					savingRef.current.handleClose();
 				})
