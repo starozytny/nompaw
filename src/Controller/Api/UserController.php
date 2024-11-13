@@ -19,6 +19,8 @@ class UserController extends AbstractController
         $user = $this->getUser();
 
         return $apiResponse->apiJsonResponseCustom([
+            'username' => $user->getUsername(),
+            'avatarFilename' => $user->getAvatar(),
             'avatarUrl' => $request->getSchemeAndHttpHost() . $user->getAvatarFile()
         ]);
     }
