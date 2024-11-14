@@ -3,6 +3,7 @@
 namespace App\Service\Data;
 
 use App\Entity\Crypto\CrTrade;
+use App\Entity\Enum\Crypto\TypeType;
 use App\Service\SanitizeData;
 use Exception;
 
@@ -17,16 +18,40 @@ class DataCrypto
      */
     public function setDataTrade(CrTrade $obj, $data): CrTrade
     {
+        $type = (int) $data->type;
+
+        $totalReal = $this->sanitizeData->setFloatValueWithZero($data->totalReal);
+        $costPrice = $this->sanitizeData->setFloatValueWithZero($data->costPrice);
+        $costCoin = $this->sanitizeData->trimData($data->costCoin);
+        $total = $totalReal;
+        if($costCoin == "EUR" && $costPrice){
+            $total += $costPrice;
+        }
+
+        $fromNbToken = $this->sanitizeData->setFloatValueWithZero($data->fromNbToken);
+        $fromCoin = $this->sanitizeData->trimData($data->fromCoin);
+        $fromPrice = $this->sanitizeData->setFloatValueWithZero($data->fromPrice);
+        $toPrice = $this->sanitizeData->setFloatValueWithZero($data->toPrice);
+        if($type === TypeType::Depot){
+            $fromNbToken = $this->sanitizeData->setFloatValueWithZero($data->toNbToken);
+            $fromCoin = $this->sanitizeData->trimData($data->toCoin);
+            $fromPrice=1;
+            $toPrice=1;
+        }
+
         return ($obj)
             ->setTradeAt($this->sanitizeData->createDate($data->tradeAt))
-            ->setType((int) $data->type)
-            ->setFromCoin($this->sanitizeData->trimData($data->fromCoin))
+            ->setType($type)
+            ->setFromCoin($fromCoin)
             ->setToCoin($this->sanitizeData->trimData($data->toCoin))
-            ->setFromPrice($this->sanitizeData->setFloatValue($data->fromPrice))
-            ->setNbToken($this->sanitizeData->setFloatValue($data->nbToken))
-            ->setToPrice($this->sanitizeData->setFloatValue($data->toPrice))
-            ->setCostPrice($this->sanitizeData->setFloatValue($data->costPrice))
-            ->setCostCoin($this->sanitizeData->trimData($data->costCoin))
+            ->setCostPrice($costPrice)
+            ->setCostCoin($costCoin)
+            ->setFromNbToken($fromNbToken)
+            ->setToNbToken($this->sanitizeData->setFloatValueWithZero($data->toNbToken))
+            ->setFromPrice($fromPrice)
+            ->setToPrice($toPrice)
+            ->setTotalReal($totalReal)
+            ->setTotal($total)
         ;
     }
 }

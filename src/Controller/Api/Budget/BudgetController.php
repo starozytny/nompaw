@@ -16,14 +16,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api/budget', name: 'api_budget_')]
 class BudgetController extends AbstractController
 {
-    #[Route('/planning', name: 'index', options: ['expose' => true])]
-    public function list(BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
+    #[Route('/planning/{year}', name: 'index', methods: 'GET')]
+    public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
                          BuCategoryRepository $categoryRepository, SerializerInterface $serializer,
                          ApiResponse $apiResponse, BudgetService $budgetService): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
-        $year = (new \DateTime())->format('Y');
         if($year < $user->getBudgetYear()){
             $year = $user->getBudgetYear();
         }
