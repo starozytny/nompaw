@@ -24,11 +24,13 @@ class DataMain
     {
         if (isset($data->roles)) $obj->setRoles($data->roles);
 
+        $username = $this->sanitizeData->fullSanitize($data->username);
+
         return ($obj)
-            ->setUsername($this->sanitizeData->fullSanitize($data->username))
+            ->setUsername($username)
             ->setFirstname($this->sanitizeData->sanitizeString($data->firstname))
             ->setLastname($this->sanitizeData->sanitizeString($data->lastname))
-            ->setDisplayName($this->sanitizeData->sanitizeString($data->displayName))
+            ->setDisplayName($data->displayName ? $this->sanitizeData->sanitizeString($data->displayName) : $username)
             ->setEmail($data->email)
         ;
     }
