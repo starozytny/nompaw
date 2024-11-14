@@ -192,7 +192,7 @@ class Form extends Component {
 		return <div>
 			<div className="flex flex-col gap-4">
 				<div className="flex gap-4">
-					<div class="w-full">
+					<div className="w-full">
 						{recurrenceId
 							? <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
 							: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
