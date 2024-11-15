@@ -40,6 +40,7 @@ class BudgetController extends AbstractController
         $today = new \DateTime();
 
         return $apiResponse->apiJsonResponseCustom([
+            'userBudgetYear' => $user->getBudgetYear(),
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
             'donnees' => json_decode($data),
