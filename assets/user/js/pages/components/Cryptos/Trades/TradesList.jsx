@@ -35,8 +35,7 @@ export class TradesList extends Component {
         this.state = {
             context : 'create',
             id: '',
-            tradeAt: Formulaire.setValueDate(new Date()),
-            tradeTime: '',
+            tradeAt: Formulaire.setValueDateTime(new Date()),
             type: 0,
             fromCoin: '',
             toCoin: '',
@@ -52,14 +51,10 @@ export class TradesList extends Component {
     }
 
     handleEditElement = (element) => {
-        let tradeAt = element ? moment(element.tradeAt).toDate() : new Date();
-        let tradeTime = element ? `${Sanitaze.addZeroToNumber(tradeAt.getHours())}:${Sanitaze.addZeroToNumber(tradeAt.getMinutes())}` : ''
-
         this.setState({
             context: element ? "update" : "create",
             id: element ? element.id : "",
-            tradeAt: Formulaire.setValueDate(tradeAt),
-            tradeTime: tradeTime,
+            tradeAt: Formulaire.setValueDateTime(element.tradeAt),
             type: element ? Formulaire.setValue(element.type) : 0,
             fromCoin: element ? Formulaire.setValue(element.fromCoin) : '',
             toCoin: element ? Formulaire.setValue(element.toCoin) : '',
@@ -87,13 +82,12 @@ export class TradesList extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
 
-        const { context, loadData, id, tradeAt, tradeTime, type, fromCoin, fromNbToken, toCoin, toNbToken, toPrice, fromPrice, costPrice, costCoin, totalReal } = this.state;
+        const { context, loadData, id, tradeAt, type, fromCoin, fromNbToken, toCoin, toNbToken, toPrice, fromPrice, costPrice, costCoin, totalReal } = this.state;
 
         this.setState({ errors: [] });
 
         let paramsToValidate = [
             { type: "text", id: 'tradeAt', value: tradeAt },
-            { type: "text", id: 'tradeTime', value: tradeTime },
             { type: "text", id: 'type', value: type },
             { type: "text", id: 'toCoin', value: toCoin },
             { type: "text", id: 'toNbToken', value: toNbToken },
@@ -121,8 +115,6 @@ export class TradesList extends Component {
                 this.setState({ loadData: true })
                 Formulaire.loader(true);
 
-                this.state.tradeAt = new Date(tradeAt + ' ' + tradeTime);
-
                 let methode = context === "create" ? "POST" : "PUT";
                 let url = context === "create" ? Routing.generate(URL_CREATE_ELEMENT) : Routing.generate(URL_UPDATE_ELEMENT, {id: id})
 
@@ -145,7 +137,7 @@ export class TradesList extends Component {
 
     render () {
         const { data } = this.props;
-        const { context, errors, tradeAt, tradeTime, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, toPrice, fromPrice, totalReal } = this.state;
+        const { context, errors, tradeAt, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, toPrice, fromPrice, totalReal } = this.state;
 
         let typeItems = [
             { value: 0, identifiant: 'type-0', label: 'Achat' },
@@ -345,14 +337,7 @@ export class TradesList extends Component {
                         <div className="item-content">
                             <div className="item-infos text-sm xl:text-base">
                                 <div className="col-1">
-                                    <div className="flex gap-1">
-                                        <div className="w-full">
-                                            <Input type="date" valeur={tradeAt} identifiant="tradeAt" {...params0} />
-                                        </div>
-                                        <div className="w-full">
-                                            <Input type="time" valeur={tradeTime} identifiant="tradeTime" {...params0} />
-                                        </div>
-                                    </div>
+                                    <Input type="datetime-local" valeur={tradeAt} identifiant="tradeAt" {...params0} />
                                 </div>
                                 <div className="col-2">
                                     <Select identifiant="type" valeur={type} items={typeItems} noEmpty={true} noErrors={true} {...params0}></Select>

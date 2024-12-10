@@ -57,6 +57,10 @@ function setValueTime (value, defaultValue = "") {
     return value === null ? defaultValue : moment(value).format('HH[:]mm');
 }
 
+function setValueDateTime (value, defaultValue = "") {
+    return value === null ? defaultValue : moment(value).format('YYYY-MM-DDTHH:mm');
+}
+
 function showErrors(self, validate, text="Veuillez vérifier les informations transmises.", toTop = false)
 {
     if(toTop){
@@ -93,6 +97,7 @@ module.exports = {
     setValue,
     setValueDate,
     setValueTime,
+    setValueDateTime,
     showErrors,
     displayErrors,
     updateValueCheckbox
