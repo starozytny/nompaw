@@ -49,16 +49,12 @@ function setValue (value, defaultValue = "") {
     return value === null ? defaultValue : value;
 }
 
-function setDate (value, retour = "") {
-    return value ? moment(value).format('YYYY-MM-DD') : retour;
-}
-
 function setValueDate (value, defaultValue = "") {
-    return value === null ? defaultValue : moment(value).format('DD/MM/YYYY');
+    return value === null ? defaultValue : moment(value).format('YYYY-MM-DD');
 }
 
 function setValueTime (value, defaultValue = "") {
-    return value === null ? defaultValue : moment.utc(value).format('HH:mm');
+    return value === null ? defaultValue : moment(value).format('HH[:]mm');
 }
 
 function showErrors(self, validate, text="Veuillez vérifier les informations transmises.", toTop = false)
@@ -95,7 +91,6 @@ module.exports = {
     axiosGetData,
     loader,
     setValue,
-    setDate,
     setValueDate,
     setValueTime,
     showErrors,

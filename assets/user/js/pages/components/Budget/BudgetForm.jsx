@@ -37,7 +37,7 @@ export function BudgetFormulaire ({ context, categories, element, year, month, o
 		name={element ? Formulaire.setValue(element.name) : ""}
 		category={element && element.category ? Formulaire.setValue(element.category.id) : ""}
 		isActive={element ? Formulaire.setValue(element.isActive) : false}
-		dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('DD/MM/Y')}
+		dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('YYYY-MM-DD')}
 		dateTime={element ? Formulaire.setValueTime(element.dateAt) : ""}
 		recurrenceId={element ? Formulaire.setValue(element.recurrenceId) : ""}
 
@@ -67,11 +67,7 @@ class Form extends Component {
 		this.select = React.createRef();
 	}
 
-	componentDidMount = () => {
-		Inputs.initDateInput(this.handleChangeDate, this.handleChange, "")
-	}
-
-	handleChange = (e, picker) => {
+	handleChange = (e) => {
 		let name = e.currentTarget.name;
 		let value = e.currentTarget.value;
 
@@ -83,23 +79,11 @@ class Form extends Component {
 			value = Inputs.textMoneyMinusInput(value, this.state.price);
 		}
 
-		if (name === "dateAt") {
-			value = Inputs.dateInput(e, picker, this.state[name]);
-		}
-
-		if (name === "dateTime") {
-			value = Inputs.timeInput(e, this.state[name]);
-		}
-
 		if (name === "type") {
 			this.setState({ category: "" })
 			this.select.current.handleClose(null, "")
 		}
 
-		this.setState({ [name]: value })
-	}
-
-	handleChangeDate = (name, value) => {
 		this.setState({ [name]: value })
 	}
 
@@ -219,7 +203,7 @@ class Form extends Component {
 
 				<div className="flex gap-4">
 					<div className="w-full">
-						<Input type="js-date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
+						<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
 					</div>
 					<div className="w-full">
 						<SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}

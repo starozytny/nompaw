@@ -35,7 +35,7 @@ export class TradesList extends Component {
         this.state = {
             context : 'create',
             id: '',
-            tradeAt: Formulaire.setDate(new Date()),
+            tradeAt: Formulaire.setValueDate(new Date()),
             tradeTime: '',
             type: 0,
             fromCoin: '',
@@ -58,7 +58,7 @@ export class TradesList extends Component {
         this.setState({
             context: element ? "update" : "create",
             id: element ? element.id : "",
-            tradeAt: Formulaire.setDate(tradeAt),
+            tradeAt: Formulaire.setValueDate(tradeAt),
             tradeTime: tradeTime,
             type: element ? Formulaire.setValue(element.type) : 0,
             fromCoin: element ? Formulaire.setValue(element.fromCoin) : '',

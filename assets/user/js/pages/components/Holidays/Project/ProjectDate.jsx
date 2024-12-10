@@ -4,19 +4,15 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import moment from 'moment';
-import 'moment/locale/fr';
-
-import Formulaire from "@commonFunctions/formulaire";
-import Validateur from "@commonFunctions/validateur";
-import Inputs from "@commonFunctions/inputs";
-import Sanitaze from "@commonFunctions/sanitaze";
 import Sort from "@commonFunctions/sort";
 import Propals from "@userFunctions/propals";
+import Sanitaze from "@commonFunctions/sanitaze";
+import Formulaire from "@commonFunctions/formulaire";
+import Validateur from "@commonFunctions/validateur";
 
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Input } from "@tailwindComponents/Elements/Fields";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 const URL_CREATE_PROPAL = 'intern_api_projects_propals_date_create';
 const URL_UPDATE_PROPAL = 'intern_api_projects_propals_date_update';
@@ -45,23 +41,9 @@ export class ProjectDate extends Component {
 		this.cancelDate = React.createRef();
 	}
 
-	componentDidMount = () => {
-		Inputs.initDateInput(this.handleChangeDate, this.handleChange, "")
-	}
 
-	handleChange = (e, picker) => {
-		let name = e.currentTarget.name;
-		let value = e.currentTarget.value;
-
-		if (name === "startAt" || name === "endAt") {
-			value = Inputs.dateInput(e, picker, this.state[name]);
-		}
-
-		this.setState({ [name]: value })
-	}
-
-	handleChangeDate = (name, value) => {
-		this.setState({ [name]: value })
+	handleChange = (e) => {
+		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
 	}
 
 	handleModal = (identifiant, context, propal) => {
@@ -71,8 +53,8 @@ export class ProjectDate extends Component {
 		modalCancelDate(this);
 		this.setState({
 			context: context, propal: propal,
-			startAt: propal ? moment(propal.startAt).format('DD/MM/Y') : "",
-			endAt: propal && propal.endAt ? moment(propal.endAt).format('DD/MM/Y') : ""
+			startAt: propal ? Formulaire.setValueDate(propal.startAt) : "",
+			endAt: propal && propal.endAt ? Formulaire.setValueDate(propal.endAt) : ""
 		})
 		this[identifiant].current.handleClick();
 	}
@@ -241,10 +223,10 @@ export class ProjectDate extends Component {
 			<Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
 				   content={<div className="flex gap-2">
 					   <div className="w-full">
-						   <Input type="js-date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
+						   <Input type="date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
 					   </div>
 					   <div className="w-full">
-						   <Input type="js-date" identifiant="endAt" valeur={endAt} {...params}>Fini le</Input>
+						   <Input type="date" identifiant="endAt" valeur={endAt} {...params}>Fini le</Input>
 					   </div>
 				   </div>}
 				   footer={null} closeTxt="Annuler" />

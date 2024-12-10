@@ -36,8 +36,8 @@ class DataHolidays
     public function setDataPropalDate(HoPropalDate $obj, $data): HoPropalDate
     {
         return ($obj)
-            ->setStartAt($this->sanitizeData->createDatePicker($data->startAt))
-            ->setEndAt($this->sanitizeData->createDatePicker($data->endAt))
+            ->setStartAt($this->sanitizeData->createDate($data->startAt))
+            ->setEndAt($this->sanitizeData->createDate($data->endAt))
             ;
     }
 

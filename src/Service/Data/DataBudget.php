@@ -17,10 +17,9 @@ class DataBudget
 
     public function setDataItem(BuItem $obj, $data): BuItem
     {
-        $dateAt = $this->sanitizeData->createDatePicker($data->dateAt);
+        $dateAt = $this->sanitizeData->createDate($data->dateAt);
         if($data->dateTime !== ""){
-            $dateTime = str_replace('h', ':', $data->dateTime);
-            $dateAt = $this->sanitizeData->createDateTimePicker($data->dateAt . " " . $dateTime);
+            $dateAt = $this->sanitizeData->createDateTime($data->dateAt . " " . $data->dateTime);
         }
 
         return ($obj)

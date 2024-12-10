@@ -64,10 +64,6 @@ export class RecipeRead extends Component {
 		let value = e.currentTarget.value;
 
 		if (name !== "difficulty") {
-			if (name === 'durationPrepare' || name === 'durationCooking') {
-				value = Inputs.timeInput(e, this.state[name]);
-			}
-
 			this.setState({ [name]: value });
 		} else {
 			this.handleSubmit(e, 'text', 'difficulty', value);

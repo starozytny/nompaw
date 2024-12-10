@@ -43,7 +43,7 @@ class DataRandos
     public function setDataPropalDate(RaPropalDate $obj, $data): RaPropalDate
     {
         return ($obj)
-            ->setDateAt($this->sanitizeData->createDatePicker($data->dateAt))
+            ->setDateAt($this->sanitizeData->createDate($data->dateAt))
         ;
     }
 
