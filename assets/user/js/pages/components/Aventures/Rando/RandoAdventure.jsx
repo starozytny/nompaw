@@ -43,14 +43,7 @@ export class RandoAdventure extends Component {
 	}
 
 	handleChange = (e) => {
-		let name = e.currentTarget.name;
-		let value = e.currentTarget.value;
-
-		if (name === "duration") {
-			value = Inputs.timeInput(e, this.state[name]);
-		}
-
-		this.setState({ [name]: value })
+		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
 	}
 
 	handleModal = (identifiant, context, propal) => {

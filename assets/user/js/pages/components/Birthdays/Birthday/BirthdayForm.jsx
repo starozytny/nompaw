@@ -5,7 +5,6 @@ import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Toastr from "@tailwindFunctions/toastr";
-import Inputs from "@commonFunctions/inputs";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
@@ -61,27 +60,8 @@ class Form extends Component {
 		this.file = React.createRef();
 	}
 
-	componentDidMount = () => {
-		Inputs.initDateInput(this.handleChangeDate, this.handleChange, new Date())
-	}
-
-	handleChange = (e, picker) => {
-		let name = e.currentTarget.name;
-		let value = e.currentTarget.value;
-
-		if (name === "startAt") {
-			value = Inputs.dateInput(e, picker, this.state[name]);
-		}
-
-		if (name === "timeAt") {
-			value = Inputs.timeInput(e, this.state[name]);
-		}
-
-		this.setState({ [name]: value })
-	}
-
-	handleChangeDate = (name, value) => {
-		this.setState({ [name]: value })
+	handleChange = (e) => {
+		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
 	}
 
 	handleChangeTinyMCE = (name, html) => {
@@ -160,7 +140,7 @@ class Form extends Component {
                         </div>
                         <div className="flex gap-4">
                             <div className="w-full">
-                                <Input type="js-date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
+                                <Input type="date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
                             </div>
                             <div className="w-full">
                                 <Input type="time" identifiant="timeAt" valeur={timeAt} placeholder="00h00" {...params}>À quelle heure</Input>

@@ -1,7 +1,7 @@
 const Sanitaze = require('@commonFunctions/sanitaze');
 
 function validateDate(value) {
-    let regex = /^\d{2}\/\d{2}\/\d{4}$/;
+    let regex = /^\d{4}-\d{2}-\d{2}$/;
 
     if (!regex.test(value)) {
         return {'code': false, 'message': 'La date n\'est pas valide.'};
@@ -29,7 +29,7 @@ function validateDate(value) {
 }
 
 function validateTime(value) {
-    let regex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+    let regex = /^([0-1][0-9]|2[0-3])[h:][0-5][0-9]$/;
 
     if (!regex.test(value)) {
         return {'code': false, 'message': 'La valeur n\'est pas valide.'};
@@ -43,10 +43,10 @@ function validateTime(value) {
 }
 
 function extractDate(value) {
-    let parts = value.split("/");
-    let day = parseInt(parts[0], 10);
+    let parts = value.split("-");
+    let day = parseInt(parts[2], 10);
     let month = parseInt(parts[1], 10);
-    let year = parseInt(parts[2], 10);
+    let year = parseInt(parts[0], 10);
 
     return [day, month, year];
 }

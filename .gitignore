@@ -36,6 +36,7 @@ winpty.exe.stackdump
 
 /config/databaseConfig.json
 /config/packages/doctrine.yaml
+
 /config/credentials.json
 
 .yarnrc
@@ -44,3 +45,5 @@ winpty.exe.stackdump
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+/public/tinymce/*

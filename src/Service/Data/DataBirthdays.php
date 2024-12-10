@@ -18,7 +18,7 @@ class DataBirthdays
             ->setName($this->sanitizeData->trimData($data->name))
             ->setSlug($this->sanitizeData->slugString($data->name))
             ->setDescription($this->sanitizeData->trimData($data->description->html))
-            ->setStartAt($this->sanitizeData->createDatePicker($data->startAt))
+            ->setStartAt($this->sanitizeData->createDate($data->startAt))
             ->setTimeAt($this->sanitizeData->createTime($data->timeAt))
             ->setIframeRoute($this->sanitizeData->trimData($data->iframeRoute))
         ;

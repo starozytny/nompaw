@@ -8,7 +8,6 @@ import moment from 'moment';
 import 'moment/locale/fr';
 
 import Sort from "@commonFunctions/sort";
-import Inputs from "@commonFunctions/inputs";
 import Propals from "@userFunctions/propals";
 import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
@@ -44,23 +43,8 @@ export class RandoDate extends Component {
 		this.cancelDate = React.createRef();
 	}
 
-	componentDidMount = () => {
-		Inputs.initDateInput(this.handleChangeDate, this.handleChange, "")
-	}
-
-	handleChange = (e, picker) => {
-		let name = e.currentTarget.name;
-		let value = e.currentTarget.value;
-
-		if (name === "dateAt") {
-			value = Inputs.dateInput(e, picker, this.state[name]);
-		}
-
-		this.setState({ [name]: value })
-	}
-
-	handleChangeDate = (name, value) => {
-		this.setState({ [name]: value })
+	handleChange = (e) => {
+		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
 	}
 
 	handleModal = (identifiant, context, propal) => {
@@ -68,7 +52,7 @@ export class RandoDate extends Component {
 		modalDeletePropal(this);
 		modalEndPropal(this);
 		modalCancelDate(this);
-		this.setState({ context: context, propal: propal, dateAt: propal ? moment(propal.dateAt).format('DD/MM/Y') : "" })
+		this.setState({ context: context, propal: propal, dateAt: propal ? Formulaire.setValueDate(propal.dateAt) : "" })
 		this[identifiant].current.handleClick();
 	}
 
@@ -231,7 +215,7 @@ export class RandoDate extends Component {
 
 			<Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
 				   content={<div>
-					   <Input type="js-date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
+					   <Input type="date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
 				   </div>}
 				   footer={null} closeTxt="Annuler" />
 
