@@ -40,7 +40,7 @@ class DataCrypto
         }
 
         return ($obj)
-            ->setTradeAt($this->sanitizeData->createDate($data->tradeAt))
+            ->setTradeAt($this->sanitizeData->createDateTime($data->tradeAt))
             ->setType($type)
             ->setFromCoin($fromCoin)
             ->setToCoin($this->sanitizeData->trimData($data->toCoin))

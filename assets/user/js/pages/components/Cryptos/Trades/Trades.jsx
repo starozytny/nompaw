@@ -10,8 +10,10 @@ import Formulaire from "@commonFunctions/formulaire";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 
 import { TradesList } from "@userPages/Cryptos/Trades/TradesList";
+import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
 
 const URL_GET_DATA = "intern_api_cryptos_trades_list";
+const URL_DELETE_ELEMENT = "intern_api_cryptos_trades_delete";
 
 export class Trades extends Component {
 	constructor (props) {
@@ -20,8 +22,11 @@ export class Trades extends Component {
 		this.state = {
 			loadingData: true,
 			errors: [],
-			sorter: Sort.compareTradeAt
+			sorter: Sort.compareTradeAt,
+			element: null
 		}
+
+		this.delete = React.createRef();
 	}
 
 	componentDidMount = () => {
@@ -49,13 +54,26 @@ export class Trades extends Component {
 		this.setState({ data: nData })
 	}
 
+	handleModal = (identifiant, elem) => {
+		this[identifiant].current.handleClick();
+		this.setState({ element: elem })
+	}
+
 	render () {
-		const { data, loadingData } = this.state;
+		const { data, loadingData, element } = this.state;
 
 		return <>
 			{loadingData
 				? <LoaderElements />
-				: <TradesList data={data} onUpdateList={this.handleUpdateList} />
+				: <>
+					<TradesList data={data} onModal={this.handleModal} onUpdateList={this.handleUpdateList} />
+
+					<ModalDelete refModal={this.delete} element={element} routeName={URL_DELETE_ELEMENT}
+								 title="Supprimer cette transaction" msgSuccess="Transaction supprimée."
+								 onUpdateList={this.handleUpdateList}>
+						Êtes-vous sûr de vouloir supprimer définitivement cette transaction ?
+					</ModalDelete>
+				</>
             }
         </>
     }
