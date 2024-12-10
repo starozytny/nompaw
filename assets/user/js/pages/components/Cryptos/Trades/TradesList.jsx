@@ -50,6 +50,17 @@ export class TradesList extends Component {
         }
     }
 
+    handleChange = (e) => {
+        let name = e.currentTarget.name;
+        let value = e.currentTarget.value;
+
+        if(name === 'fromCoin' || name === 'toCoin' || name === 'costCoin'){
+            value = value !== "" ? value.toUpperCase() : value;
+        }
+
+        this.setState({ [name]: value })
+    }
+
     handleEditElement = (element) => {
         this.setState({
             context: element ? "update" : "create",
@@ -66,17 +77,6 @@ export class TradesList extends Component {
             fromPrice: element ? Formulaire.setValue(element.fromPrice) : '',
             totalReal: element ? Formulaire.setValue(element.totalReal) : '',
         })
-    }
-
-    handleChange = (e) => {
-        let name = e.currentTarget.name;
-        let value = e.currentTarget.value;
-
-        if(name === 'fromCoin' || name === 'toCoin' || name === 'costCoin'){
-            value = value !== "" ? value.toUpperCase() : value;
-        }
-
-        this.setState({ [name]: value })
     }
 
     handleSubmit = (e) => {
@@ -136,7 +136,7 @@ export class TradesList extends Component {
     }
 
     render () {
-        const { data } = this.props;
+        const { onModal, data } = this.props;
         const { context, errors, tradeAt, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, toPrice, fromPrice, totalReal } = this.state;
 
         let typeItems = [
@@ -267,7 +267,8 @@ export class TradesList extends Component {
                     }
 
                     itemsTrade.push(<TradesItem key={elem.id} elem={elem}
-                                       onEditElement={this.handleEditElement} />);
+                                                onModal={onModal}
+                                                onEditElement={this.handleEditElement} />);
                 })
 
                 itemsMonth.push(<div key={ind}>

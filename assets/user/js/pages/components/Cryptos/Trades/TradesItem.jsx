@@ -14,7 +14,7 @@ const RECUP = 4;
 const STAKING = 5;
 const TRANSFERT = 6;
 
-export function TradesItem ({ elem, onEditElement }) {
+export function TradesItem ({ elem, onModal, onEditElement }) {
 	let typesString = ['Achat', "Vente", "Dépôt", "Retrait", "Récup.", "Staking", "Transfert"];
 	let typesBadge = ['blue', "red", "indigo", "yellow", "indigo", "gray", "gray"];
 
@@ -63,6 +63,7 @@ export function TradesItem ({ elem, onEditElement }) {
 				</div>
 				<div className="col-8 actions">
 					<ButtonIcon type="default" icon="pencil" onClick={() => onEditElement(elem)}>Modifier</ButtonIcon>
+					<ButtonIcon type="default" icon="trash" onClick={() => onModal('delete', elem)}>Supprimer</ButtonIcon>
 				</div>
 			</div>
 		</div>

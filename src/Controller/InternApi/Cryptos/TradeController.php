@@ -65,4 +65,12 @@ class TradeController extends AbstractController
     {
         return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity);
     }
+
+    #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
+    public function delete(CrTrade $obj, CrTradeRepository $repository, ApiResponse $apiResponse): Response
+    {
+        $repository->remove($obj, true);
+
+        return $apiResponse->apiJsonResponseSuccessful("ok");
+    }
 }
