@@ -64,10 +64,10 @@ class SanitizeData
         return $return;
     }
 
-    public function createDate($value, $return = null): ?DateTime
+    public function createDate($value, $return = null, $format = "Y-m-d"): ?DateTime
     {
         if($value != "" && $value != null){
-            return DateTime::createFromFormat('Y-m-d', $value);
+            return DateTime::createFromFormat($format, $value);
         }
 
         return $return;
