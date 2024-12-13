@@ -65,7 +65,7 @@ export class TradesList extends Component {
         this.setState({
             context: element ? "update" : "create",
             id: element ? element.id : "",
-            tradeAt: Formulaire.setValueDateTime(element.tradeAt),
+            tradeAt: element ? Formulaire.setValueDateTime(element.tradeAt) : '',
             type: element ? Formulaire.setValue(element.type) : 0,
             fromCoin: element ? Formulaire.setValue(element.fromCoin) : '',
             toCoin: element ? Formulaire.setValue(element.toCoin) : '',
@@ -214,7 +214,7 @@ export class TradesList extends Component {
 
                     switch (elem.type){
                         case VENTE:
-                            total += elem.total;
+                            total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
 
                             findCryptoY = 0;
                             cryptosY.forEach(cr => {
@@ -232,12 +232,12 @@ export class TradesList extends Component {
                             }
                             break;
                         case DEPOT:
-                            total += elem.total;
-                            totalDepot += elem.total;
-                            totalYDepot += elem.total;
+                            total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
+                            totalDepot = Sanitaze.toRoundTwoDec(totalDepot) + Sanitaze.toRoundTwoDec(elem.total);
+                            totalYDepot = Sanitaze.toRoundTwoDec(totalYDepot) + Sanitaze.toRoundTwoDec(elem.total);
                             break;
                         case ACHAT:
-                            total -= elem.total;
+                            total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
 
                             findCryptoY = 0;
                             cryptosY.forEach(cr => {
@@ -255,13 +255,13 @@ export class TradesList extends Component {
                             }
                             break;
                         case RETRAIT:
-                            total -= elem.total;
-                            totalRetrait += elem.totalReal;
-                            totalYRetrait += elem.totalReal;
+                            total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
+                            totalRetrait = Sanitaze.toRoundTwoDec(totalRetrait) + Sanitaze.toRoundTwoDec(elem.totalReal);
+                            totalYRetrait = Sanitaze.toRoundTwoDec(totalYRetrait) + Sanitaze.toRoundTwoDec(elem.totalReal);
                             break;
                         case RECUP:
                         case STAKING:
-                            totalBonus += elem.total;
+                            totalBonus += Sanitaze.toRoundTwoDec(elem.total);
                             break;
                         default: break;
                     }
