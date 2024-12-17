@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Main\User;
+use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Main\UserRepository;
 use App\Service\ApiResponse;
 use App\Service\Export;
@@ -46,7 +47,8 @@ class UserController extends AbstractController
     }
 
     #[Route('/utilisateur/supprimer/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(User $obj, UserRepository $repository, ApiResponse $apiResponse, FileUploader $fileUploader): Response
+    public function delete(User $obj, UserRepository $repository, ApiResponse $apiResponse, FileUploader $fileUploader,
+                           BuCategoryRepository $categoryRepository): Response
     {
         if ($obj->getHighRoleCode() === User::CODE_ROLE_DEVELOPER) {
             return $apiResponse->apiJsonResponseForbidden();
@@ -54,6 +56,10 @@ class UserController extends AbstractController
 
         if ($obj === $this->getUser()) {
             return $apiResponse->apiJsonResponseBadRequest('Vous ne pouvez pas vous supprimer.');
+        }
+
+        foreach($obj->getBuCategories() as $item){
+            $categoryRepository->remove($item);
         }
 
         $repository->remove($obj, true);
