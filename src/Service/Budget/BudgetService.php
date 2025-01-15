@@ -31,35 +31,6 @@ class BudgetService
 
             $totalExpense = 0;
             $totalIncome = 0;
-            for ($i = $user->getBudgetYear(); $i < $year; $i++) {
-                for ($j = 0; $j < 12; $j++) {
-                    foreach ($recurrences as $re) {
-                        if ($i > $re->getInitYear() || ($re->getInitYear() == $i && $j + 1 >= $re->getInitMonth())) {
-                            if (in_array($j + 1, $re->getMonths())) {
-
-                                $noDelete = true;
-                                foreach ($items as $item) {
-                                    if ($item->getYear() == $i && $item->getMonth() == $j + 1
-                                        && $item->getRecurrenceId() == $re->getId()
-                                        && $item->getType() == TypeType::Deleted
-                                    ) {
-                                        $noDelete = false;
-                                    }
-                                }
-
-                                if ($noDelete) {
-                                    if ($re->getType() != TypeType::Income) {
-                                        $totalExpense += $re->getPrice();
-                                    } else {
-                                        $totalIncome += $re->getPrice();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             foreach ($items as $item) {
                 if ($item->getType() !== TypeType::Used && $item->getType() !== TypeType::Deleted) {
                     if ($item->getYear() < $year) {
