@@ -331,9 +331,12 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 	return <>
 		{currentImages.map((elem, index) => {
 			return <div key={elem.id} className="relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md">
-				<div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && (!error[index] && elem.type !== 1) ? "opacity-100" : "opacity-0"}`}>
-					<span className="icon-chart-3"></span>
-				</div>
+				{elem.type !== 1
+					? <div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && (!error[index]) ? "opacity-100" : "opacity-0"}`}>
+						<span className="icon-chart-3"></span>
+					</div>
+					: null
+				}
 				<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
 					 style={elem.type === 1 ? { height: "87%" } : {}}
 				>
