@@ -2,9 +2,7 @@
 
 namespace App\Controller\User\Aventures;
 
-use App\Entity\Cook\CoRecipe;
 use App\Entity\Main\User;
-use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaPropalDate;
@@ -12,14 +10,12 @@ use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaImageRepository;
-use App\Repository\Rando\RaLinkRepository;
 use App\Repository\Rando\RaPropalAdventureRepository;
 use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/espace-membre/aventures/randos', name: 'user_aventures_randos_')]
@@ -67,7 +63,7 @@ class RandoController extends AbstractController
         $users = $userRepository->findAll();
 
         if($obj->getAuthor()->getId() != $this->getUser()->getId() && !$this->isGranted('ROLE_ADMIN')){
-            throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
+            throw $this->createAccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
         }
 
         $element = $serializer->serialize($obj,   'json', ['groups' => RaRando::FORM]);

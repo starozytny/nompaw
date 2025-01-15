@@ -221,16 +221,26 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		recurrencesData.forEach(d => {
 			if (year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth)) {
 				if (d.months.includes(i + 1)) {
-					switch (d.type) {
-						case 0:
-						case 2:
-							totauxExpense[i] += d.price;
-							break;
-						case 1:
-							totauxIncome[i] += d.price;
-							break;
-						default:
-							break;
+
+					let notDeleted = true;
+					data.forEach(realD => {
+						if(realD.recurrenceId === d.id && realD.month === i + 1 && realD.type === 3){
+							notDeleted = false;
+						}
+					})
+
+					if(notDeleted){
+						switch (d.type) {
+							case 0:
+							case 2:
+								totauxExpense[i] += d.price;
+								break;
+							case 1:
+								totauxIncome[i] += d.price;
+								break;
+							default:
+								break;
+						}
 					}
 				}
 			}
@@ -240,18 +250,28 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			recurrencesData.forEach(d => {
 				if (year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth)) {
 					if (d.months.includes(i + 1)) {
-						switch (d.type) {
-							case 0:
-								totalExpense += d.price;
-								break;
-							case 1:
-								totalIncome += d.price;
-								break;
-							case 2:
-								totalSaving += d.price;
-								break;
-							default:
-								break;
+
+						let notDeleted = true;
+						data.forEach(realD => {
+							if(realD.recurrenceId === d.id && realD.month === i + 1 && realD.type === 3){
+								notDeleted = false;
+							}
+						})
+
+						if(notDeleted){
+							switch (d.type) {
+								case 0:
+									totalExpense += d.price;
+									break;
+								case 1:
+									totalIncome += d.price;
+									break;
+								case 2:
+									totalSaving += d.price;
+									break;
+								default:
+									break;
+							}
 						}
 					}
 				}
@@ -299,7 +319,6 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			if (d.recurrenceId) {
 				nRecurrencesData = nRecurrencesData.filter(r => r.id !== d.recurrenceId);
 				switch (d.type) {
-					case 3:
 					case 0:
 						totalExpense -= d.recurrencePrice;
 						if(!d.isActive){
@@ -339,7 +358,6 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		if (d.recurrenceId) {
 			switch (d.type) {
 				case 0:
-				case 3:
 				case 2:
 					totauxExpense[d.month - 1] -= d.recurrencePrice;
 					break;
@@ -388,7 +406,6 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		let tmpDispo = (i === 0 ? parseFloat(initTotal) : 0) + totauxIncome[i] - totauxExpense[i];
 		totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
 	}
-
 
 	let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
 	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
