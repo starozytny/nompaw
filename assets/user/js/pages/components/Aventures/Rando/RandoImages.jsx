@@ -334,56 +334,62 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 				<div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && !error[index] ? "opacity-100" : "opacity-0"}`}>
 					<span className="icon-chart-3"></span>
 				</div>
-				{error[index]
-					? <div className="w-full h-full bg-gray-900 text-white text-center flex items-center justify-center z-10" onClick={() => onLightbox(elem)}>
-						Cliquez pour voir la photo..
-					</div>
-					: <>
-						<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
-							 style={elem.type === 1 ? { height: "87%" } : {}}
-						>
-							<div className="flex justify-between gap-2 p-2">
-								<div className="group">
-									<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-										 onClick={() => onSelect(elem.id)}>
-										<span className={`icon-check1 text-sm ${selected.includes(elem.id) ? "text-white" : "text-transparent"}`}></span>
-									</div>
-								</div>
-								<div className="flex gap-1">
-									<ButtonIcon type="default" icon="zoom-in" tooltipWidth={80} onClick={() => onLightbox(elem)} tooltipPosition="-bottom-7 right-0">
-										Plein écran
-									</ButtonIcon>
-									{parseInt(userId) === elem.author.id && <>
-										<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={() => onCover(elem)} tooltipPosition="-bottom-7 right-0">
-											Image de couverture
-										</ButtonIcon>
-										<ButtonIcon type="red" icon="trash" onClick={() => onModal('deleteImage', elem)} tooltipPosition="-bottom-7 right-0">
-											Supprimer
-										</ButtonIcon>
-									</>}
-								</div>
-							</div>
-							<div className="absolute top-12 w-full h-[calc(100%-6rem)]" onClick={() => onLightbox(elem)}></div>
-							<div className="flex justify-between gap-2 p-2">
-								<div className="flex items-center gap-2">
-									<div className="w-8 h-8 rounded-full shadow">
-										{elem.author.avatarFile
-											? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`} className="w-8 h-8 object-cover rounded-full" />
-											: <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
-												{elem.author.lastname.slice(0, 1) + elem.author.firstname.slice(0, 1)}
-											</div>
-										}
-									</div>
-									<div className="font-medium text-sm text-slate-50">{elem.author.displayName}</div>
-								</div>
-								<div>
-									<ButtonIconA type="default" icon="download"
-												 onClick={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })}>
-										Télécharger
-									</ButtonIconA>
-								</div>
+				<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
+					 style={elem.type === 1 ? { height: "87%" } : {}}
+				>
+					<div className="flex justify-between gap-2 p-2">
+						<div className="group">
+							<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+								 onClick={() => onSelect(elem.id)}>
+								<span className={`icon-check1 text-sm ${selected.includes(elem.id) ? "text-white" : "text-transparent"}`}></span>
 							</div>
 						</div>
+						<div className="flex gap-1">
+							<ButtonIcon type="default" icon="zoom-in" tooltipWidth={80} onClick={() => onLightbox(elem)} tooltipPosition="-bottom-7 right-0">
+								Plein écran
+							</ButtonIcon>
+							{parseInt(userId) === elem.author.id && <>
+								<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={() => onCover(elem)} tooltipPosition="-bottom-7 right-0">
+									Image de couverture
+								</ButtonIcon>
+								<ButtonIcon type="red" icon="trash" onClick={() => onModal('deleteImage', elem)} tooltipPosition="-bottom-7 right-0">
+									Supprimer
+								</ButtonIcon>
+							</>}
+						</div>
+					</div>
+					<div className="absolute top-12 w-full h-[calc(100%-6rem)]" onClick={() => onLightbox(elem)}></div>
+					<div className="flex justify-between gap-2 p-2">
+						<div className="flex items-center gap-2">
+							<div className="w-8 h-8 rounded-full shadow">
+								{elem.author.avatarFile
+									? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`} className="w-8 h-8 object-cover rounded-full" />
+									: <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+										{elem.author.lastname.slice(0, 1) + elem.author.firstname.slice(0, 1)}
+									</div>
+								}
+							</div>
+							<div className="font-medium text-sm text-slate-50">{elem.author.displayName}</div>
+						</div>
+						<div>
+							<ButtonIconA type="default" icon="download"
+										 onClick={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })}>
+								Télécharger
+							</ButtonIconA>
+						</div>
+					</div>
+				</div>
+				{error[index]
+					? <>
+						{elem.type === 1
+							? <video className="h-[205px] md:h-[332px]" controls>
+								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
+							</video>
+							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt=""
+							/>
+						}
+					</>
+					: <>
 						{elem.type === 1
 							? <video className="h-[205px] md:h-[332px]" controls>
 								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
@@ -481,13 +487,13 @@ class LightboxContent extends Component {
 
 		let nRank = rankPhoto + 1;
 
-		if(nRank > images.length){
+		if (nRank > images.length) {
 			nRank = rankPhoto;
 		}
 
 		let nElem = elem;
 		images.forEach(image => {
-			if(image.rankPhoto === nRank){
+			if (image.rankPhoto === nRank) {
 				nElem = image;
 			}
 		})
@@ -501,13 +507,13 @@ class LightboxContent extends Component {
 
 		let nRank = rankPhoto - 1;
 
-		if(nRank < 1){
+		if (nRank < 1) {
 			nRank = rankPhoto;
 		}
 
 		let nElem = elem;
 		images.forEach(image => {
-			if(image.rankPhoto === nRank){
+			if (image.rankPhoto === nRank) {
 				nElem = image;
 			}
 		})
