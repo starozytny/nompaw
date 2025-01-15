@@ -9,7 +9,7 @@ import Validateur from "@commonFunctions/validateur";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
 import { Button } from "@tailwindComponents/Elements/Button";
-import { Checkbox, Input, InputView, Radiobox, SelectCustom } from "@tailwindComponents/Elements/Fields";
+import { Checkbox, Input, InputView, Radiobox } from "@tailwindComponents/Elements/Fields";
 
 const URL_INDEX_ELEMENTS = "user_budget_recurrences_index";
 const URL_CREATE_ELEMENT = "intern_api_budget_recurrences_create";
@@ -210,10 +210,10 @@ class Form extends Component {
                         </div>
 
                         <div>
-                            <SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}
-                                          items={categoryItems} {...paramsInput1}>
-                                Catégorie
-                            </SelectCustom>
+                            {/*<SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}*/}
+                            {/*              items={categoryItems} {...paramsInput1}>*/}
+                            {/*    Catégorie*/}
+                            {/*</SelectCustom>*/}
                         </div>
 
                         <div>

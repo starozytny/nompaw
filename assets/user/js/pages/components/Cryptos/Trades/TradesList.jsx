@@ -15,7 +15,7 @@ import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
-import { Input, Select } from "@tailwindComponents/Elements/Fields";
+import { Input } from "@tailwindComponents/Elements/Fields";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -341,7 +341,7 @@ export class TradesList extends Component {
                                     <Input type="datetime-local" valeur={tradeAt} identifiant="tradeAt" {...params0} />
                                 </div>
                                 <div className="col-2">
-                                    <Select identifiant="type" valeur={type} items={typeItems} noEmpty={true} noErrors={true} {...params0}></Select>
+                                    {/*<Select identifiant="type" valeur={type} items={typeItems} noEmpty={true} noErrors={true} {...params0}></Select>*/}
                                 </div>
                                 <div className="col-3">
                                     {parseInt(type) === DEPOT

@@ -13,7 +13,7 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
-import { Input, Radiobox, InputView, SelectCustom, Switcher } from "@tailwindComponents/Elements/Fields";
+import { Input, Radiobox, InputView, Switcher } from "@tailwindComponents/Elements/Fields";
 
 const URL_CREATE_ELEMENT = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT = "intern_api_budget_items_update";
@@ -206,10 +206,10 @@ class Form extends Component {
 						<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
 					</div>
 					<div className="w-full">
-						<SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}
-									  items={categoryItems} {...paramsInput1}>
-							Catégorie
-						</SelectCustom>
+						{/*<SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}*/}
+						{/*			  items={categoryItems} {...paramsInput1}>*/}
+						{/*	Catégorie*/}
+						{/*</SelectCustom>*/}
 					</div>
 				</div>
 

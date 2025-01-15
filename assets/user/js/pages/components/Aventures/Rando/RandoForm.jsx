@@ -10,7 +10,7 @@ import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-import { Input, InputView, Radiobox, Select } from "@tailwindComponents/Elements/Fields";
+import { Input, InputView, Radiobox } from "@tailwindComponents/Elements/Fields";
 
 const URL_INDEX_PAGE = "user_aventures_randos_read";
 const URL_CREATE_ELEMENT = "intern_api_aventures_randos_create";
@@ -140,9 +140,9 @@ class Form extends Component {
                     <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
                         <div className="flex gap-4">
                             <div className="w-full">
-                                <Select identifiant="referent" valeur={referent} items={referentsItem} noEmpty={true} noErrors={true} {...params}>
-                                    Référent
-                                </Select>
+                                {/*<Select identifiant="referent" valeur={referent} items={referentsItem} noEmpty={true} noErrors={true} {...params}>*/}
+                                {/*    Référent*/}
+                                {/*</Select>*/}
                             </div>
                             <div className="w-full">
                                 <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure *</Input>

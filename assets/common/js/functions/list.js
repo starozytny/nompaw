@@ -172,37 +172,6 @@ function updateDataMuta (element, context, data, sorter, nameProperty = "id") {
 	return nData;
 }
 
-function update (context, data, element, nameProperty = "id") {
-	let newData = [];
-
-	switch (context) {
-		case "delete_group":
-			data.forEach(el => {
-				if (!element.includes(el[nameProperty])) {
-					newData.push(el);
-				}
-			})
-			break;
-		case "delete":
-			newData = data.filter(el => el[nameProperty] !== element[nameProperty]);
-			break;
-		case "update":
-			data.forEach(el => {
-				if (el[nameProperty] === element[nameProperty]) {
-					el = element;
-				}
-				newData.push(el);
-			})
-			break;
-		default:
-			newData = data ? data : [];
-			newData.push(element);
-			break;
-	}
-
-	return newData;
-}
-
 function updateData (element, context, data, sorter) {
 	let newData = update(context, data, element);
 	if (sorter) {

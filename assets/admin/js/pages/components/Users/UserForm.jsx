@@ -4,14 +4,13 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import Sort from "@commonFunctions/sort";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Password } from "@tailwindComponents/Modules/User/Password";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
-import { Checkbox, Input, InputFile, InputView, SelectCustom } from "@tailwindComponents/Elements/Fields";
+import { Checkbox, Input, InputFile, InputView, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 
 const URL_SELECT_SOCIETIES = "intern_api_selection_societies";
 const URL_INDEX_ELEMENTS = "admin_users_index";
@@ -19,7 +18,7 @@ const URL_PROFIL_ELEMENT = "user_profil_index";
 const URL_CREATE_ELEMENT = "intern_api_users_create";
 const URL_UPDATE_ELEMENT = "intern_api_users_update";
 
-let societies = [];
+let itemsSocieties = [];
 
 export function UserFormulaire ({ context, element, page = 'user' }) {
 	let url = Routing.generate(URL_CREATE_ELEMENT);
@@ -68,27 +67,21 @@ class Form extends Component {
 			loadData: true,
 		}
 
-		this.select = React.createRef();
 		this.file = React.createRef();
 	}
 
 	componentDidMount = () => {
-		const { society } = this.props;
 
 		let self = this;
 		axios({ method: "GET", url: Routing.generate(URL_SELECT_SOCIETIES), data: {} })
 			.then(function (response) {
 				let data = response.data;
 
-				data.sort(Sort.compareCode)
-				let societyName = "";
 				data.forEach(elem => {
-					let label = elem.code + " - " + elem.name;
-					societyName = elem.id === society ? label : societyName;
-					societies.push({ value: elem.id, label: label, inputName: label, identifiant: "so-" + elem.id })
+					itemsSocieties.push({ value: elem.value, label: elem.label })
 				})
 
-				self.setState({ societyName: societyName, loadData: false })
+				self.setState({ loadData: false })
 			})
 			.catch(function (error) {
 				Formulaire.displayErrors(self, error);
@@ -109,9 +102,8 @@ class Form extends Component {
 		this.setState({ [name]: value })
 	}
 
-	handleSelect = (name, value, displayValue) => {
+	handleSelect = (name, value) => {
 		this.setState({ [name]: value });
-		this.select.current.handleClose(null, displayValue);
 	}
 
 	handleSubmit = (e) => {
@@ -171,7 +163,7 @@ class Form extends Component {
 
 	render () {
 		const { page, context, avatarFile } = this.props;
-		const { errors, loadData, username, firstname, lastname, email, password, password2, roles, societyName } = this.state;
+		const { errors, loadData, username, firstname, lastname, email, password, password2, roles, society } = this.state;
 
 		let rolesItems = [
 			{ value: 'ROLE_ADMIN', identifiant: 'admin', label: 'Admin' },
@@ -180,7 +172,7 @@ class Form extends Component {
 
 		let params = { errors: errors }
 		let params0 = { ...params, ...{ onChange: this.handleChange } }
-		let params1 = { ...params, ...{ onClick: this.handleSelect } }
+		let params1 = { ...params, ...{ onSelect: this.handleSelect } }
 
 		return <form onSubmit={this.handleSubmit}>
 			<div className="flex flex-col gap-4 xl:gap-6">
@@ -231,17 +223,16 @@ class Form extends Component {
 										Rôles
 									</Checkbox>
 								</div>
-
-								<div>
+								<div className="line">
 									{loadData
 										? <>
 											<label>Société</label>
 											<LoaderElements text="Récupération des sociétés..." />
 										</>
-										: <SelectCustom ref={this.select} identifiant="society" inputValue={societyName}
-														items={societies} {...params1}>
+										: <SelectCombobox identifiant="society" valeur={society} items={itemsSocieties}
+														  {...params1} toSort={true} placeholder="Sélectionner une société..">
 											Société
-										</SelectCustom>
+										</SelectCombobox>
 									}
 								</div>
 							</>
