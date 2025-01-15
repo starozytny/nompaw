@@ -15,7 +15,7 @@ import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
-import { Input } from "@tailwindComponents/Elements/Fields";
+import { Input, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -59,6 +59,10 @@ export class TradesList extends Component {
         }
 
         this.setState({ [name]: value })
+    }
+
+    handleSelect = (identifiant, value) => {
+        this.setState({ [identifiant]: value })
     }
 
     handleEditElement = (element) => {
@@ -140,16 +144,17 @@ export class TradesList extends Component {
         const { context, errors, tradeAt, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, toPrice, fromPrice, totalReal } = this.state;
 
         let typeItems = [
-            { value: 0, identifiant: 'type-0', label: 'Achat' },
-            { value: 1, identifiant: 'type-1', label: 'Vente' },
-            { value: 2, identifiant: 'type-2', label: 'Depot' },
-            { value: 3, identifiant: 'type-3', label: 'Retrait' },
-            { value: 4, identifiant: 'type-4', label: 'Récupération' },
-            { value: 5, identifiant: 'type-5', label: 'Stacking' },
-            { value: 6, identifiant: 'type-6', label: 'Transfert' },
+            { value: 0, label: 'Achat' },
+            { value: 1, label: 'Vente' },
+            { value: 2, label: 'Depot' },
+            { value: 3, label: 'Retrait' },
+            { value: 4, label: 'Récupération' },
+            { value: 5, label: 'Stacking' },
+            { value: 6, label: 'Transfert' },
         ]
 
         let params0 = { errors: errors, onChange: this.handleChange }
+        let params1 = { errors: errors, onSelect: this.handleSelect }
 
         let yData = [];
         data.forEach(item => {
@@ -341,7 +346,7 @@ export class TradesList extends Component {
                                     <Input type="datetime-local" valeur={tradeAt} identifiant="tradeAt" {...params0} />
                                 </div>
                                 <div className="col-2">
-                                    {/*<Select identifiant="type" valeur={type} items={typeItems} noEmpty={true} noErrors={true} {...params0}></Select>*/}
+                                    <SelectCombobox identifiant="type" valeur={type} items={typeItems} noEmpty={true} {...params1} />
                                 </div>
                                 <div className="col-3">
                                     {parseInt(type) === DEPOT

@@ -13,7 +13,7 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
-import { Input, Radiobox, InputView, Switcher } from "@tailwindComponents/Elements/Fields";
+import { Input, Radiobox, InputView, Switcher, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 
 const URL_CREATE_ELEMENT = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT = "intern_api_budget_items_update";
@@ -63,8 +63,6 @@ class Form extends Component {
 			errors: [],
 			load: false
 		}
-
-		this.select = React.createRef();
 	}
 
 	handleChange = (e) => {
@@ -81,15 +79,13 @@ class Form extends Component {
 
 		if (name === "type") {
 			this.setState({ category: "" })
-			this.select.current.handleClose(null, "")
 		}
 
 		this.setState({ [name]: value })
 	}
 
-	handleSelect = (name, value, displayValue) => {
+	handleSelect = (name, value) => {
 		this.setState({ [name]: value });
-		this.select.current.handleClose(null, displayValue);
 	}
 
 	handleSubmit = (e) => {
@@ -159,19 +155,16 @@ class Form extends Component {
 		let activeItems = [{ value: 1, label: 'Oui', identifiant: 'oui-1' }]
 
 		categories.sort(Sort.compareName);
-		let categoryItems = [{ value: "", label: "Aucun", inputName: "", identifiant: "cat-empty" }], categoryName = "";
+		let categoryItems = [{ value: "", label: "Aucun" }];
 		categories.forEach(cat => {
 			if (cat.type === parseInt(type)) {
-				if (cat.id === category) {
-					categoryName = cat.name;
-				}
-				categoryItems.push({ value: cat.id, label: cat.name, inputName: cat.name, identifiant: "cat-" + cat.id })
+				categoryItems.push({ value: cat.id, label: cat.name })
 			}
 		})
 
 		let params = { errors: errors, onChange: this.handleChange };
 		let paramsInput0 = { ...params, ...{ onChange: this.handleChange } }
-		let paramsInput1 = { ...params, ...{ onClick: this.handleSelect } }
+		let paramsInput1 = { ...params, ...{ onSelect: this.handleSelect } }
 
 		return <div>
 			<div className="flex flex-col gap-4">
@@ -206,10 +199,10 @@ class Form extends Component {
 						<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
 					</div>
 					<div className="w-full">
-						{/*<SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}*/}
-						{/*			  items={categoryItems} {...paramsInput1}>*/}
-						{/*	Catégorie*/}
-						{/*</SelectCustom>*/}
+						<SelectCombobox identifiant="category" valeur={category} items={categoryItems}
+										{...paramsInput1} toSort={true}>
+							Catégorie
+						</SelectCombobox>
 					</div>
 				</div>
 

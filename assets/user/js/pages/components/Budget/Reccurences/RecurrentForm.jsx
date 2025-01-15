@@ -9,7 +9,7 @@ import Validateur from "@commonFunctions/validateur";
 
 import { Alert } from "@tailwindComponents/Elements/Alert";
 import { Button } from "@tailwindComponents/Elements/Button";
-import { Checkbox, Input, InputView, Radiobox } from "@tailwindComponents/Elements/Fields";
+import { Checkbox, Input, InputView, Radiobox, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 
 const URL_INDEX_ELEMENTS = "user_budget_recurrences_index";
 const URL_CREATE_ELEMENT = "intern_api_budget_recurrences_create";
@@ -54,8 +54,6 @@ class Form extends Component {
 			errors: [],
 			loadData: false,
 		}
-
-		this.select = React.createRef();
 	}
 
 	handleChange = (e) => {
@@ -76,15 +74,13 @@ class Form extends Component {
 
 		if (name === "type") {
 			this.setState({ category: "" })
-			this.select.current.handleClose(null, "")
 		}
 
 		this.setState({ [name]: value })
 	}
 
-	handleSelect = (name, value, displayValue) => {
+	handleSelect = (name, value) => {
 		this.setState({ [name]: value });
-		this.select.current.handleClose(null, displayValue);
 	}
 
 	handleSubmit = (e) => {
@@ -170,19 +166,16 @@ class Form extends Component {
 
         let typeString = ['Dépense', 'Revenu', 'Économie'];
 
-        let categoryItems = [{ value: "", label: "Aucun", inputName: "", identifiant: "cat-empty" }], categoryName = "";
+        let categoryItems = [{ value: "", label: "Aucun" }];
         categories.forEach(cat => {
             if (cat.type === parseInt(type)) {
-                if (cat.id === category) {
-                    categoryName = cat.name;
-                }
-                categoryItems.push({ value: cat.id, label: cat.name, inputName: cat.name, identifiant: "cat-" + cat.id })
+                categoryItems.push({ value: cat.id, label: cat.name,})
             }
         })
 
         let params = { errors: errors, onChange: this.handleChange };
         let paramsInput0 = { ...params, ...{ onChange: this.handleChange } }
-        let paramsInput1 = { ...params, ...{ onClick: this.handleSelect } }
+		let paramsInput1 = { ...params, ...{ onSelect: this.handleSelect } }
 
         return <form onSubmit={this.handleSubmit}>
             <div className="flex flex-col gap-4 xl:gap-6">
@@ -210,10 +203,10 @@ class Form extends Component {
                         </div>
 
                         <div>
-                            {/*<SelectCustom ref={this.select} identifiant="category" inputValue={categoryName}*/}
-                            {/*              items={categoryItems} {...paramsInput1}>*/}
-                            {/*    Catégorie*/}
-                            {/*</SelectCustom>*/}
+							<SelectCombobox identifiant="category" valeur={category} items={categoryItems}
+											{...paramsInput1} toSort={true}>
+								Catégorie
+							</SelectCombobox>
                         </div>
 
                         <div>

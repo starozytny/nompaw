@@ -10,7 +10,7 @@ import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-import { Input, InputView, Radiobox } from "@tailwindComponents/Elements/Fields";
+import { Input, InputView, Radiobox, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 
 const URL_INDEX_PAGE = "user_aventures_randos_read";
 const URL_CREATE_ELEMENT = "intern_api_aventures_randos_create";
@@ -75,6 +75,10 @@ class Form extends Component {
 		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
 	}
 
+	handleSelect = (identifiant, value) => {
+		this.setState({ [identifiant]: value })
+	}
+
 	handleChangeTinyMCE = (name, html) => {
 		this.setState({ [name]: { value: this.state[name].value, html: html } })
 	}
@@ -112,7 +116,8 @@ class Form extends Component {
         const { context, status, adventure, users } = this.props;
         const { errors, name, description, level, altitude, devPlus, distance, referent, googlePhotos, story } = this.state;
 
-        let params = { errors: errors, onChange: this.handleChange };
+        let params0 = { errors: errors, onChange: this.handleChange };
+        let params1 = { errors: errors, onSelect: this.handleSelect };
 
         let levelItems = [
             { value: 0, label: 'Aucun', identifiant: 'level-0' },
@@ -125,7 +130,7 @@ class Form extends Component {
 
         let referentsItem = [];
         users.forEach(us => {
-            referentsItem.push({ value: us.id, label: us.displayName, identifiant: 'us-' + us.id })
+            referentsItem.push({ value: us.id, label: us.displayName })
         })
 
         return <form onSubmit={this.handleSubmit}>
@@ -140,12 +145,12 @@ class Form extends Component {
                     <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
                         <div className="flex gap-4">
                             <div className="w-full">
-                                {/*<Select identifiant="referent" valeur={referent} items={referentsItem} noEmpty={true} noErrors={true} {...params}>*/}
-                                {/*    Référent*/}
-                                {/*</Select>*/}
+								<SelectCombobox identifiant="referent" valeur={referent} items={referentsItem} {...params1} noEmpty={true}>
+									Référent
+								</SelectCombobox>
                             </div>
                             <div className="w-full">
-                                <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure *</Input>
+                                <Input identifiant="name" valeur={name} {...params0}>Nom de l'aventure *</Input>
                             </div>
                         </div>
                         <div>
@@ -170,27 +175,27 @@ class Form extends Component {
                             </div>
                             <div className="flex gap-4">
                                 <div className="w-full">
-                                    <Input type="number" identifiant="distance" valeur={distance} {...params}>Distance</Input>
+                                    <Input type="number" identifiant="distance" valeur={distance} {...params0}>Distance</Input>
                                 </div>
                                 <div className="w-full">
-                                    <Input type="number" identifiant="devPlus" valeur={devPlus} {...params}>Dénivelé +</Input>
+                                    <Input type="number" identifiant="devPlus" valeur={devPlus} {...params0}>Dénivelé +</Input>
                                 </div>
                                 <div className="w-full">
-                                    <Input type="number" identifiant="altitude" valeur={altitude} {...params}>Altitude</Input>
+                                    <Input type="number" identifiant="altitude" valeur={altitude} {...params0}>Altitude</Input>
                                 </div>
                             </div>
                             <div>
-                                <Radiobox items={levelItems} identifiant="level" valeur={level} {...params}
+                                <Radiobox items={levelItems} identifiant="level" valeur={level} {...params0}
                                           classItems="flex gap-2 flex-wrap" styleType="fat">
                                     Niveau *
                                 </Radiobox>
                             </div>
                             <div className="flex gap-4">
                                 <div className="w-full">
-                                    <Input identifiant="googlePhotos" valeur={googlePhotos} {...params}>Lien Google photos</Input>
+                                    <Input identifiant="googlePhotos" valeur={googlePhotos} {...params0}>Lien Google photos</Input>
                                 </div>
                                 <div className="w-full">
-                                    <Input identifiant="story" valeur={story} {...params}>Lien URL du storytelling</Input>
+                                    <Input identifiant="story" valeur={story} {...params0}>Lien URL du storytelling</Input>
                                 </div>
                             </div>
                         </div>
