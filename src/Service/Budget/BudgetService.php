@@ -27,9 +27,6 @@ class BudgetService
 
         $totalInit = $user->getBudgetInit();
         if ($year > $user->getBudgetYear()) {
-            //
-            // TODO : Create entity Total to store total by year for improve performance
-            //
             $items = $repository->findBy(['user' => $user]);
 
             $totalExpense = 0;
@@ -42,10 +39,10 @@ class BudgetService
 
                                 $noDelete = true;
                                 foreach ($items as $item) {
-                                    if ($item->getMonth() == $j + 1
+                                    if ($item->getYear() == $i && $item->getMonth() == $j + 1
                                         && $item->getRecurrenceId() == $re->getId()
-                                        && $item->getType() == TypeType::Deleted)
-                                    {
+                                        && $item->getType() == TypeType::Deleted
+                                    ) {
                                         $noDelete = false;
                                     }
                                 }
@@ -64,14 +61,12 @@ class BudgetService
             }
 
             foreach ($items as $item) {
-                if ($item->getType() !== TypeType::Used) {
-                    if ($item->getType() !== TypeType::Deleted) {
-                        if ($item->getYear() < $year) {
-                            if ($item->getType() != TypeType::Income) {
-                                $totalExpense += $item->getPrice();
-                            } else {
-                                $totalIncome += $item->getPrice();
-                            }
+                if ($item->getType() !== TypeType::Used && $item->getType() !== TypeType::Deleted) {
+                    if ($item->getYear() < $year) {
+                        if ($item->getType() != TypeType::Income) {
+                            $totalExpense += $item->getPrice();
+                        } else {
+                            $totalIncome += $item->getPrice();
                         }
                     }
                 }
