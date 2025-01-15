@@ -385,8 +385,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 							? <video className="h-[205px] md:h-[332px]" controls>
 								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
 							</video>
-							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt=""
-							/>
+							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt="error" />
 						}
 					</>
 					: <>
