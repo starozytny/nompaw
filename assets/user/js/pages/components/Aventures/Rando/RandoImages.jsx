@@ -385,7 +385,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 							? <video className="h-[205px] md:h-[332px]" controls>
 								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
 							</video>
-							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt="error" />
+							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt="error" key={elem.id + "error"} />
 						}
 					</>
 					: <>
@@ -393,7 +393,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 							? <video className="h-[205px] md:h-[332px]" controls>
 								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
 							</video>
-							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt=""
+							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt="" key={elem.id}
 								   loading="lazy"
 								   onLoad={() => handleImageLoad(index)} // Appelé quand l'image est chargée
 								   onError={() => handleImageError(index)} // En cas d'erreur de chargement
