@@ -256,8 +256,8 @@ export class RandoImages extends Component {
 			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
 								 content={<div>
 									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*"
-												max={300} maxSize={62914560} {...params}>
-										 Photos (300 maximum par envoi)
+												max={500} maxSize={62914560} {...params}>
+										 Photos (500 maximum par envoi)
 									 </InputFile>
 								 </div>}
 								 footer={null} closeTxt="Annuler" />
