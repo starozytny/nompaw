@@ -243,7 +243,7 @@ export class Presents extends Component {
                                 <div className="h-32 w-32 overflow-hidden rounded-md bg-gray-100">
                                     <img src={el.imageFile} alt={"illustration " + el.name} className="h-32 w-full object-contain" />
                                 </div>
-                                <div>
+                                <div className="w-full">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium">{el.name} {el.isSelected
                                             ? <span className="text-red-500">[Pris par {el.guestName}{isAdmin === "1" && el.guest && el.guestName === "Anonyme"
