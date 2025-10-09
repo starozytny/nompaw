@@ -238,7 +238,7 @@ export class Presents extends Component {
 
                         let active = !!el.isSelected;
 
-                        return <div className={`flex items-center justify-between gap-2 py-4 ${active ? "opacity-30" : ""}`} key={index}>
+                        return <div className={`flex items-center justify-between gap-2 py-4 ${active ? "opacity-60" : ""}`} key={index}>
                             <div className="flex gap-2">
                                 <div className="h-32 w-32 overflow-hidden rounded-md bg-gray-100">
                                     <img src={el.imageFile} alt={"illustration " + el.name} className="h-32 w-full object-contain" />
