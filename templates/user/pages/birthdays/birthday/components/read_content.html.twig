@@ -25,7 +25,7 @@
         <div class="p-4">
             <div class="flex flex-col gap-4 sm:flex-row">
                 <div class="w-full text-sm">{{ elem.description | raw }}</div>
-                <div class="w-full">{{ elem.iframeRoute | raw }}</div>
+                <div class="w-full max-w-[320px] overflow-hidden">{{ elem.iframeRoute | raw }}</div>
             </div>
         </div>
     </div>
