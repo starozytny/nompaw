@@ -11,8 +11,6 @@ import Menu from "@tailwindFunctions/menu";
 import { ContactFormulaire } from "@appFolder/pages/components/Contact/ContactForm";
 import { UserFormulaire } from "@adminPages/Users/UserForm";
 
-// import "./functions/firebase-push";
-
 Routing.setRoutingData(routes);
 
 Menu.menuListener();

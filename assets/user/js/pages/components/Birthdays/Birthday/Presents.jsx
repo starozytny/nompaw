@@ -4,19 +4,15 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-// import { initializeApp } from "firebase/app";
-// import { getMessaging, getToken } from "firebase/messaging";
-
 import Inputs from "@commonFunctions/inputs";
 import Propals from "@userFunctions/propals";
 import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
-// import FirebaseConfig from "@userFunctions/firebase-config";
 
+import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Input, InputFile, TextArea } from "@tailwindComponents/Elements/Fields";
-import { Modal } from "@tailwindComponents/Elements/Modal";
 
 const URL_CREATE_PROPAL = 'intern_api_birthdays_presents_create';
 const URL_UPDATE_PROPAL = 'intern_api_birthdays_presents_update';
@@ -24,14 +20,11 @@ const URL_DELETE_PROPAL = 'intern_api_birthdays_presents_delete';
 const URL_END_PROPAL = 'intern_api_birthdays_presents_end';
 const URL_CANCEL_PROPAL = 'intern_api_birthdays_presents_cancel';
 
-// const URL_STORE_TOKEN   = "intern_api_firebase_notifs_create_token_birthday";
-
 export class Presents extends Component {
 	constructor (props) {
 		super(props);
 
 		this.state = {
-			haveNotifPermission: 0,
 			context: 'create',
 			propal: null,
 			name: '',
@@ -54,15 +47,6 @@ export class Presents extends Component {
 		this.endPropal = React.createRef();
 		this.cancelPropal = React.createRef();
 	}
-
-	// componentDidMount() {
-	//     let self = this;
-	//     if (Notification.permission === "granted") {
-	//         self.setState({ haveNotifPermission: 1 })
-	//     }else if(Notification.permission === "denied"){
-	//         self.setState({ haveNotifPermission: 2 })
-	//     }
-	// }
 
 	handleChange = (e) => {
 		let name = e.currentTarget.name;
@@ -159,38 +143,9 @@ export class Presents extends Component {
 		Propals.cancel(this, propal.id, URL_CANCEL_PROPAL, modalCancelPropal);
 	}
 
-	handleNotif = () => {
-		const { birthdayId } = this.props;
-		const { loadData } = this.state;
-
-		if (!loadData) {
-			// let app = initializeApp(FirebaseConfig.getConfig());
-			//
-			// let self = this;
-			// let msgError = 'Veuillez vérifier vos paramètres d\'autorisations de notifications.';
-			//
-			// self.setState({ loadData: true })
-			//
-			// const messaging = getMessaging(app);
-			// getToken(messaging, { vapidKey: FirebaseConfig.getApiKey() })
-			//     .then((currentToken) => {
-			//         if (currentToken) {
-			//             axios({ method: "POST", url: Routing.generate(URL_STORE_TOKEN, {'type': 'birthday', 'id': birthdayId}), data: {token: currentToken} })
-			//                 .then(function (response) { self.setState({ haveNotifPermission: 1 }) })
-			//                 .catch(function (error) { Toastr.toast('error', "erreur"); })
-			//                 .then(function () { self.setState({ loadData: false }) })
-			//             ;
-			//         } else {
-			//             Toastr.toast('error', "erreur");
-			//         }
-			//     }).catch((err) => { console.log(err); Toastr.toast('error', "erreur"); })
-			// ;
-		}
-	}
-
 	render () {
 		const { mode, userId, isAdmin } = this.props;
-		const { haveNotifPermission, errors, loadData, name, url, price, priceMax, description, data, propal, imageFile, guestName } = this.state;
+		const { errors, loadData, name, url, price, priceMax, description, data, propal, imageFile, guestName } = this.state;
 
 		let params = { errors: errors, onChange: this.handleChange }
 
@@ -201,26 +156,6 @@ export class Presents extends Component {
 		return <div className="bg-white border rounded-md max-w-screen-lg">
             <div className="p-4 bg-color0/80 text-slate-50 rounded-t-md flex justify-between gap-2">
                 <div className="font-semibold text-xl">🎁 Cadeaux</div>
-                {/*<div className="actions">*/}
-                {/*    {loadData*/}
-                {/*        ? <span className="icon-chart-3"/>*/}
-                {/*        : (haveNotifPermission === 1*/}
-                {/*                ? <div className="firebase-notif-bell">*/}
-				{/*                    <span className="icon-notification"></span>*/}
-				{/*                    <span className="tooltip">Notifications activées</span>*/}
-				{/*                </div>*/}
-				{/*                : (haveNotifPermission === 2*/}
-				{/*                    ? <div className="firebase-notif-bell disabled">*/}
-				{/*                        <span className="icon-notification"></span>*/}
-				{/*                        <span className="tooltip">Notifications refusées</span>*/}
-				{/*                    </div>*/}
-				{/*                    : <Button onClick={this.handleNotif} icon="notification">*/}
-				{/*                            Activer les notifications*/}
-				{/*                </Button>*/}
-				{/*                )*/}
-				{/*        )*/}
-				{/*    }*/}
-				{/*</div>*/}
 			</div>
             <div className="p-4">
                 <div className="pb-4 mb-4 border-b text-gray-600">
