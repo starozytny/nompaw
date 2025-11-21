@@ -8,6 +8,7 @@ use App\Repository\Rando\RaImageRepository;
 use App\Repository\Rando\RaRandoRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\FileUploader;
+use DateTime;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +32,8 @@ class ImageController extends AbstractController
 
             $randoFile = '/' . $obj->getId();
             foreach($request->files as $key => $file){
+                $exif = @exif_read_data($file);
+
                 $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
 
                 $image = (new RaImage())
@@ -42,15 +45,12 @@ class ImageController extends AbstractController
                     ->setRando($obj)
                 ;
 
-                $filePath = $this->getParameter('private_directory') . $image->getFileFile();
-                $exif = @exif_read_data($filePath);
-
                 if ($exif && isset($exif['DateTimeOriginal'])) {
                     $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
                     $image->setTakenAt($date ?: new \DateTime());
                 } else {
-                    // Fallback sur la date d'upload
-                    $image->setTakenAt(new \DateTime());
+                    $date = new DateTime();
+                    $image->setTakenAt($date->setTimestamp($request->get($key . "-time")));
                 }
 
                 $mime = mime_content_type($this->getParameter('private_directory') . $image->getFileFile());
