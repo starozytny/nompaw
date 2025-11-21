@@ -35,7 +35,6 @@
         "@ant-design/icons": "^5.0.1",
         "antd": "^5.2.2",
         "babel-polyfill": "^6.26.0",
-        "firebase": "^10.4.0",
         "fs-extra": "^11.1.0",
         "gsap": "^3.12.2",
         "jquery-resizable-dom": "^0.35.0",
