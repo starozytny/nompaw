@@ -242,8 +242,6 @@ export class RandoImages extends Component {
 
 		let params = { errors: errors, onChange: this.handleChange }
 
-		data.sort((a, b) => a.takenAt - b.takenAt);
-
 		return <div className="flex flex-col gap-4">
 			<div>
 				<div className="flex gap-2">
