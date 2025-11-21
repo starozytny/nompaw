@@ -41,6 +41,7 @@ export class RandoImages extends Component {
 		this.formFiles = React.createRef();
 		this.deleteImage = React.createRef();
 		this.deleteFiles = React.createRef();
+		this.deleteAllFiles = React.createRef();
 		this.lightbox = React.createRef();
 	}
 
@@ -86,6 +87,7 @@ export class RandoImages extends Component {
 		modalForm(this);
 		modalDeleteImage(this);
 		modalDeleteImages(this);
+		modalDeleteAllImages(this);
 		this.setState({ image: image })
 		this[identifiant].current.handleClick();
 	}
@@ -188,6 +190,27 @@ export class RandoImages extends Component {
 		;
 	}
 
+	handleDeleteAllImages = () => {
+		const { data } = this.state;
+
+		let ids = data.map(elem => elem.id);
+
+		Formulaire.loader(true);
+		let self = this;
+		this.deleteAllFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
+		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: ids } })
+			.then(function (response) {
+				Toastr.toast('info', "Photos supprimée.");
+				location.reload();
+			})
+			.catch(function (error) {
+				modalDeleteImages(self);
+				Formulaire.displayErrors(self, error);
+				Formulaire.loader(false);
+			})
+		;
+	}
+
 	handleCover = (image) => {
 		const { randoId } = this.props;
 
@@ -223,10 +246,12 @@ export class RandoImages extends Component {
 			<div>
 				<div className="flex gap-2">
 					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
+					{data.length !== 0
+						? <Button type="red" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
+						: null
+					}
 					{selected.length !== 0
-						? <>
-							<Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
-						</>
+						? <Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
 						: null
 					}
 				</div>
@@ -276,6 +301,12 @@ export class RandoImages extends Component {
 								 footer={null} closeTxt="Annuler" />
 				, document.body
 			)}
+
+			{createPortal(<Modal ref={this.deleteAllFiles} identifiant='delete-all-files' maxWidth={414} title="Supprimer les photos"
+								 content={<p>Êtes-vous sûr de vouloir supprimer <b>les photos</b> ?</p>}
+								 footer={null} closeTxt="Annuler" />
+				, document.body
+			)}
 		</div>
 	}
 }
@@ -296,6 +327,10 @@ function modalDeleteImage (self) {
 
 function modalDeleteImages (self) {
     self.deleteFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImages}>Confirmer la suppression</Button>)
+}
+
+function modalDeleteAllImages (self) {
+    self.deleteAllFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteAllImages}>Confirmer la suppression</Button>)
 }
 
 function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, selected, userId }) {
