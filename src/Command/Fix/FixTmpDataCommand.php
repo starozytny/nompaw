@@ -8,7 +8,6 @@ use App\Service\DatabaseService;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -30,50 +29,52 @@ class FixTmpDataCommand extends Command
         $this->privateDirectory = $privateDirectory;
     }
 
-    protected function configure(): void
-    {
-        $this
-            ->addArgument('rando_id', InputArgument::REQUIRED, 'rando id')
-        ;
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Initialisation');
 
-        $randoId = $input->getArgument('rando_id');
+        $data = $this->em->getRepository(RaImage::class)->findAll();
 
-        $rando = $this->em->getRepository(RaRando::class)->findOneBy(['id' => $randoId]);
+        $updated = 0;
+        foreach($data as $item){
+            $filePath = $this->privateDirectory . $item->getFileFile();
 
-        $folderCover = $this->privateDirectory . RaRando::FOLDER_COVER . '/' . $randoId;
-        if(file_exists($folderCover . "/" . $rando->getCover())){
-            unlink($folderCover . "/" . $rando->getCover());
+            if (!file_exists($filePath)) {
+                continue;
+            }
+
+            // Extraire les données EXIF
+            $exif = @exif_read_data($filePath);
+
+            if ($exif && isset($exif['DateTimeOriginal'])) {
+                $dateStr = $exif['DateTimeOriginal'];
+                // Format: "2024:11:21 14:30:00"
+                $date = \DateTime::createFromFormat('Y:m:d H:i:s', $dateStr);
+
+                if ($date) {
+                    $item->setTakenAt($date);
+                    $updated++;
+                }
+            } elseif ($exif && isset($exif['DateTime'])) {
+                $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTime']);
+                if ($date) {
+                    $item->setTakenAt($date);
+                    $updated++;
+                }
+            }
+
+            // Flush par batch pour performance
+            if ($updated % 50 === 0) {
+                $this->em->flush();
+                $io->writeln("Traité: {$updated} photos");
+            }
         }
 
-        $images = $this->em->getRepository(RaImage::class)->findBy(['rando' => $rando]);
-
-        foreach($images as $item){
-            $folderImages = $this->privateDirectory . RaRando::FOLDER_IMAGES . '/' . $randoId;
-            $folderThumbs = $this->privateDirectory . RaRando::FOLDER_THUMBS . '/' . $randoId;
-            $folderLightbox = $this->privateDirectory . RaRando::FOLDER_LIGHTBOX . '/' . $randoId;
-
-            if(file_exists($folderImages . "/" . $item->getFile())){
-                unlink($folderImages . "/" . $item->getFile());
-            }
-
-            if(file_exists($folderThumbs . "/" . $item->getThumbs())){
-                unlink($folderThumbs . "/" . $item->getThumbs());
-            }
-
-            if(file_exists($folderLightbox . "/" . $item->getLightbox())){
-                unlink($folderLightbox . "/" . $item->getLightbox());
-            }
-
-            $this->em->remove($item);
-        }
         $this->em->flush();
+
+        $io->success("✅ {$updated} photos mises à jour");
 
         $io->newLine();
         $io->comment('--- [FIN DE LA COMMANDE] ---');

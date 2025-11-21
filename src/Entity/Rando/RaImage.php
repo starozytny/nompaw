@@ -49,6 +49,10 @@ class RaImage extends DataEntity
     #[ORM\JoinColumn(nullable: false)]
     private ?RaRando $rando = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['ra_img_list'])]
+    private ?\DateTime $takenAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -152,6 +156,18 @@ class RaImage extends DataEntity
     public function setType(?int $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getTakenAt(): ?\DateTime
+    {
+        return $this->takenAt;
+    }
+
+    public function setTakenAt(?\DateTime $takenAt): static
+    {
+        $this->takenAt = $takenAt;
 
         return $this;
     }
