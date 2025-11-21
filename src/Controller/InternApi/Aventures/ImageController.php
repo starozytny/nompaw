@@ -45,10 +45,6 @@ class ImageController extends AbstractController
                     ->setRando($obj)
                 ;
 
-                $filePath = $this->getParameter('private_directory') . $image->getFileFile();
-                $exifN = @exif_read_data($filePath);
-                dump($exifN);
-
                 if ($exif && isset($exif['DateTimeOriginal'])) {
                     $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
                     $image->setTakenAt($date ?: new \DateTime());
