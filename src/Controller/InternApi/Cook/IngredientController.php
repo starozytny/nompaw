@@ -5,7 +5,7 @@ namespace App\Controller\InternApi\Cook;
 use App\Entity\Cook\CoIngredient;
 use App\Repository\Cook\CoIngredientRepository;
 use App\Repository\Cook\CoRecipeRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataCook;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

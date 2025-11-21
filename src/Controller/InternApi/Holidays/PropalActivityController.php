@@ -5,7 +5,7 @@ namespace App\Controller\InternApi\Holidays;
 use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalActivity;
 use App\Repository\Holiday\HoPropalActivityRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataHolidays;
 use App\Service\FileUploader;
 use App\Service\Propals\PropalService;

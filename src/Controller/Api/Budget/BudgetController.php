@@ -6,7 +6,7 @@ use App\Entity\Main\User;
 use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Budget\BuItemRepository;
 use App\Repository\Budget\BuRecurrentRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Budget\BudgetService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

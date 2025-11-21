@@ -7,7 +7,7 @@ use App\Entity\Rando\RaLink;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaLinkRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataRandos;
 use App\Service\FileUploader;
 use App\Service\ValidatorService;

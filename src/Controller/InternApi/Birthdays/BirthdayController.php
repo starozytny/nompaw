@@ -4,7 +4,7 @@ namespace App\Controller\InternApi\Birthdays;
 
 use App\Entity\Birthday\BiBirthday;
 use App\Repository\Birthday\BiBirthdayRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataBirthdays;
 use App\Service\FileUploader;
 use App\Service\ValidatorService;

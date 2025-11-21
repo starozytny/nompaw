@@ -5,7 +5,7 @@ namespace App\Controller\InternApi;
 use App\Entity\Main\Society;
 use App\Entity\Main\User;
 use App\Repository\Main\UserRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataMain;
 use App\Service\FileUploader;
 use App\Service\MailerService;
@@ -246,7 +246,7 @@ class UserController extends AbstractController
             return $apiResponse->apiJsonResponseBadRequest("Vous n'avez pas l'autorisation de bloquer cet utilisateur.");
         }
 
-        $user->setBlocked(!$user->isBlocked());
+        $user->setIsBlocked(!$user->isIsBlocked());
 
         $repository->save($user, true);
         return $apiResponse->apiJsonResponse($user, User::LIST);

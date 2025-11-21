@@ -6,7 +6,7 @@ use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaImageRepository;
 use App\Repository\Rando\RaRandoRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\FileUploader;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;

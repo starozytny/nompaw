@@ -4,7 +4,7 @@ namespace App\Controller\InternApi\Cook;
 
 use App\Entity\Cook\CoFavorite;
 use App\Entity\Cook\CoRecipe;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

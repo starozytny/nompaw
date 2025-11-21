@@ -7,7 +7,7 @@ use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaPropalAdventureRepository;
 use App\Repository\Rando\RaRandoRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataRandos;
 use App\Service\Propals\PropalService;
 use App\Service\ValidatorService;

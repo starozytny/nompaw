@@ -4,7 +4,7 @@ namespace App\Controller\InternApi\Cryptos;
 
 use App\Entity\Crypto\CrTrade;
 use App\Repository\Crypto\CrTradeRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataCrypto;
 use App\Service\ValidatorService;
 use Exception;

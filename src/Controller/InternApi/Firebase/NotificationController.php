@@ -4,7 +4,7 @@ namespace App\Controller\InternApi\Firebase;
 
 use App\Entity\Firebase\FiToken;
 use App\Repository\Firebase\FiTokenRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

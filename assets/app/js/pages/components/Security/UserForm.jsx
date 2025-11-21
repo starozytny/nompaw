@@ -123,7 +123,7 @@ class Form extends Component {
 				</div>
 
 				<div className="mt-4 flex justify-end gap-2">
-					<ButtonA type="default" onClick={Routing.generate(URL_LOGIN_PAGE)}>J'ai déja un compte</ButtonA>
+					<ButtonA type="default" onClick={Routing.generate(URL_LOGIN_PAGE)}>J'ai déjà un compte</ButtonA>
 					<Button type="blue" isSubmit={true}>Rejoindre</Button>
 				</div>
 			</form>

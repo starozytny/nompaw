@@ -5,7 +5,7 @@ namespace App\Controller\InternApi\Cook;
 use App\Entity\Cook\CoRecipe;
 use App\Repository\Cook\CoRecipeRepository;
 use App\Repository\Cook\CoStepRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataCook;
 use App\Service\FileUploader;
 use App\Service\SanitizeData;

@@ -11,7 +11,7 @@
                  data-propals="{{ propalDates }}"
                  data-user-id="{{ app.user ? app.user.id : null }}"
                  data-author-id="{{ elem.author.id }}"
-                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.isAdmin) }}"
             >
                 {% include "layout/components/tailwind/loaders/loader.html.twig" %}
             </div>
@@ -44,7 +44,7 @@
              data-propals="{{ propalHouses }}"
              data-user-id="{{ app.user ? app.user.id : null }}"
              data-author-id="{{ elem.author.id }}"
-             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.isAdmin) }}"
              data-texte="{{ elem.textHouse }}"
         >
             {% include "layout/components/tailwind/loaders/loader.html.twig" %}
@@ -62,7 +62,7 @@
              data-propals="{{ propalActivities }}"
              data-user-id="{{ app.user ? app.user.id : null }}"
              data-author-id="{{ elem.author.id }}"
-             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.admin) }}"
+             data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.isAdmin) }}"
              data-texte="{{ elem.textActivities }}"
         >
             {% include "layout/components/tailwind/loaders/loader.html.twig" %}
