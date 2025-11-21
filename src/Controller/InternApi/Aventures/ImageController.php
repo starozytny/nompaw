@@ -42,6 +42,17 @@ class ImageController extends AbstractController
                     ->setRando($obj)
                 ;
 
+                $filePath = $this->getParameter('private_directory') . $image->getFileFile();
+                $exif = @exif_read_data($filePath);
+
+                if ($exif && isset($exif['DateTimeOriginal'])) {
+                    $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
+                    $image->setTakenAt($date ?: new \DateTime());
+                } else {
+                    // Fallback sur la date d'upload
+                    $image->setTakenAt(new \DateTime());
+                }
+
                 $mime = mime_content_type($this->getParameter('private_directory') . $image->getFileFile());
                 if(str_contains($mime, "image/")){
                     $image->setType(0);
