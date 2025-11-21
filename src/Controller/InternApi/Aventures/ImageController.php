@@ -49,8 +49,7 @@ class ImageController extends AbstractController
                     $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
                     $image->setTakenAt($date ?: new \DateTime());
                 } else {
-                    // Fallback sur la date d'upload
-                    $image->setTakenAt(new \DateTime());
+                    $image->setTakenAt($request->get($key . "-time"));
                 }
 
                 $mime = mime_content_type($this->getParameter('private_directory') . $image->getFileFile());

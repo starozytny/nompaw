@@ -5,6 +5,7 @@ namespace App\Command\Fix;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Service\DatabaseService;
+use DateTime;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -51,28 +52,31 @@ class FixTmpDataCommand extends Command
             if ($exif && isset($exif['DateTimeOriginal'])) {
                 $dateStr = $exif['DateTimeOriginal'];
                 // Format: "2024:11:21 14:30:00"
-                $date = \DateTime::createFromFormat('Y:m:d H:i:s', $dateStr);
+                $date = DateTime::createFromFormat('Y:m:d H:i:s', $dateStr);
 
                 if ($date) {
                     $item->setTakenAt($date);
                     $updated++;
                 }
             } elseif ($exif && isset($exif['DateTime'])) {
-                $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTime']);
+                $date = DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTime']);
                 if ($date) {
                     $item->setTakenAt($date);
                     $updated++;
                 }
+            } else{
+                $date = new DateTime();
+                $item->setTakenAt($date->setTimestamp($item->getMTime()));
+                $updated++;
             }
 
             // Flush par batch pour performance
             if ($updated % 50 === 0) {
                 $this->em->flush();
-                $io->writeln("Traité: {$updated} photos");
             }
         }
 
-        $this->em->flush();
+//        $this->em->flush();
 
         $io->success("✅ {$updated} photos mises à jour");
 
