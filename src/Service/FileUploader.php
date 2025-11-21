@@ -56,21 +56,23 @@ class FileUploader
 
             $file->move($directory, $fileName);
 
-            $fileOri = $directory . "/" . $fileName;
+            if($reducePixel || !$keepOriginalSize){
+                $fileOri = $directory . "/" . $fileName;
 
-            $mime = mime_content_type($fileOri);
-            if(str_contains($mime, "image/")){
-                $layer = ImageWorkshop::initFromPath($fileOri);
+                $mime = mime_content_type($fileOri);
+                if(str_contains($mime, "image/")){
+                    $layer = ImageWorkshop::initFromPath($fileOri);
 
-                if($reducePixel){
-                    $layer->resizeInPixel(null, $reducePixel, true);
-                }else if($layer->getHeight() > 2160){
-                    if(!$keepOriginalSize){
-                        $layer->resizeInPixel(null, 2160, true);
+                    if($reducePixel){
+                        $layer->resizeInPixel(null, $reducePixel, true);
+                        $layer->save($directory, $fileName);
+                    }else if($layer->getHeight() > 2160){
+                        if(!$keepOriginalSize){
+                            $layer->resizeInPixel(null, 2160, true);
+                            $layer->save($directory, $fileName);
+                        }
                     }
                 }
-
-                $layer->save($directory, $fileName);
             }
         } catch (FileException|ImageWorkshopException|ImageWorkshopLayerException $e) {
             return false;
