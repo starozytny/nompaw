@@ -6,7 +6,7 @@ use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalHouse;
 use App\Repository\Holiday\HoProjectRepository;
 use App\Repository\Holiday\HoPropalHouseRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataHolidays;
 use App\Service\Propals\PropalService;
 use App\Service\ValidatorService;

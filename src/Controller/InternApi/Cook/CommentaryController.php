@@ -7,7 +7,7 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\Cook\CoStep;
 use App\Repository\Cook\CoCommentaryRepository;
 use App\Repository\Cook\CoRecipeRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

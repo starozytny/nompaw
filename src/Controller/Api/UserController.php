@@ -3,7 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Main\User;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

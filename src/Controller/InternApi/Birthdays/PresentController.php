@@ -7,7 +7,7 @@ use App\Entity\Birthday\BiPresent;
 use App\Repository\Birthday\BiPresentRepository;
 use App\Repository\Firebase\FiTokenRepository;
 use App\Repository\Main\UserRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataBirthdays;
 use App\Service\FileUploader;
 use App\Service\ThirdPart\FirebaseService;

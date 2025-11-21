@@ -6,7 +6,7 @@ use App\Entity\Cook\CoRecipe;
 use App\Entity\Cook\CoStep;
 use App\Repository\Cook\CoRecipeRepository;
 use App\Repository\Cook\CoStepRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\FileUploader;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

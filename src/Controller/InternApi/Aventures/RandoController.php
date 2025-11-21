@@ -10,7 +10,7 @@ use App\Repository\Rando\RaImageRepository;
 use App\Repository\Rando\RaPropalAdventureRepository;
 use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataRandos;
 use App\Service\FileUploader;
 use App\Service\ValidatorService;

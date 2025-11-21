@@ -9,7 +9,7 @@ use App\Repository\Holiday\HoPropalActivityRepository;
 use App\Repository\Holiday\HoPropalDateRepository;
 use App\Repository\Holiday\HoPropalHouseRepository;
 use App\Repository\Holiday\HoTodoRepository;
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\Data\DataHolidays;
 use App\Service\FileUploader;
 use App\Service\SanitizeData;

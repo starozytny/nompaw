@@ -2,7 +2,7 @@
 
 namespace App\Service\Propals;
 
-use App\Service\ApiResponse;
+use App\Service\Api\ApiResponse;
 use App\Service\ValidatorService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

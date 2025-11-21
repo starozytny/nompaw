@@ -232,6 +232,7 @@ export class RandoImages extends Component {
 				</div>
 			</div>
 
+			<div className="text-xs text-gray-500">{data.length} image{data.length > 1 ? "s" : ""}</div>
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
 				<LazyLoadingGalleryWithPlaceholder currentImages={data}
 												   onModal={this.handleModal} onCover={this.handleCover}
