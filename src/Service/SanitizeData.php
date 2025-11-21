@@ -117,4 +117,14 @@ class SanitizeData
 
         return $return;
     }
+
+    public function textareaValue($value, $return = null): ?string
+    {
+        if($value != "" && $value != null){
+            $value = trim($value);
+            return str_replace("\n", "<br />", $value);
+        }
+
+        return $return;
+    }
 }

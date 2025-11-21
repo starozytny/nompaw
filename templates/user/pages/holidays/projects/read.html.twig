@@ -18,7 +18,7 @@
         btn_icon: 'left-arrow',
         btn_text: 'Retourner aux projets'
     } %}
-    {% if app.user.id == elem.author.id or app.user.admin %}
+    {% if app.user.id == elem.author.id or app.user.isAdmin %}
         {% include 'layout/components/tailwind/buttons/button.html.twig' with {
             btn_link: path('user_projects_update', {slug: elem.slug}),
             btn_type: 'default',
@@ -30,7 +30,7 @@
 
 {% block main_content %}
 <div class="flex flex-col">
-    {% if app.user.id == elem.author.id or app.user.admin %}
+    {% if app.user.id == elem.author.id or app.user.isAdmin %}
         <div class="w-full flex justify-end gap-1 border-b pb-4 mb-4">
             <div id="share_link" class="cursor-pointer flex items-center justify-center text-center gap-1 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
                  data-url="{{ path('user_projects_read', {slug: elem.slug, code: elem.code}) }}">

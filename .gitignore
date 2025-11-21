@@ -47,3 +47,5 @@ winpty.exe.stackdump
 ###< lexik/jwt-authentication-bundle ###
 
 /public/tinymce/*
+
+phpunit.xml.dist

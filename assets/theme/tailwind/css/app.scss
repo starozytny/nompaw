@@ -6,7 +6,7 @@ html, body{
   scroll-behavior: smooth;
 }
 
-a:hover, button:hover, .avatar:hover, .url-topo:hover{
+a:hover, button:hover, .tooltip-btn:hover, .avatar:hover, .url-topo:hover{
   .tooltip{
     display: block;
   }

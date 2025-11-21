@@ -8,7 +8,6 @@ import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
-import { Password } from "@tailwindComponents/Modules/User/Password";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Checkbox, Input, InputFile, InputView, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 
@@ -24,7 +23,7 @@ export function UserFormulaire ({ context, element, page = 'user' }) {
 	let url = Routing.generate(URL_CREATE_ELEMENT);
 
 	if (context === "update") {
-		url = Routing.generate(URL_UPDATE_ELEMENT, { 'id': element.id });
+		url = Routing.generate(URL_UPDATE_ELEMENT, { id: element.id });
 	}
 
 	return  <Form
@@ -62,7 +61,6 @@ class Form extends Component {
 			email: props.email,
 			roles: props.roles,
 			password: '',
-			password2: '',
 			errors: [],
 			loadData: true,
 		}
@@ -110,7 +108,7 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { page, context, url } = this.props;
-		const { username, firstname, lastname, password, password2, email, roles, society, } = this.state;
+		const { username, firstname, lastname, email, roles, society } = this.state;
 
 		this.setState({ errors: [] });
 
@@ -122,20 +120,13 @@ class Form extends Component {
 			{ type: "array", id: 'roles', value: roles },
 			{ type: "text", id: 'society', value: society }
 		];
-		if (context === "create") {
-			if (password !== "") {
-				paramsToValidate = [...paramsToValidate,
-					...[{ type: "password", id: 'password', value: password, idCheck: 'password2', valueCheck: password2 }]
-				];
-			}
-		}
 
 		let validate = Validateur.validateur(paramsToValidate)
 		if (!validate.code) {
 			Formulaire.showErrors(this, validate);
 		} else {
-			Formulaire.loader(true);
 			let self = this;
+			Formulaire.loader(true);
 
 			let formData = new FormData();
 			formData.append("data", JSON.stringify(this.state));
@@ -148,7 +139,7 @@ class Form extends Component {
 			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 				.then(function (response) {
 					if(page === "user"){
-						location.href = Routing.generate(URL_INDEX_ELEMENTS, {'h': response.data.id});
+						location.href = Routing.generate(URL_INDEX_ELEMENTS, {h: response.data.id});
 					}else{
 						location.href = Routing.generate(URL_PROFIL_ELEMENT);
 					}
@@ -163,7 +154,7 @@ class Form extends Component {
 
 	render () {
 		const { page, context, avatarFile } = this.props;
-		const { errors, loadData, username, firstname, lastname, email, password, password2, roles, society } = this.state;
+		const { errors, loadData, username, firstname, lastname, email, password, roles, society } = this.state;
 
 		let rolesItems = [
 			{ value: 'ROLE_ADMIN', identifiant: 'admin', label: 'Admin' },
@@ -263,7 +254,9 @@ class Form extends Component {
 						</div>
 					</div>
 					<div className="bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
-						<Password password={password} password2={password2} params={params0} />
+						<Input identifiant="password" valeur={password} {...params0} type="password" autocomplete="new-password">
+							Mot de passe
+						</Input>
 					</div>
 				</div>
 			</div>

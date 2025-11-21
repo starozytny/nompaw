@@ -21,7 +21,7 @@
         btn_icon: 'left-arrow',
         btn_text: 'Retourner au groupe'
     } %}
-    {% if app.user.id == elem.author.id or app.user.admin %}
+    {% if app.user.id == elem.author.id or app.user.isAdmin %}
         {% include 'layout/components/tailwind/buttons/button.html.twig' with {
             btn_link: path('user_aventures_randos_update', {slug: elem.slug}),
             btn_type: 'default',
@@ -97,7 +97,7 @@
                      data-propals="{{ propalDates }}"
                      data-user-id="{{ app.user.id }}"
                      data-author-id="{{ elem.author.id }}"
-                     data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                     data-mode="{{ app.user.id == elem.author.id or app.user.isAdmin }}"
                      data-status="{{ elem.status }}"
                      data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : "" }}"
                      data-adventure-id="{{ elem.adventure ? elem.adventure.id : "" }}"
@@ -113,7 +113,7 @@
                          data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
                          data-propals="{{ propalAdvs }}"
                          data-author-id="{{ elem.author.id }}"
-                         data-mode="{{ app.user.id == elem.author.id or app.user.admin }}"
+                         data-mode="{{ app.user.id == elem.author.id or app.user.isAdmin }}"
                          data-status="{{ elem.status }}"
                     >
                         {% include "layout/components/tailwind/loaders/loader.html.twig" %}
@@ -209,7 +209,7 @@
                                 </div>
                             </div>
                         </div>
-                        {% if app.user.id == elem.author.id or app.user.admin %}
+                        {% if app.user.id == elem.author.id or app.user.isAdmin %}
                             <a class="block text-center bg-blue-500 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
                                 <span class="icon-add"></span>
                                 <span>Ajouter des informations</span>

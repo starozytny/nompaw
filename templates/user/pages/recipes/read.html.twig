@@ -19,7 +19,7 @@
         btn_icon: 'left-arrow',
         btn_text: 'Retourner aux recettes'
     } %}
-    {% if app.user.id == elem.author.id or app.user.admin %}
+    {% if app.user.id == elem.author.id or app.user.isAdmin %}
         {% include 'layout/components/tailwind/buttons/button.html.twig' with {
             btn_link: path('user_recipes_update', {slug: elem.slug}),
             btn_type: 'default',
