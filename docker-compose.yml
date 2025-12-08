@@ -8,7 +8,7 @@ services:
       - ./:/var/www/html:cached
       - composer_cache:/root/.composer
     environment:
-      - DATABASE_URL=mysql://symfony:symfony@db:3306/symfony?serverVersion=mariadb-11.4.9
+      - DATABASE_URL=mysql://symfony:symfony@db:3306/nompaw?serverVersion=mariadb-11.4.9
     depends_on:
       db:
         condition: service_healthy
