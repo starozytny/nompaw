@@ -151,7 +151,7 @@
                 {% if randos | length > 0 %}
                     <div class="flex justify-center gap-4 flex-wrap xl:justify-start qhd:gap-6">
                         {% for rando in randos %}
-                            <article class="group w-full sm:w-72 md:w-80 xl:w-72 2xl:w-80 bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-1"
+                            <article class="group w-full sm:w-72 md:w-80 xl:w-72 2xl:w-80 bg-white rounded-md shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-1"
                                      onclick="location.href='{{ path('user_aventures_randos_read', {slug: rando.slug}) }}';">
                                 <div class="relative h-64 overflow-hidden bg-slate-200">
                                     <img
@@ -188,13 +188,13 @@
                                             <span>{{ rando.startAt | format_datetime(locale='fr', timeFormat="none") }}</span>
                                         </div>
 
-                                        <div class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            </svg>
-                                            <span>Chamonix, France</span>
-                                        </div>
+{#                                        <div class="flex items-center gap-1">#}
+{#                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">#}
+{#                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>#}
+{#                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>#}
+{#                                            </svg>#}
+{#                                            <span>Chamonix, France</span>#}
+{#                                        </div>#}
                                     </div>
 
                                     <div class="text-slate-600 text-sm line-clamp-3 mb-4">
