@@ -27,10 +27,10 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Configuration Git pour résoudre le problème de propriété
-RUN git config --global --add safe.directory /var/www/html
+RUN git config --global --add safe.directory /var/www/nompaw
 
 # Configuration du répertoire de travail
-WORKDIR /var/www/html
+WORKDIR /var/www/nompaw
 
 # Copie uniquement composer.json et composer.lock d'abord
 COPY composer.json composer.lock ./
@@ -46,7 +46,7 @@ RUN composer dump-autoload --optimize && \
     composer run-script --no-interaction post-install-cmd || true
 
 # Permissions
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/www/nompaw
 
 # Exposition du port
 EXPOSE 9000

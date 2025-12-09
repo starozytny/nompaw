@@ -88,3 +88,4 @@ permissions: ## Fixe les permissions
 install: build up composer yarn db-create db-migrate ## Installation complète du projet
 
 reset: down build up composer yarn db-drop db-create db-migrate db-fixtures cache-clear ## Reset complet du projet
+

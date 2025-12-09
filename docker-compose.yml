@@ -3,43 +3,43 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: symfony_php
+    container_name: nompaw_php
     volumes:
-      - ./:/var/www/html:cached
+      - ./:/var/www/nompaw:cached
       - composer_cache:/root/.composer
     environment:
-      - DATABASE_URL=mysql://symfony:symfony@db:3306/nompaw?serverVersion=mariadb-11.4.9
+      - DATABASE_URL=mysql://project:project@db_default:3306/nompaw?serverVersion=mariadb-11.4.9
     depends_on:
-      db:
+      db_default:
         condition: service_healthy
     networks:
       - symfony
 
   nginx:
     image: nginx:alpine
-    container_name: symfony_nginx
+    container_name: nompaw_nginx
     ports:
       - "8080:80"
     volumes:
-      - ./public:/var/www/html/public:cached
+      - ./public:/var/www/nompaw/public:cached
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - php
     networks:
       - symfony
 
-  db:
+  db_default:
     image: mariadb:11.4.9
-    container_name: symfony_db
+    container_name: nompaw_db
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: nompaw
-      MYSQL_USER: symfony
-      MYSQL_PASSWORD: symfony
+      MYSQL_USER: project
+      MYSQL_PASSWORD: project
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_default:/var/lib/mysql
     networks:
       - symfony
     healthcheck:
@@ -50,11 +50,11 @@ services:
 
   node:
     image: node:20.19.4-alpine
-    container_name: symfony_node
-    working_dir: /var/www/html
+    container_name: project_node
+    working_dir: /var/www/nompaw
     volumes:
-      - ./:/var/www/html:cached
-      - node_modules:/var/www/html/node_modules
+      - ./:/var/www/nompaw:cached
+      - node_modules:/var/www/nompaw/node_modules
     command: sh -c "yarn install && yarn watch"
     networks:
       - symfony
@@ -64,6 +64,6 @@ networks:
     driver: bridge
 
 volumes:
-  db_data:
+  db_default:
   composer_cache:
   node_modules:
