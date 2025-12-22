@@ -14,64 +14,71 @@
 
 {% block main_content %}
     <div class="flex justify-center gap-4 flex-wrap 2xl:justify-start qhd:gap-6">
-        {% for elem in groupes %}
-            <div class="bg-white rounded-md w-full sm:w-72 md:w-80 xl:w-72 shadow-sm">
-                <div class="p-4 border-b flex gap-4">
-                    <div class="w-20 h-20 rounded">
-                        <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}" class="w-20 h-20 rounded object-cover">
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <div class="font-semibold">{{ elem.name }}</div>
-                        <div class="flex ml-4">
-                            {% set totalMembers = 1 %}
-                            {% for member in elem.links %}
-                                {% if loop.index < 8 %}
-                                    {% include "user/layout/components/elements/avatar.html.twig" %}
-                                {% endif %}
-                                {% set totalMembers = totalMembers + 1 %}
-                            {% endfor %}
-                            {% if totalMembers >= 8 %}
-                                <div class="-ml-4">
-                                    <div class="w-8 h-8 text-sm shadow rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
-                                        + {{ totalMembers - 7 }}
+        {% if groupes | length > 0 %}
+            {% for elem in groupes %}
+                <div class="bg-white rounded-md w-full sm:w-72 md:w-80 xl:w-72 shadow-sm">
+                    <div class="p-4 border-b flex gap-4">
+                        <div class="w-20 h-20 rounded">
+                            <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}" class="w-20 h-20 rounded object-cover">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <div class="font-semibold">{{ elem.name }}</div>
+                            <div class="flex ml-4">
+                                {% set totalMembers = 1 %}
+                                {% for member in elem.links %}
+                                    {% if loop.index < 8 %}
+                                        {% include "user/layout/components/elements/avatar.html.twig" %}
+                                    {% endif %}
+                                    {% set totalMembers = totalMembers + 1 %}
+                                {% endfor %}
+                                {% if totalMembers >= 8 %}
+                                    <div class="-ml-4">
+                                        <div class="w-8 h-8 text-sm shadow rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                                            + {{ totalMembers - 7 }}
+                                        </div>
                                     </div>
-                                </div>
-                            {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="p-4 min-h-36 flex flex-col justify-between gap-1 border-b">
-                    <div>{{ elem.description | raw }}</div>
-                    <span class="text-gray-600 text-sm">Niveau : {{ elem.levelString }}</span>
-                </div>
-                <div class="flex justify-center items-center divide-x px-4 py-2">
-                    {% if app.user.id == elem.author.id %}
+                    <div class="p-4 min-h-36 flex flex-col justify-between gap-1 border-b">
+                        <div>{{ elem.description | raw }}</div>
+                        <span class="text-gray-600 text-sm">Niveau : {{ elem.levelString }}</span>
+                    </div>
+                    <div class="flex justify-center items-center divide-x px-4 py-2">
+                        {% if app.user.id == elem.author.id %}
+                            <div class="w-full">
+                                <a href="{{ path('user_aventures_groupes_update', {slug: elem.slug}) }}"
+                                   class="relative flex items-center justify-center rounded-md text-lg px-2 py-2"
+                                >
+                                    <span class="icon-pencil"></span>
+                                    <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Modifier</span>
+                                </a>
+                            </div>
+                            <div class="delete-groupe w-full text-center"
+                                 data-context="groupes"
+                                 data-id="{{ elem.id }}"
+                                 data-name="{{ elem.name }}"
+                            >
+                                <button class="w-full relative flex items-center justify-center rounded-md text-lg px-2 py-2"><span class="icon-chart-3"></span></button>
+                            </div>
+                        {% endif %}
                         <div class="w-full">
-                            <a href="{{ path('user_aventures_groupes_update', {slug: elem.slug}) }}"
+                            <a href="{{ path('user_aventures_groupes_read', {slug: elem.slug}) }}"
                                class="relative flex items-center justify-center rounded-md text-lg px-2 py-2"
                             >
-                                <span class="icon-pencil"></span>
-                                <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Modifier</span>
+                                <span class="icon-right-arrow"></span>
+                                <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="width: 114px;">Accéder à la page</span>
                             </a>
                         </div>
-                        <div class="delete-groupe w-full text-center"
-                             data-context="groupes"
-                             data-id="{{ elem.id }}"
-                             data-name="{{ elem.name }}"
-                        >
-                            <button class="w-full relative flex items-center justify-center rounded-md text-lg px-2 py-2"><span class="icon-chart-3"></span></button>
-                        </div>
-                    {% endif %}
-                    <div class="w-full">
-                        <a href="{{ path('user_aventures_groupes_read', {slug: elem.slug}) }}"
-                           class="relative flex items-center justify-center rounded-md text-lg px-2 py-2"
-                        >
-                            <span class="icon-right-arrow"></span>
-                            <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="width: 114px;">Accéder à la page</span>
-                        </a>
                     </div>
                 </div>
+            {% endfor %}
+        {% else %}
+            <div class="flex items-center justify-center">
+                <div></div>
+                <div class="text-xl font-medium">Aucune aventures enregistrées</div>
             </div>
-        {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}
