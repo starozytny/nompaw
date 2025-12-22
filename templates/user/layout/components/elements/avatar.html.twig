@@ -1,5 +1,5 @@
 {% if member.user.avatarFile %}
-    <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur" class="w-8 h-8 object-cover rounded-full">
+    <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur" class="w-8 h-8 object-cover rounded-full border-2 border-white">
 {% else %}
     <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium">{{ member.user.lastname | slice(0, 1) }}</div>
 {% endif %}
