@@ -17,7 +17,7 @@
 <a href="{{ btn_link }}" target="{{ btn_target is defined ? btn_target : "" }}"
    class="relative inline-flex justify-center rounded-md text-lg px-2 py-2  {{ btn_width is defined ? btn_width : "" }} {{ typeVariants[btn_type] }}"
 >
-    <span class="icon-{{ btn_icon}} {{ typeVariantsText[btn_type] }} inline-block translate-y-0.5"></span>
+    <span class="icon-{{ btn_icon}} {{ typeVariantsText[btn_type] }}"></span>
     <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="{{ btn_style is defined ? btn_style : "" }}">
         {{ btn_text }}
     </span>

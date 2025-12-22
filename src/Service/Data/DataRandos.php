@@ -35,7 +35,6 @@ class DataRandos
             ->setDistance($this->sanitizeData->setFloatValue($data->distance))
             ->setDevPlus($this->sanitizeData->setIntValue($data->devPlus))
             ->setAltitude($this->sanitizeData->setIntValue($data->altitude))
-            ->setGooglePhotos($this->sanitizeData->trimData($data->googlePhotos))
             ->setStory($this->sanitizeData->trimData($data->story))
         ;
     }

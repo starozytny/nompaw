@@ -37,7 +37,6 @@ export function RandoFormulaire ({ context, element, groupeId, users, userId }) 
         distance={element ? Formulaire.setValue(element.distance) : ""}
         adventure={element ? element.adventure : null}
         referent={element ? Formulaire.setValue(element.author.id) : userId}
-        googlePhotos={element ? Formulaire.setValue(element.googlePhotos) : ""}
         story={element ? Formulaire.setValue(element.story) : ""}
 
         users={users}
@@ -65,7 +64,6 @@ class Form extends Component {
 			devPlus: props.devPlus,
 			distance: props.distance,
 			referent: props.referent,
-			googlePhotos: props.googlePhotos,
 			story: props.story,
 			errors: [],
 		}
@@ -114,7 +112,7 @@ class Form extends Component {
 
 	render () {
         const { context, status, adventure, users } = this.props;
-        const { errors, name, description, level, altitude, devPlus, distance, referent, googlePhotos, story } = this.state;
+        const { errors, name, description, level, altitude, devPlus, distance, referent, story } = this.state;
 
         let params0 = { errors: errors, onChange: this.handleChange };
         let params1 = { errors: errors, onSelect: this.handleSelect };
@@ -190,14 +188,9 @@ class Form extends Component {
                                     Niveau *
                                 </Radiobox>
                             </div>
-                            <div className="flex gap-4">
-                                <div className="w-full">
-                                    <Input identifiant="googlePhotos" valeur={googlePhotos} {...params0}>Lien Google photos</Input>
-                                </div>
-                                <div className="w-full">
-                                    <Input identifiant="story" valeur={story} {...params0}>Lien URL du storytelling</Input>
-                                </div>
-                            </div>
+							<div>
+								<Input identifiant="story" valeur={story} {...params0}>Lien URL du storytelling</Input>
+							</div>
                         </div>
                     </div>
                 }
