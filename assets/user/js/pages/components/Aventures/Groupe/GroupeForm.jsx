@@ -212,17 +212,17 @@ class Form extends Component {
                                     if (member === user.id) selected = true;
                                 })
 
-                                return <div className={`cursor-pointer bg-gray-100 p-4 rounded flex items-center gap-2 border-2 ${selected ? "bg-blue-700/20 border-blue-500" : "hover:bg-gray-50"}`} key={user.id}
+                                return <div className={`cursor-pointer bg-gray-100 py-3 px-3 rounded flex items-center gap-2 border-2 ${selected ? "bg-blue-700/20 border-blue-500" : "hover:bg-gray-50"}`} key={user.id}
                                             onClick={() => this.handleClickUser(user.id)}>
                                     <div className="avatar">
                                         {user.avatarFile
-                                            ? <img src={user.avatarFile} alt={`avatar de ${user.username}`} className="w-8 h-8 object-cover rounded-full" />
-                                            : <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
-                                                {user.lastname.slice(0, 1) + user.firstname.slice(0, 1)}
+                                            ? <img src={user.avatarFile} alt={`avatar de ${user.username}`} className="w-6 h-6 object-cover rounded-full" />
+                                            : <div className="w-6 h-6 rounded-full text-xs bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+                                                {user.lastname.slice(0, 2).toUpperCase()}
                                         </div>
                                         }
                                     </div>
-                                    <div className="font-semibold">{user.displayName}</div>
+                                    <div className="font-medium">{user.displayName}</div>
                                 </div>
                             })}
                         </div>

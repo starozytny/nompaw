@@ -37,12 +37,17 @@ export function GroupeDelete ({ context, id, name }) {
 	return <>
 		{context === "read"
 			? <Button iconLeft="trash" type="red" onClick={handleClick}>Supprimer</Button>
-			: <ButtonIcon icon="trash" type="none" onClick={handleClick}>Supprimer</ButtonIcon>
+			: <button onClick={handleClick}
+					  className="relative w-full flex-1 bg-gray-50 hover:bg-red-50 text-gray-700 hover:text-red-600 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+			>
+				<span className="icon-trash"></span>
+				<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -top-7 right-2.5 text-xs hidden">Supprimer</span>
+			</button>
 		}
 		<Modal ref={modalRef} identifiant={`delete-groupe-${id}`} maxWidth={414} title="Supprimer le groupe"
 			   content={<p>Êtes-vous sûr de vouloir supprimer le groupe de randonnée : <b>{name}</b> ?</p>}
-			   footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
-	</>
+		   footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
+</>
 }
 
 GroupeDelete.propTypes = {
