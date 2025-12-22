@@ -242,22 +242,24 @@ export class RandoImages extends Component {
 
 		let params = { errors: errors, onChange: this.handleChange }
 
-		return <div className="flex flex-col gap-4">
-			<div>
+		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+			<div className="flex items-center justify-between mb-4">
+				<h3 className="text-lg font-semibold text-slate-900">Photos ({data.length})</h3>
 				<div className="flex gap-2">
-					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
-					{data.length !== 0
-						? <Button type="red" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
-						: null
-					}
-					{selected.length !== 0
-						? <Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
-						: null
-					}
+					<div className="flex gap-2">
+						<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
+						{data.length !== 0
+							? <Button type="red" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
+							: null
+						}
+						{selected.length !== 0
+							? <Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
+							: null
+						}
+					</div>
 				</div>
 			</div>
 
-			<div className="text-xs text-gray-500">{data.length} image{data.length > 1 ? "s" : ""}</div>
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
 				<LazyLoadingGalleryWithPlaceholder currentImages={data}
 												   onModal={this.handleModal} onCover={this.handleCover}
@@ -265,15 +267,12 @@ export class RandoImages extends Component {
 												   selected={selected} userId={userId} />
 			</div>
 
-
-
 			{nbProgress !== 0 && nbTotal !== 0
 				? <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800/80 z-30">
 					<div className="text-xl font-semibold text-white pt-24">{nbProgress} / {nbTotal}</div>
 				</div>
 				: null
 			}
-
 
 			{createPortal(<LightBox ref={this.lightbox} identifiant="lightbox" content={null} />
 				, document.body

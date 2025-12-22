@@ -31,6 +31,7 @@ export function RandoFormulaire ({ context, element, groupeId, users, userId }) 
         name={element ? Formulaire.setValue(element.name) : ""}
         description={element ? Formulaire.setValue(element.description) : ""}
         status={element ? Formulaire.setValue(element.status) : 0}
+        localisation={element ? Formulaire.setValue(element.localisation) : ""}
         level={element ? Formulaire.setValue(element.level) : ""}
         altitude={element ? Formulaire.setValue(element.altitude) : ""}
         devPlus={element ? Formulaire.setValue(element.devPlus) : ""}
@@ -56,9 +57,12 @@ class Form extends Component {
 
 		let description = props.description ? props.description : "";
 
+		console.log("in")
+
 		this.state = {
 			name: props.name,
 			description: { value: description, html: description },
+			localisation: props.localisation,
 			level: props.level,
 			altitude: props.altitude,
 			devPlus: props.devPlus,
@@ -112,7 +116,7 @@ class Form extends Component {
 
 	render () {
         const { context, status, adventure, users } = this.props;
-        const { errors, name, description, level, altitude, devPlus, distance, referent, story } = this.state;
+        const { errors, name, description, localisation, level, altitude, devPlus, distance, referent, story } = this.state;
 
         let params0 = { errors: errors, onChange: this.handleChange };
         let params1 = { errors: errors, onSelect: this.handleSelect };
@@ -157,6 +161,9 @@ class Form extends Component {
                                 Petite description
                             </TinyMCE>
                         </div>
+						<div>
+							<Input identifiant="localisation" valeur={localisation} {...params0}>Localisation</Input>
+						</div>
                     </div>
                 </div>
                 {status !== 0 &&

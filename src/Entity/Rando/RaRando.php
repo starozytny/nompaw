@@ -77,6 +77,10 @@ class RaRando extends DataEntity
     #[Groups(['rando_form'])]
     private ?RaPropalDate $adventureDate = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?string $localisation = null;
+
     #[ORM\Column(nullable: true)]
     #[Groups(['rando_form'])]
     private ?int $level = null;
@@ -313,6 +317,18 @@ class RaRando extends DataEntity
     public function setAdventureDate(?RaPropalDate $adventureDate): self
     {
         $this->adventureDate = $adventureDate;
+
+        return $this;
+    }
+
+    public function getLocalisation(): ?string
+    {
+        return $this->localisation;
+    }
+
+    public function setLocalisation(?string $localisation): static
+    {
+        $this->localisation = $localisation;
 
         return $this;
     }
