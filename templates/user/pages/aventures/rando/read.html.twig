@@ -199,16 +199,17 @@
                                 </div>
                             {% endif %}
 
-                            {% if adventure.duration %}
-                                <div class="flex items-center gap-1">
-                                    <span class="icon-time"></span>
-                                    <span>{{ adventure.duration | date('H\\hi', "UTC") | duration }}</span>
-                                </div>
-                            {% endif %}
                             {% if adventure.url and adventure.url != "https://" %}
-                                <div class="flex items-center gap-1">
-                                    <span class="icon-link"></span>
-                                    <span><a href="{{ adventure.url }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien du topo</a></span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <span class="icon-book-1 text-gray-600"></span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500">Topo</p>
+                                        <div class="text-sm font-medium">
+                                            <a href="{{ adventure.url }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien du topo</a>
+                                        </div>
+                                    </div>
                                 </div>
                             {% endif %}
                         </div>
