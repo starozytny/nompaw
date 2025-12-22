@@ -243,20 +243,18 @@ export class RandoImages extends Component {
 		let params = { errors: errors, onChange: this.handleChange }
 
 		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-			<div className="flex items-center justify-between mb-4">
+			<div className="flex flex-col items-center justify-between gap-2 mb-4 md:flex-row">
 				<h3 className="text-lg font-semibold text-slate-900">Photos ({data.length})</h3>
-				<div className="flex gap-2">
-					<div className="flex gap-2">
-						<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
-						{data.length !== 0
-							? <Button type="red" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
-							: null
-						}
-						{selected.length !== 0
-							? <Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
-							: null
-						}
-					</div>
+				<div className="flex flex-col gap-2 sm:flex-row">
+					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
+					{data.length !== 0
+						? <Button type="red" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
+						: null
+					}
+					{selected.length !== 0
+						? <Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
+						: null
+					}
 				</div>
 			</div>
 

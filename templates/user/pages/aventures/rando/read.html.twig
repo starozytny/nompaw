@@ -87,7 +87,7 @@
                 </div>
             </div>
 
-            <div class="flex flex-col gap-4 sm:flex-row xl:flex-col">
+            <div class="flex flex-col gap-4">
                 <div id="rando_date" class="w-full"
                      data-rando-id="{{ elem.id }}"
                      data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
@@ -131,24 +131,12 @@
 
                     <div class="p-6 space-y-4">
                         {% if elem.description %}
-                            <div class="text-slate-600 italic">
+                            <div class="text-slate-700">
                                 {{ elem.description | raw }}
                             </div>
                         {% endif %}
 
-                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 xl:grid-cols-3 2xl:grid-cols-4">
-                            {% if elem.localisation %}
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-color0/10 rounded-lg flex items-center justify-center">
-                                        <span class="icon-placeholder text-color0"></span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-slate-500">Lieu</p>
-                                        <p class="text-sm font-medium text-slate-900">{{ elem.localisation }}</p>
-                                    </div>
-                                </div>
-                            {% endif %}
-
+                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 sm:grid-cols-3">
                             {% if elem.distance %}
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -184,6 +172,19 @@
                                     </div>
                                 </div>
                             {% endif %}
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 pt-4 md:grid-cols-3">
+                            {% if elem.localisation %}
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-color0/10 rounded-lg flex items-center justify-center">
+                                        <span class="icon-placeholder text-color0"></span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500">Lieu</p>
+                                        <p class="text-sm font-medium text-slate-900">{{ elem.localisation }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
 
                             {% if elem.story %}
                                 <div class="flex items-center gap-3">
@@ -215,17 +216,18 @@
                         </div>
 
                         {% if app.user.id == elem.author.id or app.user.isAdmin %}
-                            <a class="group flex items-center gap-2 cursor-pointer" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
+                            <a class="group pt-4 border-t border-slate-100 flex items-center gap-2 cursor-pointer" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
                                 <span class="icon-add text-blue-900"></span>
                                 <span class="text-sm font-medium text-blue-900 group-hover:underline">Ajouter des informations</span>
                             </a>
                         {% endif %}
                     </div>
                 </div>
-            {% endif %}
+            </div>
+        {% endif %}
     </div>
 
-    <div id="rando_images" class="xl:col-span-3"
+    <div id="rando_images"
          data-rando-id="{{ elem.id }}"
          data-user-id="{{ app.user.id }}"
          data-images="{{ images }}"
