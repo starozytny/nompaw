@@ -85,7 +85,28 @@
                 </div>
             {% endfor %}
         {% else %}
-            <div>Aucun recette trouvée.</div>
+
+            <div class="w-full flex flex-col items-center justify-center">
+                <div>
+                    <div class="flex flex-col items-center justify-center bg-white p-12 rounded-xl shadow-sm">
+                        <div class="bg-blue-100 rounded-lg p-3 flex items-center justify-center">
+                            <span class="icon-book text-2xl text-blue-600"></span>
+                        </div>
+                        <div class="text-xl font-medium mt-4">Aucune recette enregistrée</div>
+                        <div class="max-w-sm text-gray-500 text-center mt-2">
+                            Aucune recette n'est enregistrée. Commencez à ajouter votre recette !
+                        </div>
+                        <div class="mt-4">
+                            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                                btn_link: path('user_recipes_create'),
+                                btn_type: 'blue',
+                                btn_icon: 'add',
+                                btn_text: 'Ajouter une recette'
+                            } %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

@@ -5,12 +5,30 @@
 
 {% block main_content %}
 <div class="flex justify-center gap-4 flex-wrap 2xl:justify-start qhd:gap-6">
-    {% for elem in finder %}
-        <a href="{{ path('user_videotheque_download', { filename: elem.filename }) }}" download
-           class="bg-white rounded-md flex flex-col gap-2 w-full sm:w-72 md:w-80 xl:w-72 shadow-sm p-4 border hover:border-gray-300">
-            <span class="font-medium break-words">{{ elem.filename }}</span>
-            <span class="text-xs text-gray-600">{{ elem.size | sizeFormat }}</span>
-        </a>
-    {% endfor %}
+    {% if finder | length > 0 %}
+        {% for elem in finder %}
+            <a href="{{ path('user_videotheque_download', { filename: elem.filename }) }}" download
+               class="bg-white rounded-md flex flex-col gap-2 w-full sm:w-72 md:w-80 xl:w-72 shadow-sm p-4 border hover:border-gray-300">
+                <span class="font-medium break-words">{{ elem.filename }}</span>
+                <span class="text-xs text-gray-600">{{ elem.size | sizeFormat }}</span>
+            </a>
+        {% endfor %}
+    {% else %}
+        <div class="w-full flex flex-col items-center justify-center">
+            <div>
+                <div class="flex flex-col items-center justify-center bg-white p-12 rounded-xl shadow-sm">
+                    <div class="bg-purple-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div class="text-xl font-medium mt-4">Aucune vidéo enregistrée</div>
+                    <div class="max-w-sm text-gray-500 text-center mt-2">
+                        Il n'y a aucune vidéo d'enregistrée pour le moment.
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

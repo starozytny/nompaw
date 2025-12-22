@@ -13,6 +13,8 @@
       "@commonHooks/*": ["assets/common/js/hooks/*"],
       "@appFolder/*": ["assets/app/js/*"],
       "@adminPages/*": ["assets/admin/js/pages/components/*"],
+      "@userPages/*": ["assets/user/js/pages/components/*"],
+      "@userFunctions/*": ["assets/user/js/functions/*"],
       "@nodeModulesFolder/*": ["node_modules/*"]
     }
   },

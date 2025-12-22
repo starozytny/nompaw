@@ -14,40 +14,66 @@
 
 {% block main_content %}
     <div class="flex justify-center gap-4 flex-wrap 2xl:justify-start qhd:gap-6">
-        {% for elem in birthdays %}
-            <div class="bg-white rounded-md w-full sm:w-72 md:w-80 xl:w-72 shadow-sm">
-                <div class="p-4 border-b">
-                    <div class="font-semibold">{{ elem.name }}</div>
-                </div>
-                <div class="relative cursor-pointer group overflow-hidden {{ app.user.id == elem.author.id ? '' : 'rounded-b-md' }}">
-                    <a href="{{ path('user_birthdays_read', {slug: elem.slug}) }}" class="bg-gray-800/15 absolute w-full h-full group-hover:opacity-0 transition-opacity"></a>
-                    <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
-                </div>
-                {% if app.user.id == elem.author.id %}
-                    <div class="relative z-10 flex justify-between divide-x py-2">
-                        <div class="w-full text-center">
-                            {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
-                                btn_link: path('user_birthdays_update', {slug: elem.slug}),
-                                btn_type: 'transparent',
-                                btn_icon: 'pencil',
-                                btn_text: 'Modifier'
-                            } %}
+        {% if birthdays | length > 0 %}
+            {% for elem in birthdays %}
+                <div class="bg-white rounded-md w-full sm:w-72 md:w-80 xl:w-72 shadow-sm">
+                    <div class="p-4 border-b">
+                        <div class="font-semibold">{{ elem.name }}</div>
+                    </div>
+                    <div class="relative cursor-pointer group overflow-hidden {{ app.user.id == elem.author.id ? '' : 'rounded-b-md' }}">
+                        <a href="{{ path('user_birthdays_read', {slug: elem.slug}) }}" class="bg-gray-800/15 absolute w-full h-full group-hover:opacity-0 transition-opacity"></a>
+                        <img src="{{ asset(elem.imageFile) }}" alt="Logo {{ elem.name }}" class="w-80 h-56 object-cover">
+                    </div>
+                    {% if app.user.id == elem.author.id %}
+                        <div class="relative z-10 flex justify-between divide-x py-2">
+                            <div class="w-full text-center">
+                                {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                    btn_link: path('user_birthdays_update', {slug: elem.slug}),
+                                    btn_type: 'transparent',
+                                    btn_icon: 'pencil',
+                                    btn_text: 'Modifier'
+                                } %}
+                            </div>
+                            <div class="delete-birthday w-full text-center"
+                                 data-context="birthday"
+                                 data-id="{{ elem.id }}"
+                                 data-name="{{ elem.name }}"
+                            >
+                                {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                    btn_link: "",
+                                    btn_type: 'transparent',
+                                    btn_icon: 'chart-3',
+                                    btn_text: 'Supprimer'
+                                } %}
+                            </div>
                         </div>
-                        <div class="delete-birthday w-full text-center"
-                             data-context="birthday"
-                             data-id="{{ elem.id }}"
-                             data-name="{{ elem.name }}"
-                        >
-                            {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
-                                btn_link: "",
-                                btn_type: 'transparent',
-                                btn_icon: 'chart-3',
-                                btn_text: 'Supprimer'
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="w-full flex flex-col items-center justify-center">
+                <div>
+                    <div class="flex flex-col items-center justify-center bg-white p-12 rounded-xl shadow-sm">
+                        <div class="bg-pink-100 rounded-lg p-3">
+                            <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"/>
+                            </svg>
+                        </div>
+                        <div class="text-xl font-medium mt-4">Aucun anniversaire enregistré</div>
+                        <div class="max-w-sm text-gray-500 text-center mt-2">
+                            Vous n'avez aucun anniversaire de créé. Commencez à ajouter votre premier anniversaire.
+                        </div>
+                        <div class="mt-4">
+                            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                                btn_link: path('user_birthdays_create'),
+                                btn_type: 'blue',
+                                btn_icon: 'add',
+                                btn_text: 'Créer un anniversaire'
                             } %}
                         </div>
                     </div>
-                {% endif %}
+                </div>
             </div>
-        {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}
