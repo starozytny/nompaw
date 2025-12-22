@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -31,6 +30,7 @@ winpty.exe.stackdump
 /public/error_log
 /public/immo/photos/*
 /public/immo/logos/*
+/public/tinymce/
 /bin/backup/*
 /documents/data/*
 

@@ -114,6 +114,33 @@ function changeSorter (self, data, perPage, sortersFunction, nb, sessionName = n
 	self.setState({ nbSorter: nb, currentPage: 0 })
 }
 
+function updateDataMuta (element, context, data, sorter, nameProperty = "id") {
+    let nData = [];
+    switch (context){
+        case "delete":
+            nData = data.filter(el => el[nameProperty] !== element[nameProperty]);
+            break;
+        case "update":
+            nData = data.map(el => {
+                if (el[nameProperty] === element[nameProperty]) {
+                    return { ...el, ...element };
+                } else {
+                    return el;
+                }
+            });
+            break;
+        default:
+            nData = [...data, element];
+            break;
+    }
+
+    if(sorter){
+        nData.sort(sorter);
+    }
+
+    return nData;
+}
+
 function update (context, data, element, nameProperty = "id") {
 	let newData = [];
 
@@ -145,33 +172,6 @@ function update (context, data, element, nameProperty = "id") {
 	return newData;
 }
 
-function updateDataMuta (element, context, data, sorter, nameProperty = "id") {
-	let nData = [];
-	switch (context) {
-		case "delete":
-			nData = data.filter(el => el[nameProperty] !== element[nameProperty]);
-			break;
-		case "update":
-			nData = data.map(el => {
-				if (el[nameProperty] === element[nameProperty]) {
-					return { ...element, ...element };
-				} else {
-					return el;
-				}
-			});
-			break;
-		default:
-			nData = [...data, element];
-			break;
-	}
-
-	if (sorter) {
-		nData.sort(sorter);
-	}
-
-	return nData;
-}
-
 function updateData (element, context, data, sorter) {
 	let newData = update(context, data, element);
 	if (sorter) {
@@ -181,10 +181,10 @@ function updateData (element, context, data, sorter) {
 	return newData;
 }
 
-function updateListPagination (self, element, context, data, dataImmuable, currentData, sorter, toHighlight = false, nameHighlight, perPage) {
-	let newData = updateData(element, context, data, sorter);
-	let newDataImmuable = updateData(element, context, dataImmuable, sorter);
-	let newCurrentData = updateData(element, context, currentData, sorter);
+function updateListPagination (self, element, context, data, dataImmuable, currentData, sorter, toHighlight = false, perPage, nameHighlight = "id") {
+    let newData = updateData(element, context, data, sorter);
+    let newDataImmuable = updateData(element, context, dataImmuable, sorter);
+    let newCurrentData = updateData(element, context, currentData, sorter);
 
 	let currentPage;
 	if (toHighlight) {

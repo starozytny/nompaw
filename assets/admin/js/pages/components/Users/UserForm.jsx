@@ -108,13 +108,12 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { page, context, url } = this.props;
-		const { username, firstname, lastname, email, roles, society } = this.state;
+		const { username, lastname, email, roles, society } = this.state;
 
 		this.setState({ errors: [] });
 
 		let paramsToValidate = [
 			{ type: "text", id: 'username', value: username },
-			{ type: "text", id: 'firstname', value: firstname },
 			{ type: "text", id: 'lastname', value: lastname },
 			{ type: "email", id: 'email', value: email },
 			{ type: "array", id: 'roles', value: roles },
@@ -175,7 +174,7 @@ class Form extends Component {
 							{context === "create" ? <span><br /><br />Attention, le nom d'utilisateur ne pourra plus être modifié.</span> : ""}
 						</div>
 					</div>
-					<div className="bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
+					<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
 						<div className="flex gap-4">
 							<div className="w-full">
 								{page !== "profil"
@@ -186,6 +185,25 @@ class Form extends Component {
 							<div className="w-full">
 								<Input valeur={email} identifiant="email" {...params0} type="email">Adresse e-mail</Input>
 							</div>
+						</div>
+
+						<div>
+							<Checkbox identifiant="roles" valeur={roles} items={rolesItems} {...params0} classItems="flex gap-4">
+								Rôles
+							</Checkbox>
+						</div>
+
+						<div>
+							{loadData
+								? <>
+									<label>Société</label>
+									<LoaderElements text="Récupération des sociétés..." />
+								</>
+								: <SelectCombobox identifiant="society" valeur={society} items={itemsSocieties}
+												  {...params1} toSort={true} placeholder="Sélectionner une société..">
+									Société
+								</SelectCombobox>
+							}
 						</div>
 					</div>
 				</div>
@@ -200,35 +218,12 @@ class Form extends Component {
 					<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
 						<div className="flex gap-4">
 							<div className="w-full">
-								<Input identifiant="firstname" valeur={firstname} {...params0}>Prénom</Input>
+								<Input identifiant="firstname" valeur={firstname} {...params0}>Prénom <span className="text-xs text-gray-600">(facultatif)</span></Input>
 							</div>
 							<div className="w-full">
-								<Input identifiant="lastname" valeur={lastname} {...params0}>Nom</Input>
+								<Input identifiant="lastname" valeur={lastname} {...params0}>Nom / Désignation</Input>
 							</div>
 						</div>
-
-						{page !== "profil"
-							? <>
-								<div>
-									<Checkbox identifiant="roles" valeur={roles} items={rolesItems} {...params0} classItems="flex gap-4">
-										Rôles
-									</Checkbox>
-								</div>
-								<div className="line">
-									{loadData
-										? <>
-											<label>Société</label>
-											<LoaderElements text="Récupération des sociétés..." />
-										</>
-										: <SelectCombobox identifiant="society" valeur={society} items={itemsSocieties}
-														  {...params1} toSort={true} placeholder="Sélectionner une société..">
-											Société
-										</SelectCombobox>
-									}
-								</div>
-							</>
-							: null
-						}
 
 						<div>
 							<InputFile ref={this.file} type="simple" identifiant="avatar" valeur={avatarFile} {...params0}>
