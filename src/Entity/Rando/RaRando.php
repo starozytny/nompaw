@@ -77,6 +77,10 @@ class RaRando extends DataEntity
     #[Groups(['rando_form'])]
     private ?RaPropalDate $adventureDate = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?string $localisation = null;
+
     #[ORM\Column(nullable: true)]
     #[Groups(['rando_form'])]
     private ?int $level = null;
@@ -98,10 +102,6 @@ class RaRando extends DataEntity
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $cover = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['rando_form'])]
-    private ?string $googlePhotos = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['rando_form'])]
@@ -321,6 +321,18 @@ class RaRando extends DataEntity
         return $this;
     }
 
+    public function getLocalisation(): ?string
+    {
+        return $this->localisation;
+    }
+
+    public function setLocalisation(?string $localisation): static
+    {
+        $this->localisation = $localisation;
+
+        return $this;
+    }
+
     public function getLevel(): ?int
     {
         return $this->level;
@@ -414,18 +426,6 @@ class RaRando extends DataEntity
     public function getCoverFile()
     {
         return $this->getFileOrDefault($this->cover, RaRando::FOLDER_COVER . '/' . $this->id);
-    }
-
-    public function getGooglePhotos(): ?string
-    {
-        return $this->googlePhotos;
-    }
-
-    public function setGooglePhotos(?string $googlePhotos): self
-    {
-        $this->googlePhotos = $googlePhotos;
-
-        return $this;
     }
 
     public function getStory(): ?string

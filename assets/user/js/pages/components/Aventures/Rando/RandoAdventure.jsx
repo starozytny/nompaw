@@ -6,7 +6,6 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
-import Inputs from "@commonFunctions/inputs";
 import Sanitaze from "@commonFunctions/sanitaze";
 import Propals from "@userFunctions/propals";
 
@@ -133,120 +132,119 @@ export class RandoAdventure extends Component {
 
 		let params = { errors: errors, onChange: this.handleChange }
 
-        return <div className="bg-white border rounded-md">
-            <div className="p-4 bg-color0/80 text-slate-50 rounded-t-md">
-                <div className="font-semibold">{haveAdventure ? "Aventure sélectionnée" : "Proposition d'aventures"}</div>
-            </div>
-            <div className="p-4">
-                {haveAdventure
-                    ? <div className="text-xl font-bold text-blue-700 py-4 flex items-center justify-center gap-2">
-                        <div>{advName}</div>
-                        {mode || authorId === parseInt(userId)
-                            ? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
-                                <span className="icon-close"></span>
-                            </div>
-                            : null
-                        }
-                    </div>
-                    : <>
-                        <div className="flex flex-col gap-2">
-                        {data.map((el, index) => {
-                            let onVote = () => this.handleVote(el);
+		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+			<h3 className="text-sm font-semibold text-slate-700 mb-3">{haveAdventure ? "Aventure sélectionnée" : "Proposition d'aventures"}</h3>
 
-                            let active = false;
-                            el.votes.forEach(v => {
-                                if (v === userId) {
-                                    active = true;
-                                }
-                            })
+			<div className="flex items-center justify-between bg-purple-50 border border-purple-200 rounded-lg px-4 py-3">
+				{haveAdventure
+					? <>
+						<span className="text-sm font-medium text-purple-900">{advName}</span>
+						{mode || authorId === parseInt(userId)
+							? <button className="text-slate-400 hover:text-slate-600" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
+								<span className="icon-close"></span>
+							</button>
+							: null
+						}
+					</>
+					: <div className="w-full flex flex-col gap-4">
+						{data.length > 0
+							? <div className="flex flex-col gap-2">
+								{data.map((el, index) => {
+									let onVote = () => this.handleVote(el);
 
-                            return <div className="flex items-center justify-between gap-2" key={index}>
-                                <div className="flex items-center gap-2 group">
-                                    <div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-                                         onClick={onVote}>
-                                        <span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
-                                    </div>
-                                    <div>
-                                        <div className="font-medium flex items-center gap-2">
-                                            <span onClick={onVote}>{el.name}</span>
-                                            {(el.url && el.url !== "https://") && <a href={el.url} className="url-topo relative text-blue-700" target="_blank">
-                                                <span className="icon-link"></span>
-                                                <span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Topo</span>
-                                            </a>}
-                                        </div>
-                                        <div className="text-gray-600 text-sm" onClick={onVote}>
-                                            {Sanitaze.toFormatDuration(Sanitaze.toFormatDate(el.duration, 'LT', "", true, true).replace(':', 'h'))}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex gap-2">
-                                        <div className="flex gap-1">
-                                            {mode || el.author.id === parseInt(userId)
-                                                ? <>
-                                                    <ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-                                                    <ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-                                                    {mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
-                                                </>
-                                                : null
-                                            }
-                                        </div>
-                                        <div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
-                                            {loadData
-                                                ? <span className="icon-chart-3" />
-                                                : `+ ${el.votes.length}`
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        })}
-                        </div>
-                    </>
-                }
-            </div>
-            {haveAdventure
-                ? null
-                : <div className="flex items-center justify-center gap-1 cursor-pointer text-center bg-blue-500 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4"
-                       onClick={() => this.handleModal('formPropal', 'create', null)}>
-                    <span className="icon-add"></span>
-                    <span>Proposer une aventure</span>
-                </div>
-            }
+									let active = false;
+									el.votes.forEach(v => {
+										if (v === userId) {
+											active = true;
+										}
+									})
 
-            <Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une aventure"
-                   content={<div className="flex flex-col gap-4">
-                       <div className="flex gap-4">
-                           <div className="w-full">
-                               <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
-                           </div>
-                           <div className="w-full">
-                               <Input type="time" identifiant="duration" valeur={duration} {...params}>Durée</Input>
-                           </div>
-                       </div>
-                       <div>
-                           <Input identifiant="url" valeur={url} {...params}>Lien du topo</Input>
-                       </div>
-                   </div>}
-                   footer={null} closeTxt="Annuler" />
+									return <div className="flex items-center justify-between gap-2" key={index}>
+										<div className="flex items-center gap-2 group">
+											<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+												 onClick={onVote}>
+												<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
+											</div>
+											<div>
+												<div className="font-medium flex items-center gap-2">
+													<span onClick={onVote}>{el.name}</span>
+													{(el.url && el.url !== "https://") && <a href={el.url} className="url-topo relative text-blue-700" target="_blank">
+														<span className="icon-link"></span>
+														<span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Topo</span>
+													</a>}
+												</div>
+												<div className="text-gray-600 text-sm" onClick={onVote}>
+													{Sanitaze.toFormatDuration(Sanitaze.toFormatDate(el.duration, 'LT', "", true, true).replace(':', 'h'))}
+												</div>
+											</div>
+										</div>
+										<div>
+											<div className="flex gap-2">
+												<div className="flex gap-1">
+													{mode || el.author.id === parseInt(userId)
+														? <>
+															<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+															<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+															{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
+														</>
+														: null
+													}
+												</div>
+												<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
+													{loadData
+														? <span className="icon-chart-3" />
+														: `+ ${el.votes.length}`
+													}
+												</div>
+											</div>
+										</div>
+									</div>
+								})}
+							</div>
+							: null
+						}
 
-            <Modal ref={this.deletePropal} identifiant='delete-propal-adventure' maxWidth={414} title="Supprimer l'aventure"
-                   content={<p>Êtes-vous sûr de vouloir supprimer <b>{propal ? propal.name : ""}</b> ?</p>}
-                   footer={null} closeTxt="Annuler" />
+						<div className="group flex items-center gap-2 cursor-pointer" onClick={() => this.handleModal('formPropal', 'create', null)}>
+							<span className="icon-add text-blue-900"></span>
+							<span className="text-sm font-medium text-blue-900 group-hover:underline">Proposer une aventure</span>
+						</div>
+					</div>
+				}
+			</div>
 
-            <Modal ref={this.endPropal} identifiant='end-propal-adventure' maxWidth={414} title="Sélectionner l'aventure finale"
-                   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? propal.name : ""}</b> comme étant l'aventure <b>FINALE</b> ?</p>}
-                   footer={null} closeTxt="Annuler" />
+			<Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une aventure"
+				   content={<div className="flex flex-col gap-4">
+					   <div className="flex gap-4">
+						   <div className="w-full">
+							   <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
+						   </div>
+						   <div className="w-full">
+							   <Input type="time" identifiant="duration" valeur={duration} {...params}>Durée</Input>
+						   </div>
+					   </div>
+					   <div>
+						   <Input identifiant="url" valeur={url} {...params}>Lien du topo</Input>
+					   </div>
+				   </div>}
+				   footer={null} closeTxt="Annuler" />
 
-            <Modal ref={this.cancelAdventure} identifiant='cancel-adventure' maxWidth={414} title="Annuler l'aventure sélectionnée"
-                   content={<p>Êtes-vous sûr de vouloir revenir sur les propositions des aventures ?</p>}
-                   footer={null} closeTxt="Annuler" />
-        </div>
-    }
+			<Modal ref={this.deletePropal} identifiant='delete-propal-adventure' maxWidth={414} title="Supprimer l'aventure"
+				   content={<p>Êtes-vous sûr de vouloir supprimer <b>{propal ? propal.name : ""}</b> ?</p>}
+				   footer={null} closeTxt="Annuler" />
+
+			<Modal ref={this.endPropal} identifiant='end-propal-adventure' maxWidth={414} title="Sélectionner l'aventure finale"
+				   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? propal.name : ""}</b> comme étant l'aventure <b>FINALE</b> ?</p>}
+				   footer={null} closeTxt="Annuler" />
+
+			<Modal ref={this.cancelAdventure} identifiant='cancel-adventure' maxWidth={414} title="Annuler l'aventure sélectionnée"
+				   content={<p>Êtes-vous sûr de vouloir revenir sur les propositions des aventures ?</p>}
+				   footer={null} closeTxt="Annuler" />
+		</div>
+	}
 }
 
 RandoAdventure.propTypes = {
-    mode: PropTypes.bool.isRequired,
+	mode: PropTypes.bool.isRequired,
 	haveAdventure: PropTypes.bool.isRequired,
 	advName: PropTypes.string.isRequired,
 	userId: PropTypes.string.isRequired,

@@ -12,7 +12,8 @@ import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 import { Input, InputFile, Radiobox } from "@tailwindComponents/Elements/Fields";
 
-const URL_INDEX_PAGE = "user_aventures_groupes_read";
+const URL_INDEX_PAGE = "user_aventures_groupes_index";
+const URL_READ_ELEMENT = "user_aventures_groupes_read";
 const URL_CREATE_ELEMENT = "intern_api_aventures_groupes_create";
 const URL_UPDATE_ELEMENT = "intern_api_aventures_groupes_update";
 const TEXT_CREATE = "Ajouter le groupe";
@@ -95,7 +96,7 @@ class Form extends Component {
 	handleSubmit = (e) => {
 		e.preventDefault();
 
-		const { url } = this.props;
+		const { context, url } = this.props;
 		const { name, isVisible, level, description } = this.state;
 
 		this.setState({ errors: [] });
@@ -125,7 +126,12 @@ class Form extends Component {
 			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 				.then(function (response) {
 					Toastr.toast('info', "Données enregistrées.");
-					location.href = Routing.generate(URL_INDEX_PAGE, { slug: response.data.slug });
+					if(context === "create") {
+						location.href = Routing.generate(URL_READ_ELEMENT, { slug: response.data.slug });
+					}else{
+						location.href = Routing.generate(URL_INDEX_PAGE);
+					}
+
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(self, error);

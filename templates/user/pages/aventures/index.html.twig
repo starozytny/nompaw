@@ -17,7 +17,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {% for elem in groupes %}
                 <div class="w-full bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
-                    <div class="relative h-48 overflow-hidden">
+                    <div class="relative h-48 overflow-hidden cursor-pointer" onclick="location.href='{{ path('user_aventures_groupes_read', {slug: elem.slug}) }}'">
                         <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         {% if elem.isVisible == false %}
                             <div class="absolute top-3 right-3 bg-pink-500 text-white p-2 rounded-full">
@@ -35,11 +35,7 @@
                                     <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium">+5</div>
                                 {% else %}
                                     {% for member in elem.links %}
-                                        {% if member.user.avatarFile %}
-                                            <img src="{{ asset(member.user.avatarFile) }}" alt="Avatar utilisateur" class="w-8 h-8 object-cover rounded-full">
-                                        {% else %}
-                                            <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium">{{ member.user.lastname | slice(0, 1) }}</div>
-                                        {% endif %}
+                                        {% include "user/layout/components/elements/avatar.html.twig" %}
                                     {% endfor %}
                                 {% endif %}
                             </div>

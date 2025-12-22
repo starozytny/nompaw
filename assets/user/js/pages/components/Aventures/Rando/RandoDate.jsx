@@ -4,9 +4,6 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import moment from 'moment';
-import 'moment/locale/fr';
-
 import Sort from "@commonFunctions/sort";
 import Propals from "@userFunctions/propals";
 import Sanitaze from "@commonFunctions/sanitaze";
@@ -139,79 +136,81 @@ export class RandoDate extends Component {
 			})
 		}
 
-		return <div className="bg-white border rounded-md">
-			<div className="p-4 bg-color0/80 text-slate-50 rounded-t-md">
-				<div className="font-semibold">{startAt ? "Date sélectionnée" : "Proposition de dates"}</div>
-			</div>
-			<div className="p-4">
+		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+			<h3 className="text-sm font-semibold text-slate-700 mb-3">{startAt ? "Date sélectionnée" : "Proposition de dates"}</h3>
+
+			<div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
 				{startAt
-					? <div className="text-xl font-bold text-blue-700 py-4 flex items-center justify-center gap-2">
-						<div>{Sanitaze.toFormatDate(startAt, 'LL', '', false)}</div>
+					? <>
+						<div className="flex items-center gap-2">
+							<span className="icon-calendar text-blue-600"></span>
+							<span className="text-sm font-medium text-blue-900">{Sanitaze.toFormatDate(startAt, 'LL', '', false)}</span>
+						</div>
 						{mode || authorId === parseInt(userId)
-							? <div className="cursor-pointer text-gray-900" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+							? <button className="text-slate-400 hover:text-slate-600" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
 								<span className="icon-close"></span>
+							</button>
+							: null
+						}
+					</>
+					: <div className="w-full flex flex-col gap-4">
+						{data.length > 0
+							? <div className="w-full flex flex-col gap-2">
+								{data.map((el, index) => {
+
+									let onVote = () => this.handleVote(el);
+
+									let active = false;
+									el.votes.forEach(v => {
+										if (v === userId) {
+											active = true;
+										}
+									})
+
+									return <div className="w-full flex items-center justify-between gap-2" key={index}>
+										<div className="flex items-center gap-2 group">
+											<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+												 onClick={onVote}>
+												<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
+											</div>
+											<div className="font-medium text-sm" onClick={onVote}>
+												{Sanitaze.toFormatDate(el.dateAt, 'LL', "", false)}
+											</div>
+										</div>
+
+										<div>
+											<div className="flex gap-2">
+												<div className="flex gap-1">
+													{mode || el.author.id === parseInt(userId)
+														? <>
+															<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+															<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+															{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
+														</>
+														: null
+													}
+												</div>
+												<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
+													{loadData
+														? <span className="icon-chart-3" />
+														: `+ ${el.votes.length}`
+													}
+												</div>
+											</div>
+										</div>
+									</div>
+								})}
 							</div>
 							: null
 						}
-					</div>
-					: <>
-						<div className="flex flex-col gap-2">
-						{data.map((el, index) => {
 
-								let onVote = () => this.handleVote(el);
-
-								let active = false;
-								el.votes.forEach(v => {
-									if (v === userId) {
-										active = true;
-									}
-								})
-
-								return <div className="flex items-center justify-between gap-2" key={index}>
-									<div className="flex items-center gap-2 group">
-										<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-											 onClick={onVote}>
-											<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
-										</div>
-										<div className="font-medium" onClick={onVote}>
-											{Sanitaze.toFormatDate(el.dateAt, 'LL', "", false)}
-										</div>
-									</div>
-
-									<div>
-										<div className="flex gap-2">
-											<div className="flex gap-1">
-												{mode || el.author.id === parseInt(userId)
-													? <>
-														<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-														<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-														{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
-													</>
-													: null
-												}
-											</div>
-											<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
-												{loadData
-													? <span className="icon-chart-3" />
-													: `+ ${el.votes.length}`
-												}
-											</div>
-										</div>
-									</div>
-								</div>
-							})}
+						<div className="group flex items-center gap-2 cursor-pointer" onClick={() => this.handleModal('formPropal', 'create', null)}>
+							<span className="icon-add text-blue-900"></span>
+							<span className="text-sm font-medium text-blue-900 group-hover:underline">Proposer une date</span>
 						</div>
-					</>
+					</div>
 				}
 			</div>
-			{startAt === ""
-				? <div className="flex items-center justify-center gap-1 cursor-pointer text-center bg-blue-500 hover:opacity-95 text-slate-50 transition-colors w-full rounded-b-md p-4"
-					   onClick={() => this.handleModal('formPropal', 'create', null)}>
-					<span className="icon-add"></span>
-					<span>Proposer une date</span>
-				</div>
-				: null
-			}
 
 			<Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
 				   content={<div>

@@ -31,13 +31,13 @@ export function RandoFormulaire ({ context, element, groupeId, users, userId }) 
         name={element ? Formulaire.setValue(element.name) : ""}
         description={element ? Formulaire.setValue(element.description) : ""}
         status={element ? Formulaire.setValue(element.status) : 0}
+        localisation={element ? Formulaire.setValue(element.localisation) : ""}
         level={element ? Formulaire.setValue(element.level) : ""}
         altitude={element ? Formulaire.setValue(element.altitude) : ""}
         devPlus={element ? Formulaire.setValue(element.devPlus) : ""}
         distance={element ? Formulaire.setValue(element.distance) : ""}
         adventure={element ? element.adventure : null}
         referent={element ? Formulaire.setValue(element.author.id) : userId}
-        googlePhotos={element ? Formulaire.setValue(element.googlePhotos) : ""}
         story={element ? Formulaire.setValue(element.story) : ""}
 
         users={users}
@@ -57,15 +57,17 @@ class Form extends Component {
 
 		let description = props.description ? props.description : "";
 
+		console.log("in")
+
 		this.state = {
 			name: props.name,
 			description: { value: description, html: description },
+			localisation: props.localisation,
 			level: props.level,
 			altitude: props.altitude,
 			devPlus: props.devPlus,
 			distance: props.distance,
 			referent: props.referent,
-			googlePhotos: props.googlePhotos,
 			story: props.story,
 			errors: [],
 		}
@@ -114,7 +116,7 @@ class Form extends Component {
 
 	render () {
         const { context, status, adventure, users } = this.props;
-        const { errors, name, description, level, altitude, devPlus, distance, referent, googlePhotos, story } = this.state;
+        const { errors, name, description, localisation, level, altitude, devPlus, distance, referent, story } = this.state;
 
         let params0 = { errors: errors, onChange: this.handleChange };
         let params1 = { errors: errors, onSelect: this.handleSelect };
@@ -159,6 +161,9 @@ class Form extends Component {
                                 Petite description
                             </TinyMCE>
                         </div>
+						<div>
+							<Input identifiant="localisation" valeur={localisation} {...params0}>Localisation</Input>
+						</div>
                     </div>
                 </div>
                 {status !== 0 &&
@@ -190,14 +195,9 @@ class Form extends Component {
                                     Niveau *
                                 </Radiobox>
                             </div>
-                            <div className="flex gap-4">
-                                <div className="w-full">
-                                    <Input identifiant="googlePhotos" valeur={googlePhotos} {...params0}>Lien Google photos</Input>
-                                </div>
-                                <div className="w-full">
-                                    <Input identifiant="story" valeur={story} {...params0}>Lien URL du storytelling</Input>
-                                </div>
-                            </div>
+							<div>
+								<Input identifiant="story" valeur={story} {...params0}>Lien URL du storytelling</Input>
+							</div>
                         </div>
                     </div>
                 }
