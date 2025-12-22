@@ -48,9 +48,10 @@ class Settings
     #[Groups(['settings_form', 'settings_multiple_db'])]
     private ?bool $multipleDatabase = false;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['settings_form', 'settings_multiple_db'])]
-    private ?string $prefixDatabase = null;
+    public function __construct()
+    {
+        $this->multipleDatabase = false;
+    }
 
     public function getId(): ?int
     {
@@ -149,18 +150,6 @@ class Settings
     public function setMultipleDatabase(bool $multipleDatabase): self
     {
         $this->multipleDatabase = $multipleDatabase;
-
-        return $this;
-    }
-
-    public function getPrefixDatabase(): ?string
-    {
-        return $this->prefixDatabase;
-    }
-
-    public function setPrefixDatabase(?string $prefixDatabase): self
-    {
-        $this->prefixDatabase = $prefixDatabase;
 
         return $this;
     }

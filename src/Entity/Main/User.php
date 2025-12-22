@@ -210,7 +210,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->token = $this->initToken();
+        $this->token = bin2hex(random_bytes(32));
         $this->coRecipes = new ArrayCollection();
         $this->coCommentaries = new ArrayCollection();
         $this->coFavorites = new ArrayCollection();

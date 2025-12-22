@@ -46,8 +46,8 @@ class ContactController extends AbstractController
 
         if(!$mailerService->sendMail(
             [$settingsService->getEmailContact()],
-            "Demande de contact",
-            "Demande de contact",
+            "[" . $settingsService->getWebsiteName() . "] Demande de contact",
+            "Demande de contact réalisé à partir de " . $settingsService->getWebsiteName(),
             'app/email/contact/contact.html.twig',
             ['contact' => $obj, 'settings' => $settingsService->getSettings()],
             [], [], $obj->getEmail()

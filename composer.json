@@ -9,6 +9,7 @@
         "ext-fileinfo": "*",
         "ext-iconv": "*",
         "ext-openssl": "*",
+        "ext-pdo": "*",
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/doctrine-migrations-bundle": "^3.2",
