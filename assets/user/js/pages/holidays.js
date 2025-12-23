@@ -7,7 +7,6 @@ import Toastr from "@tailwindFunctions/toastr";
 
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
-import { ProjectDate } from "@userPages/Holidays/Project/ProjectDate";
 import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
 import { ProjectActivities } from "@userPages/Holidays/Project/ProjectActivities";
 import { ProjectTodos } from "@userPages/Holidays/Project/ProjectTodos";
@@ -36,11 +35,6 @@ if(deletesProject){
     deletesProject.forEach(elem => {
         createRoot(elem).render(<ProjectDelete context="projects" {...elem.dataset} />)
     })
-}
-
-let projectDate = document.getElementById("project_date");
-if(projectDate){
-    createRoot(projectDate).render(<ProjectDate {...projectDate.dataset} mode={projectDate.dataset.mode === "1"} />)
 }
 
 let projectBudget = document.getElementById("project_budget");

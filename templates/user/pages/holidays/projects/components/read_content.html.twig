@@ -1,23 +1,4 @@
 <div class="flex flex-col gap-6">
-    <div class="flex flex-col gap-4 sm:flex-row max-w-screen-lg">
-        <div class="project-title w-full max-w-screen-md bg-white p-4 border rounded-md flex flex-col gap-2" style="background-image: url({{ elem.imageFile }});">
-            <h2 class="text-2xl font-semibold text-slate-50">{{ elem.name }}</h2>
-        </div>
-        <div class="w-full">
-            <div id="project_date"
-                 data-project-id="{{ elem.id }}"
-                 data-n-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
-                 data-n-end-at="{{ elem.endAt ? elem.endAt | date('Y-m-d') : "" }}"
-                 data-propals="{{ propalDates }}"
-                 data-user-id="{{ app.user ? app.user.id : null }}"
-                 data-author-id="{{ elem.author.id }}"
-                 data-mode="{{ app.user and (app.user.id == elem.author.id or app.user.isAdmin) }}"
-            >
-                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-            </div>
-        </div>
-    </div>
-
     <div class="flex flex-col gap-6">
         <div id="project_budget"
              data-route-price="{{ elem.priceRoute }}"

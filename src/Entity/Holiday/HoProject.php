@@ -58,13 +58,6 @@ class HoProject extends DataEntity
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalDate::class)]
-    private Collection $propalDates;
-
-    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
-    #[Groups(['hopro_form'])]
-    private ?HoPropalDate $propalDate = null;
-
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalHouse::class)]
     private Collection $propalHouses;
 
@@ -111,7 +104,6 @@ class HoProject extends DataEntity
 
     public function __construct()
     {
-        $this->propalDates = new ArrayCollection();
         $this->propalHouses = new ArrayCollection();
         $this->propalActivities = new ArrayCollection();
         $this->todos = new ArrayCollection();
@@ -221,48 +213,6 @@ class HoProject extends DataEntity
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, HoPropalDate>
-     */
-    public function getPropalDates(): Collection
-    {
-        return $this->propalDates;
-    }
-
-    public function addPropalDate(HoPropalDate $propalDate): self
-    {
-        if (!$this->propalDates->contains($propalDate)) {
-            $this->propalDates->add($propalDate);
-            $propalDate->setProject($this);
-        }
-
-        return $this;
-    }
-
-    public function removePropalDate(HoPropalDate $propalDate): self
-    {
-        if ($this->propalDates->removeElement($propalDate)) {
-            // set the owning side to null (unless already changed)
-            if ($propalDate->getProject() === $this) {
-                $propalDate->setProject(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getPropalDate(): ?HoPropalDate
-    {
-        return $this->propalDate;
-    }
-
-    public function setPropalDate(?HoPropalDate $propalDate): self
-    {
-        $this->propalDate = $propalDate;
 
         return $this;
     }

@@ -14,7 +14,6 @@ use App\Entity\Crypto\CrTrade;
 use App\Entity\DataEntity;
 use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalActivity;
-use App\Entity\Holiday\HoPropalDate;
 use App\Entity\Holiday\HoPropalHouse;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
@@ -165,9 +164,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoProject::class)]
     private Collection $hoProjects;
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalDate::class)]
-    private Collection $hoPropalDates;
-
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: HoPropalHouse::class)]
     private Collection $hoPropalHouses;
 
@@ -221,7 +217,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->raPropalAdventures = new ArrayCollection();
         $this->raImages = new ArrayCollection();
         $this->hoProjects = new ArrayCollection();
-        $this->hoPropalDates = new ArrayCollection();
         $this->hoPropalHouses = new ArrayCollection();
         $this->hoPropalActivities = new ArrayCollection();
         $this->biBirthdays = new ArrayCollection();
@@ -886,36 +881,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($hoProject->getAuthor() === $this) {
                 $hoProject->setAuthor(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, HoPropalDate>
-     */
-    public function getHoPropalDates(): Collection
-    {
-        return $this->hoPropalDates;
-    }
-
-    public function addHoPropalDate(HoPropalDate $hoPropalDate): self
-    {
-        if (!$this->hoPropalDates->contains($hoPropalDate)) {
-            $this->hoPropalDates->add($hoPropalDate);
-            $hoPropalDate->setAuthor($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHoPropalDate(HoPropalDate $hoPropalDate): self
-    {
-        if ($this->hoPropalDates->removeElement($hoPropalDate)) {
-            // set the owning side to null (unless already changed)
-            if ($hoPropalDate->getAuthor() === $this) {
-                $hoPropalDate->setAuthor(null);
             }
         }
 
