@@ -301,7 +301,7 @@ export function Checkbox ({ items, identifiant, valeur, errors, onChange, childr
 			<label htmlFor={elem.identifiant}
 				   className={cn("block text-sm font-medium leading-6 text-gray-800",
 					   styleType === "fat" ? "block text-sm font-medium leading-6 cursor-pointer px-3 py-2 rounded-md ring-1 ring-inset" : "",
-					   styleType === "fat" && isChecked ? "bg-color1-o-4 ring-ring-color1-o-4 text-slate-50" : "bg-white hover:bg-gray-50 ring-gray-300 text-gray-900"
+					   styleType === "fat" && isChecked ? "bg-blue-700 ring-blue-700 text-slate-50" : "bg-white hover:bg-gray-50 ring-gray-300 text-gray-900"
 				   )}
 			>
 				{withIcon ? <span className={`icon-${elem.icon} inline-block mr-1`}></span> : null}

@@ -34,7 +34,7 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel }) {
 					{elem.type === 3
 						? <ButtonIcon type="default" icon="refresh1" onClick={() => onCancel(elem)} tooltipWidth={150}>Annuler la suppression</ButtonIcon>
 						: <>
-							{elem.type !== 4 && <ButtonIcon type="default" icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>}
+							<ButtonIcon type="default" icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
 							<ButtonIcon type="default" icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
 						</>
 					}
