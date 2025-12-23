@@ -1,388 +1,1020 @@
 {% extends 'user/pages/blog/template.html.twig' %}
 
-{% set page_title %}Une escapade de 5 jours à Chamonix{% endset %}
-{% set page_subtitle %}Du 1er au 4 Août 2023{% endset %}
+{% set page_title %}Les aventures des cochons{% endset %}
+{% set page_subtitle %}Groupe d'aventures : Cochons{% endset %}
 
 {% block main_content %}
-
     {% set groupe = "cochons" %}
     {% set aventure = "chamonix" %}
 
-    <style>
-        p{
-            color: #FFFFFF;
-        }
-    </style>
-    <div id="mapSrc" data-map="cochons/chamonix/map.svg"></div>
-    <div id="article-loader">
-        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-    </div>
-    <div class="main-content main-content-transparent" id="article" style="opacity: 0">
-        <div class="article">
-            <div class="content">
-                <div class="main">
-                    <div class="container"></div>
-                    <div class="text">
-                        <section class="js-section" data-zoom-start="1">
-                            <h2><span class="title-up">Sud de la France</span><span class="title-down">Une escapade de 5 jours à Chamonix</span></h2>
-                            <p class="text-intro">Pour cette escapade, nous étions un groupe de 5 personnes au départ de Peyrolles-en-provence.</p>
+    <div class="main-content main-content-transparent">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <div class="grid lg:grid-cols-3 gap-8">
 
-                            <p>
-                                On démarre au petit matin pour se rendre à Chamonix, plus précisément aux alentours des
-                                Bossons, pour rejoindre notre fabuleux chalet loué sur AirBnb.
-                                <br>
-                                <br>
-                                Arrivé un peu avant midi, on dépose nos bagages, on choisit nos lits et on découvre les lieux !
-                            </p>
-                        </section>
-                        <section class="js-section" data-zoom-start="1">
-                            <h2><span class="title-up">Jour 1</span><span class="title-down">Arrivée au chalet</span></h2>
+                <!-- Contenu principal -->
+                <article class="max-w-2xl lg:col-span-2">
+                    <header class="mb-8">
+                        <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                            <span>Une escapade de 5 jours à Chamonix</span>
+                        </h2>
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                            <span>📍 Chamonix, France</span>
+                            <span>•</span>
+                            <span>👥 Groupe de 5 personnes</span>
+                            <span>•</span>
+                            <span>📅 1 au 4 Août 2024</span>
+                        </div>
+                    </header>
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-1v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-2v-2.jpg'}) }}"  />
+                    <!-- Jour 1 -->
+                    <section class="mb-8" data-section="arrivee" data-lat="45.9237" data-lng="6.8694">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Jour 1</span>
+                            Arrivée au chalet
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            On démarre au petit matin pour se rendre à Chamonix, plus précisément aux alentours des
+                            Bossons, pour rejoindre notre fabuleux chalet loué sur AirBnb.
+                            <br>
+                            Arrivé un peu avant midi, on dépose nos bagages, on choisit nos lits et on découvre les lieux !
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="flex gap-3 mb-3">
+                                <div class="w-full">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                            <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-1v-2.jpg'}) }}" />
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                            <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-2v-2.jpg'}) }}" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="js-gallery-content" style="margin-top: 10px;">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v6.mp4'}) }}" type="video/mp4" />
-                                    </video>
+                                <figure class="w-full">
+                                    <div class="video-container h-full">
+                                        <video controls>
+                                            <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v6.mp4'}) }}" type="video/mp4" />
+                                        </video>
+                                    </div>
+                                </figure>
+                            </div>
+
+                            <figcaption class="text-sm text-gray-600 italic">
+                                Chalet chaleureux, bien équipé et une magnifique vue sur le glacier des Bossons.
+                            </figcaption>
+                        </figure>
+                    </section>
+
+                    <!-- Les Houches -->
+                    <section class="mb-8" data-section="houches" data-lat="45.8934" data-lng="6.7970">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Houches</span>
+                            Petit repas avec vue
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            Pour notre premier repas, on s'est dirigé aux Houches pour trouver une boulangerie.
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            On a fini par trouver, tant bien que mal, une boulangerie au pied d'un télésiège qui donne une superbe vue
+                            sur les montagnes encore enneigées.
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-4v-2.jpg'}) }}" />
+                                    </div>
                                 </div>
-                                <figcaption>Chalet chaleureux, bien équipé et une magnifique vue sur le glacier des Bossons.</figcaption>
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="2.5">
-                            <h2><span class="title-up">Houches</span><span class="title-down">Petit repas avec vue</span></h2>
-
-                            <p>
-                                Pour notre premier repas, on s'est dirigé aux Houches pour trouver une boulangerie.
-                            </p>
-                            <p>
-                                On a fini par trouver, tant bien que mal, une boulangerie au pied d'un télésiège qui donne une superbe vue
-                                sur les montagnes encore enneigées.
-                            </p>
-
-                            <figure class="js-image" data-pos="0.3">
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-4v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-5v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-6v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-7v-2.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-5v-2.jpg'}) }}" />
+                                    </div>
                                 </div>
-                                <div class="js-gallery-content">
-                                    <img src="{{path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-3v-2.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-6v-2.jpg'}) }}" />
+                                    </div>
                                 </div>
-                                <div class="js-gallery-content">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v2.mp4'}) }}" type="video/mp4" />
-                                    </video>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-7v-2.jpg'}) }}" />
+                                    </div>
                                 </div>
-                                <figcaption>Vue depuis la terrasse sur les monts enneigés.</figcaption>
-                            </figure>
-
-                            <p>
-                                Première bière de l'escapade, on chill en terrasse avant de reprendre la voiture pour
-                                se diriger à Annecy qui se trouve à environ 1h15 de route.
-                            </p>
-
-                            <figure>
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-8v-2.jpg'}) }}"  />
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="0.6">
-                            <h2><span class="title-up">Annecy</span><span class="title-down">Visite sous un temps pluvieux</span></h2>
-
-                            <p>
-                                Pas de chance, on arrive à Annecy sous quelques fines averses.
-                            </p>
-
-                            <figure>
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-9v-2.jpg'}) }}"  />
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-10v-2.jpg'}) }}"  />
-                                <figcaption>Le fameux pont des amours.</figcaption>
-                            </figure>
-
-                            <p>
-                                Le vieux Annecy est ce qu'il y a de plus intéressant à photographier. Son architecture et
-                                ses décorations fleuries donnent un petit charme au lieu.
-                            </p>
-
-                            <figure>
-
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-11v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-12v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-13v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-14v-2.jpg'}) }}"  />
+                            </div>
+                            <div class="flex flex-col gap-3 mb-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-3v-2.jpg'}) }}" />
+                                    </div>
                                 </div>
-                                <figcaption>La ville d'Annecy.</figcaption>
-                            </figure>
+                                <figure>
+                                    <div class="video-container">
+                                        <video controls>
+                                            <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v2.mp4'}) }}" type="video/mp4" />
+                                        </video>
+                                    </div>
+                                </figure>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic">
+                                Vue depuis la terrasse sur les monts enneigés.
+                            </figcaption>
+                        </figure>
 
-                            <figure class="js-image" data-pos="0.5">
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-15v-2.jpg'}) }}"  />
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-16v-2.jpg'}) }}"  />
-                                <figcaption>Shooting groupé.</figcaption>
-                            </figure>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Première bière de l'escapade, on chill en terrasse avant de reprendre la voiture pour
+                            se diriger à Annecy qui se trouve à environ 1h15 de route.
+                        </p>
 
-                            <p>
-                                Pour le soir, on a réservé un restaurant de burger qui proposait de belles choses bien grasses !
-                            </p>
+                        <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                            <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-8v-2.jpg'}) }}" />
+                            </div>
+                        </div>
+                    </section>
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-17v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-18v-2.jpg'}) }}"  />
+                    <!-- Annecy -->
+                    <section class="mb-8" data-section="annecy" data-lat="45.8992" data-lng="6.1294">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Annecy</span>
+                            Visite sous un temps pluvieux
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Pas de chance, on arrive à Annecy sous quelques fines averses.
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-9v-2.jpg'}) }}"  />
+                                    </div>
                                 </div>
-                                <div class="js-gallery-content">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-10v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic">
+                                Le fameux pont des amours.
+                            </figcaption>
+                        </figure>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Le vieux Annecy est ce qu'il y a de plus intéressant à photographier. Son architecture et
+                            ses décorations fleuries donnent un petit charme au lieu.
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-11v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-12v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-13v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-14v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                La ville d'Annecy.
+                            </figcaption>
+                        </figure>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-15v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-16v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                Shooting groupé
+                            </figcaption>
+                        </figure>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Pour le soir, on a réservé un restaurant de burger qui proposait de belles choses bien grasses !
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-17v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-18v-2.jpg'}) }}"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-200 rounded-lg overflow-hidden">
+                                <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
                                     <img class="js-image" data-pos="0.6" src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-19v-2.jpg'}) }}"  />
                                 </div>
-                                <figcaption>Le petit groupe avant d'aller graille.</figcaption>
-                            </figure>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                Le petit groupe avant d'aller graille
+                            </figcaption>
+                        </figure>
 
-                            <p>
-                                On finit la soirée en retournant à notre chalet pour jouer à quelques jeux de sociétés et
-                                se reposer pour la vraie découverte de Chamonix.
+                        <p class="text-gray-700 leading-relaxed">
+                            On finit la soirée en retournant à notre chalet pour jouer à quelques jeux de sociétés et
+                            se reposer pour la vraie découverte de Chamonix.
+                        </p>
+                    </section>
+
+                    <!-- Jour 2 -->
+                    <section class="mb-8" data-section="jour2" data-lat="45.9237" data-lng="6.8694">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Jour 2</span>
+                            Un réveil difficile
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            C'est sous les coups de 7h ou 8h du matin qu'on se réveille pour nous préparer à la journée qui nous attend.
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Réveil 1]
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Réveil 2]
+                                    </div>
+                                </div>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                L'attente est longue.
+                            </figcaption>
+                        </figure>
+                    </section>
+
+                    <!-- Aiguille du Midi -->
+                    <section class="mb-8" data-section="aiguille" data-lat="45.8792" data-lng="6.8872">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Aiguille du Midi</span>
+                            Incertitude
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            On avait prévu de commencer la matinée par un tour à l'aiguille du Midi.
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Manque de chance, ce jour-là, le temps n'était pas favorable pour aller jusqu'en haut
+                            car il y avait trop de vent pour les télécabines.
+                        </p>
+
+                        <div class="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6">
+                            <p class="text-sm text-orange-900">
+                                <strong>⚠️ Aléas météo :</strong> Les conditions en haute montagne peuvent changer rapidement.
+                                                                  Il est important d'avoir un plan B et de rester flexible dans ses activités.
                             </p>
-                        </section>
+                        </div>
 
-                        <section class="js-section" data-zoom-start="1.5">
-                            <h2><span class="title-up">Jour 2</span><span class="title-down">Un réveil difficile</span></h2>
-
-                            <p>
-                                C'est sous les coups de 7h ou 8h du matin qu'on se réveille pour nous préparer à la journée qui nous attend.
-                            </p>
-
-                            <figure class="js-image" data-pos="0.2">
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-20v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-21v-2.jpg'}) }}"  />
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Plan Aiguille 1]
+                                    </div>
                                 </div>
-                                <figcaption>L'attente est longue.</figcaption>
-                            </figure>
-                        </section>
-
-                        <section class="js-section" data-zoom-start="1.5">
-                            <h2><span class="title-up">Aiguille du Midi</span><span class="title-down">Incertitude</span></h2>
-
-                            <p>
-                                On avait prévu de commencer la matinée par un tour à l'aiguille du Midi. <br><br>
-                                Manque de chance, ce jour-là, le temps n'était pas favorable pour aller jusqu'en haut
-                                car il y avait trop de vent pour les télécabines.
-                            </p>
-
-                            <figure class="js-image" data-pos="0.1">
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-22v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-23v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-24v-2.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-25v-2.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Plan Aiguille 2]
+                                    </div>
                                 </div>
-                                <figcaption>Vue depuis le refuge du Plan de l'Aiguille.</figcaption>
-                            </figure>
-
-                            <p>
-                                On a eu le droit d'aller au premier stop, au Refuge du Plan de l'Aiguille (2 207m d'altitude),
-                                où on a pu se rendre au Lac Bleu et profiter d'un petit café en terrasse.
-                            </p>
-
-                            <figure>
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-29.jpg'}) }}"  />
-
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-26.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-27.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-28.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-33.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Plan Aiguille 3]
+                                    </div>
                                 </div>
-
-                                <div class="gallery-2" style="margin-top: 10px">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v3.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v5.mp4'}) }}" type="video/mp4" />
-                                    </video>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Plan Aiguille 4]
+                                    </div>
                                 </div>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                Vue depuis le refuge du Plan de l'Aiguille.
+                            </figcaption>
+                        </figure>
 
-                                <div class="js-gallery-content">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-30.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-31.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-32.jpg'}) }}"  />
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            On a eu le droit d'aller au premier stop, au Refuge du Plan de l'Aiguille (2 207m d'altitude),
+                            où on a pu se rendre au Lac Bleu et profiter d'un petit café en terrasse.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed">
+                            On redescend vers Chamonix pour prendre un autre téléphérique pour se rendre au Brevent.
+                        </p>
+                    </section>
+
+                    <!-- Brévent -->
+                    <section class="mb-8" data-section="brevent" data-lat="45.9321" data-lng="6.8306">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Brévent</span>
+                            Une belle surprise
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Au sommet du Brévent, à environ 2 400m d'altitude, malgré le froid et un vent glacial, les quelques nuages et rayons de lumières nous
+                            permettent de découvrir un paysage magnifique à 360° ! Chaque plan nous offre une ambiance et une histoire particulière.
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Brévent 1]
+                                    </div>
                                 </div>
-
-                                <div class="js-gallery-content">
-                                    <video>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v1.mp4'}) }}" type="video/mp4" />
-                                    </video>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Brévent 2]
+                                    </div>
                                 </div>
-                                <figcaption>On attend le feu vert pour aller à l'Aiguille du Midi.</figcaption>
-                            </figure>
-
-                            <p>
-                                On redescend vers Chamonix pour prendre un autre téléphérique pour se rendre au Brevent.
-                            </p>
-
-                            <figure>
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-34.jpg'}) }}" />
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-35.jpg'}) }}" />
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-36.jpg'}) }}" />
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-37.jpg'}) }}" />
-                                <figcaption>Durant le trajet aux télécabines, on a la chance de voir un nuage traverse un pic.</figcaption>
-                            </figure>
-                        </section>
-
-                        <section class="js-section" data-zoom-start="1.5">
-                            <h2><span class="title-up">Brévent</span><span class="title-down">Une belle surprise</span></h2>
-
-                            <p>
-                                Au sommet du Brévent, à environ 2 400m d'altitude, malgré le froid et un vent glacial, les quelques nuages et rayons de lumières nous
-                                permettent de découvrir un paysage magnifique à 360° ! Chaque plan nous offre une ambiance et une histoire particulière.
-                            </p>
-
-                            <figure class="js-image" data-pos="0.3">
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-38.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-39.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-40.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-78.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Brévent 3]
+                                    </div>
                                 </div>
-                                <figcaption>La grandeur de la nature.</figcaption>
-                            </figure>
-
-                            <figure>
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-41.jpg'}) }}"  />
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-42.jpg'}) }}"  />
-
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-43.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-44.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-45.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-46.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-47.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-48.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Brévent 4]
+                                    </div>
                                 </div>
-                                <div class="js-gallery-content">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-49.jpg'}) }}"  />
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                La grandeur de la nature.
+                            </figcaption>
+                        </figure>
+
+                        <p class="text-gray-700 leading-relaxed">
+                            Après avoir apprécié ce décor, on redescend à Chamonix pour se faire le petit restaurant
+                            du midi, il était incroyable.
+                        </p>
+                    </section>
+
+                    <!-- Mer de Glace -->
+                    <section class="mb-8" data-section="merdeglace" data-lat="45.9264" data-lng="6.9206">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Mer de glace</span>
+                            Le glacier mythique
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Après le restaurant, place à la digestion à bord du train à crémaillère pour découvrir le
+                            glacier de la Mer de glace depuis le site du Montenvers situé à 1 913m d'altitude.
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Train 1]
+                                    </div>
                                 </div>
-                                <figcaption>Le vent glacial.</figcaption>
-                            </figure>
-
-                            <p>
-                                Après avoir apprécié ce décor, on redescend à Chamonix pour se faire le petit restaurant
-                                du midi, il était incroyable.
-                            </p>
-
-                            <figure>
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-50.jpg'}) }}"  />
-                                <figcaption>Le vent glacial.</figcaption>
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="1.5">
-                            <h2><span class="title-up">Mer de glace</span><span class="title-down">La mer de glace</span></h2>
-
-                            <p>
-                                Après le restaurant, place à la digestion à bord du train à crémaillère pour découvrir le
-                                glacier de la Mer de glace depuis le site du Montenvers situé à 1 913m d'altitude.
-                            </p>
-
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-51.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-52.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-53.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-54.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Train 2]
+                                    </div>
                                 </div>
-                                <figcaption>Le repos des guerriers</figcaption>
-                            </figure>
-
-                            <p>
-                                En plus de la vue sur le glacier, il est possible de visite une grotte de glace au coeur du glacier.
-                                <br>
-                                Malheureusement, ce jour-là, la grotte était fermée à cause des conditions météorologiques.
-                            </p>
-
-                            <figure class="js-image" data-pos="0.3">
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-55.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-56.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-57.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-58.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Groupe 1]
+                                    </div>
                                 </div>
-                                <div class="js-gallery-content">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-59.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Groupe 2]
+                                    </div>
                                 </div>
-                                <figcaption>Le monde réunit</figcaption>
-                            </figure>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                Le repos des guerriers.
+                            </figcaption>
+                        </figure>
 
-                            <p>
-                                Au retour, on décide se reposer tranquillement au chalet et profiter du barbecue, sous la pluie !
-                            </p>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            En plus de la vue sur le glacier, il est possible de visiter une grotte de glace au cœur du glacier.
+                            Malheureusement, ce jour-là, la grotte était fermée à cause des conditions météorologiques.
+                        </p>
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-62.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-71.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-63.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-79.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-61.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-60.jpg'}) }}"  />
+                        <p class="text-gray-700 leading-relaxed">
+                            Au retour, on décide de se reposer tranquillement au chalet et profiter du barbecue, sous la pluie !
+                        </p>
+                    </section>
+
+                    <!-- Jour 3 -->
+                    <section class="mb-8" data-section="jour3" data-lat="45.9237" data-lng="6.8694">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            <span class="block text-sm text-blue-600 font-normal">Jour 3</span>
+                            Une activité sportive
+                        </h2>
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Pour commencer cette nouvelle journée, on avait prévu de faire un tour en rafting en mode sportif !
+                            L'activité était sympathique avec en plus de beaux paysages à voir.
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Rafting 1]
+                                    </div>
                                 </div>
-                                <div class="js-gallery-content" style="margin-top: 10px;">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v4.mp4'}) }}" type="video/mp4" />
-                                    </video>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Rafting 2]
+                                    </div>
                                 </div>
-                                <figcaption>Mérité !</figcaption>
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="1.5">
-                            <h2><span class="title-up">Jour 3</span><span class="title-down">Une activité sportive</span></h2>
-
-                            <p>
-                                Pour commencer cette nouvelle journée, on avait prévu de faire un tour en rafting en mode sportif !
-                                <br>
-                                L'activité était sympathique avec en plus de beaux paysages à voir.
-                            </p>
-
-                            <figure>
-                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-64.jpg'}) }}"  />
-
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-65.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-66.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-67.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-68.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-69.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-70.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Rafting 3]
+                                    </div>
                                 </div>
-                                <figcaption>Une eau glaciale.</figcaption>
-                            </figure>
-
-                            <p>
-                                Après avoir mangé, on chill au chalet avant d'aller se relaxer aux Thermes de Chamonix qui
-                                offre une très belle infrastructure, une vue imprenable sur les montagnes et un apéro offert !
-                            </p>
-
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-72.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-73.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-74.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-75.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-76.jpg'}) }}"  />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-77.jpg'}) }}"  />
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Rafting 4]
+                                    </div>
                                 </div>
-                                <figcaption>Embrouille</figcaption>
-                            </figure>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                Une eau glaciale.
+                            </figcaption>
+                        </figure>
 
-                            <blockquote>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Après avoir mangé, on chill au chalet avant d'aller se relaxer aux Thermes de Chamonix qui
+                            offre une très belle infrastructure, une vue imprenable sur les montagnes et un apéro offert !
+                        </p>
+
+                        <figure class="mb-6">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Thermes 1]
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Thermes 2]
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Thermes 3]
+                                    </div>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                                        [Thermes 4]
+                                    </div>
+                                </div>
+                            </div>
+                            <figcaption class="text-sm text-gray-600 italic mt-3">
+                                Détente bien méritée.
+                            </figcaption>
+                        </figure>
+
+                        <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-r-lg">
+                            <p class="text-lg text-green-900 font-semibold text-center">
                                 Fin de l'escapade !
-                            </blockquote>
-                        </section>
-                        <section class="js-section" data-stay="true" data-zoom-start="0.8"></section>
+                            </p>
+                        </div>
+                    </section>
+                </article>
+
+                <!-- Carte sticky -->
+                <aside class="lg:col-span-1">
+                    <div class="sidebar-sticky">
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h3 class="font-bold text-gray-900 mb-3">📍 Parcours de l'aventure</h3>
+                            <div id="map" class="map-container"></div>
+                            <div class="mt-3 text-xs text-gray-600">
+                                <p>La carte suit votre lecture</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </aside>
             </div>
         </div>
     </div>
+
+    <script>
+		window.addEventListener('load', function() {
+			// Initialisation carte centrée sur Chamonix
+			const map = L.map('map').setView([45.9237, 6.8694], 18);
+
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '© OpenStreetMap'
+			}).addTo(map);
+
+			const markers = {};
+			let currentMarker = null;
+
+			// Tracé du parcours
+			const pathCoordinates = [
+				[45.9237, 6.8694],  // Chamonix
+				[45.8933, 6.7997],  // Les Houches
+				[45.8992, 6.1294],  // Annecy
+				[45.8795, 6.8874],  // Aiguille du Midi
+				[45.9311, 6.8328],  // Brévent
+				[45.9305, 6.9214],  // Mer de glace
+				[45.9237, 6.8694]   // Retour Chamonix
+			];
+
+			const polyline = L.polyline(pathCoordinates, {
+				color: '#3b82f6',
+				weight: 3,
+				opacity: 0.7
+			}).addTo(map);
+
+			map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+
+			// Création des marqueurs
+			document.querySelectorAll('[data-section]').forEach(section => {
+				const lat = parseFloat(section.dataset.lat);
+				const lng = parseFloat(section.dataset.lng);
+				const sectionName = section.dataset.section;
+
+				const marker = L.marker([lat, lng], {
+					icon: L.divIcon({
+						className: 'custom-marker',
+						html: '<div style="background: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+						iconSize: [20, 20]
+					})
+				}).addTo(map);
+
+				markers[sectionName] = marker;
+			});
+
+			// Détection scroll
+			let ticking = false;
+			window.addEventListener('scroll', () => {
+				if (!ticking) {
+					window.requestAnimationFrame(() => {
+						updateActiveSection();
+						ticking = false;
+					});
+					ticking = true;
+				}
+			});
+
+			function updateActiveSection() {
+				const sections = document.querySelectorAll('[data-section]');
+				const scrollPos = window.scrollY + window.innerHeight / 2;
+				let activeSection = null;
+
+				sections.forEach(section => {
+					const rect = section.getBoundingClientRect();
+					const sectionTop = rect.top + window.scrollY;
+					const sectionBottom = sectionTop + rect.height;
+
+					if (scrollPos >= sectionTop && scrollPos <= sectionBottom) {
+						activeSection = section.dataset.section;
+					}
+				});
+
+				if (activeSection && activeSection !== currentMarker) {
+					// Reset marqueurs
+					Object.values(markers).forEach(marker => {
+						marker._icon.querySelector('div').style.background = '#3b82f6';
+						marker._icon.querySelector('div').style.transform = 'scale(1)';
+					});
+
+					// Activer marqueur actuel
+					if (markers[activeSection]) {
+						markers[activeSection]._icon.querySelector('div').style.background = '#10b981';
+						markers[activeSection]._icon.querySelector('div').style.transform = 'scale(1.3)';
+						markers[activeSection]._icon.querySelector('div').style.transition = 'all 0.3s ease';
+
+						const lat = parseFloat(document.querySelector(`[data-section="${activeSection}"]`).dataset.lat);
+						const lng = parseFloat(document.querySelector(`[data-section="${activeSection}"]`).dataset.lng);
+						map.panTo([lat, lng], { animate: true, duration: 0.5 });
+					}
+
+					currentMarker = activeSection;
+				}
+			}
+
+			updateActiveSection();
+		});
+    </script>
+
+{#    {% set groupe = "cochons" %}#}
+{#    {% set aventure = "chamonix" %}#}
+
+{#    <style>#}
+{#        p{#}
+{#            color: #FFFFFF;#}
+{#        }#}
+{#    </style>#}
+{#    <div id="mapSrc" data-map="cochons/chamonix/map.svg"></div>#}
+{#    <div id="article-loader">#}
+{#        {% include "layout/components/tailwind/loaders/loader.html.twig" %}#}
+{#    </div>#}
+{#    <div class="main-content main-content-transparent" id="article" style="opacity: 0">#}
+{#        <div class="article">#}
+{#            <div class="content">#}
+{#                <div class="main">#}
+{#                    <div class="container"></div>#}
+{#                    <div class="text">#}
+{#                        <section class="js-section" data-zoom-start="1">#}
+{#                            <h2><span class="title-up">Sud de la France</span><span class="title-down">Une escapade de 5 jours à Chamonix</span></h2>#}
+{#                            <p class="text-intro">Pour cette escapade, nous étions un groupe de 5 personnes au départ de Peyrolles-en-provence.</p>#}
+
+{#                            <p>#}
+{#                                On démarre au petit matin pour se rendre à Chamonix, plus précisément aux alentours des#}
+{#                                Bossons, pour rejoindre notre fabuleux chalet loué sur AirBnb.#}
+{#                                <br>#}
+{#                                <br>#}
+{#                                Arrivé un peu avant midi, on dépose nos bagages, on choisit nos lits et on découvre les lieux !#}
+{#                            </p>#}
+{#                        </section>#}
+{#                        <section class="js-section" data-zoom-start="1">#}
+{#                            <h2><span class="title-up">Jour 1</span><span class="title-down">Arrivée au chalet</span></h2>#}
+
+{#                            <figure>#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-1v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-2v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <div class="js-gallery-content" style="margin-top: 10px;">#}
+{#                                    <video controls>#}
+{#                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v6.mp4'}) }}" type="video/mp4" />#}
+{#                                    </video>#}
+{#                                </div>#}
+{#                                <figcaption>Chalet chaleureux, bien équipé et une magnifique vue sur le glacier des Bossons.</figcaption>#}
+{#                            </figure>#}
+{#                        </section>#}
+{#                        <section class="js-section" data-zoom-start="2.5">#}
+{#                            <h2><span class="title-up">Houches</span><span class="title-down">Petit repas avec vue</span></h2>#}
+
+{#                            <p>#}
+{#                                Pour notre premier repas, on s'est dirigé aux Houches pour trouver une boulangerie.#}
+{#                            </p>#}
+{#                            <p>#}
+{#                                On a fini par trouver, tant bien que mal, une boulangerie au pied d'un télésiège qui donne une superbe vue#}
+{#                                sur les montagnes encore enneigées.#}
+{#                            </p>#}
+
+{#                            <figure class="js-image" data-pos="0.3">#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-4v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-5v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-6v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-7v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <div class="js-gallery-content">#}
+{#                                    <img src="{{path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-3v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <div class="js-gallery-content">#}
+{#                                    <video controls>#}
+{#                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v2.mp4'}) }}" type="video/mp4" />#}
+{#                                    </video>#}
+{#                                </div>#}
+{#                                <figcaption>Vue depuis la terrasse sur les monts enneigés.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                Première bière de l'escapade, on chill en terrasse avant de reprendre la voiture pour#}
+{#                                se diriger à Annecy qui se trouve à environ 1h15 de route.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-8v-2.jpg'}) }}"  />#}
+{#                            </figure>#}
+{#                        </section>#}
+{#                        <section class="js-section" data-zoom-start="0.6">#}
+{#                            <h2><span class="title-up">Annecy</span><span class="title-down">Visite sous un temps pluvieux</span></h2>#}
+
+{#                            <p>#}
+{#                                Pas de chance, on arrive à Annecy sous quelques fines averses.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-9v-2.jpg'}) }}"  />#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-10v-2.jpg'}) }}"  />#}
+{#                                <figcaption>Le fameux pont des amours.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                Le vieux Annecy est ce qu'il y a de plus intéressant à photographier. Son architecture et#}
+{#                                ses décorations fleuries donnent un petit charme au lieu.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-11v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-12v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-13v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-14v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>La ville d'Annecy.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <figure class="js-image" data-pos="0.5">#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-15v-2.jpg'}) }}"  />#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-16v-2.jpg'}) }}"  />#}
+{#                                <figcaption>Shooting groupé.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                Pour le soir, on a réservé un restaurant de burger qui proposait de belles choses bien grasses !#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-17v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-18v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <div class="js-gallery-content">#}
+{#                                    <img class="js-image" data-pos="0.6" src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-19v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>Le petit groupe avant d'aller graille.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                On finit la soirée en retournant à notre chalet pour jouer à quelques jeux de sociétés et#}
+{#                                se reposer pour la vraie découverte de Chamonix.#}
+{#                            </p>#}
+{#                        </section>#}
+
+{#                        <section class="js-section" data-zoom-start="1.5">#}
+{#                            <h2><span class="title-up">Jour 2</span><span class="title-down">Un réveil difficile</span></h2>#}
+
+{#                            <p>#}
+{#                                C'est sous les coups de 7h ou 8h du matin qu'on se réveille pour nous préparer à la journée qui nous attend.#}
+{#                            </p>#}
+
+{#                            <figure class="js-image" data-pos="0.2">#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-20v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-21v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>L'attente est longue.</figcaption>#}
+{#                            </figure>#}
+{#                        </section>#}
+
+{#                        <section class="js-section" data-zoom-start="1.5">#}
+{#                            <h2><span class="title-up">Aiguille du Midi</span><span class="title-down">Incertitude</span></h2>#}
+
+{#                            <p>#}
+{#                                On avait prévu de commencer la matinée par un tour à l'aiguille du Midi. <br><br>#}
+{#                                Manque de chance, ce jour-là, le temps n'était pas favorable pour aller jusqu'en haut#}
+{#                                car il y avait trop de vent pour les télécabines.#}
+{#                            </p>#}
+
+{#                            <figure class="js-image" data-pos="0.1">#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-22v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-23v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-24v-2.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-25v-2.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>Vue depuis le refuge du Plan de l'Aiguille.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                On a eu le droit d'aller au premier stop, au Refuge du Plan de l'Aiguille (2 207m d'altitude),#}
+{#                                où on a pu se rendre au Lac Bleu et profiter d'un petit café en terrasse.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-29.jpg'}) }}"  />#}
+
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-26.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-27.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-28.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-33.jpg'}) }}"  />#}
+{#                                </div>#}
+
+{#                                <div class="gallery-2" style="margin-top: 10px">#}
+{#                                    <video controls>#}
+{#                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v3.mp4'}) }}" type="video/mp4" />#}
+{#                                    </video>#}
+{#                                    <video controls>#}
+{#                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v5.mp4'}) }}" type="video/mp4" />#}
+{#                                    </video>#}
+{#                                </div>#}
+
+{#                                <div class="js-gallery-content">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-30.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-31.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-32.jpg'}) }}"  />#}
+{#                                </div>#}
+
+{#                                <div class="js-gallery-content">#}
+{#                                    <video>#}
+{#                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v1.mp4'}) }}" type="video/mp4" />#}
+{#                                    </video>#}
+{#                                </div>#}
+{#                                <figcaption>On attend le feu vert pour aller à l'Aiguille du Midi.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                On redescend vers Chamonix pour prendre un autre téléphérique pour se rendre au Brevent.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-34.jpg'}) }}" />#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-35.jpg'}) }}" />#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-36.jpg'}) }}" />#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-37.jpg'}) }}" />#}
+{#                                <figcaption>Durant le trajet aux télécabines, on a la chance de voir un nuage traverse un pic.</figcaption>#}
+{#                            </figure>#}
+{#                        </section>#}
+
+{#                        <section class="js-section" data-zoom-start="1.5">#}
+{#                            <h2><span class="title-up">Brévent</span><span class="title-down">Une belle surprise</span></h2>#}
+
+{#                            <p>#}
+{#                                Au sommet du Brévent, à environ 2 400m d'altitude, malgré le froid et un vent glacial, les quelques nuages et rayons de lumières nous#}
+{#                                permettent de découvrir un paysage magnifique à 360° ! Chaque plan nous offre une ambiance et une histoire particulière.#}
+{#                            </p>#}
+
+{#                            <figure class="js-image" data-pos="0.3">#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-38.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-39.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-40.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-78.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>La grandeur de la nature.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <figure>#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-41.jpg'}) }}"  />#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-42.jpg'}) }}"  />#}
+
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-43.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-44.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-45.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-46.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-47.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-48.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <div class="js-gallery-content">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-49.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>Le vent glacial.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                Après avoir apprécié ce décor, on redescend à Chamonix pour se faire le petit restaurant#}
+{#                                du midi, il était incroyable.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-50.jpg'}) }}"  />#}
+{#                                <figcaption>Le vent glacial.</figcaption>#}
+{#                            </figure>#}
+{#                        </section>#}
+{#                        <section class="js-section" data-zoom-start="1.5">#}
+{#                            <h2><span class="title-up">Mer de glace</span><span class="title-down">La mer de glace</span></h2>#}
+
+{#                            <p>#}
+{#                                Après le restaurant, place à la digestion à bord du train à crémaillère pour découvrir le#}
+{#                                glacier de la Mer de glace depuis le site du Montenvers situé à 1 913m d'altitude.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-51.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-52.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-53.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-54.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>Le repos des guerriers</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                En plus de la vue sur le glacier, il est possible de visite une grotte de glace au coeur du glacier.#}
+{#                                <br>#}
+{#                                Malheureusement, ce jour-là, la grotte était fermée à cause des conditions météorologiques.#}
+{#                            </p>#}
+
+{#                            <figure class="js-image" data-pos="0.3">#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-55.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-56.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-57.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-58.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <div class="js-gallery-content">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-59.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>Le monde réunit</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                Au retour, on décide se reposer tranquillement au chalet et profiter du barbecue, sous la pluie !#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-62.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-71.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-63.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-79.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-61.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-60.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <div class="js-gallery-content" style="margin-top: 10px;">#}
+{#                                    <video controls>#}
+{#                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v4.mp4'}) }}" type="video/mp4" />#}
+{#                                    </video>#}
+{#                                </div>#}
+{#                                <figcaption>Mérité !</figcaption>#}
+{#                            </figure>#}
+{#                        </section>#}
+{#                        <section class="js-section" data-zoom-start="1.5">#}
+{#                            <h2><span class="title-up">Jour 3</span><span class="title-down">Une activité sportive</span></h2>#}
+
+{#                            <p>#}
+{#                                Pour commencer cette nouvelle journée, on avait prévu de faire un tour en rafting en mode sportif !#}
+{#                                <br>#}
+{#                                L'activité était sympathique avec en plus de beaux paysages à voir.#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-64.jpg'}) }}"  />#}
+
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-65.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-66.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-67.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-68.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-69.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-70.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>Une eau glaciale.</figcaption>#}
+{#                            </figure>#}
+
+{#                            <p>#}
+{#                                Après avoir mangé, on chill au chalet avant d'aller se relaxer aux Thermes de Chamonix qui#}
+{#                                offre une très belle infrastructure, une vue imprenable sur les montagnes et un apéro offert !#}
+{#                            </p>#}
+
+{#                            <figure>#}
+{#                                <div class="gallery-2">#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-72.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-73.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-74.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-75.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-76.jpg'}) }}"  />#}
+{#                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'img-77.jpg'}) }}"  />#}
+{#                                </div>#}
+{#                                <figcaption>Embrouille</figcaption>#}
+{#                            </figure>#}
+
+{#                            <blockquote>#}
+{#                                Fin de l'escapade !#}
+{#                            </blockquote>#}
+{#                        </section>#}
+{#                        <section class="js-section" data-stay="true" data-zoom-start="0.8"></section>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 {% endblock %}
