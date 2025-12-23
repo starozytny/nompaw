@@ -9,6 +9,7 @@ use App\Repository\Rando\RaRandoRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\FileUploader;
 use DateTime;
+use getID3;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -51,14 +52,27 @@ class ImageController extends AbstractController
                     $image->setTakenAt($date ?: new \DateTime());
                 } else {
                     $date = new DateTime();
-                    $image->setTakenAt($date->setTimestamp($request->get($key . "-time")));
+                    $image->setTakenAt($date->setTimestamp($request->get('mtime')));
                 }
 
                 $mime = mime_content_type($fileUploaded);
+
                 if(str_contains($mime, "image/")){
                     $image->setType(0);
                 }elseif(str_contains($mime, "video/")){
                     $image->setType(1);
+
+                    $getID3 = new getID3();
+                    $info = $getID3->analyze($fileUploaded);
+
+                    if (isset($info['quicktime']['timestamps_unix']['create']['moov mvhd'])) {
+                        $timestamp = $info['quicktime']['timestamps_unix']['create']['moov mvhd'];
+
+                        if ($timestamp > 946684800 && $timestamp < 4102444800) {
+                            $date = new DateTime();
+                            $image->setTakenAt($date->setTimestamp($timestamp));
+                        }
+                    }
                 }else{
                     $image->setType(99);
                 }
