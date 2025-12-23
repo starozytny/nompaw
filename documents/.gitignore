@@ -1,5 +1,5 @@
 /immo/*
 /import/*
 /images/*
-/videotheque/*
-/stor/*
+#/videotheque/*
+#/stor/*
