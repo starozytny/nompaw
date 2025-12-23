@@ -8,6 +8,7 @@ services:
     volumes:
       - ./:/var/www/nompaw:cached
       - composer_cache:/root/.composer
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
     environment:
       - DATABASE_URL=mysql://project:project@db_default:3306/nompaw?serverVersion=mariadb-11.4.9
     depends_on:

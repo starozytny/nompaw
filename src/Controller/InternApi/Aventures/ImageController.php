@@ -9,6 +9,7 @@ use App\Repository\Rando\RaRandoRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\FileUploader;
 use DateTime;
+use getID3;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,32 +33,46 @@ class ImageController extends AbstractController
 
             $randoFile = '/' . $obj->getId();
             foreach($request->files as $key => $file){
-                $exif = @exif_read_data($file);
-
                 $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
-                    ->setMTime($request->get($key . "-time"))
+                    ->setMTime($request->get('mtime'))
                     ->setThumbs($filenameImage)
                     ->setLightbox($filenameImage)
                     ->setAuthor($this->getUser())
                     ->setRando($obj)
                 ;
 
+                $fileUploaded = $this->getParameter('private_directory') . $image->getFileFile();
+                $exif = @exif_read_data($fileUploaded);
+
                 if ($exif && isset($exif['DateTimeOriginal'])) {
                     $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
                     $image->setTakenAt($date ?: new \DateTime());
                 } else {
                     $date = new DateTime();
-                    $image->setTakenAt($date->setTimestamp($request->get($key . "-time")));
+                    $image->setTakenAt($date->setTimestamp($request->get('mtime')));
                 }
 
-                $mime = mime_content_type($this->getParameter('private_directory') . $image->getFileFile());
+                $mime = mime_content_type($fileUploaded);
+
                 if(str_contains($mime, "image/")){
                     $image->setType(0);
                 }elseif(str_contains($mime, "video/")){
                     $image->setType(1);
+
+                    $getID3 = new getID3();
+                    $info = $getID3->analyze($fileUploaded);
+
+                    if (isset($info['quicktime']['timestamps_unix']['create']['moov mvhd'])) {
+                        $timestamp = $info['quicktime']['timestamps_unix']['create']['moov mvhd'];
+
+                        if ($timestamp > 946684800 && $timestamp < 4102444800) {
+                            $date = new DateTime();
+                            $image->setTakenAt($date->setTimestamp($timestamp));
+                        }
+                    }
                 }else{
                     $image->setType(99);
                 }
@@ -74,23 +89,7 @@ class ImageController extends AbstractController
             }
         }
 
-        $max = $request->get('max');
-        $iEnd = $request->get('iEnd');
-        $iProceed = $request->get('iProceed');
-
-        if($iProceed < $max){
-            return $apiResponse->apiJsonResponseCustom([
-                'max' => $max,
-                'iStart' => $iEnd,
-                'iEnd' => $iEnd + 20,
-                'iProceed' => $iProceed,
-                'continue' => true
-            ]);
-        }
-
-        return $apiResponse->apiJsonResponseCustom([
-            'continue' => false
-        ]);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
     #[Route('/image/delete/{id}', name: 'image_delete', options: ['expose' => true], methods: 'DELETE')]

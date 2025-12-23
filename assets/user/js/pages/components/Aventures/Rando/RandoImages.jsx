@@ -96,60 +96,38 @@ export class RandoImages extends Component {
 		e.preventDefault();
 
 		const { randoId } = this.props;
+		const files = this.files.current.state.files;
 
-		this.handleUploadChunk(this, randoId, 0, 20, 0);
+		this.handleParallelUpload(files, randoId, 5);
 	}
 
-	handleUploadChunk (self, randoId, iStart, iEnd, iProceed) {
-		let formData = new FormData();
+	async handleParallelUpload(files, randoId, batchSize) {
+		const total = files.length;
+		let completed = 0;
 
-		let max = 0;
-		let postMaxSize = 524288000; // 500 MB
+		for (let i = 0; i < total; i += batchSize) {
+			const batch = files.slice(i, i + batchSize);
 
-		let nIEnd = iEnd;
+			await Promise.all(batch.map(async (file, index) => {
+				const formData = new FormData();
+				formData.append('file', file);
+				formData.append('mtime', Math.floor(file.lastModified / 1000));
 
-		let file = self.files.current, totalSize = 0;
-		if (file.state.files.length > 0) {
-			file.state.files.forEach((f, index) => {
-				max++;
-				if(index >= iStart && index < iEnd){
-					totalSize += f.size;
-					if(totalSize > postMaxSize){
-						nIEnd--;
-					}else{
-						iProceed++;
-						let lastMod = "" + f.lastModified
-						formData.append("file-" + index, f);
-						formData.append("file-" + index + '-time', lastMod.substring(0, lastMod.length - 3));
-					}
+				try {
+					await axios.post(
+						Routing.generate(URL_UPLOAD_IMAGES, { id: randoId }),
+						formData
+					);
+					completed++;
+					this.setState({ nbProgress: completed, nbTotal: total });
+				} catch (error) {
+					console.error('Upload failed:', error);
 				}
-			})
+			}));
 		}
 
-		this.setState({ nbTotal: max })
-
-		formData.append("max", max);
-		formData.append("iStart", iStart);
-		formData.append("iEnd", nIEnd);
-		formData.append("iProceed", iProceed);
-
-		this.formFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
-		axios({ method: "POST", url: Routing.generate(URL_UPLOAD_IMAGES, { id: randoId }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
-			.then(function (response) {
-				if(response.data.continue){
-					self.handleUploadChunk(self, randoId, response.data.iStart, response.data.iEnd, response.data.iProceed);
-					self.setState({ nbProgress: response.data.iProceed })
-				}else{
-					self.setState({ nbProgress: max })
-					Toastr.toast('info', "Photos envoyées.");
-					location.reload();
-				}
-			})
-			.catch(function (error) {
-				modalForm(self);
-				Formulaire.displayErrors(self, error);
-			})
-		;
+		Toastr.toast('info', "Photos envoyées.");
+		location.reload();
 	}
 
 	handleDeleteImage = () => {
@@ -370,9 +348,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 					</div>
 					: null
 				}
-				<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
-					 style={elem.type === 1 ? { height: "87%" } : {}}
-				>
+				<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}>
 					<div className="flex justify-between gap-2 p-2">
 						<div className="group">
 							<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
@@ -597,11 +573,17 @@ class LightboxContent extends Component {
 					 onTouchEnd={this.handleTouchEnd}
 				>
 					{images.map(image => {
-						return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
-							<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
-								 className="max-w-[1440px] mx-auto w-full h-full object-contain select-none outline-none transition-transform"
-								 style={{ transform: `translateX(${currentTranslate}px)` }} />
-						</div>
+						if(image.type === 1){
+							return <video className="max-h-dvh" controls>
+								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
+							</video>
+						}else{
+							return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
+								<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
+									 className="max-w-[1440px] mx-auto w-full h-full object-contain select-none outline-none transition-transform"
+									 style={{ transform: `translateX(${currentTranslate}px)` }} />
+							</div>
+						}
 					})}
 				</div>
 				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full right-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
