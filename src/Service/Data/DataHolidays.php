@@ -21,6 +21,8 @@ class DataHolidays
         return ($obj)
             ->setName($this->sanitizeData->trimData($data->name))
             ->setSlug($this->sanitizeData->slugString($data->name))
+            ->setStartAt($this->sanitizeData->createDate($data->startAt))
+            ->setEndAt($this->sanitizeData->createDate($data->endAt))
             ->setDescription($this->sanitizeData->trimData($data->description->html))
         ;
     }
@@ -38,7 +40,7 @@ class DataHolidays
         return ($obj)
             ->setStartAt($this->sanitizeData->createDate($data->startAt))
             ->setEndAt($this->sanitizeData->createDate($data->endAt))
-            ;
+        ;
     }
 
     public function setDataPropalHouse(HoPropalHouse $obj, $data): HoPropalHouse

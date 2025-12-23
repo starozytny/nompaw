@@ -29,6 +29,8 @@ export function ProjectFormulaire ({ context, element }) {
         context={context}
         url={url}
         name={element ? Formulaire.setValue(element.name) : ""}
+		startAt={element ? Formulaire.setValueDate(element.startAt) : ""}
+		endAt={element ? Formulaire.setValueDate(element.endAt) : ""}
         description={element ? Formulaire.setValue(element.description) : ""}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
     />
@@ -47,6 +49,8 @@ class Form extends Component {
 
 		this.state = {
 			name: props.name,
+			startAt: props.startAt,
+			endAt: props.endAt,
 			description: { value: description, html: description },
 			errors: [],
 		}
@@ -66,11 +70,15 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { url } = this.props;
-		const { name } = this.state;
+		const { name, startAt } = this.state;
 
 		this.setState({ errors: [] });
 
-		let paramsToValidate = [{ type: "text", id: 'name', value: name }];
+		let paramsToValidate = [
+			{ type: "text", id: 'name', value: name },
+			{ type: "text", id: 'startAt', value: startAt },
+			{ type: "date", id: 'startAt', value: startAt },
+		];
 
 		let validate = Validateur.validateur(paramsToValidate)
 		if (!validate.code) {
@@ -102,7 +110,7 @@ class Form extends Component {
 
 	render () {
         const { context, imageFile } = this.props;
-        const { errors, name, description } = this.state;
+        const { errors, name, startAt, endAt, description } = this.state;
 
         let params = { errors: errors, onChange: this.handleChange };
 
@@ -127,6 +135,14 @@ class Form extends Component {
                                 </InputFile>
                             </div>
                         </div>
+						<div className="flex gap-2">
+							<div className="w-full">
+								<Input type="date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
+							</div>
+							<div className="w-full">
+								<Input type="date" identifiant="endAt" valeur={endAt} {...params}>Fini le</Input>
+							</div>
+						</div>
                         <div>
                             <TinyMCE type={6} identifiant='description' valeur={description.value}
                                      errors={errors} onUpdateData={this.handleChangeTinyMCE}>

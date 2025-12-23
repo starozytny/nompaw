@@ -45,12 +45,12 @@ class ProjectController extends AbstractController
         $todos = $todoRepository->findBy(['project' => $obj]);
         $lifestyles = $lifestyleRepository->findBy(['project' => $obj]);
 
+        $element = $serializer->serialize($obj, 'json', ['groups' => HoProject::READ]);
         $propalDates  = $serializer->serialize($propalDates,  'json', ['groups' => HoPropalDate::LIST]);
         $propalHouses = $serializer->serialize($propalHouses, 'json', ['groups' => HoPropalHouse::LIST]);
         $propalActivities = $serializer->serialize($propalActivities, 'json', ['groups' => HoPropalActivity::LIST]);
         $todos = $serializer->serialize($todos, 'json', ['groups' => HoTodo::LIST]);
         $lifestyles = $serializer->serialize($lifestyles, 'json', ['groups' => HoLifestyle::LIST]);
-
 
         if($this->getUser()){
             $routeName = 'user/pages/holidays/projects/read.html.twig';
@@ -62,6 +62,7 @@ class ProjectController extends AbstractController
 
         return $this->render($routeName, [
             'elem' => $obj,
+            'element' => $element,
             'propalDates' => $propalDates,
             'propalHouses' => $propalHouses,
             'propalActivities' => $propalActivities,

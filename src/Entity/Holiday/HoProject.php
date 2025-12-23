@@ -18,11 +18,12 @@ class HoProject extends DataEntity
 
     const FORM = ['hopro_form'];
     const TEXTE = ['hopro_text'];
+    const READ = ['hopro_read'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['hopro_form', 'hopro_route'])]
+    #[Groups(['hopro_read', 'hopro_form', 'hopro_route'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -34,9 +35,11 @@ class HoProject extends DataEntity
     private ?string $image = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['hopro_form'])]
     private ?\DateTimeInterface $startAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['hopro_form'])]
     private ?\DateTimeInterface $endAt = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -79,15 +82,15 @@ class HoProject extends DataEntity
     private Collection $lifestyles;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_text'])]
+    #[Groups(['hopro_read', 'hopro_text'])]
     private ?string $textRoute = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_text'])]
+    #[Groups(['hopro_read', 'hopro_text'])]
     private ?string $iframeRoute = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['hopro_text'])]
+    #[Groups(['hopro_read', 'hopro_text'])]
     private ?float $priceRoute = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

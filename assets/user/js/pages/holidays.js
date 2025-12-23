@@ -14,6 +14,7 @@ import { ProjectTodos } from "@userPages/Holidays/Project/ProjectTodos";
 import { ProjectLifestyle } from "@userPages/Holidays/Project/ProjectLifestyle";
 import { ProjectRoute } from "@userPages/Holidays/Project/ProjectRoute";
 import { ProjectBudget } from "@userPages/Holidays/Project/ProjectBudget";
+import { ProjectRead } from "@userPages/Holidays/Project/ProjectRead";
 
 let el = document.getElementById("projects_update");
 if(el){
@@ -23,6 +24,11 @@ if(el){
 el = document.getElementById("projects_create");
 if(el){
     createRoot(el).render(<ProjectFormulaire context="create" element={null} />)
+}
+
+let projectRead = document.getElementById("projects_read");
+if(projectRead){
+    createRoot(projectRead).render(<ProjectRead elem={JSON.parse(projectRead.dataset.elem)} userId={projectRead.dataset.userId} />)
 }
 
 let deletesProject = document.querySelectorAll('.delete-project');
