@@ -96,8 +96,40 @@ export class RandoImages extends Component {
 		e.preventDefault();
 
 		const { randoId } = this.props;
+		const files = this.files.current.state.files;
 
-		this.handleUploadChunk(this, randoId, 0, 20, 0);
+		this.handleParallelUpload(files, randoId, 5);
+
+		// this.handleUploadChunk(this, randoId, 0, 20, 0);
+	}
+
+	async handleParallelUpload(files, randoId, batchSize) {
+		const total = files.length;
+		let completed = 0;
+
+		for (let i = 0; i < total; i += batchSize) {
+			const batch = files.slice(i, i + batchSize);
+
+			await Promise.all(batch.map(async (file, index) => {
+				const formData = new FormData();
+				formData.append('file', file);
+				formData.append('mtime', Math.floor(file.lastModified / 1000));
+
+				try {
+					await axios.post(
+						Routing.generate(URL_UPLOAD_IMAGES, { id: randoId }),
+						formData
+					);
+					completed++;
+					this.setState({ nbProgress: completed, nbTotal: total });
+				} catch (error) {
+					console.error('Upload failed:', error);
+				}
+			}));
+		}
+
+		Toastr.toast('info', "Photos envoyées.");
+		location.reload();
 	}
 
 	handleUploadChunk (self, randoId, iStart, iEnd, iProceed) {

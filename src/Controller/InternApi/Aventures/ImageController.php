@@ -27,6 +27,43 @@ class ImageController extends AbstractController
     public function upload(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository,
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
     {
+        $randoFile = '/' . $obj->getId();
+
+        $file = $request->files->get('file');
+        $mtime = $request->get('mtime');
+
+        $exif = @exif_read_data($file);
+
+        $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
+
+        $image = (new RaImage())
+            ->setFile($filenameImage)
+            ->setMTime($request->get($key . "-time"))
+            ->setThumbs($filenameImage)
+            ->setLightbox($filenameImage)
+            ->setAuthor($this->getUser())
+            ->setRando($obj)
+        ;
+
+        if ($exif && isset($exif['DateTimeOriginal'])) {
+            $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
+            $image->setTakenAt($date ?: new \DateTime());
+        } else {
+            $date = new DateTime();
+            $image->setTakenAt($date->setTimestamp($request->get($key . "-time")));
+        }
+
+        // Détection type mime
+        $mime = $file->getMimeType();
+        $image->setType(str_contains($mime, 'image/') ? 0 : (str_contains($mime, 'video/') ? 1 : 99));
+
+        $imageRepository->save($image, true);
+
+        $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
+        $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+
         if($request->files){
             $images = [];
 
