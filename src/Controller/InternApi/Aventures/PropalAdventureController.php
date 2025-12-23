@@ -89,7 +89,10 @@ class PropalAdventureController extends AbstractController
     {
         $rando = $obj->getRando();
         $rando->setAdventure($obj);
-        $rando->setStatus(StatusType::Validate);
+
+        if($rando->getStatus() != StatusType::End){
+            $rando->setStatus(StatusType::Validate);
+        }
 
         $noErrors = $validator->validate($rando);
         if ($noErrors !== true) {

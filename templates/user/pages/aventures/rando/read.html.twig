@@ -40,7 +40,7 @@
                     <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
                     <span class="text-sm font-medium text-amber-800">{{ elem.statusString }}</span>
                 </div>
-                {% if elem.status != 2 %}
+                {% if app.user.id == elem.author.id or app.user.isAdmin %}
                     <div class="w-full flex justify-end gap-1">
                         <div class="delete-rando"
                              data-context="read"
@@ -55,25 +55,26 @@
                                 btn_text: 'Supprimer'
                             } %}
                         </div>
-                        {% if elem.startAt != null and elem.adventure != null %}
-                            <div class="end-rando"
-                                 data-context="read"
-                                 data-id="{{ elem.id }}"
-                                 data-name="{{ elem.name }}"
-                                 data-groupe-slug="{{ groupe.slug }}"
-                            >
-                                {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                                    btn_link: "",
-                                    btn_type: 'green',
-                                    btn_icon: 'chart-3',
-                                    btn_text: 'Terminer'
-                                } %}
-                            </div>
+                        {% if elem.status != 2 %}
+                            {% if elem.startAt != null and elem.adventure != null %}
+                                <div class="end-rando"
+                                     data-context="read"
+                                     data-id="{{ elem.id }}"
+                                     data-name="{{ elem.name }}"
+                                     data-groupe-slug="{{ groupe.slug }}"
+                                >
+                                    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                                        btn_link: "",
+                                        btn_type: 'green',
+                                        btn_icon: 'chart-3',
+                                        btn_text: 'Terminer'
+                                    } %}
+                                </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                 {% endif %}
             </div>
-
 
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                 <h3 class="text-sm font-semibold text-slate-700 mb-3">Participants</h3>
@@ -102,7 +103,7 @@
                     {% include "layout/components/tailwind/loaders/loader.html.twig" %}
                 </div>
 
-                {% if elem.startAt %}
+                {% if elem.startAt or elem.status == 2 %}
                     <div id="rando_adventures" class="w-full"
                          data-rando-id="{{ elem.id }}"
                          data-user-id="{{ app.user.id }}"
@@ -119,7 +120,7 @@
             </div>
         </div>
 
-        {% if elem.startAt and elem.adventure %}
+        {% if elem.startAt and elem.adventure or elem.status == 2 %}
             <div class="lg:col-span-2 space-y-6">
                 {% set adventure = elem.adventure %}
 

@@ -117,6 +117,7 @@ class RandoController extends AbstractController
         foreach($imageRepository->findBy(['rando' => $obj]) as $item){
             $fileUploader->deleteFile($item->getFile(), RaRando::FOLDER_IMAGES.'/'.$item->getRando()->getId(), false);
             $fileUploader->deleteFile($item->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$item->getRando()->getId(), false);
+            $fileUploader->deleteFile($item->getLightbox(), RaRando::FOLDER_LIGHTBOX.'/'.$item->getRando()->getId(), false);
 
             $imageRepository->remove($item);
         }
@@ -139,7 +140,9 @@ class RandoController extends AbstractController
     public function cancelAdventure(RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository): Response
     {
         $obj->setAdventure(null);
-        $obj->setStatus(StatusType::Propal);
+        if($obj->getStatus() != StatusType::End){
+            $obj->setStatus(StatusType::Propal);
+        }
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponseSuccessful('ok');
