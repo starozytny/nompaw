@@ -27,60 +27,24 @@ class ImageController extends AbstractController
     public function upload(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository,
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
     {
-        $randoFile = '/' . $obj->getId();
-
-        $file = $request->files->get('file');
-        $mtime = $request->get('mtime');
-
-        $exif = @exif_read_data($file);
-
-        $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
-
-        $image = (new RaImage())
-            ->setFile($filenameImage)
-            ->setMTime($request->get($key . "-time"))
-            ->setThumbs($filenameImage)
-            ->setLightbox($filenameImage)
-            ->setAuthor($this->getUser())
-            ->setRando($obj)
-        ;
-
-        if ($exif && isset($exif['DateTimeOriginal'])) {
-            $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
-            $image->setTakenAt($date ?: new \DateTime());
-        } else {
-            $date = new DateTime();
-            $image->setTakenAt($date->setTimestamp($request->get($key . "-time")));
-        }
-
-        // Détection type mime
-        $mime = $file->getMimeType();
-        $image->setType(str_contains($mime, 'image/') ? 0 : (str_contains($mime, 'video/') ? 1 : 99));
-
-        $imageRepository->save($image, true);
-
-        $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
-        $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
-
-        return $apiResponse->apiJsonResponseSuccessful('ok');
-
         if($request->files){
             $images = [];
 
             $randoFile = '/' . $obj->getId();
             foreach($request->files as $key => $file){
-                $exif = @exif_read_data($file);
-
                 $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
-                    ->setMTime($request->get($key . "-time"))
+                    ->setMTime($request->get('mtime'))
                     ->setThumbs($filenameImage)
                     ->setLightbox($filenameImage)
                     ->setAuthor($this->getUser())
                     ->setRando($obj)
                 ;
+
+                $fileUploaded = $this->getParameter('private_directory') . $image->getFileFile();
+                $exif = @exif_read_data($fileUploaded);
 
                 if ($exif && isset($exif['DateTimeOriginal'])) {
                     $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
@@ -90,7 +54,7 @@ class ImageController extends AbstractController
                     $image->setTakenAt($date->setTimestamp($request->get($key . "-time")));
                 }
 
-                $mime = mime_content_type($this->getParameter('private_directory') . $image->getFileFile());
+                $mime = mime_content_type($fileUploaded);
                 if(str_contains($mime, "image/")){
                     $image->setType(0);
                 }elseif(str_contains($mime, "video/")){
@@ -111,23 +75,7 @@ class ImageController extends AbstractController
             }
         }
 
-        $max = $request->get('max');
-        $iEnd = $request->get('iEnd');
-        $iProceed = $request->get('iProceed');
-
-        if($iProceed < $max){
-            return $apiResponse->apiJsonResponseCustom([
-                'max' => $max,
-                'iStart' => $iEnd,
-                'iEnd' => $iEnd + 20,
-                'iProceed' => $iProceed,
-                'continue' => true
-            ]);
-        }
-
-        return $apiResponse->apiJsonResponseCustom([
-            'continue' => false
-        ]);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
     #[Route('/image/delete/{id}', name: 'image_delete', options: ['expose' => true], methods: 'DELETE')]
