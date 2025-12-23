@@ -196,7 +196,7 @@ class Form extends Component {
                                 </Radiobox>
                             </div>
 							<div>
-								<Input identifiant="story" valeur={story} {...params0}>Lien URL du storytelling</Input>
+								<Input identifiant="story" valeur={story} {...params0}>Nom de la route du storytelling</Input>
 							</div>
                         </div>
                     </div>
