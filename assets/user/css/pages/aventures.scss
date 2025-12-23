@@ -3,6 +3,7 @@
   opacity: 0;
 
   &:hover, &.active{
+    z-index: 20;
     opacity: 1;
   }
 }

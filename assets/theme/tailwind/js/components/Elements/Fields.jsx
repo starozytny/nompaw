@@ -596,7 +596,7 @@ export class InputFile extends Component {
 									? <div>{files.length} fichiers à téléverser.</div>
 									: files.map((file, index) => {
 										return <div className="flex gap-2" key={index}>
-											{format === "image" && <div className="h-16 w-16 rounded-md overflow-hidden bg-gray-200">
+											{format === "image" && !file.type.includes('video') && <div className="h-16 w-16 rounded-md overflow-hidden bg-gray-200">
 												<img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-contain" />
 											</div>}
 											<div>

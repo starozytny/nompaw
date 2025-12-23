@@ -348,9 +348,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 					</div>
 					: null
 				}
-				<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}
-					 style={elem.type === 1 ? { height: "87%" } : {}}
-				>
+				<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}>
 					<div className="flex justify-between gap-2 p-2">
 						<div className="group">
 							<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
@@ -575,11 +573,17 @@ class LightboxContent extends Component {
 					 onTouchEnd={this.handleTouchEnd}
 				>
 					{images.map(image => {
-						return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
-							<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
-								 className="max-w-[1440px] mx-auto w-full h-full object-contain select-none outline-none transition-transform"
-								 style={{ transform: `translateX(${currentTranslate}px)` }} />
-						</div>
+						if(image.type === 1){
+							return <video className="max-h-dvh" controls>
+								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
+							</video>
+						}else{
+							return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
+								<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
+									 className="max-w-[1440px] mx-auto w-full h-full object-contain select-none outline-none transition-transform"
+									 style={{ transform: `translateX(${currentTranslate}px)` }} />
+							</div>
+						}
 					})}
 				</div>
 				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full right-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
