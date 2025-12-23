@@ -26,10 +26,17 @@ class DataMain
 
         $username = $this->sanitizeData->fullSanitize($data->username);
 
+        if(isset($data->firstname) && isset($data->lastname)){
+            $obj = ($obj)
+                ->setFirstname($this->sanitizeData->sanitizeString($data->firstname))
+                ->setLastname($this->sanitizeData->sanitizeString($data->lastname))
+            ;
+        }else{
+            $obj->setLastname($this->sanitizeData->sanitizeString($data->displayName));
+        }
+
         return ($obj)
             ->setUsername($username)
-            ->setFirstname($this->sanitizeData->sanitizeString($data->firstname))
-            ->setLastname($this->sanitizeData->sanitizeString($data->lastname))
             ->setDisplayName($data->displayName ? $this->sanitizeData->sanitizeString($data->displayName) : $username)
             ->setEmail($data->email)
         ;

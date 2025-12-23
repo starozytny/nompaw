@@ -19,8 +19,6 @@ export function UserFormulaire () {
 	return <Form
 		url={Routing.generate(URL_CREATE_ELEMENT)}
 		username=""
-		firstname=""
-		lastname=""
 		displayName=""
 		email=""
 	/>;
@@ -33,8 +31,6 @@ class Form extends Component {
 		this.state = {
 			context: "registration",
 			username: props.username,
-			firstname: props.firstname,
-			lastname: props.lastname,
 			displayName: props.displayName,
 			email: props.email,
 			password: '',
@@ -52,7 +48,7 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { url } = this.props;
-		const { username, firstname, lastname, displayName, password, password2, email, critere } = this.state;
+		const { username, displayName, password, password2, email, critere } = this.state;
 
 		this.setState({ errors: [] });
 
@@ -61,8 +57,6 @@ class Form extends Component {
 		} else {
 			let paramsToValidate = [
 				{ type: "text", id: 'username', value: username },
-				{ type: "text", id: 'firstname', value: firstname },
-				{ type: "text", id: 'lastname', value: lastname },
 				{ type: "text", id: 'displayName', value: displayName },
 				{ type: "email", id: 'email', value: email },
 				{ type: "password", id: 'password', value: password, idCheck: 'password2', valueCheck: password2 }
@@ -92,7 +86,7 @@ class Form extends Component {
 	}
 
 	render () {
-		const { errors, username, firstname, lastname, displayName, email, password, password2 } = this.state;
+		const { errors, username, displayName, email, password, password2 } = this.state;
 
 		let params0 = { errors: errors, onChange: this.handleChange };
 
@@ -105,14 +99,6 @@ class Form extends Component {
 						</div>
 						<div className="w-full">
 							<Input identifiant="email" valeur={email}    {...params0} type="email">Adresse e-mail</Input>
-						</div>
-					</div>
-					<div className="flex gap-2">
-						<div className="w-full">
-							<Input identifiant="firstname" valeur={firstname}  {...params0}>Prénom</Input>
-						</div>
-						<div className="w-full">
-							<Input identifiant="lastname" valeur={lastname}   {...params0}>Nom</Input>
 						</div>
 					</div>
 					<div>
@@ -134,6 +120,5 @@ class Form extends Component {
 Form.propTypes = {
 	url: PropTypes.node.isRequired,
 	username: PropTypes.string.isRequired,
-	firstname: PropTypes.string.isRequired,
 	email: PropTypes.string.isRequired,
 }
