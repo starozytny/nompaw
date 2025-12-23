@@ -6,7 +6,6 @@ use App\Entity\Holiday\HoProject;
 use App\Repository\Holiday\HoLifestyleRepository;
 use App\Repository\Holiday\HoProjectRepository;
 use App\Repository\Holiday\HoPropalActivityRepository;
-use App\Repository\Holiday\HoPropalDateRepository;
 use App\Repository\Holiday\HoPropalHouseRepository;
 use App\Repository\Holiday\HoTodoRepository;
 use App\Service\Api\ApiResponse;
@@ -118,21 +117,16 @@ class ProjectController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(HoProject $obj, HoProjectRepository $repository, ApiResponse $apiResponse,
                            FileUploader $fileUploader,
-                           HoPropalDateRepository $dateRepository,
                            HoPropalHouseRepository $houseRepository,
                            HoPropalActivityRepository $activityRepository,
                            HoTodoRepository $todoRepository,
                            HoLifestyleRepository $lifestyleRepository): Response
     {
         $image = $obj->getImage();
-        $obj->setPropalDate(null);
         $obj->setPropalHouse(null);
 
         $repository->save($obj, true);
 
-        foreach($dateRepository->findBy(['project' => $obj]) as $item){
-            $dateRepository->remove($item);
-        }
         foreach($houseRepository->findBy(['project' => $obj]) as $item){
             $houseRepository->remove($item);
         }
@@ -156,7 +150,6 @@ class ProjectController extends AbstractController
     #[Route('/cancel/date/{id}', name: 'cancel_date', options: ['expose' => true], methods: 'PUT')]
     public function cancelDate(HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository): Response
     {
-        $obj->setPropalDate(null);
         $obj->setStartAt(null);
         $obj->setEndAt(null);
 

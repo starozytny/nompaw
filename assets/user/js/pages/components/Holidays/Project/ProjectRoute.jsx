@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
+import { createPortal } from "react-dom";
 
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
@@ -11,7 +11,7 @@ import Inputs from "@commonFunctions/inputs";
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Input } from "@tailwindComponents/Elements/Fields";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button } from "@tailwindComponents/Elements/Button";
 
 const URL_UPDATE_PROJECT = 'intern_api_projects_update_text';
 
@@ -61,7 +61,7 @@ export class ProjectRoute extends Component {
 		const self = this;
 		this.formText.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({
-			method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, { 'type': 'route', 'id': projectId }),
+			method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, { type: 'route', id: projectId }),
 			data: { texte: texte, iframe: iframe, price: price }
 		})
 			.then(function (response) {
@@ -95,52 +95,67 @@ export class ProjectRoute extends Component {
 			return null;
 		}
 
-		return <div className="bg-white border rounded-md max-w-screen-lg">
-            <div className="p-4 bg-color0/80 text-slate-50 rounded-t-md flex justify-between gap-2">
-                <div className="font-semibold text-xl">🚓 Trajet</div>
-                {userId
-                    ? <div>
-                        <Button type="default" iconLeft="pencil" onClick={() => this.handleModal("formText")}>
-                            Modifier
-                        </Button>
-                    </div>
-                    : null
-                }
-            </div>
-            <div className="p-4">
-                <div className="flex flex-col gap-4 sm:flex-row">
-                    <div className="w-full text-sm" dangerouslySetInnerHTML={{ __html: textRoute }}></div>
-                    <div className="w-full" dangerouslySetInnerHTML={{ __html: iframeRoute }}></div>
-                </div>
-            </div>
+		return <div className="space-y-6">
+			<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+				<div className="flex items-center justify-between mb-4">
+					<h3 className="text-lg font-semibold text-slate-800">
+						<span className="icon-map !font-semibold text-xl"></span>
+						<span className="ml-2">Itinéraire du voyage</span>
+					</h3>
+					{userId
+						? <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium" onClick={() => this.handleModal("formText")}>
+							Modifier
+						</button>
+						: null
+					}
+				</div>
 
-            <div className="flex flex-col gap-2 justify-center items-center p-4 bg-color0/10 rounded-b-md">
-                <div className="text-xl font-bold text-yellow-500">
-                    {Sanitaze.toFormatCurrency(priceRoute)}
-                </div>
-            </div>
+				{textRoute
+					? <div className="mb-4 p-4 bg-slate-50 rounded-lg">
+						<div className="text-sm text-slate-700">
+							<div dangerouslySetInnerHTML={{ __html: textRoute }}></div>
+						</div>
+					</div>
+					: null
+				}
 
-			<Modal ref={this.formText} identifiant="form-route" maxWidth={768} margin={5} title="Modifier la partie Route"
-				   content={<div className="flex flex-col gap-4">
-					   <div>
-						   <TinyMCE type={8} identifiant="texte" valeur={texte.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
-                               Texte
-						   </TinyMCE>
-					   </div>
-					   <div>
-						   <Input identifiant="iframe" valeur={iframe} {...params}>Iframe</Input>
-					   </div>
-					   <div>
-						   <Input identifiant="price" valeur={price} {...params}>Prix</Input>
-					   </div>
-				   </div>}
-				   footer={null} closeTxt="Annuler" />
+				<div className="relative h-[450px] bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center">
+					{iframeRoute
+						? <div className="w-full project-route" dangerouslySetInnerHTML={{ __html: iframeRoute }}></div>
+						: <div className="text-center text-slate-500">
+							<span className="icon-map text-2xl"></span>
+							<p className="mt-2 font-medium">Carte</p>
+							<p className="text-sm">Renseigner une iframe pour voir la carte.</p>
+						</div>
+					}
+					<div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-xs">
+						<div className="font-medium text-yellow-500">
+							{Sanitaze.toFormatCurrency(priceRoute)}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{createPortal(
+				<Modal ref={this.formText} identifiant="form-route" maxWidth={768} margin={5} title="Modifier la partie Route"
+					   content={<div className="flex flex-col gap-4">
+						   <div>
+							   <TinyMCE type={8} identifiant="texte" valeur={texte.value} errors={errors} onUpdateData={this.handleChangeTinyMCE}>
+								   Texte
+							   </TinyMCE>
+						   </div>
+						   <div>
+							   <Input identifiant="iframe" valeur={iframe} {...params}>Iframe</Input>
+						   </div>
+						   <div>
+							   <Input identifiant="price" valeur={price} {...params}>Prix</Input>
+						   </div>
+					   </div>}
+					   footer={null} closeTxt="Annuler" />,
+				document.body
+			)}
 		</div>
 	}
-}
-
-ProjectRoute.propTypes = {
-	projectId: PropTypes.string.isRequired
 }
 
 function modalFormText (self) {

@@ -29,12 +29,12 @@ class RandoController extends AbstractController
         $obj = $repository->findOneBy(['slug' => $slug]);
         $propalDates = $propalDateRepository->findBy(['rando' => $obj]);
         $propalAdvs  = $adventureRepository->findBy(['rando' => $obj]);
-        $images      = $imageRepository->findBy(['rando' => $obj], ['takenAt' => 'ASC']);
-        $users       = $userRepository->findAll();
+        $images = $imageRepository->findBy(['rando' => $obj], ['takenAt' => 'ASC']);
+        $users = $userRepository->findAll();
 
         $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);
-        $propalAdvs  = $serializer->serialize($propalAdvs,  'json', ['groups' => RaPropalAdventure::LIST]);
-        $images      = $serializer->serialize($images,      'json', ['groups' => RaImage::LIST]);
+        $propalAdvs = $serializer->serialize($propalAdvs,  'json', ['groups' => RaPropalAdventure::LIST]);
+        $images = $serializer->serialize($images, 'json', ['groups' => RaImage::LIST]);
 
         return $this->render('user/pages/aventures/rando/read.html.twig', [
             'elem' => $obj,
@@ -59,7 +59,7 @@ class RandoController extends AbstractController
     #[Route('/modifier/{slug}', name: 'update')]
     public function update($slug, RaRandoRepository $repository, UserRepository $userRepository, SerializerInterface $serializer): Response
     {
-        $obj   = $repository->findOneBy(['slug' => $slug]);
+        $obj = $repository->findOneBy(['slug' => $slug]);
         $users = $userRepository->findAll();
 
         if($obj->getAuthor()->getId() != $this->getUser()->getId() && !$this->isGranted('ROLE_ADMIN')){

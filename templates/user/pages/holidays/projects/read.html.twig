@@ -29,29 +29,62 @@
 {% endset %}
 
 {% block main_content %}
-<div class="flex flex-col">
-    {% if app.user.id == elem.author.id or app.user.isAdmin %}
-        <div class="w-full flex justify-end gap-1 border-b pb-4 mb-4">
-            <div id="share_link" class="cursor-pointer flex items-center justify-center text-center gap-1 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
-                 data-url="{{ path('user_projects_read', {slug: elem.slug, code: elem.code}) }}">
-                <span class="icon-share inline-block translate-y-0.5"></span>
-                <span class="ml-1">Partager</span>
-            </div>
-            <div class="delete-project"
-                 data-context="read"
-                 data-id="{{ elem.id }}"
-                 data-name="{{ elem.name }}"
-            >
-                {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                    btn_link: "",
-                    btn_type: 'red',
-                    btn_icon: 'chart-3',
-                    btn_text: 'Supprimer'
-                } %}
+<div class="min-h-screen bg-gradient-to-br from-white/10 to-white rounded-2xl border">
+    <div class="project-title w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 border rounded-t-2xl flex flex-col gap-2" style="background-image: url({{ elem.imageFile }});">
+        <div class="relative h-full flex items-center py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                                onclick="location.href = '{{ path('user_projects_index') }}';"
+                        >
+                            <span class="icon-left-chevron"></span>
+                        </button>
+                        <div class="text-white">
+                            <h1 class="text-3xl font-bold mb-3">{{ elem.name }}</h1>
+                            <div class="flex items-center space-x-6 text-sm">
+                                <div class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                                    <span class="icon-calendar"></span>
+                                    <span>{{ elem.startAt ? elem.startAt | date('d/m/Y') : "" }} {{ elem.endAt ? " au " ~ elem.endAt | date('d/m/Y') : "" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        {% if app.user.id == elem.author.id or app.user.isAdmin %}
+                            <div class="w-full flex justify-end gap-1">
+                                <div id="share_link" class="cursor-pointer flex items-center justify-center text-center gap-1 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+                                     data-url="{{ path('user_projects_read', {slug: elem.slug, code: elem.code}) }}">
+                                    <span class="icon-share"></span>
+                                    <span class="ml-1">Partager</span>
+                                </div>
+                                <div class="delete-project"
+                                     data-context="read"
+                                     data-id="{{ elem.id }}"
+                                     data-name="{{ elem.name }}"
+                                >
+                                    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                                        btn_link: "",
+                                        btn_type: 'red',
+                                        btn_icon: 'chart-3',
+                                        btn_text: 'Supprimer'
+                                    } %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-    {% endif %}
+    </div>
 
+    <div id="projects_read" data-elem="{{ element }}" data-user-id="{{ app.user.id }}">
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+</div>
+
+<div class="flex flex-col">
     {% include "user/pages/holidays/projects/components/read_content.html.twig" %}
 </div>
 {% endblock %}

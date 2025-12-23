@@ -170,28 +170,46 @@ class Form extends Component {
 			<div className="flex flex-col gap-4">
 				<div className="flex gap-4">
 					<div className="w-full">
-						{recurrenceId
-							? <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
-							: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
-										classItems="flex flex-wrap gap-2" styleType="fat">
-								Type
-							</Radiobox>
+						{type === 4
+							? <InputView valeur="Economie utilisée" errors={errors}>Type</InputView>
+							: recurrenceId
+								? <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
+								: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
+											classItems="flex flex-wrap gap-2" styleType="fat">
+									Type
+								</Radiobox>
 						}
 					</div>
-					<div className="w-full max-w-20">
-						<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
-							Réel ?
-						</Switcher>
-					</div>
+					{type === 4
+						? null
+						: <div className="w-full max-w-20">
+							<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
+								Réel ?
+							</Switcher>
+						</div>
+					}
 				</div>
 
 				<div className="flex gap-4">
-					<div className="w-full">
-						<Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
-					</div>
-					<div className="w-full">
-						<Input identifiant="price" valeur={price} {...paramsInput0}>Prix</Input>
-					</div>
+					{type === 4
+						? <>
+							<div className="w-full">
+								<InputView valeur={name} errors={errors}>Intitulé</InputView>
+							</div>
+							<div className="w-full">
+								<InputView valeur={price} errors={errors}>Prix</InputView>
+							</div>
+						</>
+						: <>
+							<div className="w-full">
+								<Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
+							</div>
+							<div className="w-full">
+								<Input identifiant="price" valeur={price} {...paramsInput0}>Prix</Input>
+							</div>
+						</>
+					}
+
 				</div>
 
 				<div className="flex gap-4">
@@ -199,10 +217,13 @@ class Form extends Component {
 						<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
 					</div>
 					<div className="w-full">
-						<SelectCombobox identifiant="category" valeur={category} items={categoryItems}
-										{...paramsInput1} toSort={true}>
-							Catégorie
-						</SelectCombobox>
+						{type === 4
+							? <InputView valeur="Economie" errors={errors}>Catégorie</InputView>
+							: <SelectCombobox identifiant="category" valeur={category} items={categoryItems}
+											  {...paramsInput1} toSort={true}>
+								Catégorie
+							</SelectCombobox>
+						}
 					</div>
 				</div>
 
