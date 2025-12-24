@@ -8,7 +8,6 @@ import Toastr from "@tailwindFunctions/toastr";
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
 import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
-import { ProjectActivities } from "@userPages/Holidays/Project/ProjectActivities";
 import { ProjectLifestyle } from "@userPages/Holidays/Project/ProjectLifestyle";
 import { ProjectRead } from "@userPages/Holidays/Project/ProjectRead";
 
@@ -47,11 +46,6 @@ if(projectHouse){
 let projectLifestyle = document.getElementById("project_lifestyle");
 if(projectLifestyle){
     createRoot(projectLifestyle).render(<ProjectLifestyle {...projectLifestyle.dataset} />)
-}
-
-let projectActivities = document.getElementById("project_activities");
-if(projectActivities){
-    createRoot(projectActivities).render(<ProjectActivities {...projectActivities.dataset} mode={projectActivities.dataset.mode === "1"} />)
 }
 
 let share = document.getElementById('share_link');

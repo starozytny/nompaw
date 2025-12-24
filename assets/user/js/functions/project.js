@@ -5,20 +5,13 @@ function getBudget (participants, routePrice, housePrice, lifestyle, activities)
 	let totalPrice = (routePrice ? parseFloat(routePrice) : 0) + (housePrice ? parseFloat(housePrice) : 0);
 	let totalPromo = (routePrice ? parseFloat(routePrice) : 0) + (housePromo ? housePromo : 0);
 
-	let lifeStylePrice = 0, activitiesPrice = 0, activitesWithoutPrice = 0;
-	let lifeStylePricePers = 0, activitiesPricePers = 0;
+	let lifeStylePrice = 0, activitiesPrice = 0;
 	JSON.parse(lifestyle).map(el => {
-		lifeStylePrice += el.price ? el.price : 0;
-		lifeStylePricePers += el.price ? el.price * (el.priceType === 0 ? participants : 1) : 0;
+		lifeStylePrice += el.price ? el.price * (el.priceType === 0 ? participants : 1) : 0;
 	})
 	JSON.parse(activities).map(el => {
-		if (el.isSelected) {
-			if (el.price) {
-				activitiesPrice += el.price;
-				activitiesPricePers += el.price * (el.priceType === 0 ? participants : 1);
-			} else {
-				activitesWithoutPrice++;
-			}
+		if (el.price) {
+			activitiesPrice += el.price * (el.priceType === 0 ? participants : 1);
 		}
 	})
 

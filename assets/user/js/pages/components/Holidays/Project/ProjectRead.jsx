@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { Calendar, Activity, Euro, Plus, Clock, Edit2, X } from 'lucide-react';
+import { Calendar, Plus, Clock, Edit2, X } from 'lucide-react';
 
 import ProjectFunctions from "@userFunctions/project";
 
 import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
 import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
 import { ProjectTodos } from "@userPages/Holidays/Project/Components/ProjectTodos";
+import { ProjectActivities } from "@userPages/Holidays/Project/Components/ProjectActivities";
+
+import { Input } from "@tailwindComponents/Elements/Fields";
 
 export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
 	const [activeTab, setActiveTab] = useState('overview');
-	const [nbPers, setPers] = useState(1);
+	const [participants, setParticipants] = useState(1);
+
+	let onChange = (e) => {
+		let value = e.currentTarget.value;
+		setParticipants(value === "" ? 1 : value)
+	}
 
 	const dailyPlan = [
 		{
@@ -49,12 +57,7 @@ export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
 		{ name: "Chalet 10 personnes", location: "Chamonix-Mont-Blanc", price: 1426.70, perPerson: 142.67, nights: 3, link: "10 Route du Poud" }
 	];
 
-	const activitiesDefault = [
-		{ name: "Rafting", price: 61, perPerson: 61, icon: "🚣" },
-		{ name: "Multipass Mont Blanc", price: 70, perPerson: 70, icon: "🚠" }
-	];
-
-	let budget = ProjectFunctions.getBudget(nbPers, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyle, activities);
+	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyle, activities);
 
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
@@ -62,14 +65,19 @@ export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
 				<div className="flex items-center justify-between h-12">
 					<div className="flex items-center space-x-6 text-sm">
 						<div className="flex items-center space-x-2">
-							<span className="icon-group"></span>
-							<span className="text-slate-700">10 participants</span>
+							<span className="icon-group !font-bold text-ls"></span>
+							<div className="text-slate-700 flex items-center">
+								<div className="w-10 mr-2">
+									<Input identifiant="participants" valeur={participants} errors={[]} onChange={onChange} />
+								</div>
+								participants
+							</div>
 						</div>
 						<div className="w-px h-6 bg-slate-200"></div>
 						<div className="flex items-center space-x-2">
-							<Euro />
-							<span className="font-semibold text-slate-800">{(1552.88).toFixed(2)} € / {(1940.70).toFixed(2)} €</span>
-							<span className="text-slate-500">(80%)</span>
+							<span class="icon-bank !font-bold text-ls"></span>
+							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(budget.total).toFixed(2)} €</span>
+							{/*<span className="text-slate-500">(80%)</span>*/}
 						</div>
 					</div>
 					<div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -142,45 +150,19 @@ export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
 							))}
 						</div>
 
-						<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-							<div className="flex items-center justify-between mb-4">
-								<h3 className="text-lg font-semibold text-slate-800 flex items-center">
-									<Activity />
-									<span className="ml-2">Activités</span>
-								</h3>
-								<button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
-									+ Ajouter
-								</button>
-							</div>
-							<div className="space-y-3">
-								{activitiesDefault.map((activity, idx) => (
-									<div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-										<div className="flex items-center space-x-3">
-											<span className="text-2xl">{activity.icon}</span>
-											<span className="text-sm font-medium text-slate-700">{activity.name}</span>
-										</div>
-										<div className="text-right">
-											<div className="font-semibold text-emerald-600">{activity.price} €</div>
-											<div className="text-xs text-slate-500">{activity.perPerson} € / pers.</div>
-										</div>
-									</div>
-								))}
-								<div className="pt-3 border-t border-slate-200">
-									<div className="flex justify-between items-center">
-										<span className="text-sm font-medium text-slate-600">Total activités</span>
-										<span className="text-lg font-bold text-emerald-600">
-											{activitiesDefault.reduce((sum, a) => sum + a.price, 0)} €
-										</span>
-									</div>
-								</div>
-							</div>
-						</div>
-
 						<ProjectTodos
 							projectId={elem.id}
 							todos={todos}
 							userId={userId}
 						/>
+
+						<div className="col-span-2">
+							<ProjectActivities
+								projectId={elem.id}
+								activities={activities}
+								userId={userId}
+							/>
+						</div>
 					</div>
 				</div>
 			)}

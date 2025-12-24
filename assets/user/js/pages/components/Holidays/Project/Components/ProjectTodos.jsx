@@ -116,7 +116,7 @@ export class ProjectTodos extends Component {
 			return null;
 		}
 
-		return <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+		return <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
 			<div className="flex items-center justify-between mb-4">
 				<h3 className="text-lg font-semibold text-slate-800">
 					<span className="icon-check !font-bold text-xl"></span>
