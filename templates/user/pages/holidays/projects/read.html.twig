@@ -79,12 +79,13 @@
         </div>
     </div>
 
-    <div id="projects_read" data-elem="{{ element }}" data-user-id="{{ app.user.id }}">
+    <div id="projects_read"
+         data-elem="{{ element }}"
+         data-user-id="{{ app.user.id }}"
+         data-lifestyle="{{ lifestyles }}"
+         data-activities="{{ propalActivities }}"
+    >
         {% include "layout/components/tailwind/loaders/loader.html.twig" %}
     </div>
-</div>
-
-<div class="flex flex-col">
-    {% include "user/pages/holidays/projects/components/read_content.html.twig" %}
 </div>
 {% endblock %}

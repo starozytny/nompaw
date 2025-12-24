@@ -11,8 +11,7 @@ import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
 import { ProjectActivities } from "@userPages/Holidays/Project/ProjectActivities";
 import { ProjectTodos } from "@userPages/Holidays/Project/ProjectTodos";
 import { ProjectLifestyle } from "@userPages/Holidays/Project/ProjectLifestyle";
-import { ProjectRoute } from "@userPages/Holidays/Project/ProjectRoute";
-import { ProjectBudget } from "@userPages/Holidays/Project/ProjectBudget";
+import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
 import { ProjectRead } from "@userPages/Holidays/Project/ProjectRead";
 
 let el = document.getElementById("projects_update");
@@ -27,7 +26,11 @@ if(el){
 
 let projectRead = document.getElementById("projects_read");
 if(projectRead){
-    createRoot(projectRead).render(<ProjectRead elem={JSON.parse(projectRead.dataset.elem)} userId={projectRead.dataset.userId} />)
+    createRoot(projectRead).render(<ProjectRead elem={JSON.parse(projectRead.dataset.elem)}
+                                                userId={projectRead.dataset.userId}
+                                                lifestyle={projectRead.dataset.lifestyle}
+                                                activities={projectRead.dataset.activities}
+    />)
 }
 
 let deletesProject = document.querySelectorAll('.delete-project');
@@ -35,16 +38,6 @@ if(deletesProject){
     deletesProject.forEach(elem => {
         createRoot(elem).render(<ProjectDelete context="projects" {...elem.dataset} />)
     })
-}
-
-let projectBudget = document.getElementById("project_budget");
-if(projectBudget){
-    createRoot(projectBudget).render(<ProjectBudget {...projectBudget.dataset} />)
-}
-
-let projectRoute = document.getElementById("project_route");
-if(projectRoute){
-    createRoot(projectRoute).render(<ProjectRoute {...projectRoute.dataset} />)
 }
 
 let projectHouse = document.getElementById("project_house");

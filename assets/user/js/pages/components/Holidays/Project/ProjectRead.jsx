@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { Calendar, MapPin, Activity, CheckSquare, Euro, Plus, Clock, Users, Edit2, X } from 'lucide-react';
+import { Calendar, CheckSquare, Euro, Plus, Clock, Edit2, X } from 'lucide-react';
 
-import { ProjectRoute } from "@userPages/Holidays/Project/ProjectRoute";
+import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
+import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
 
-export function ProjectRead ({ elem, userId }) {
-	const [activeTab, setActiveTab] = useState('itinerary');
+export function ProjectRead ({ elem, userId, lifestyle, activities }) {
+	const [activeTab, setActiveTab] = useState('budget');
+	const [nbPers, setPers] = useState(1);
 	const [checkedItems, setCheckedItems] = useState([false, false, false, false]);
 
 	const tripData = {
-		title: "Chamonix",
-		dates: "1 août 2023 au 4 août 2023",
-		image: "/api/placeholder/800/300",
 		budget: {
 			total: 1940.70,
 			spent: 1552.88,
@@ -59,15 +58,6 @@ export function ProjectRead ({ elem, userId }) {
 		}
 	];
 
-	const accommodations = [
-		{ name: "Chalet 10 personnes", location: "Chamonix-Mont-Blanc", price: 1426.70, perPerson: 142.67, nights: 3, link: "10 Route du Poud" }
-	];
-
-	const activities = [
-		{ name: "Rafting", price: 61, perPerson: 61, icon: "🚣" },
-		{ name: "Multipass Mont Blanc", price: 70, perPerson: 70, icon: "🚠" }
-	];
-
 	const todoList = [
 		{ item: "Maillot" },
 		{ item: "Châuda" },
@@ -81,7 +71,7 @@ export function ProjectRead ({ elem, userId }) {
 				<div className="flex items-center justify-between h-12">
 					<div className="flex items-center space-x-6 text-sm">
 						<div className="flex items-center space-x-2">
-							<Users />
+							<span className="icon-group"></span>
 							<span className="text-slate-700">10 participants</span>
 						</div>
 						<div className="w-px h-6 bg-slate-200"></div>
@@ -320,51 +310,13 @@ export function ProjectRead ({ elem, userId }) {
 				</div>
 			)}
 
-			{activeTab === 'budget' && (
-				<div className="space-y-6">
-					<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-						<h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center">
-							<Euro />
-							<span className="ml-2">Répartition du budget</span>
-						</h3>
-
-						<div className="space-y-4">
-							{Object.entries(tripData.budget.breakdown).map(([key, item]) => (
-								<div key={key}>
-									<div className="flex items-center justify-between mb-2">
-										<span className="text-sm font-medium text-slate-700">{item.label}</span>
-										<span className="text-sm font-semibold text-slate-800">{item.amount} €</span>
-									</div>
-									<div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-										<div
-											className={`h-3 ${item.color} transition-all duration-500`}
-											style={{ width: `${(item.amount / tripData.budget.total) * 100}%` }}
-										/>
-									</div>
-									<div className="text-xs text-slate-500 mt-1">
-										{((item.amount / tripData.budget.total) * 100).toFixed(1)}% du budget total
-									</div>
-								</div>
-							))}
-						</div>
-
-						<div className="mt-6 pt-6 border-t border-slate-200">
-							<div className="grid grid-cols-2 gap-4">
-								<div className="bg-slate-50 rounded-lg p-4">
-									<div className="text-sm text-slate-600">Budget total</div>
-									<div className="text-2xl font-bold text-slate-800 mt-1">{tripData.budget.total.toFixed(2)} €</div>
-								</div>
-								<div className="bg-indigo-50 rounded-lg p-4">
-									<div className="text-sm text-indigo-600">Par personne</div>
-									<div className="text-2xl font-bold text-indigo-600 mt-1">
-										{(tripData.budget.total / tripData.participants).toFixed(2)} €
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
+			{activeTab === 'budget' && (<ProjectBudget
+				nbPers={nbPers}
+				routePrice={elem.priceRoute}
+				housePrice={elem.propalHouse ? elem.propalHouse.price : 0}
+				lifestyle={lifestyle}
+				activities={activities}
+			/>)}
 
 			{activeTab === 'checklist' && (
 				<div className="space-y-6">
