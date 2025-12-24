@@ -1,28 +1,14 @@
 import React, { useState } from 'react';
-import { Calendar, CheckSquare, Euro, Plus, Clock, Edit2, X } from 'lucide-react';
+import { Calendar, Activity, CheckSquare, Euro, Plus, Clock, Edit2, X } from 'lucide-react';
 
 import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
 import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
+import ProjectFunctions from "@userFunctions/project";
 
 export function ProjectRead ({ elem, userId, lifestyle, activities }) {
-	const [activeTab, setActiveTab] = useState('budget');
+	const [activeTab, setActiveTab] = useState('overview');
 	const [nbPers, setPers] = useState(1);
 	const [checkedItems, setCheckedItems] = useState([false, false, false, false]);
-
-	const tripData = {
-		budget: {
-			total: 1940.70,
-			spent: 1552.88,
-			percentage: 80,
-			breakdown: {
-				transport: { label: "Trajet", amount: 200, color: "bg-blue-500" },
-				accommodation: { label: "Hébergement", amount: 1426.70, color: "bg-purple-500" },
-				activities: { label: "Activités", amount: 134, color: "bg-emerald-500" },
-				food: { label: "Style de vie", amount: 180, color: "bg-amber-500" }
-			}
-		},
-		participants: 10
-	};
 
 	const dailyPlan = [
 		{
@@ -58,12 +44,23 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 		}
 	];
 
+	const accommodations = [
+		{ name: "Chalet 10 personnes", location: "Chamonix-Mont-Blanc", price: 1426.70, perPerson: 142.67, nights: 3, link: "10 Route du Poud" }
+	];
+
+	const activitiesDefault = [
+		{ name: "Rafting", price: 61, perPerson: 61, icon: "🚣" },
+		{ name: "Multipass Mont Blanc", price: 70, perPerson: 70, icon: "🚠" }
+	];
+
 	const todoList = [
 		{ item: "Maillot" },
 		{ item: "Châuda" },
 		{ item: "Vêtement froid" },
 		{ item: "Crèpe anti" }
 	];
+
+	let budget = ProjectFunctions.getBudget(nbPers, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyle, activities);
 
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
@@ -130,7 +127,7 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 								</h3>
 							</div>
 							<div className="space-y-3">
-								{Object.entries(tripData.budget.breakdown).map(([key, item]) => (
+								{Object.entries(budget.breakdown).map(([key, item]) => (
 									<div key={key} className="flex items-center justify-between text-sm">
 										<div className="flex items-center space-x-2">
 											<div className={`w-3 h-3 rounded-full ${item.color}`} />
@@ -143,10 +140,10 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 							<div className="mt-4 pt-4 border-t border-slate-200">
 								<div className="flex justify-between items-center">
 									<span className="text-sm font-medium text-slate-600">Total</span>
-									<span className="text-2xl font-bold text-indigo-600">{tripData.budget.total.toFixed(2)} €</span>
+									<span className="text-2xl font-bold text-indigo-600">{budget.total.toFixed(2)} €</span>
 								</div>
 								<div className="text-xs text-slate-500 text-right mt-1">
-									{(tripData.budget.total / tripData.participants).toFixed(2)} € / pers.
+									{(budget.total / nbPers).toFixed(2)} € / pers.
 								</div>
 							</div>
 						</div>
@@ -165,7 +162,7 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 								<div key={idx} className="space-y-2">
 									<div className="font-medium text-slate-800">{acc.name}</div>
 									<div className="flex items-center text-sm text-slate-600">
-										<MapPin />
+										<span className="icon-map"></span>
 										<span className="ml-1">{acc.location}</span>
 									</div>
 									<a href="#" className="text-sm text-indigo-600 hover:underline block">{acc.link}</a>
@@ -191,7 +188,7 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 								</button>
 							</div>
 							<div className="space-y-3">
-								{activities.map((activity, idx) => (
+								{activitiesDefault.map((activity, idx) => (
 									<div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
 										<div className="flex items-center space-x-3">
 											<span className="text-2xl">{activity.icon}</span>
@@ -207,8 +204,8 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 									<div className="flex justify-between items-center">
 										<span className="text-sm font-medium text-slate-600">Total activités</span>
 										<span className="text-lg font-bold text-emerald-600">
-                                                        {activities.reduce((sum, a) => sum + a.price, 0)} €
-                                                    </span>
+											{activitiesDefault.reduce((sum, a) => sum + a.price, 0)} €
+										</span>
 									</div>
 								</div>
 							</div>
