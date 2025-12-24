@@ -9,9 +9,7 @@ import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
 import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
 import { ProjectActivities } from "@userPages/Holidays/Project/ProjectActivities";
-import { ProjectTodos } from "@userPages/Holidays/Project/ProjectTodos";
 import { ProjectLifestyle } from "@userPages/Holidays/Project/ProjectLifestyle";
-import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
 import { ProjectRead } from "@userPages/Holidays/Project/ProjectRead";
 
 let el = document.getElementById("projects_update");
@@ -30,6 +28,7 @@ if(projectRead){
                                                 userId={projectRead.dataset.userId}
                                                 lifestyle={projectRead.dataset.lifestyle}
                                                 activities={projectRead.dataset.activities}
+                                                todos={projectRead.dataset.todos}
     />)
 }
 
@@ -53,11 +52,6 @@ if(projectLifestyle){
 let projectActivities = document.getElementById("project_activities");
 if(projectActivities){
     createRoot(projectActivities).render(<ProjectActivities {...projectActivities.dataset} mode={projectActivities.dataset.mode === "1"} />)
-}
-
-let projectTodos = document.getElementById("project_todos");
-if(projectTodos){
-    createRoot(projectTodos).render(<ProjectTodos {...projectTodos.dataset} />)
 }
 
 let share = document.getElementById('share_link');

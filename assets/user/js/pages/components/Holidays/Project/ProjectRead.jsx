@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Calendar, Activity, CheckSquare, Euro, Plus, Clock, Edit2, X } from 'lucide-react';
+import { Calendar, Activity, Euro, Plus, Clock, Edit2, X } from 'lucide-react';
 
 import ProjectFunctions from "@userFunctions/project";
 
 import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
 import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
+import { ProjectTodos } from "@userPages/Holidays/Project/Components/ProjectTodos";
 
-export function ProjectRead ({ elem, userId, lifestyle, activities }) {
+export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
 	const [activeTab, setActiveTab] = useState('overview');
 	const [nbPers, setPers] = useState(1);
-	const [checkedItems, setCheckedItems] = useState([false, false, false, false]);
 
 	const dailyPlan = [
 		{
@@ -54,13 +54,6 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 		{ name: "Multipass Mont Blanc", price: 70, perPerson: 70, icon: "🚠" }
 	];
 
-	const todoList = [
-		{ item: "Maillot" },
-		{ item: "Châuda" },
-		{ item: "Vêtement froid" },
-		{ item: "Crèpe anti" }
-	];
-
 	let budget = ProjectFunctions.getBudget(nbPers, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyle, activities);
 
 	return <>
@@ -96,7 +89,6 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 						{ id: 'overview', label: 'Vue d\'ensemble', icon: 'menu-1' },
 						{ id: 'itinerary', label: 'Itinéraire', icon: 'map' },
 						{ id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
-						{ id: 'checklist', label: 'À préparer', icon: 'check' }
 					].map((tab) => (
 						<button
 							key={tab.id}
@@ -183,6 +175,12 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 								</div>
 							</div>
 						</div>
+
+						<ProjectTodos
+							projectId={elem.id}
+							todos={todos}
+							userId={userId}
+						/>
 					</div>
 				</div>
 			)}
@@ -279,66 +277,6 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 					</div>
 				</div>
 			)}
-
-			{activeTab === 'checklist' && (
-				<div className="space-y-6">
-					<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-						<div className="flex items-center justify-between mb-6">
-							<h3 className="text-lg font-semibold text-slate-800 flex items-center">
-								<CheckSquare />
-								<span className="ml-2">Choses à préparer</span>
-							</h3>
-							<button className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
-								<Plus />
-								<span className="ml-2">Ajouter un élément</span>
-							</button>
-						</div>
-
-						<div className="space-y-2">
-							{todoList.map((todo, idx) => (
-								<div
-									key={idx}
-									className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors group"
-								>
-									<div className="flex items-center space-x-3">
-										<input
-											type="checkbox"
-											checked={checkedItems[idx]}
-											onChange={() => {
-												const newChecked = [...checkedItems];
-												newChecked[idx] = !newChecked[idx];
-												setCheckedItems(newChecked);
-											}}
-											className="w-5 h-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-										/>
-										<span className={`${checkedItems[idx] ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                                                        {todo.item}
-                                                    </span>
-									</div>
-									<button className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
-										<X />
-									</button>
-								</div>
-							))}
-						</div>
-
-						<div className="mt-6 pt-6 border-t border-slate-200">
-							<div className="flex items-center justify-between mb-2">
-								<span className="text-sm font-medium text-slate-700">Progression</span>
-								<span className="text-sm font-semibold text-slate-800">
-                                                {checkedItems.filter(t => t).length} / {todoList.length}
-                                            </span>
-							</div>
-							<div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-								<div
-									className="h-2 bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500"
-									style={{ width: `${(checkedItems.filter(t => t).length / todoList.length) * 100}%` }}
-								/>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
 		</div>
 	</>;
-};
+}
