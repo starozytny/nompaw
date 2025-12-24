@@ -151,8 +151,8 @@ export class ProjectRoute extends Component {
 							   <Input identifiant="price" valeur={price} {...params}>Prix</Input>
 						   </div>
 					   </div>}
-					   footer={null} closeTxt="Annuler" />,
-				document.body
+					   footer={null} closeTxt="Annuler" />
+				, document.body
 			)}
 		</div>
 	}

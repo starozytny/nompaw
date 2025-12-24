@@ -1,29 +1,24 @@
 import React, { useState } from 'react';
-import { Calendar, MapPin, Activity, CheckSquare, Euro, Plus, Clock, Users, Edit2, X } from 'lucide-react';
+import { Calendar, Plus, Clock, Edit2, X } from 'lucide-react';
 
-import { ProjectRoute } from "@userPages/Holidays/Project/ProjectRoute";
+import ProjectFunctions from "@userFunctions/project";
 
-export function ProjectRead ({ elem, userId }) {
-	const [activeTab, setActiveTab] = useState('itinerary');
-	const [checkedItems, setCheckedItems] = useState([false, false, false, false]);
+import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
+import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
+import { ProjectTodos } from "@userPages/Holidays/Project/Components/ProjectTodos";
+import { ProjectActivities } from "@userPages/Holidays/Project/Components/ProjectActivities";
 
-	const tripData = {
-		title: "Chamonix",
-		dates: "1 août 2023 au 4 août 2023",
-		image: "/api/placeholder/800/300",
-		budget: {
-			total: 1940.70,
-			spent: 1552.88,
-			percentage: 80,
-			breakdown: {
-				transport: { label: "Trajet", amount: 200, color: "bg-blue-500" },
-				accommodation: { label: "Hébergement", amount: 1426.70, color: "bg-purple-500" },
-				activities: { label: "Activités", amount: 134, color: "bg-emerald-500" },
-				food: { label: "Style de vie", amount: 180, color: "bg-amber-500" }
-			}
-		},
-		participants: 10
-	};
+import { Input } from "@tailwindComponents/Elements/Fields";
+import { ProjectLifestyle } from "@userPages/Holidays/Project/Components/ProjectLifestyle";
+
+export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
+	const [activeTab, setActiveTab] = useState('overview');
+	const [participants, setParticipants] = useState(1);
+
+	let onChange = (e) => {
+		let value = e.currentTarget.value;
+		setParticipants(value === "" ? 1 : value)
+	}
 
 	const dailyPlan = [
 		{
@@ -63,17 +58,7 @@ export function ProjectRead ({ elem, userId }) {
 		{ name: "Chalet 10 personnes", location: "Chamonix-Mont-Blanc", price: 1426.70, perPerson: 142.67, nights: 3, link: "10 Route du Poud" }
 	];
 
-	const activities = [
-		{ name: "Rafting", price: 61, perPerson: 61, icon: "🚣" },
-		{ name: "Multipass Mont Blanc", price: 70, perPerson: 70, icon: "🚠" }
-	];
-
-	const todoList = [
-		{ item: "Maillot" },
-		{ item: "Châuda" },
-		{ item: "Vêtement froid" },
-		{ item: "Crèpe anti" }
-	];
+	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyles, activities);
 
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
@@ -81,14 +66,19 @@ export function ProjectRead ({ elem, userId }) {
 				<div className="flex items-center justify-between h-12">
 					<div className="flex items-center space-x-6 text-sm">
 						<div className="flex items-center space-x-2">
-							<Users />
-							<span className="text-slate-700">10 participants</span>
+							<span className="icon-group !font-bold text-ls"></span>
+							<div className="text-slate-700 flex items-center">
+								<div className="w-10 mr-2">
+									<Input identifiant="participants" valeur={participants} errors={[]} onChange={onChange} />
+								</div>
+								participants
+							</div>
 						</div>
 						<div className="w-px h-6 bg-slate-200"></div>
 						<div className="flex items-center space-x-2">
-							<Euro />
-							<span className="font-semibold text-slate-800">{(1552.88).toFixed(2)} € / {(1940.70).toFixed(2)} €</span>
-							<span className="text-slate-500">(80%)</span>
+							<span class="icon-bank !font-bold text-ls"></span>
+							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(budget.total).toFixed(2)} €</span>
+							{/*<span className="text-slate-500">(80%)</span>*/}
 						</div>
 					</div>
 					<div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -108,8 +98,6 @@ export function ProjectRead ({ elem, userId }) {
 						{ id: 'overview', label: 'Vue d\'ensemble', icon: 'menu-1' },
 						{ id: 'itinerary', label: 'Itinéraire', icon: 'map' },
 						{ id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
-						{ id: 'budget', label: 'Budget', icon: 'bank' },
-						{ id: 'checklist', label: 'À préparer', icon: 'check' }
 					].map((tab) => (
 						<button
 							key={tab.id}
@@ -132,34 +120,7 @@ export function ProjectRead ({ elem, userId }) {
 			{activeTab === 'overview' && (
 				<div className="space-y-6">
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-							<div className="flex items-center justify-between mb-4">
-								<h3 className="text-lg font-semibold text-slate-800">
-									<span className="icon-bank !font-bold text-xl"></span>
-									<span className="ml-2">Budget</span>
-								</h3>
-							</div>
-							<div className="space-y-3">
-								{Object.entries(tripData.budget.breakdown).map(([key, item]) => (
-									<div key={key} className="flex items-center justify-between text-sm">
-										<div className="flex items-center space-x-2">
-											<div className={`w-3 h-3 rounded-full ${item.color}`} />
-											<span className="text-slate-600">{item.label}</span>
-										</div>
-										<span className="font-medium text-slate-800">{item.amount} €</span>
-									</div>
-								))}
-							</div>
-							<div className="mt-4 pt-4 border-t border-slate-200">
-								<div className="flex justify-between items-center">
-									<span className="text-sm font-medium text-slate-600">Total</span>
-									<span className="text-2xl font-bold text-indigo-600">{tripData.budget.total.toFixed(2)} €</span>
-								</div>
-								<div className="text-xs text-slate-500 text-right mt-1">
-									{(tripData.budget.total / tripData.participants).toFixed(2)} € / pers.
-								</div>
-							</div>
-						</div>
+						<ProjectBudget budget={budget} />
 
 						<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
 							<div className="flex items-center justify-between mb-4">
@@ -175,7 +136,7 @@ export function ProjectRead ({ elem, userId }) {
 								<div key={idx} className="space-y-2">
 									<div className="font-medium text-slate-800">{acc.name}</div>
 									<div className="flex items-center text-sm text-slate-600">
-										<MapPin />
+										<span className="icon-map"></span>
 										<span className="ml-1">{acc.location}</span>
 									</div>
 									<a href="#" className="text-sm text-indigo-600 hover:underline block">{acc.link}</a>
@@ -190,39 +151,25 @@ export function ProjectRead ({ elem, userId }) {
 							))}
 						</div>
 
-						<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-							<div className="flex items-center justify-between mb-4">
-								<h3 className="text-lg font-semibold text-slate-800 flex items-center">
-									<Activity />
-									<span className="ml-2">Activités</span>
-								</h3>
-								<button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
-									+ Ajouter
-								</button>
-							</div>
-							<div className="space-y-3">
-								{activities.map((activity, idx) => (
-									<div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-										<div className="flex items-center space-x-3">
-											<span className="text-2xl">{activity.icon}</span>
-											<span className="text-sm font-medium text-slate-700">{activity.name}</span>
-										</div>
-										<div className="text-right">
-											<div className="font-semibold text-emerald-600">{activity.price} €</div>
-											<div className="text-xs text-slate-500">{activity.perPerson} € / pers.</div>
-										</div>
-									</div>
-								))}
-								<div className="pt-3 border-t border-slate-200">
-									<div className="flex justify-between items-center">
-										<span className="text-sm font-medium text-slate-600">Total activités</span>
-										<span className="text-lg font-bold text-emerald-600">
-                                                        {activities.reduce((sum, a) => sum + a.price, 0)} €
-                                                    </span>
-									</div>
-								</div>
-							</div>
+						<ProjectTodos
+							projectId={elem.id}
+							todos={todos}
+							userId={userId}
+						/>
+
+						<div className="col-span-2">
+							<ProjectActivities
+								projectId={elem.id}
+								activities={activities}
+								userId={userId}
+							/>
 						</div>
+
+						<ProjectLifestyle
+							projectId={elem.id}
+							lifestyles={lifestyles}
+							userId={userId}
+						/>
 					</div>
 				</div>
 			)}
@@ -319,112 +266,6 @@ export function ProjectRead ({ elem, userId }) {
 					</div>
 				</div>
 			)}
-
-			{activeTab === 'budget' && (
-				<div className="space-y-6">
-					<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-						<h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center">
-							<Euro />
-							<span className="ml-2">Répartition du budget</span>
-						</h3>
-
-						<div className="space-y-4">
-							{Object.entries(tripData.budget.breakdown).map(([key, item]) => (
-								<div key={key}>
-									<div className="flex items-center justify-between mb-2">
-										<span className="text-sm font-medium text-slate-700">{item.label}</span>
-										<span className="text-sm font-semibold text-slate-800">{item.amount} €</span>
-									</div>
-									<div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-										<div
-											className={`h-3 ${item.color} transition-all duration-500`}
-											style={{ width: `${(item.amount / tripData.budget.total) * 100}%` }}
-										/>
-									</div>
-									<div className="text-xs text-slate-500 mt-1">
-										{((item.amount / tripData.budget.total) * 100).toFixed(1)}% du budget total
-									</div>
-								</div>
-							))}
-						</div>
-
-						<div className="mt-6 pt-6 border-t border-slate-200">
-							<div className="grid grid-cols-2 gap-4">
-								<div className="bg-slate-50 rounded-lg p-4">
-									<div className="text-sm text-slate-600">Budget total</div>
-									<div className="text-2xl font-bold text-slate-800 mt-1">{tripData.budget.total.toFixed(2)} €</div>
-								</div>
-								<div className="bg-indigo-50 rounded-lg p-4">
-									<div className="text-sm text-indigo-600">Par personne</div>
-									<div className="text-2xl font-bold text-indigo-600 mt-1">
-										{(tripData.budget.total / tripData.participants).toFixed(2)} €
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{activeTab === 'checklist' && (
-				<div className="space-y-6">
-					<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-						<div className="flex items-center justify-between mb-6">
-							<h3 className="text-lg font-semibold text-slate-800 flex items-center">
-								<CheckSquare />
-								<span className="ml-2">Choses à préparer</span>
-							</h3>
-							<button className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
-								<Plus />
-								<span className="ml-2">Ajouter un élément</span>
-							</button>
-						</div>
-
-						<div className="space-y-2">
-							{todoList.map((todo, idx) => (
-								<div
-									key={idx}
-									className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors group"
-								>
-									<div className="flex items-center space-x-3">
-										<input
-											type="checkbox"
-											checked={checkedItems[idx]}
-											onChange={() => {
-												const newChecked = [...checkedItems];
-												newChecked[idx] = !newChecked[idx];
-												setCheckedItems(newChecked);
-											}}
-											className="w-5 h-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
-										/>
-										<span className={`${checkedItems[idx] ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                                                        {todo.item}
-                                                    </span>
-									</div>
-									<button className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
-										<X />
-									</button>
-								</div>
-							))}
-						</div>
-
-						<div className="mt-6 pt-6 border-t border-slate-200">
-							<div className="flex items-center justify-between mb-2">
-								<span className="text-sm font-medium text-slate-700">Progression</span>
-								<span className="text-sm font-semibold text-slate-800">
-                                                {checkedItems.filter(t => t).length} / {todoList.length}
-                                            </span>
-							</div>
-							<div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-								<div
-									className="h-2 bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500"
-									style={{ width: `${(checkedItems.filter(t => t).length / todoList.length) * 100}%` }}
-								/>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
 		</div>
 	</>;
-};
+}

@@ -38,13 +38,13 @@ class ProjectController extends AbstractController
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
         $propalHouses = $propalHouseRepository->findBy(['project' => $obj]);
-        $propalActivities = $propalActivityRepository->findBy(['project' => $obj]);
+        $activities = $propalActivityRepository->findBy(['project' => $obj]);
         $todos = $todoRepository->findBy(['project' => $obj]);
         $lifestyles = $lifestyleRepository->findBy(['project' => $obj]);
 
         $element = $serializer->serialize($obj, 'json', ['groups' => HoProject::READ]);;
         $propalHouses = $serializer->serialize($propalHouses, 'json', ['groups' => HoPropalHouse::LIST]);
-        $propalActivities = $serializer->serialize($propalActivities, 'json', ['groups' => HoPropalActivity::LIST]);
+        $activities = $serializer->serialize($activities, 'json', ['groups' => HoPropalActivity::LIST]);
         $todos = $serializer->serialize($todos, 'json', ['groups' => HoTodo::LIST]);
         $lifestyles = $serializer->serialize($lifestyles, 'json', ['groups' => HoLifestyle::LIST]);
 
@@ -60,7 +60,7 @@ class ProjectController extends AbstractController
             'elem' => $obj,
             'element' => $element,
             'propalHouses' => $propalHouses,
-            'propalActivities' => $propalActivities,
+            'activities' => $activities,
             'todos' => $todos,
             'lifestyles' => $lifestyles,
         ]);

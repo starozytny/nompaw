@@ -62,7 +62,7 @@ class HoProject extends DataEntity
     private Collection $propalHouses;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
-    #[Groups(['hopro_form'])]
+    #[Groups(['hopro_read', 'hopro_form'])]
     private ?HoPropalHouse $propalHouse = null;
 
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalActivity::class)]
@@ -87,20 +87,8 @@ class HoProject extends DataEntity
     private ?float $priceRoute = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_text'])]
+    #[Groups(['hopro_read', 'hopro_text'])]
     private ?string $textHouse = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_text'])]
-    private ?string $textLifestyle = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_text'])]
-    private ?string $textActivities = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_text'])]
-    private ?string $textTodos = null;
 
     public function __construct()
     {
@@ -381,42 +369,6 @@ class HoProject extends DataEntity
     public function setTextHouse(?string $textHouse): self
     {
         $this->textHouse = $textHouse;
-
-        return $this;
-    }
-
-    public function getTextLifestyle(): ?string
-    {
-        return $this->textLifestyle;
-    }
-
-    public function setTextLifestyle(?string $textLifestyle): self
-    {
-        $this->textLifestyle = $textLifestyle;
-
-        return $this;
-    }
-
-    public function getTextActivities(): ?string
-    {
-        return $this->textActivities;
-    }
-
-    public function setTextActivities(?string $textActivities): self
-    {
-        $this->textActivities = $textActivities;
-
-        return $this;
-    }
-
-    public function getTextTodos(): ?string
-    {
-        return $this->textTodos;
-    }
-
-    public function setTextTodos(?string $textTodos): self
-    {
-        $this->textTodos = $textTodos;
 
         return $this;
     }

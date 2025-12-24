@@ -98,9 +98,6 @@ class ProjectController extends AbstractController
                 $obj->setIframeRoute($sanitizeData->trimData($data->iframe));
                 $obj->setPriceRoute($sanitizeData->setFloatValue($data->price));
                 break;
-            case "todos": $obj->setTextTodos($sanitizeData->trimData($data->texte->html)); break;
-            case "lifestyle": $obj->setTextLifestyle($sanitizeData->trimData($data->texte->html)); break;
-            case "activities": $obj->setTextActivities($sanitizeData->trimData($data->texte->html)); break;
             case "house": $obj->setTextHouse($sanitizeData->trimData($data->texte->html)); break;
             default: break;
         }
