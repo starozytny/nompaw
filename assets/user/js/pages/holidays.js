@@ -7,7 +7,7 @@ import Toastr from "@tailwindFunctions/toastr";
 
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
-import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
+import { ProjectHouse } from "@userPages/Holidays/Project/Components/ProjectHouse";
 import { ProjectRead } from "@userPages/Holidays/Project/ProjectRead";
 
 let el = document.getElementById("projects_update");
