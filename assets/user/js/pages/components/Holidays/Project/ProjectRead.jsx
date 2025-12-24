@@ -9,8 +9,9 @@ import { ProjectTodos } from "@userPages/Holidays/Project/Components/ProjectTodo
 import { ProjectActivities } from "@userPages/Holidays/Project/Components/ProjectActivities";
 
 import { Input } from "@tailwindComponents/Elements/Fields";
+import { ProjectLifestyle } from "@userPages/Holidays/Project/Components/ProjectLifestyle";
 
-export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
+export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 	const [activeTab, setActiveTab] = useState('overview');
 	const [participants, setParticipants] = useState(1);
 
@@ -57,7 +58,7 @@ export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
 		{ name: "Chalet 10 personnes", location: "Chamonix-Mont-Blanc", price: 1426.70, perPerson: 142.67, nights: 3, link: "10 Route du Poud" }
 	];
 
-	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyle, activities);
+	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyles, activities);
 
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
@@ -163,6 +164,12 @@ export function ProjectRead ({ elem, userId, lifestyle, activities, todos }) {
 								userId={userId}
 							/>
 						</div>
+
+						<ProjectLifestyle
+							projectId={elem.id}
+							lifestyles={lifestyles}
+							userId={userId}
+						/>
 					</div>
 				</div>
 			)}

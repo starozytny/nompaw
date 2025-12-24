@@ -90,10 +90,6 @@ class HoProject extends DataEntity
     #[Groups(['hopro_read', 'hopro_text'])]
     private ?string $textHouse = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_read', 'hopro_text'])]
-    private ?string $textLifestyle = null;
-
     public function __construct()
     {
         $this->propalHouses = new ArrayCollection();
@@ -373,18 +369,6 @@ class HoProject extends DataEntity
     public function setTextHouse(?string $textHouse): self
     {
         $this->textHouse = $textHouse;
-
-        return $this;
-    }
-
-    public function getTextLifestyle(): ?string
-    {
-        return $this->textLifestyle;
-    }
-
-    public function setTextLifestyle(?string $textLifestyle): self
-    {
-        $this->textLifestyle = $textLifestyle;
 
         return $this;
     }

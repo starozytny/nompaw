@@ -151,7 +151,7 @@ export class ProjectActivities extends Component {
 					let descriptionFormatted = activity.description ? activity.description.replaceAll("\n", "<br />") : null;
 
 					return <div key={idx} className="group flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-						<div className="w-full flex items-center space-x-3">
+						<div className="w-[calc(100%-6rem-3rem-24px)] flex items-center space-x-3">
 							<div className="h-14 w-14 overflow-hidden rounded-md bg-gray-300">
 								<img src={activity.imageFile} alt={"illustration " + activity.name} className="h-full w-full object-cover" />
 							</div>
@@ -182,14 +182,14 @@ export class ProjectActivities extends Component {
 							<div className="font-semibold text-emerald-600">{activity.price} € {(activity.priceType === 0 ? " / pers" : "")}</div>
 						</div>
 
-						<div className="w-0 flex gap-1 opacity-0 -z-10 -translate-x-80 group-hover:z-0 group-hover:opacity-100 group-hover:w-20 group-hover:translate-x-0 transition-all">
+						<div className="w-12 flex opacity-0 group-hover:opacity-100 transition-opacity">
 							<button onClick={() => this.handleModal("formPropal", "update", activity)}
-									className="px-2 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+									className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
 							>
 								<span className="icon-pencil"></span>
 							</button>
 							<button onClick={() => this.handleModal("deletePropal", "delete", activity)}
-									className="px-2 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+									className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
 							>
 								<span className="icon-close"></span>
 							</button>

@@ -8,7 +8,6 @@ import Toastr from "@tailwindFunctions/toastr";
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
 import { ProjectHouse } from "@userPages/Holidays/Project/ProjectHouse";
-import { ProjectLifestyle } from "@userPages/Holidays/Project/ProjectLifestyle";
 import { ProjectRead } from "@userPages/Holidays/Project/ProjectRead";
 
 let el = document.getElementById("projects_update");
@@ -25,7 +24,7 @@ let projectRead = document.getElementById("projects_read");
 if(projectRead){
     createRoot(projectRead).render(<ProjectRead elem={JSON.parse(projectRead.dataset.elem)}
                                                 userId={projectRead.dataset.userId}
-                                                lifestyle={projectRead.dataset.lifestyle}
+                                                lifestyles={projectRead.dataset.lifestyles}
                                                 activities={projectRead.dataset.activities}
                                                 todos={projectRead.dataset.todos}
     />)
@@ -41,11 +40,6 @@ if(deletesProject){
 let projectHouse = document.getElementById("project_house");
 if(projectHouse){
     createRoot(projectHouse).render(<ProjectHouse {...projectHouse.dataset} mode={projectHouse.dataset.mode === "1"} />)
-}
-
-let projectLifestyle = document.getElementById("project_lifestyle");
-if(projectLifestyle){
-    createRoot(projectLifestyle).render(<ProjectLifestyle {...projectLifestyle.dataset} />)
 }
 
 let share = document.getElementById('share_link');
