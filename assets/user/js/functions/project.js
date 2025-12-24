@@ -1,4 +1,4 @@
-function getBudget (nbPers, routePrice, housePrice, lifestyle, activities) {
+function getBudget (participants, routePrice, housePrice, lifestyle, activities) {
 	let housePromo = housePrice ? housePrice - (housePrice * 30 / 100) : 0;
 	housePromo = housePromo ? Math.round((housePromo + Number.EPSILON) * 100) / 100 : 0;
 
@@ -9,13 +9,13 @@ function getBudget (nbPers, routePrice, housePrice, lifestyle, activities) {
 	let lifeStylePricePers = 0, activitiesPricePers = 0;
 	JSON.parse(lifestyle).map(el => {
 		lifeStylePrice += el.price ? el.price : 0;
-		lifeStylePricePers += el.price ? el.price * (el.priceType === 0 ? nbPers : 1) : 0;
+		lifeStylePricePers += el.price ? el.price * (el.priceType === 0 ? participants : 1) : 0;
 	})
 	JSON.parse(activities).map(el => {
 		if (el.isSelected) {
 			if (el.price) {
 				activitiesPrice += el.price;
-				activitiesPricePers += el.price * (el.priceType === 0 ? nbPers : 1);
+				activitiesPricePers += el.price * (el.priceType === 0 ? participants : 1);
 			} else {
 				activitesWithoutPrice++;
 			}
@@ -28,6 +28,7 @@ function getBudget (nbPers, routePrice, housePrice, lifestyle, activities) {
 	return {
 		total: totalPrice,
 		totalPromo: totalPromo,
+		participants: participants,
 		breakdown: {
 			transport: { label: "Trajet", amount: routePrice ? routePrice : 0, color: "bg-blue-500", promo: null },
 			accommodation: { label: "Hébergement", amount: housePrice ? housePrice : 0, color: "bg-purple-500", promo: housePromo },
