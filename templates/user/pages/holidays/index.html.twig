@@ -64,7 +64,7 @@
                     </div>
 
                     {% if app.user.id == elem.author.id %}
-                        <div class="relative z-10 pt-2 border-t flex justify-between divide-x">
+                        <div class="relative z-10 py-2 border-t flex justify-between divide-x">
                             <div class="w-full text-center">
                                 {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
                                     btn_link: path('user_projects_update', {slug: elem.slug}),
