@@ -17,7 +17,7 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 
 	let onChange = (e) => {
 		let value = e.currentTarget.value;
-		setParticipants(value === "" ? 1 : value)
+		setParticipants(value)
 	}
 
 	const dailyPlan = [
