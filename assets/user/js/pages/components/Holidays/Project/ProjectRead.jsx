@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Calendar, Activity, CheckSquare, Euro, Plus, Clock, Edit2, X } from 'lucide-react';
 
-import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
-import { ProjectBudget, ProjectBudgetGlobal } from "@userPages/Holidays/Project/Components/ProjectBudget";
 import ProjectFunctions from "@userFunctions/project";
+
+import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
+import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
 
 export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 	const [activeTab, setActiveTab] = useState('overview');
@@ -95,7 +96,6 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 						{ id: 'overview', label: 'Vue d\'ensemble', icon: 'menu-1' },
 						{ id: 'itinerary', label: 'Itinéraire', icon: 'map' },
 						{ id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
-						{ id: 'budget', label: 'Budget', icon: 'bank' },
 						{ id: 'checklist', label: 'À préparer', icon: 'check' }
 					].map((tab) => (
 						<button
@@ -119,7 +119,7 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 			{activeTab === 'overview' && (
 				<div className="space-y-6">
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						<ProjectBudgetGlobal budget={budget} />
+						<ProjectBudget budget={budget} />
 
 						<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
 							<div className="flex items-center justify-between mb-4">
@@ -279,8 +279,6 @@ export function ProjectRead ({ elem, userId, lifestyle, activities }) {
 					</div>
 				</div>
 			)}
-
-			{activeTab === 'budget' && (<ProjectBudget budget={budget} />)}
 
 			{activeTab === 'checklist' && (
 				<div className="space-y-6">
