@@ -37,13 +37,13 @@ class ProjectController extends AbstractController
                          HoTodoRepository $todoRepository, HoLifestyleRepository$lifestyleRepository): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
-        $propalHouses = $propalHouseRepository->findBy(['project' => $obj]);
+        $houses = $propalHouseRepository->findBy(['project' => $obj]);
         $activities = $propalActivityRepository->findBy(['project' => $obj]);
         $todos = $todoRepository->findBy(['project' => $obj]);
         $lifestyles = $lifestyleRepository->findBy(['project' => $obj]);
 
         $element = $serializer->serialize($obj, 'json', ['groups' => HoProject::READ]);;
-        $propalHouses = $serializer->serialize($propalHouses, 'json', ['groups' => HoPropalHouse::LIST]);
+        $houses = $serializer->serialize($houses, 'json', ['groups' => HoPropalHouse::LIST]);
         $activities = $serializer->serialize($activities, 'json', ['groups' => HoPropalActivity::LIST]);
         $todos = $serializer->serialize($todos, 'json', ['groups' => HoTodo::LIST]);
         $lifestyles = $serializer->serialize($lifestyles, 'json', ['groups' => HoLifestyle::LIST]);
@@ -59,7 +59,7 @@ class ProjectController extends AbstractController
         return $this->render($routeName, [
             'elem' => $obj,
             'element' => $element,
-            'propalHouses' => $propalHouses,
+            'houses' => $houses,
             'activities' => $activities,
             'todos' => $todos,
             'lifestyles' => $lifestyles,

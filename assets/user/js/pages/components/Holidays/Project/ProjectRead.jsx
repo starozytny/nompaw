@@ -4,14 +4,15 @@ import { Calendar, Plus, Clock, Edit2, X } from 'lucide-react';
 import ProjectFunctions from "@userFunctions/project";
 
 import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
-import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
+import { ProjectHouse } from "@userPages/Holidays/Project/Components/ProjectHouse";
 import { ProjectTodos } from "@userPages/Holidays/Project/Components/ProjectTodos";
+import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
+import { ProjectLifestyle } from "@userPages/Holidays/Project/Components/ProjectLifestyle";
 import { ProjectActivities } from "@userPages/Holidays/Project/Components/ProjectActivities";
 
 import { Input } from "@tailwindComponents/Elements/Fields";
-import { ProjectLifestyle } from "@userPages/Holidays/Project/Components/ProjectLifestyle";
 
-export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
+export function ProjectRead ({ elem, userId, houses, lifestyles, activities, todos }) {
 	const [activeTab, setActiveTab] = useState('overview');
 	const [participants, setParticipants] = useState(1);
 
@@ -54,11 +55,7 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 		}
 	];
 
-	const accommodations = [
-		{ name: "Chalet 10 personnes", location: "Chamonix-Mont-Blanc", price: 1426.70, perPerson: 142.67, nights: 3, link: "10 Route du Poud" }
-	];
-
-	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyles, activities);
+	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, houses, lifestyles, activities);
 
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
@@ -76,7 +73,7 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 						</div>
 						<div className="w-px h-6 bg-slate-200"></div>
 						<div className="flex items-center space-x-2">
-							<span class="icon-bank !font-bold text-ls"></span>
+							<span className="icon-bank !font-bold text-ls"></span>
 							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(budget.total).toFixed(2)} €</span>
 							{/*<span className="text-slate-500">(80%)</span>*/}
 						</div>
@@ -122,34 +119,11 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 						<ProjectBudget budget={budget} />
 
-						<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-							<div className="flex items-center justify-between mb-4">
-								<h3 className="text-lg font-semibold text-slate-800 flex items-center">
-									<span className="icon-home !font-bold text-xl"></span>
-									<span className="ml-2">Hébergement</span>
-								</h3>
-								<button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
-									+ Ajouter
-								</button>
-							</div>
-							{accommodations.map((acc, idx) => (
-								<div key={idx} className="space-y-2">
-									<div className="font-medium text-slate-800">{acc.name}</div>
-									<div className="flex items-center text-sm text-slate-600">
-										<span className="icon-map"></span>
-										<span className="ml-1">{acc.location}</span>
-									</div>
-									<a href="#" className="text-sm text-indigo-600 hover:underline block">{acc.link}</a>
-									<div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-200">
-										<span className="text-sm text-slate-600">{acc.nights} nuits</span>
-										<div className="text-right">
-											<div className="font-bold text-purple-600">{acc.price.toFixed(2)} €</div>
-											<div className="text-xs text-slate-500">{acc.perPerson.toFixed(2)} € / pers.</div>
-										</div>
-									</div>
-								</div>
-							))}
-						</div>
+						<ProjectHouse
+							projectId={elem.id}
+							houses={houses}
+							userId={userId}
+						/>
 
 						<ProjectTodos
 							projectId={elem.id}

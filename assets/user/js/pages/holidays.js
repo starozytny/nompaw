@@ -24,6 +24,7 @@ let projectRead = document.getElementById("projects_read");
 if(projectRead){
     createRoot(projectRead).render(<ProjectRead elem={JSON.parse(projectRead.dataset.elem)}
                                                 userId={projectRead.dataset.userId}
+                                                houses={projectRead.dataset.houses}
                                                 lifestyles={projectRead.dataset.lifestyles}
                                                 activities={projectRead.dataset.activities}
                                                 todos={projectRead.dataset.todos}
