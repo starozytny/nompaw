@@ -122,29 +122,37 @@ export class ProjectHouse extends Component {
 					+ Ajouter
 				</button>
 			</div>
-			{data.map((acc, idx) => (
-				<div key={idx} className="space-y-2">
-					<div className="font-medium flex items-center gap-2 text-slate-800">
-						<span>{acc.name}</span>
-						{(acc.url && acc.url !== "https://") && <a href={acc.url} className="url-topo relative text-blue-700" target="_blank">
-							<span className="icon-link"></span>
-							<span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Lien externe</span>
-						</a>}
-					</div>
-					{/*<div className="flex items-center text-sm text-slate-600">*/}
-					{/*	<span className="icon-placeholder"></span>*/}
-					{/*	<span className="ml-1">{acc.location}</span>*/}
-					{/*</div>*/}
-					<a href="#" className="text-sm text-indigo-600 hover:underline block">{acc.link}</a>
-					<div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-200">
-						<span className="text-sm text-slate-600">{acc.nights} nuits</span>
-						<div className="text-right">
-							<div className="font-bold text-purple-600">{acc.price.toFixed(2)} €</div>
-							{/*<div className="text-xs text-slate-500">{acc.perPerson.toFixed(2)} € / pers.</div>*/}
+			<div className="space-y-3">
+				{data.map((acc, idx) => (
+					<div key={idx} className="group flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+						<div className="font-medium flex items-center gap-2 text-slate-800">
+							<span>{acc.name}</span>
+							{(acc.url && acc.url !== "https://") && <a href={acc.url} className="url-topo relative text-blue-700" target="_blank">
+								<span className="icon-link"></span>
+								<span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Lien externe</span>
+							</a>}
+							{/*<div className="flex items-center text-sm text-slate-600">*/}
+							{/*	<span className="icon-placeholder"></span>*/}
+							{/*	<span className="ml-1">{acc.location}</span>*/}
+							{/*</div>*/}
+						</div>
+						<div className="flex justify-end items-center text-sm">
+							<div className="text-slate-600">{acc.nights} nuits</div>
+							<div className="font-semibold text-purple-600 ml-2">{acc.price.toFixed(2)} €</div>
 						</div>
 					</div>
+				))}
+
+				<div className="pt-3 border-t border-slate-200">
+					<div className="flex justify-between items-center">
+						<span className="text-sm font-medium text-slate-600">Total hébergements</span>
+						<span className="text-sm font-bold text-purple-600">
+							{data.reduce((sum, a) => sum + a.price, 0)} €
+						</span>
+					</div>
 				</div>
-			))}
+			</div>
+
 
 			{createPortal(
 				<Modal ref={this.formPropal} identifiant="form-house" maxWidth={568} title="Proposer un hébergement"
