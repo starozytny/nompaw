@@ -7,7 +7,6 @@ import Toastr from "@tailwindFunctions/toastr";
 
 import { ProjectFormulaire } from "@userPages/Holidays/Project/ProjectForm";
 import { ProjectDelete } from "@userPages/Holidays/Project/ProjectDelete";
-import { ProjectHouse } from "@userPages/Holidays/Project/Components/ProjectHouse";
 import { ProjectRead } from "@userPages/Holidays/Project/ProjectRead";
 
 let el = document.getElementById("projects_update");
@@ -36,11 +35,6 @@ if(deletesProject){
     deletesProject.forEach(elem => {
         createRoot(elem).render(<ProjectDelete context="projects" {...elem.dataset} />)
     })
-}
-
-let projectHouse = document.getElementById("project_house");
-if(projectHouse){
-    createRoot(projectHouse).render(<ProjectHouse {...projectHouse.dataset} mode={projectHouse.dataset.mode === "1"} />)
 }
 
 let share = document.getElementById('share_link');

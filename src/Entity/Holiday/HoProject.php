@@ -43,13 +43,15 @@ class HoProject extends DataEntity
     private ?\DateTimeInterface $endAt = null;
 
     #[ORM\Column]
+    #[Groups(['hopro_read', 'hopro_form'])]
     private ?int $participants = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_form'])]
+    #[Groups(['hopro_read', 'hopro_form'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['hopro_read', 'hopro_form'])]
     private ?float $maxBudget = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

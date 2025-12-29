@@ -22,7 +22,9 @@ class DataHolidays
             ->setSlug($this->sanitizeData->slugString($data->name))
             ->setStartAt($this->sanitizeData->createDate($data->startAt))
             ->setEndAt($this->sanitizeData->createDate($data->endAt))
+            ->setParticipants($this->sanitizeData->setIntValue($data->participants, 1))
             ->setDescription($this->sanitizeData->trimData($data->description->html))
+            ->setMaxBudget($this->sanitizeData->setFloatValue($data->maxBudget))
         ;
     }
 

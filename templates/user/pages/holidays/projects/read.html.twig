@@ -45,9 +45,10 @@
                             <div class="flex items-center space-x-6 text-sm">
                                 <div class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
                                     <span class="icon-calendar"></span>
-                                    <span>{{ elem.startAt ? elem.startAt | date('d/m/Y') : "" }} {{ elem.endAt ? " au " ~ elem.endAt | date('d/m/Y') : "" }}</span>
+                                    <span>{{ elem.startAt ? elem.startAt | date('d M Y') | lower : "" }} {{ elem.endAt != elem.startAt ? " au " ~ elem.endAt | date('d M Y') | lower : "" }}</span>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
