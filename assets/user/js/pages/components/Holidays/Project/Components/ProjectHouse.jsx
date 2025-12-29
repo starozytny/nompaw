@@ -125,7 +125,7 @@ export class ProjectHouse extends Component {
 			<div className="space-y-3">
 				{data.map((acc, idx) => (
 					<div key={idx} className="group flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-						<div className="font-medium flex items-center gap-2 text-slate-800">
+						<div className="w-[calc(100%-2.5rem-3rem-24px)] md:w-[calc(100%-6rem-3rem-24px)] font-medium flex items-center gap-2 text-slate-800">
 							<span>{acc.name}</span>
 							{(acc.url && acc.url !== "https://") && <a href={acc.url} className="url-topo relative text-blue-700" target="_blank">
 								<span className="icon-link"></span>
@@ -136,9 +136,21 @@ export class ProjectHouse extends Component {
 							{/*	<span className="ml-1">{acc.location}</span>*/}
 							{/*</div>*/}
 						</div>
-						<div className="flex justify-end items-center text-sm">
+						<div className="w-10 md:w-24 flex justify-end items-center text-sm">
 							<div className="text-slate-600">{acc.nights} nuits</div>
 							<div className="font-semibold text-purple-600 ml-2">{acc.price.toFixed(2)} €</div>
+						</div>
+						<div className="w-12 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 md:transition-opacity">
+							<button onClick={() => this.handleModal("formPropal", "update", acc)}
+									className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+							>
+								<span className="icon-pencil"></span>
+							</button>
+							<button onClick={() => this.handleModal("deletePropal", "delete", acc)}
+									className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+							>
+								<span className="icon-close"></span>
+							</button>
 						</div>
 					</div>
 				))}
