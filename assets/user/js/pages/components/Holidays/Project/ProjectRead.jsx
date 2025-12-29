@@ -58,7 +58,7 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 	let menu = [
 		{ id: 'overview', label: 'Vue d\'ensemble', icon: 'menu-1' },
 		{ id: 'itinerary', label: 'Itinéraire', icon: 'map' },
-		{ id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
+		// { id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
 	]
 
 	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, houses, lifestyles, activities);

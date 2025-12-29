@@ -83,7 +83,6 @@ Encore
     .addEntry('admin_mails', './assets/admin/js/pages/mails.js')
 
     .addEntry('user_app', './assets/user/js/app.js')
-    .addEntry('user_recipes', './assets/user/js/pages/recipes.js')
     .addEntry('user_profil', './assets/user/js/pages/profil.js')
     .addEntry('user_aventures', './assets/user/js/pages/aventures.js')
     .addEntry('user_holidays', './assets/user/js/pages/holidays.js')
