@@ -92,15 +92,9 @@ class ProjectController extends AbstractController
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
         }
 
-        switch ($type){
-            case "route":
-                $obj->setTextRoute($sanitizeData->trimData($data->texte->html));
-                $obj->setIframeRoute($sanitizeData->trimData($data->iframe));
-                $obj->setPriceRoute($sanitizeData->setFloatValue($data->price));
-                break;
-            case "house": $obj->setTextHouse($sanitizeData->trimData($data->texte->html)); break;
-            default: break;
-        }
+        $obj->setTextRoute($sanitizeData->trimData($data->texte->html));
+        $obj->setIframeRoute($sanitizeData->trimData($data->iframe));
+        $obj->setPriceRoute($sanitizeData->setFloatValue($data->price));
 
         $noErrors = $validator->validate($obj);
         if ($noErrors !== true) {
@@ -142,24 +136,5 @@ class ProjectController extends AbstractController
         $fileUploader->deleteFile($image, HoProject::FOLDER);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
-    }
-
-    #[Route('/cancel/date/{id}', name: 'cancel_date', options: ['expose' => true], methods: 'PUT')]
-    public function cancelDate(HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository): Response
-    {
-        $obj->setStartAt(null);
-        $obj->setEndAt(null);
-
-        $repository->save($obj, true);
-        return $apiResponse->apiJsonResponseSuccessful('ok');
-    }
-
-    #[Route('/cancel/house/{id}', name: 'cancel_house', options: ['expose' => true], methods: 'PUT')]
-    public function cancelHouse(HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository): Response
-    {
-        $obj->setPropalHouse(null);
-
-        $repository->save($obj, true);
-        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 }

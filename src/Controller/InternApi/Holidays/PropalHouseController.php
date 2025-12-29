@@ -4,11 +4,9 @@ namespace App\Controller\InternApi\Holidays;
 
 use App\Entity\Holiday\HoProject;
 use App\Entity\Holiday\HoPropalHouse;
-use App\Repository\Holiday\HoProjectRepository;
 use App\Repository\Holiday\HoPropalHouseRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Data\DataHolidays;
-use App\Service\Propals\PropalService;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -79,27 +77,5 @@ class PropalHouseController extends AbstractController
         $repository->remove($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
-    }
-
-    #[Route('/vote/{id}', name: 'vote', options: ['expose' => true], methods: 'PUT')]
-    public function vote(Request $request, ApiResponse $apiResponse, ValidatorService $validator,
-                         HoPropalHouse $obj, HoPropalHouseRepository $repository, PropalService $propalService): Response
-    {
-        return $propalService->vote($request, $apiResponse, $validator, $obj, $repository, HoPropalHouse::LIST);
-    }
-
-    #[Route('/end/{id}', name: 'end', options: ['expose' => true], methods: 'PUT')]
-    public function end(HoPropalHouse $obj, ApiResponse $apiResponse, ValidatorService $validator, HoProjectRepository $repository): Response
-    {
-        $project = $obj->getProject();
-        $project->setPropalHouse($obj);
-
-        $noErrors = $validator->validate($project);
-        if ($noErrors !== true) {
-            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
-        }
-
-        $repository->save($project, true);
-        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 }

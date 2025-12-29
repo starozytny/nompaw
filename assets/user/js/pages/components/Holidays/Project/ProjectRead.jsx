@@ -4,14 +4,15 @@ import { Calendar, Plus, Clock, Edit2, X } from 'lucide-react';
 import ProjectFunctions from "@userFunctions/project";
 
 import { ProjectRoute } from "@userPages/Holidays/Project/Components/ProjectRoute";
-import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
+import { ProjectHouse } from "@userPages/Holidays/Project/Components/ProjectHouse";
 import { ProjectTodos } from "@userPages/Holidays/Project/Components/ProjectTodos";
+import { ProjectBudget } from "@userPages/Holidays/Project/Components/ProjectBudget";
+import { ProjectLifestyle } from "@userPages/Holidays/Project/Components/ProjectLifestyle";
 import { ProjectActivities } from "@userPages/Holidays/Project/Components/ProjectActivities";
 
 import { Input } from "@tailwindComponents/Elements/Fields";
-import { ProjectLifestyle } from "@userPages/Holidays/Project/Components/ProjectLifestyle";
 
-export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
+export function ProjectRead ({ elem, userId, houses, lifestyles, activities, todos }) {
 	const [activeTab, setActiveTab] = useState('overview');
 	const [participants, setParticipants] = useState(1);
 
@@ -54,17 +55,19 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 		}
 	];
 
-	const accommodations = [
-		{ name: "Chalet 10 personnes", location: "Chamonix-Mont-Blanc", price: 1426.70, perPerson: 142.67, nights: 3, link: "10 Route du Poud" }
-	];
+	let menu = [
+		{ id: 'overview', label: 'Vue d\'ensemble', icon: 'menu-1' },
+		{ id: 'itinerary', label: 'Itinéraire', icon: 'map' },
+		{ id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
+	]
 
-	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, elem.propalHouse ? elem.propalHouse.price : 0, lifestyles, activities);
+	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, houses, lifestyles, activities);
 
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex items-center justify-between h-12">
-					<div className="flex items-center space-x-6 text-sm">
+					<div className="text-sm flex items-center space-x-6">
 						<div className="flex items-center space-x-2">
 							<span className="icon-group !font-bold text-ls"></span>
 							<div className="text-slate-700 flex items-center">
@@ -74,14 +77,14 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 								participants
 							</div>
 						</div>
-						<div className="w-px h-6 bg-slate-200"></div>
+						<div className="hidden md:block w-px h-6 bg-slate-200"></div>
 						<div className="flex items-center space-x-2">
-							<span class="icon-bank !font-bold text-ls"></span>
+							<span className="icon-bank !font-bold text-ls"></span>
 							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(budget.total).toFixed(2)} €</span>
 							{/*<span className="text-slate-500">(80%)</span>*/}
 						</div>
 					</div>
-					<div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+					<div className="hidden md:block w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
 						<div
 							className="h-1.5 bg-gradient-to-r from-emerald-500 to-amber-500 rounded-full transition-all"
 							style={{ width: `80%` }}
@@ -94,11 +97,7 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 		<div className="bg-white border-b border-slate-200">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<nav className="flex space-x-8" aria-label="Tabs">
-					{[
-						{ id: 'overview', label: 'Vue d\'ensemble', icon: 'menu-1' },
-						{ id: 'itinerary', label: 'Itinéraire', icon: 'map' },
-						{ id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
-					].map((tab) => (
+					{menu.map((tab) => (
 						<button
 							key={tab.id}
 							onClick={() => setActiveTab(tab.id)}
@@ -109,7 +108,7 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 							}`}
 						>
 							<span className={`icon-${tab.icon}`}></span>
-							<span className="ml-2">{tab.label}</span>
+							<span className={`${activeTab === tab.id ? 'block ml-2' : 'hidden md:block'} md:ml-2`}>{tab.label}</span>
 						</button>
 					))}
 				</nav>
@@ -119,37 +118,14 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 		<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 			{activeTab === 'overview' && (
 				<div className="space-y-6">
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+					<div className="flex flex-col xl:grid xl:grid-cols-3 gap-6">
 						<ProjectBudget budget={budget} />
 
-						<div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-							<div className="flex items-center justify-between mb-4">
-								<h3 className="text-lg font-semibold text-slate-800 flex items-center">
-									<span className="icon-home !font-bold text-xl"></span>
-									<span className="ml-2">Hébergement</span>
-								</h3>
-								<button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
-									+ Ajouter
-								</button>
-							</div>
-							{accommodations.map((acc, idx) => (
-								<div key={idx} className="space-y-2">
-									<div className="font-medium text-slate-800">{acc.name}</div>
-									<div className="flex items-center text-sm text-slate-600">
-										<span className="icon-map"></span>
-										<span className="ml-1">{acc.location}</span>
-									</div>
-									<a href="#" className="text-sm text-indigo-600 hover:underline block">{acc.link}</a>
-									<div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-200">
-										<span className="text-sm text-slate-600">{acc.nights} nuits</span>
-										<div className="text-right">
-											<div className="font-bold text-purple-600">{acc.price.toFixed(2)} €</div>
-											<div className="text-xs text-slate-500">{acc.perPerson.toFixed(2)} € / pers.</div>
-										</div>
-									</div>
-								</div>
-							))}
-						</div>
+						<ProjectHouse
+							projectId={elem.id}
+							houses={houses}
+							userId={userId}
+						/>
 
 						<ProjectTodos
 							projectId={elem.id}
@@ -157,7 +133,7 @@ export function ProjectRead ({ elem, userId, lifestyles, activities, todos }) {
 							userId={userId}
 						/>
 
-						<div className="col-span-2">
+						<div className="xl:col-span-2">
 							<ProjectActivities
 								projectId={elem.id}
 								activities={activities}

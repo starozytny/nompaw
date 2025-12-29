@@ -33,8 +33,8 @@
     <div class="project-title w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 border rounded-t-2xl flex flex-col gap-2" style="background-image: url({{ elem.imageFile }});">
         <div class="relative h-full flex items-center py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
+                <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center md:gap-2">
+                    <div class="flex space-x-4 lg:items-center">
                         <button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors"
                                 onclick="location.href = '{{ path('user_projects_index') }}';"
                         >
@@ -82,7 +82,7 @@
     <div id="projects_read"
          data-elem="{{ element }}"
          data-user-id="{{ app.user.id }}"
-         data-lifestyle="{{ lifestyles }}"
+         data-houses="{{ houses }}"
          data-activities="{{ activities }}"
          data-lifestyles="{{ lifestyles }}"
          data-todos="{{ todos }}"

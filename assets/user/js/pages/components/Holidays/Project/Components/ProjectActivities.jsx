@@ -151,7 +151,7 @@ export class ProjectActivities extends Component {
 					let descriptionFormatted = activity.description ? activity.description.replaceAll("\n", "<br />") : null;
 
 					return <div key={idx} className="group flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-						<div className="w-[calc(100%-6rem-3rem-24px)] flex items-center space-x-3">
+						<div className="w-[calc(100%-2.5rem-3rem-24px)] md:w-[calc(100%-6rem-3rem-24px)] flex items-center space-x-3">
 							<div className="h-14 w-14 overflow-hidden rounded-md bg-gray-300">
 								<img src={activity.imageFile} alt={"illustration " + activity.name} className="h-full w-full object-cover" />
 							</div>
@@ -178,11 +178,11 @@ export class ProjectActivities extends Component {
 							</div>
 						</div>
 
-						<div className="w-24 text-sm text-right">
+						<div className="w-10 md:w-24 text-sm text-right">
 							<div className="font-semibold text-emerald-600">{activity.price} € {(activity.priceType === 0 ? " / pers" : "")}</div>
 						</div>
 
-						<div className="w-12 flex opacity-0 group-hover:opacity-100 transition-opacity">
+						<div className="w-12 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 md:transition-opacity">
 							<button onClick={() => this.handleModal("formPropal", "update", activity)}
 									className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
 							>
