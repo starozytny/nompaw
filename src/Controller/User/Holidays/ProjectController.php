@@ -50,7 +50,7 @@ class ProjectController extends AbstractController
 
         if($this->getUser()){
             $routeName = 'user/pages/holidays/projects/read.html.twig';
-        }else if($request->query->get('code') == $obj->getCode()) {
+        }else if($request->query->get('code') == $obj->getShareCode()) {
             $routeName = 'user/pages/holidays/projects/read_visitor.html.twig';
         }else{
             return $this->redirectToRoute('app_login');

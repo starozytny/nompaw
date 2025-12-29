@@ -41,7 +41,7 @@ class HoPropalHouse
     private ?string $url = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['hopro_read', 'pr_house_list'])]
+    #[Groups(['pr_house_list'])]
     private ?float $price = null;
 
     public function getId(): ?int

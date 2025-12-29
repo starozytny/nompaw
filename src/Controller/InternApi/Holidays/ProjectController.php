@@ -51,7 +51,7 @@ class ProjectController extends AbstractController
 
         if($type == "create") {
             $obj->setAuthor($this->getUser());
-            $obj->setCode(uniqid());
+            $obj->setShareCode(uniqid());
         }
 
         $noErrors = $validator->validate($obj);
@@ -114,7 +114,6 @@ class ProjectController extends AbstractController
                            HoLifestyleRepository $lifestyleRepository): Response
     {
         $image = $obj->getImage();
-        $obj->setPropalHouse(null);
 
         $repository->save($obj, true);
 

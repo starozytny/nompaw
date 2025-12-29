@@ -42,37 +42,15 @@ class HoProject extends DataEntity
     #[Groups(['hopro_form'])]
     private ?\DateTimeInterface $endAt = null;
 
+    #[ORM\Column]
+    private ?int $participants = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['hopro_form'])]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['hopro_form'])]
-    private ?string $slug = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(['hopro_form'])]
-    private ?string $code = null;
-
-    #[ORM\ManyToOne(inversedBy: 'hoProjects')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $author = null;
-
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalHouse::class)]
-    private Collection $propalHouses;
-
-    #[ORM\OneToOne(cascade: ['persist', 'remove'], fetch: 'EAGER')]
-    #[Groups(['hopro_read', 'hopro_form'])]
-    private ?HoPropalHouse $propalHouse = null;
-
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalActivity::class)]
-    private Collection $propalActivities;
-
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoTodo::class)]
-    private Collection $todos;
-
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoLifestyle::class)]
-    private Collection $lifestyles;
+    #[ORM\Column]
+    private ?float $maxBudget = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['hopro_read', 'hopro_text'])]
@@ -86,9 +64,29 @@ class HoProject extends DataEntity
     #[Groups(['hopro_read', 'hopro_text'])]
     private ?float $priceRoute = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_read', 'hopro_text'])]
-    private ?string $textHouse = null;
+    #[ORM\Column(length: 255)]
+    #[Groups(['hopro_form'])]
+    private ?string $slug = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['hopro_form'])]
+    private ?string $shareCode = null;
+
+    #[ORM\ManyToOne(inversedBy: 'hoProjects')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $author = null;
+
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalHouse::class)]
+    private Collection $propalHouses;
+
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoPropalActivity::class)]
+    private Collection $propalActivities;
+
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoTodo::class)]
+    private Collection $todos;
+
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: HoLifestyle::class)]
+    private Collection $lifestyles;
 
     public function __construct()
     {
@@ -157,6 +155,18 @@ class HoProject extends DataEntity
         return $this;
     }
 
+    public function getParticipants(): ?int
+    {
+        return $this->participants;
+    }
+
+    public function setParticipants(int $participants): static
+    {
+        $this->participants = $participants;
+
+        return $this;
+    }
+
     public function getDescription(): ?string
     {
         return $this->description;
@@ -165,6 +175,54 @@ class HoProject extends DataEntity
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getMaxBudget(): ?float
+    {
+        return $this->maxBudget;
+    }
+
+    public function setMaxBudget(float $maxBudget): static
+    {
+        $this->maxBudget = $maxBudget;
+
+        return $this;
+    }
+
+    public function getTextRoute(): ?string
+    {
+        return $this->textRoute;
+    }
+
+    public function setTextRoute(?string $textRoute): self
+    {
+        $this->textRoute = $textRoute;
+
+        return $this;
+    }
+
+    public function getIframeRoute(): ?string
+    {
+        return $this->iframeRoute;
+    }
+
+    public function setIframeRoute(?string $iframeRoute): self
+    {
+        $this->iframeRoute = $iframeRoute;
+
+        return $this;
+    }
+
+    public function getPriceRoute(): ?float
+    {
+        return $this->priceRoute;
+    }
+
+    public function setPriceRoute(?float $priceRoute): self
+    {
+        $this->priceRoute = $priceRoute;
 
         return $this;
     }
@@ -181,14 +239,14 @@ class HoProject extends DataEntity
         return $this;
     }
 
-    public function getCode(): ?string
+    public function getShareCode(): ?string
     {
-        return $this->code;
+        return $this->shareCode;
     }
 
-    public function setCode(string $code): self
+    public function setShareCode(string $shareCode): self
     {
-        $this->code = $code;
+        $this->shareCode = $shareCode;
 
         return $this;
     }
@@ -231,18 +289,6 @@ class HoProject extends DataEntity
                 $propalHouse->setProject(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getPropalHouse(): ?HoPropalHouse
-    {
-        return $this->propalHouse;
-    }
-
-    public function setPropalHouse(?HoPropalHouse $propalHouse): self
-    {
-        $this->propalHouse = $propalHouse;
 
         return $this;
     }
@@ -333,54 +379,6 @@ class HoProject extends DataEntity
                 $lifestyle->setProject(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getTextRoute(): ?string
-    {
-        return $this->textRoute;
-    }
-
-    public function setTextRoute(?string $textRoute): self
-    {
-        $this->textRoute = $textRoute;
-
-        return $this;
-    }
-
-    public function getIframeRoute(): ?string
-    {
-        return $this->iframeRoute;
-    }
-
-    public function setIframeRoute(?string $iframeRoute): self
-    {
-        $this->iframeRoute = $iframeRoute;
-
-        return $this;
-    }
-
-    public function getTextHouse(): ?string
-    {
-        return $this->textHouse;
-    }
-
-    public function setTextHouse(?string $textHouse): self
-    {
-        $this->textHouse = $textHouse;
-
-        return $this;
-    }
-
-    public function getPriceRoute(): ?float
-    {
-        return $this->priceRoute;
-    }
-
-    public function setPriceRoute(?float $priceRoute): self
-    {
-        $this->priceRoute = $priceRoute;
 
         return $this;
     }
