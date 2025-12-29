@@ -19,7 +19,7 @@ const URL_UPDATE_ELEMENT = "intern_api_users_update";
 
 let itemsSocieties = [];
 
-export function UserFormulaire ({ context, element, page = 'user' }) {
+export function UserFormulaire ({ context, element, page = 'admin' }) {
 	let url = Routing.generate(URL_CREATE_ELEMENT);
 
 	if (context === "update") {
@@ -107,7 +107,7 @@ class Form extends Component {
 	handleSubmit = (e) => {
 		e.preventDefault();
 
-		const { page, context, url } = this.props;
+		const { page, url } = this.props;
 		const { username, lastname, email, roles, society } = this.state;
 
 		this.setState({ errors: [] });
@@ -137,7 +137,7 @@ class Form extends Component {
 
 			axios({ method: "POST", url: url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 				.then(function (response) {
-					if(page === "user"){
+					if(page === "admin"){
 						location.href = Routing.generate(URL_INDEX_ELEMENTS, {h: response.data.id});
 					}else{
 						location.href = Routing.generate(URL_PROFIL_ELEMENT);
@@ -153,7 +153,7 @@ class Form extends Component {
 
 	render () {
 		const { page, context, avatarFile } = this.props;
-		const { errors, loadData, username, firstname, lastname, email, password, roles, society } = this.state;
+		const { errors, loadData, username, firstname, lastname, email, password, roles, society,displayName } = this.state;
 
 		let rolesItems = [
 			{ value: 'ROLE_ADMIN', identifiant: 'admin', label: 'Admin' },
@@ -177,34 +177,36 @@ class Form extends Component {
 					<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
 						<div className="flex gap-4">
 							<div className="w-full">
-								{page !== "profil"
-									? <Input valeur={username} identifiant="username" {...params0}>Nom utilisateur</Input>
-									: <InputView valeur={username} identifiant="username" {...params0}>Nom utilisateur</InputView>
-								}
+								<Input valeur={username} identifiant="username" {...params0}>Nom utilisateur</Input>
 							</div>
 							<div className="w-full">
 								<Input valeur={email} identifiant="email" {...params0} type="email">Adresse e-mail</Input>
 							</div>
 						</div>
 
-						<div>
-							<Checkbox identifiant="roles" valeur={roles} items={rolesItems} {...params0} classItems="flex gap-4">
-								Rôles
-							</Checkbox>
-						</div>
+						{page !== "profil"
+							? <>
+								<div>
+									<Checkbox identifiant="roles" valeur={roles} items={rolesItems} {...params0} classItems="flex gap-4">
+										Rôles
+									</Checkbox>
+								</div>
 
-						<div>
-							{loadData
-								? <>
-									<label>Société</label>
-									<LoaderElements text="Récupération des sociétés..." />
-								</>
-								: <SelectCombobox identifiant="society" valeur={society} items={itemsSocieties}
-												  {...params1} toSort={true} placeholder="Sélectionner une société..">
-									Société
-								</SelectCombobox>
-							}
-						</div>
+								<div>
+									{loadData
+										? <>
+											<label>Société</label>
+											<LoaderElements text="Récupération des sociétés..." />
+										</>
+										: <SelectCombobox identifiant="society" valeur={society} items={itemsSocieties}
+														  {...params1} toSort={true} placeholder="Sélectionner une société..">
+											Société
+										</SelectCombobox>
+									}
+								</div>
+							</>
+							: null
+						}
 					</div>
 				</div>
 
@@ -216,14 +218,21 @@ class Form extends Component {
 						</div>
 					</div>
 					<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
-						<div className="flex gap-4">
-							<div className="w-full">
-								<Input identifiant="firstname" valeur={firstname} {...params0}>Prénom <span className="text-xs text-gray-600">(facultatif)</span></Input>
-							</div>
-							<div className="w-full">
-								<Input identifiant="lastname" valeur={lastname} {...params0}>Nom / Désignation</Input>
-							</div>
+						<div>
+							<Input identifiant="displayName" valeur={displayName} {...params0}>Nom à afficher</Input>
 						</div>
+
+						{page !== "profil"
+							? <div className="flex gap-4">
+								<div className="w-full">
+									<Input identifiant="firstname" valeur={firstname} {...params0}>Prénom <span className="text-xs text-gray-600">(facultatif)</span></Input>
+								</div>
+								<div className="w-full">
+									<Input identifiant="lastname" valeur={lastname} {...params0}>Nom / Désignation</Input>
+								</div>
+							</div>
+							: null
+						}
 
 						<div>
 							<InputFile ref={this.file} type="simple" identifiant="avatar" valeur={avatarFile} {...params0}>
