@@ -122,18 +122,21 @@ export class ProjectTodos extends Component {
 					<span className="icon-check !font-bold text-xl"></span>
 					<span className="ml-2">Choses à préparer</span>
 				</h3>
-				<button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
-						onClick={() => this.handleModal('formPropal', 'create', null)}
-				>
-					+ Ajouter
-				</button>
+				{userId
+					? <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+							  onClick={() => this.handleModal('formPropal', 'create', null)}
+					>
+						+ Ajouter
+					</button>
+					: null
+				}
 			</div>
 
 			<div className="space-y-2">
 				{data.map((todo, idx) => {
 					return <div
 						key={idx}
-						className="flex items-center justify-between px-4 py-1 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors group"
+						className="flex items-center justify-between px-4 py-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors group"
 					>
 						<div className="flex items-center space-x-3">
 							<input
@@ -144,11 +147,14 @@ export class ProjectTodos extends Component {
 							/>
 							<span className={`${todosChecked.includes(todo.id) ? 'line-through text-slate-400' : 'text-slate-700'} text-sm`}>{todo.name}</span>
 						</div>
-						<button onClick={() => this.handleModal("deletePropal", "delete", todo)}
-								className="opacity-0 group-hover:opacity-100 transition-opacity px-2 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-						>
-							<span className="icon-close"></span>
-						</button>
+						{userId
+							? <button onClick={() => this.handleModal("deletePropal", "delete", todo)}
+									  className="opacity-0 group-hover:opacity-100 transition-opacity px-2 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+							>
+								<span className="icon-close"></span>
+							</button>
+							: null
+						}
 					</div>
 				})}
 			</div>

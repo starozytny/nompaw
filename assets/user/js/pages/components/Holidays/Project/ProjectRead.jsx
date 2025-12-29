@@ -16,8 +16,6 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 	const [activeTab, setActiveTab] = useState('overview');
 	const [participants, setParticipants] = useState(elem.participants);
 
-	console.log(elem);
-
 	let onChange = (e) => {
 		let value = e.currentTarget.value;
 		setParticipants(value)
@@ -69,7 +67,7 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between h-12">
+				<div className="flex items-center justify-between h-14">
 					<div className="text-sm flex items-center space-x-6">
 						<div className="flex items-center space-x-2">
 							<span className="icon-group !font-bold text-ls"></span>
@@ -84,7 +82,7 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 						<div className="flex items-center space-x-2">
 							<span className="icon-bank !font-bold text-ls"></span>
 							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(elem.maxBudget).toFixed(2)} €</span>
-							<span className="text-slate-500">({percentage}%)</span>
+							<span className="hidden md:inline-blocktext-slate-500">({percentage}%)</span>
 						</div>
 					</div>
 					<div className="hidden md:block w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -124,31 +122,43 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 					<div className="flex flex-col xl:grid xl:grid-cols-3 gap-6">
 						<ProjectBudget budget={budget} />
 
-						<ProjectHouse
-							projectId={elem.id}
-							houses={houses}
-							userId={userId}
-						/>
+						<div className="xl:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between mb-4">
+								<h3 className="text-lg font-semibold text-slate-800">
+									<span className="icon-book-1 !font-bold text-xl"></span>
+									<span className="ml-2">Description</span>
+								</h3>
+							</div>
+							<div dangerouslySetInnerHTML={{ __html: elem.description }} />
+						</div>
 
-						<ProjectTodos
-							projectId={elem.id}
-							todos={todos}
-							userId={userId}
-						/>
+						<div className="xl:col-span-3 flex flex-col xl:grid xl:grid-cols-3 gap-6">
+							<div className="xl:col-span-2 flex flex-col gap-6">
+								<ProjectHouse
+									projectId={elem.id}
+									houses={houses}
+									userId={userId}
+								/>
 
-						<div className="xl:col-span-2">
-							<ProjectActivities
+								<ProjectLifestyle
+									projectId={elem.id}
+									lifestyles={lifestyles}
+									userId={userId}
+								/>
+
+								<ProjectActivities
+									projectId={elem.id}
+									activities={activities}
+									userId={userId}
+								/>
+							</div>
+
+							<ProjectTodos
 								projectId={elem.id}
-								activities={activities}
+								todos={todos}
 								userId={userId}
 							/>
 						</div>
-
-						<ProjectLifestyle
-							projectId={elem.id}
-							lifestyles={lifestyles}
-							userId={userId}
-						/>
 					</div>
 				</div>
 			)}

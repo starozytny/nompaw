@@ -51,10 +51,6 @@ export class ProjectActivities extends Component {
 		this.setState({ [name]: value })
 	}
 
-	handleChangeTinyMCE = (name, html) => {
-		this.setState({ [name]: { value: this.state[name].value, html: html } })
-	}
-
 	handleModal = (identifiant, context, propal) => {
 		modalFormPropal(this);
 		modalDeletePropal(this);
@@ -140,11 +136,14 @@ export class ProjectActivities extends Component {
 					<span className="icon-box !font-semibold text-xl"></span>
 					<span className="ml-2">Activités</span>
 				</h3>
-				<button onClick={() => this.handleModal('formPropal', 'create', null)}
-						className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
-				>
-					+ Ajouter
-				</button>
+				{userId
+					? <button onClick={() => this.handleModal('formPropal', 'create', null)}
+							  className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+					>
+						+ Ajouter
+					</button>
+					: null
+				}
 			</div>
 			<div className="space-y-3">
 				{data.map((activity, idx) => {
@@ -182,18 +181,21 @@ export class ProjectActivities extends Component {
 							<div className="font-semibold text-emerald-600">{activity.price} € {(activity.priceType === 0 ? " / pers" : "")}</div>
 						</div>
 
-						<div className="w-12 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 md:transition-opacity">
-							<button onClick={() => this.handleModal("formPropal", "update", activity)}
-									className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-							>
-								<span className="icon-pencil"></span>
-							</button>
-							<button onClick={() => this.handleModal("deletePropal", "delete", activity)}
-									className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-							>
-								<span className="icon-close"></span>
-							</button>
-						</div>
+						{userId
+							? <div className="w-12 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 md:transition-opacity">
+								<button onClick={() => this.handleModal("formPropal", "update", activity)}
+										className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+								>
+									<span className="icon-pencil"></span>
+								</button>
+								<button onClick={() => this.handleModal("deletePropal", "delete", activity)}
+										className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+								>
+									<span className="icon-close"></span>
+								</button>
+							</div>
+							: null
+						}
 					</div>
 				})}
 
