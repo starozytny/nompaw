@@ -124,31 +124,43 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 					<div className="flex flex-col xl:grid xl:grid-cols-3 gap-6">
 						<ProjectBudget budget={budget} />
 
-						<ProjectHouse
-							projectId={elem.id}
-							houses={houses}
-							userId={userId}
-						/>
+						<div className="xl:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between mb-4">
+								<h3 className="text-lg font-semibold text-slate-800">
+									<span className="icon-book-1 !font-bold text-xl"></span>
+									<span className="ml-2">Description</span>
+								</h3>
+							</div>
+							<div dangerouslySetInnerHTML={{ __html: elem.description }} />
+						</div>
 
-						<ProjectTodos
-							projectId={elem.id}
-							todos={todos}
-							userId={userId}
-						/>
+						<div className="xl:col-span-3 flex flex-col xl:grid xl:grid-cols-3 gap-6">
+							<div className="xl:col-span-2 flex flex-col gap-6">
+								<ProjectHouse
+									projectId={elem.id}
+									houses={houses}
+									userId={userId}
+								/>
 
-						<div className="xl:col-span-2">
-							<ProjectActivities
+								<ProjectActivities
+									projectId={elem.id}
+									activities={activities}
+									userId={userId}
+								/>
+
+								<ProjectLifestyle
+									projectId={elem.id}
+									lifestyles={lifestyles}
+									userId={userId}
+								/>
+							</div>
+
+							<ProjectTodos
 								projectId={elem.id}
-								activities={activities}
+								todos={todos}
 								userId={userId}
 							/>
 						</div>
-
-						<ProjectLifestyle
-							projectId={elem.id}
-							lifestyles={lifestyles}
-							userId={userId}
-						/>
 					</div>
 				</div>
 			)}
