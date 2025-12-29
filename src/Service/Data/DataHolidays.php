@@ -34,7 +34,9 @@ class DataHolidays
             ->setName($this->sanitizeData->trimData($data->name))
             ->setUrl($this->sanitizeData->trimData($data->url))
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
-            ;
+            ->setNbNights($this->sanitizeData->setIntValue($data->nbNights, 1))
+            ->setLocalisation($this->sanitizeData->trimData($data->localisation))
+        ;
     }
 
     public function setDataLifestyle(HoLifestyle $obj, $data): HoLifestyle

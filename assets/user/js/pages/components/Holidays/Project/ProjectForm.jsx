@@ -11,6 +11,7 @@ import Validateur from "@commonFunctions/validateur";
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 import { Input, InputFile } from "@tailwindComponents/Elements/Fields";
+import Inputs from "@commonFunctions/inputs";
 
 const URL_INDEX_PAGE = "user_projects_read";
 const URL_CREATE_ELEMENT = "intern_api_projects_create";
@@ -63,7 +64,18 @@ class Form extends Component {
 	}
 
 	handleChange = (e) => {
-		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
+		let name = e.currentTarget.name;
+		let value = e.currentTarget.value;
+
+		if (name === "maxBudget") {
+			value = Inputs.textMoneyMinusInput(value, this.state[name])
+		}
+
+		if (name === "participants") {
+			value = Inputs.textNumericInput(value, this.state[name])
+		}
+
+		this.setState({ [name]: value })
 	}
 
 	handleChangeTinyMCE = (name, html) => {

@@ -27,6 +27,8 @@ export class ProjectHouse extends Component {
 			name: '',
 			url: 'https://',
 			price: '',
+			nbNights: '1',
+			localisation: '',
 			errors: [],
 			data: JSON.parse(props.houses)
 		}
@@ -43,6 +45,10 @@ export class ProjectHouse extends Component {
 			value = Inputs.textMoneyMinusInput(value, this.state[name])
 		}
 
+		if (name === "nbNights") {
+			value = Inputs.textNumericInput(value, this.state[name])
+		}
+
 		this.setState({ [name]: value })
 	}
 
@@ -54,6 +60,8 @@ export class ProjectHouse extends Component {
 			name: propal ? propal.name : "",
 			url: propal ? Formulaire.setValue(propal.url) : "https://",
 			price: propal ? Formulaire.setValue(propal.price) : "",
+			nbNights: propal ? Formulaire.setValue(propal.nbNights) : 1,
+			localisation: propal ? Formulaire.setValue(propal.localisation) : "",
 		})
 		this[identifiant].current.handleClick();
 	}
@@ -62,11 +70,16 @@ export class ProjectHouse extends Component {
 		e.preventDefault();
 
 		const { projectId } = this.props;
-		const { context, propal, name, url, price, data } = this.state;
+		const { context, propal, name, url, price, nbNights, localisation, data } = this.state;
 
 		this.setState({ errors: [] });
 
-		let paramsToValidate = [{ type: "text", id: 'name', value: name }];
+		let paramsToValidate = [
+			{ type: "text", id: 'name', value: name },
+			{ type: "text", id: 'price', value: price },
+			{ type: "text", id: 'nbNights', value: nbNights },
+			{ type: "text", id: 'localisation', value: localisation },
+		];
 
 		let validate = Validateur.validateur(paramsToValidate)
 		if (!validate.code) {
@@ -79,7 +92,7 @@ export class ProjectHouse extends Component {
 
 			const self = this;
 			this.formPropal.current.handleUpdateFooter(<Button iconLeft="chart-3" type="primary">Confirmer</Button>);
-			axios({ method: method, url: urlName, data: { name: name, url: url, price: price } })
+			axios({ method: method, url: urlName, data: { name: name, url: url, price: price, nbNights: nbNights, localisation: localisation } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
 					self.setState({ data: Propals.updateList(context, data, response) })
@@ -102,7 +115,7 @@ export class ProjectHouse extends Component {
 
 	render () {
 		const { userId } = this.props;
-		const { errors, name, url, price, data, propal } = this.state;
+		const { errors, name, url, price, nbNights, localisation, data, propal } = this.state;
 
 		let params = { errors: errors, onChange: this.handleChange }
 
@@ -125,19 +138,24 @@ export class ProjectHouse extends Component {
 			<div className="space-y-3">
 				{data.map((acc, idx) => (
 					<div key={idx} className="group flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-						<div className="w-[calc(100%-2.5rem-3rem-24px)] md:w-[calc(100%-6rem-3rem-24px)] font-medium flex items-center gap-2 text-slate-800">
-							<span>{acc.name}</span>
-							{(acc.url && acc.url !== "https://") && <a href={acc.url} className="url-topo relative text-blue-700" target="_blank">
-								<span className="icon-link"></span>
-								<span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Lien externe</span>
-							</a>}
-							{/*<div className="flex items-center text-sm text-slate-600">*/}
-							{/*	<span className="icon-placeholder"></span>*/}
-							{/*	<span className="ml-1">{acc.location}</span>*/}
-							{/*</div>*/}
+						<div className="w-[calc(100%-2.5rem-3rem-24px)] md:w-[calc(100%-6rem-3rem-24px)] font-medium flex flex-col">
+							<div className="flex items-center gap-2 text-slate-800">
+								<span>{acc.name}</span>
+								{(acc.url && acc.url !== "https://") && <a href={acc.url} className="url-topo relative text-blue-700" target="_blank">
+									<span className="icon-link"></span>
+									<span className="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs text-gray-600 hidden">Lien externe</span>
+								</a>}
+							</div>
+							{acc.localisation
+								? <div className="flex items-center text-xs text-slate-600">
+									<span className="icon-placeholder"></span>
+									<span className="ml-1">{acc.localisation}</span>
+								</div>
+								: null
+							}
 						</div>
-						<div className="w-10 md:w-24 flex justify-end items-center text-sm">
-							<div className="text-slate-600">{acc.nights} nuits</div>
+						<div className="w-10 md:w-24 flex flex-col justify-end items-center text-sm text-right">
+							<div className="text-slate-600">{acc.nbNights} nuits</div>
 							<div className="font-semibold text-purple-600 ml-2">{acc.price.toFixed(2)} €</div>
 						</div>
 						<div className="w-12 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 md:transition-opacity">
@@ -174,7 +192,15 @@ export class ProjectHouse extends Component {
 								   <Input identifiant="name" valeur={name} {...params}>Nom de l'hébergement</Input>
 							   </div>
 							   <div className="w-full">
-								   <Input identifiant="price" valeur={price} {...params}>Prix de l'hébergement</Input>
+								   <Input identifiant="localisation" valeur={localisation} {...params}>Localisation</Input>
+							   </div>
+						   </div>
+						   <div className="flex gap-4">
+							   <div className="w-full">
+								   <Input identifiant="nbNights" valeur={nbNights} {...params}>Nombre de nuits</Input>
+							   </div>
+							   <div className="w-full">
+								   <Input identifiant="price" valeur={price} {...params}>Prix total</Input>
 							   </div>
 						   </div>
 						   <div>
