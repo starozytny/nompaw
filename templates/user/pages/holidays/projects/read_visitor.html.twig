@@ -5,4 +5,37 @@
 {% set page_title %}{{ elem.name }}{% endset %}
 
 {% block main_content %}
+    <div class="min-h-screen bg-gradient-to-br from-white/10 to-white rounded-2xl border">
+        <div class="project-title w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 border rounded-t-2xl flex flex-col gap-2" style="background-image: url({{ elem.imageFile }});">
+            <div class="relative h-full flex items-center py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                    <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center md:gap-2">
+                        <div class="flex space-x-4 lg:items-center">
+                            <div class="text-white">
+                                <h1 class="text-3xl font-bold mb-3">{{ elem.name }}</h1>
+                                <div class="flex items-center space-x-6 text-sm">
+                                    <div class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                                        <span class="icon-calendar"></span>
+                                        <span>{{ elem.startAt ? elem.startAt | date('d M Y') | lower : "" }} {{ elem.endAt != elem.startAt ? " au " ~ elem.endAt | date('d M Y') | lower : "" }}</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="projects_read"
+             data-elem="{{ element }}"
+             data-user-id=""
+             data-houses="{{ houses }}"
+             data-activities="{{ activities }}"
+             data-lifestyles="{{ lifestyles }}"
+             data-todos="{{ todos }}"
+        >
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+    </div>
 {% endblock %}

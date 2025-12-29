@@ -129,11 +129,14 @@ export class ProjectHouse extends Component {
 					<span className="icon-home !font-bold text-xl"></span>
 					<span className="ml-2">Hébergement</span>
 				</h3>
-				<button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
-						onClick={() => this.handleModal('formPropal', 'create', null)}
-				>
-					+ Ajouter
-				</button>
+				{userId
+					? <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+							  onClick={() => this.handleModal('formPropal', 'create', null)}
+					>
+						+ Ajouter
+					</button>
+					: null
+				}
 			</div>
 			<div className="space-y-3">
 				{data.map((acc, idx) => (
@@ -154,22 +157,26 @@ export class ProjectHouse extends Component {
 								: null
 							}
 						</div>
-						<div className="w-10 md:w-24 flex flex-col justify-end items-center text-sm text-right">
+						<div className="w-10 md:w-24 flex flex-col justify-end text-sm text-right">
 							<div className="text-slate-600">{acc.nbNights} nuits</div>
 							<div className="font-semibold text-purple-600 ml-2">{acc.price.toFixed(2)} €</div>
 						</div>
-						<div className="w-12 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 md:transition-opacity">
-							<button onClick={() => this.handleModal("formPropal", "update", acc)}
-									className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-							>
-								<span className="icon-pencil"></span>
-							</button>
-							<button onClick={() => this.handleModal("deletePropal", "delete", acc)}
-									className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-							>
-								<span className="icon-close"></span>
-							</button>
-						</div>
+
+						{userId
+							? <div className="w-12 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 md:transition-opacity">
+								<button onClick={() => this.handleModal("formPropal", "update", acc)}
+										className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+								>
+									<span className="icon-pencil"></span>
+								</button>
+								<button onClick={() => this.handleModal("deletePropal", "delete", acc)}
+										className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+								>
+									<span className="icon-close"></span>
+								</button>
+							</div>
+							: null
+						}
 					</div>
 				))}
 

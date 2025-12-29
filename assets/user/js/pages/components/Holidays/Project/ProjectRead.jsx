@@ -16,8 +16,6 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 	const [activeTab, setActiveTab] = useState('overview');
 	const [participants, setParticipants] = useState(elem.participants);
 
-	console.log(elem);
-
 	let onChange = (e) => {
 		let value = e.currentTarget.value;
 		setParticipants(value)
@@ -69,7 +67,7 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between h-12">
+				<div className="flex items-center justify-between h-14">
 					<div className="text-sm flex items-center space-x-6">
 						<div className="flex items-center space-x-2">
 							<span className="icon-group !font-bold text-ls"></span>
@@ -84,7 +82,7 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 						<div className="flex items-center space-x-2">
 							<span className="icon-bank !font-bold text-ls"></span>
 							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(elem.maxBudget).toFixed(2)} €</span>
-							<span className="text-slate-500">({percentage}%)</span>
+							<span className="hidden md:inline-blocktext-slate-500">({percentage}%)</span>
 						</div>
 					</div>
 					<div className="hidden md:block w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -142,15 +140,15 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 									userId={userId}
 								/>
 
-								<ProjectActivities
-									projectId={elem.id}
-									activities={activities}
-									userId={userId}
-								/>
-
 								<ProjectLifestyle
 									projectId={elem.id}
 									lifestyles={lifestyles}
+									userId={userId}
+								/>
+
+								<ProjectActivities
+									projectId={elem.id}
+									activities={activities}
 									userId={userId}
 								/>
 							</div>

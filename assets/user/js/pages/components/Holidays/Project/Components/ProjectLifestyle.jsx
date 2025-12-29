@@ -116,11 +116,14 @@ export class ProjectLifestyle extends Component {
 					<span className="icon-flash !font-semibold text-xl"></span>
 					<span className="ml-2">Style de vie</span>
 				</h3>
-				<button onClick={() => this.handleModal('formPropal', 'create', null)}
-						className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
-				>
-					+ Ajouter
-				</button>
+				{userId
+					? <button onClick={() => this.handleModal('formPropal', 'create', null)}
+							  className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+					>
+						+ Ajouter
+					</button>
+					: null
+				}
 			</div>
 			<div className="space-y-3">
 				{data.map((item, idx) => {
@@ -137,24 +140,27 @@ export class ProjectLifestyle extends Component {
 							<div className="font-semibold text-amber-600">{item.price} € {(item.priceType === 0 ? " / pers" : "")}</div>
 						</div>
 
-						<div className="w-12 flex opacity-0 group-hover:opacity-100 transition-opacity">
-							<button onClick={() => this.handleModal("formPropal", "update", item)}
-									className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-							>
-								<span className="icon-pencil"></span>
-							</button>
-							<button onClick={() => this.handleModal("deletePropal", "delete", item)}
-									className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-							>
-								<span className="icon-close"></span>
-							</button>
-						</div>
+						{userId
+							? <div className="w-12 flex opacity-0 group-hover:opacity-100 transition-opacity">
+								<button onClick={() => this.handleModal("formPropal", "update", item)}
+										className="px-1 pt-2 pb-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+								>
+									<span className="icon-pencil"></span>
+								</button>
+								<button onClick={() => this.handleModal("deletePropal", "delete", item)}
+										className="px-1 pt-2 pb-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+								>
+									<span className="icon-close"></span>
+								</button>
+							</div>
+							: null
+						}
 					</div>
 				})}
 
 				<div className="pt-3 border-t border-slate-200">
 					<div className="flex justify-between items-center">
-						<span className="text-sm font-medium text-slate-600">Total des dépenses</span>
+						<span className="text-sm font-medium text-slate-600">Total dépenses</span>
 						<span className="text-sm font-bold text-amber-600">
 							{data.reduce((sum, a) => sum + a.price, 0)} €
 						</span>
