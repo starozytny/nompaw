@@ -41,8 +41,16 @@ class HoPropalHouse
     private ?string $url = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['hopro_read', 'pr_house_list'])]
+    #[Groups(['pr_house_list'])]
     private ?float $price = null;
+
+    #[ORM\Column]
+    #[Groups(['pr_house_list'])]
+    private ?int $nbNights = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['pr_house_list'])]
+    private ?string $localisation = null;
 
     public function getId(): ?int
     {
@@ -117,6 +125,30 @@ class HoPropalHouse
     public function setPrice(?float $price): self
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    public function getNbNights(): ?int
+    {
+        return $this->nbNights;
+    }
+
+    public function setNbNights(int $nbNights): static
+    {
+        $this->nbNights = $nbNights;
+
+        return $this;
+    }
+
+    public function getLocalisation(): ?string
+    {
+        return $this->localisation;
+    }
+
+    public function setLocalisation(?string $localisation): static
+    {
+        $this->localisation = $localisation;
 
         return $this;
     }

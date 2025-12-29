@@ -11,6 +11,7 @@ import Validateur from "@commonFunctions/validateur";
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 import { Input, InputFile } from "@tailwindComponents/Elements/Fields";
+import Inputs from "@commonFunctions/inputs";
 
 const URL_INDEX_PAGE = "user_projects_read";
 const URL_CREATE_ELEMENT = "intern_api_projects_create";
@@ -31,7 +32,9 @@ export function ProjectFormulaire ({ context, element }) {
         name={element ? Formulaire.setValue(element.name) : ""}
 		startAt={element ? Formulaire.setValueDate(element.startAt) : ""}
 		endAt={element ? Formulaire.setValueDate(element.endAt) : ""}
+		participants={element ? Formulaire.setValue(element.participants) : 1}
         description={element ? Formulaire.setValue(element.description) : ""}
+		maxBudget={element ? Formulaire.setValue(element.maxBudget) : ""}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
     />
 }
@@ -51,7 +54,9 @@ class Form extends Component {
 			name: props.name,
 			startAt: props.startAt,
 			endAt: props.endAt,
+			participants: props.participants,
 			description: { value: description, html: description },
+			maxBudget: props.maxBudget,
 			errors: [],
 		}
 
@@ -59,7 +64,18 @@ class Form extends Component {
 	}
 
 	handleChange = (e) => {
-		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
+		let name = e.currentTarget.name;
+		let value = e.currentTarget.value;
+
+		if (name === "maxBudget") {
+			value = Inputs.textMoneyMinusInput(value, this.state[name])
+		}
+
+		if (name === "participants") {
+			value = Inputs.textNumericInput(value, this.state[name])
+		}
+
+		this.setState({ [name]: value })
 	}
 
 	handleChangeTinyMCE = (name, html) => {
@@ -70,7 +86,7 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { url } = this.props;
-		const { name, startAt } = this.state;
+		const { name, startAt, endAt, maxBudget } = this.state;
 
 		this.setState({ errors: [] });
 
@@ -78,6 +94,9 @@ class Form extends Component {
 			{ type: "text", id: 'name', value: name },
 			{ type: "text", id: 'startAt', value: startAt },
 			{ type: "date", id: 'startAt', value: startAt },
+			{ type: "text", id: 'endAt', value: endAt },
+			{ type: "date", id: 'endAt', value: endAt },
+			{ type: "text", id: 'maxBudget', value: maxBudget }
 		];
 
 		let validate = Validateur.validateur(paramsToValidate)
@@ -110,9 +129,9 @@ class Form extends Component {
 
 	render () {
         const { context, imageFile } = this.props;
-        const { errors, name, startAt, endAt, description } = this.state;
+        const { errors, name, startAt, endAt, participants, description, maxBudget } = this.state;
 
-        let params = { errors: errors, onChange: this.handleChange };
+        let params0 = { errors: errors, onChange: this.handleChange };
 
         return <form onSubmit={this.handleSubmit}>
             <div className="flex flex-col gap-4 xl:gap-6">
@@ -126,21 +145,29 @@ class Form extends Component {
                     <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
                         <div className="flex gap-4">
                             <div className="w-full">
-                                <Input identifiant="name" valeur={name} {...params}>Nom du projet *</Input>
+                                <Input identifiant="name" valeur={name} {...params0}>Nom du projet *</Input>
                             </div>
                             <div className="w-full">
                                 <InputFile ref={this.file} type="simple" identifiant="image" valeur={imageFile}
-                                           placeholder="Glissez et déposer une image" {...params}>
+                                           placeholder="Glissez et déposer une image" {...params0}>
                                     Illustration
                                 </InputFile>
                             </div>
                         </div>
 						<div className="flex gap-2">
 							<div className="w-full">
-								<Input type="date" identifiant="startAt" valeur={startAt} {...params}>Début le</Input>
+								<Input type="date" identifiant="startAt" valeur={startAt} {...params0}>Début le</Input>
 							</div>
 							<div className="w-full">
-								<Input type="date" identifiant="endAt" valeur={endAt} {...params}>Fini le</Input>
+								<Input type="date" identifiant="endAt" valeur={endAt} {...params0}>Fini le</Input>
+							</div>
+						</div>
+						<div className="flex gap-2">
+							<div className="w-full">
+								<Input type="number" identifiant="participants" valeur={participants} {...params0}>Participants</Input>
+							</div>
+							<div className="w-full">
+								<Input type="number" identifiant="maxBudget" valeur={maxBudget} {...params0}>Budget max.</Input>
 							</div>
 						</div>
                         <div>

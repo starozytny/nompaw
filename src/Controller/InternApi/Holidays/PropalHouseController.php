@@ -69,11 +69,6 @@ class PropalHouseController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(HoPropalHouse $obj, HoPropalHouseRepository $repository, ApiResponse $apiResponse): Response
     {
-        $project = $obj->getProject();
-        if($project->getPropalHouse() && $project->getPropalHouse()->getId() == $obj->getId()){
-            $project->setPropalHouse(null);
-        }
-
         $repository->remove($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");

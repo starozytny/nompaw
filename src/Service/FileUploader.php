@@ -5,8 +5,6 @@ namespace App\Service;
 
 
 
-use App\Entity\Cook\CoCommentary;
-use App\Entity\Cook\CoRecipe;
 use App\Entity\Enum\Image\ImageType;
 use App\Entity\Main\Agenda\AgEvent;
 use App\Entity\Main\Changelog;
@@ -221,8 +219,6 @@ class FileUploader
             $folder = match ($type){
                 ImageType::Changelog => Changelog::FOLDER,
                 ImageType::AgEvent => AgEvent::FOLDER,
-                ImageType::Recipe => CoRecipe::FOLDER,
-                ImageType::Commentary => CoCommentary::FOLDER,
                 ImageType::Groupe => RaGroupe::FOLDER,
                 ImageType::Rando => RaRando::FOLDER,
                 ImageType::Route => RaImage::FOLDER,

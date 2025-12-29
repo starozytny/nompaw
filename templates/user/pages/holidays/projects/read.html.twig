@@ -45,9 +45,10 @@
                             <div class="flex items-center space-x-6 text-sm">
                                 <div class="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
                                     <span class="icon-calendar"></span>
-                                    <span>{{ elem.startAt ? elem.startAt | date('d/m/Y') : "" }} {{ elem.endAt ? " au " ~ elem.endAt | date('d/m/Y') : "" }}</span>
+                                    <span>{{ elem.startAt ? elem.startAt | date('d M Y') | lower : "" }} {{ elem.endAt != elem.startAt ? " au " ~ elem.endAt | date('d M Y') | lower : "" }}</span>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
@@ -55,7 +56,7 @@
                         {% if app.user.id == elem.author.id or app.user.isAdmin %}
                             <div class="w-full flex justify-end gap-1">
                                 <div id="share_link" class="cursor-pointer flex items-center justify-center text-center gap-1 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
-                                     data-url="{{ path('user_projects_read', {slug: elem.slug, code: elem.code}) }}">
+                                     data-url="{{ path('user_projects_read', {slug: elem.slug, code: elem.shareCode}) }}">
                                     <span class="icon-share"></span>
                                     <span class="ml-1">Partager</span>
                                 </div>

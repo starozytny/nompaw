@@ -7,9 +7,6 @@ use App\Entity\Birthday\BiPresent;
 use App\Entity\Budget\BuCategory;
 use App\Entity\Budget\BuItem;
 use App\Entity\Budget\BuRecurrent;
-use App\Entity\Cook\CoCommentary;
-use App\Entity\Cook\CoFavorite;
-use App\Entity\Cook\CoRecipe;
 use App\Entity\Crypto\CrTrade;
 use App\Entity\DataEntity;
 use App\Entity\Holiday\HoProject;
@@ -134,15 +131,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Column(nullable: true)]
     private ?\DateTime $googleTokenExpiresAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: CoRecipe::class)]
-    private Collection $coRecipes;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoCommentary::class)]
-    private Collection $coCommentaries;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoFavorite::class)]
-    private Collection $coFavorites;
-
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: RaLink::class)]
     private Collection $roLinks;
 
@@ -207,9 +195,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->token = bin2hex(random_bytes(32));
-        $this->coRecipes = new ArrayCollection();
-        $this->coCommentaries = new ArrayCollection();
-        $this->coFavorites = new ArrayCollection();
         $this->roLinks = new ArrayCollection();
         $this->roGroupes = new ArrayCollection();
         $this->raRandos = new ArrayCollection();
@@ -518,101 +503,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setIsBlocked(bool $isBlocked): self
     {
         $this->isBlocked = $isBlocked;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CoRecipe>
-     */
-    public function getCoRecipes(): Collection
-    {
-        return $this->coRecipes;
-    }
-
-    public function addCoRecipe(CoRecipe $coRecipe): self
-    {
-        if (!$this->coRecipes->contains($coRecipe)) {
-            $this->coRecipes->add($coRecipe);
-            $coRecipe->setAuthor($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCoRecipe(CoRecipe $coRecipe): self
-    {
-        if ($this->coRecipes->removeElement($coRecipe)) {
-            // set the owning side to null (unless already changed)
-            if ($coRecipe->getAuthor() === $this) {
-                $coRecipe->setAuthor(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->getHighRoleCode() == self::CODE_ROLE_DEVELOPER || $this->getHighRoleCode() == self::CODE_ROLE_ADMIN;
-    }
-
-    /**
-     * @return Collection<int, CoCommentary>
-     */
-    public function getCoCommentaries(): Collection
-    {
-        return $this->coCommentaries;
-    }
-
-    public function addCoCommentary(CoCommentary $coCommentary): self
-    {
-        if (!$this->coCommentaries->contains($coCommentary)) {
-            $this->coCommentaries->add($coCommentary);
-            $coCommentary->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCoCommentary(CoCommentary $coCommentary): self
-    {
-        if ($this->coCommentaries->removeElement($coCommentary)) {
-            // set the owning side to null (unless already changed)
-            if ($coCommentary->getUser() === $this) {
-                $coCommentary->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CoFavorite>
-     */
-    public function getCoFavorites(): Collection
-    {
-        return $this->coFavorites;
-    }
-
-    public function addCoFavorite(CoFavorite $coFavorite): self
-    {
-        if (!$this->coFavorites->contains($coFavorite)) {
-            $this->coFavorites->add($coFavorite);
-            $coFavorite->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCoFavorite(CoFavorite $coFavorite): self
-    {
-        if ($this->coFavorites->removeElement($coFavorite)) {
-            // set the owning side to null (unless already changed)
-            if ($coFavorite->getUser() === $this) {
-                $coFavorite->setUser(null);
-            }
-        }
 
         return $this;
     }

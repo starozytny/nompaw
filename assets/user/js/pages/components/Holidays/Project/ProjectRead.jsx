@@ -14,7 +14,9 @@ import { Input } from "@tailwindComponents/Elements/Fields";
 
 export function ProjectRead ({ elem, userId, houses, lifestyles, activities, todos }) {
 	const [activeTab, setActiveTab] = useState('overview');
-	const [participants, setParticipants] = useState(1);
+	const [participants, setParticipants] = useState(elem.participants);
+
+	console.log(elem);
 
 	let onChange = (e) => {
 		let value = e.currentTarget.value;
@@ -58,10 +60,11 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 	let menu = [
 		{ id: 'overview', label: 'Vue d\'ensemble', icon: 'menu-1' },
 		{ id: 'itinerary', label: 'Itinéraire', icon: 'map' },
-		{ id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
+		// { id: 'daily', label: 'Planning jour par jour', icon: 'calendar' },
 	]
 
 	let budget = ProjectFunctions.getBudget(participants, elem.priceRoute, houses, lifestyles, activities);
+	let percentage = Math.floor(elem.maxBudget !== 0 ? (budget.total / elem.maxBudget) * 100 : 0);
 
 	return <>
 		<div className="bg-white border-b border-slate-200 shadow-sm">
@@ -80,14 +83,14 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 						<div className="hidden md:block w-px h-6 bg-slate-200"></div>
 						<div className="flex items-center space-x-2">
 							<span className="icon-bank !font-bold text-ls"></span>
-							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(budget.total).toFixed(2)} €</span>
-							{/*<span className="text-slate-500">(80%)</span>*/}
+							<span className="font-semibold text-slate-800">{(budget.total).toFixed(2)} € / {(elem.maxBudget).toFixed(2)} €</span>
+							<span className="text-slate-500">({percentage}%)</span>
 						</div>
 					</div>
 					<div className="hidden md:block w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
 						<div
 							className="h-1.5 bg-gradient-to-r from-emerald-500 to-amber-500 rounded-full transition-all"
-							style={{ width: `80%` }}
+							style={{ width: `${percentage}%` }}
 						/>
 					</div>
 				</div>
