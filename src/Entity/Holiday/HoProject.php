@@ -17,7 +17,7 @@ class HoProject extends DataEntity
     const FOLDER = "images/entity/holidays/cover/";
 
     const FORM = ['hopro_form'];
-    const TEXTE = ['hopro_text'];
+    const ITINERARY = ['hopro_itinerary'];
     const READ = ['hopro_read'];
 
     #[ORM\Id]
@@ -53,15 +53,15 @@ class HoProject extends DataEntity
     private ?float $maxBudget = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_read', 'hopro_text'])]
+    #[Groups(['hopro_read', 'hopro_itinerary'])]
     private ?string $textRoute = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['hopro_read', 'hopro_text'])]
+    #[Groups(['hopro_read', 'hopro_itinerary'])]
     private ?string $iframeRoute = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['hopro_read', 'hopro_text'])]
+    #[Groups(['hopro_read', 'hopro_itinerary'])]
     private ?float $priceRoute = null;
 
     #[ORM\Column(length: 255)]

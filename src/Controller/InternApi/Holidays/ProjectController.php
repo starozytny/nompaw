@@ -83,28 +83,6 @@ class ProjectController extends AbstractController
         return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $fileUploader);
     }
 
-    #[Route('/texte/update/{type}/{id}', name: 'update_text', options: ['expose' => true], methods: 'PUT')]
-    public function updateTexte(Request $request, $type, HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository,
-                                ValidatorService $validator, SanitizeData $sanitizeData): Response
-    {
-        $data = json_decode($request->getContent());
-        if ($data === null) {
-            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
-        }
-
-        $obj->setTextRoute($sanitizeData->trimData($data->texte->html));
-        $obj->setIframeRoute($sanitizeData->trimData($data->iframe));
-        $obj->setPriceRoute($sanitizeData->setFloatValue($data->price));
-
-        $noErrors = $validator->validate($obj);
-        if ($noErrors !== true) {
-            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
-        }
-
-        $repository->save($obj, true);
-        return $apiResponse->apiJsonResponse($obj, HoProject::TEXTE);
-    }
-
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(HoProject $obj, HoProjectRepository $repository, ApiResponse $apiResponse,
                            FileUploader $fileUploader,
@@ -135,5 +113,27 @@ class ProjectController extends AbstractController
         $fileUploader->deleteFile($image, HoProject::FOLDER);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
+    }
+
+    #[Route('/itinerary/update/{id}', name: 'itinerary_update', options: ['expose' => true], methods: 'PUT')]
+    public function itinerary(Request $request, HoProject $obj, ApiResponse $apiResponse, HoProjectRepository $repository,
+                              ValidatorService $validator, SanitizeData $sanitizeData): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $obj->setTextRoute($sanitizeData->trimData($data->texte->html));
+        $obj->setIframeRoute($sanitizeData->trimData($data->iframe));
+        $obj->setPriceRoute($sanitizeData->setFloatValue($data->price));
+
+        $noErrors = $validator->validate($obj);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, HoProject::ITINERARY);
     }
 }

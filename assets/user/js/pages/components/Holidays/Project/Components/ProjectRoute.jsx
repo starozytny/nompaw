@@ -4,16 +4,16 @@ import { createPortal } from "react-dom";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import Formulaire from "@commonFunctions/formulaire";
-import Sanitaze from "@commonFunctions/sanitaze";
 import Inputs from "@commonFunctions/inputs";
+import Sanitaze from "@commonFunctions/sanitaze";
+import Formulaire from "@commonFunctions/formulaire";
 
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Input } from "@tailwindComponents/Elements/Fields";
-import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 import { Button } from "@tailwindComponents/Elements/Button";
+import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 
-const URL_UPDATE_PROJECT = 'intern_api_projects_update_text';
+const URL_UPDATE_ITINERARY = 'intern_api_projects_itinerary_update';
 
 export class ProjectRoute extends Component {
 	constructor (props) {
@@ -61,7 +61,7 @@ export class ProjectRoute extends Component {
 		const self = this;
 		this.formText.current.handleUpdateFooter(<Button iconLeft="chart-3" type="blue">Confirmer</Button>);
 		axios({
-			method: "PUT", url: Routing.generate(URL_UPDATE_PROJECT, { type: 'route', id: projectId }),
+			method: "PUT", url: Routing.generate(URL_UPDATE_ITINERARY, { id: projectId }),
 			data: { texte: texte, iframe: iframe, price: price }
 		})
 			.then(function (response) {
