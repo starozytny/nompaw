@@ -1,3 +1,8 @@
 {% extends 'user/layout/layout.html.twig' %}
 
 {% set breadcrumbs = [{ text: "Vidéothèque", icon: "camera", url: path('user_videotheque_index') }] %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_videos') }}
+{% endblock %}

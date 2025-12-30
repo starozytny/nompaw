@@ -54,6 +54,10 @@ class HoProject extends DataEntity
     #[Groups(['hopro_read', 'hopro_form'])]
     private ?float $maxBudget = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['hopro_form'])]
+    private ?string $localisation = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['hopro_read', 'hopro_itinerary'])]
     private ?string $textRoute = null;
@@ -189,6 +193,18 @@ class HoProject extends DataEntity
     public function setMaxBudget(float $maxBudget): static
     {
         $this->maxBudget = $maxBudget;
+
+        return $this;
+    }
+
+    public function getLocalisation(): ?string
+    {
+        return $this->localisation;
+    }
+
+    public function setLocalisation(?string $localisation): static
+    {
+        $this->localisation = $localisation;
 
         return $this;
     }

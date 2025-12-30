@@ -3,13 +3,13 @@ function getBudget (participants, routePrice, houses, lifestyle, activities)
 	let nParticipants = participants !== "" ? participants : 1;
 
 	let housesPrice = 0, lifeStylePrice = 0, activitiesPrice = 0;
-	JSON.parse(houses).map(el => {
+	houses.map(el => {
 		housesPrice += el.price ? el.price : 0;
 	})
-	JSON.parse(lifestyle).map(el => {
+	lifestyle.map(el => {
 		lifeStylePrice += el.price ? el.price * (el.priceType === 0 ? nParticipants : 1) : 0;
 	})
-	JSON.parse(activities).map(el => {
+	activities.map(el => {
 		if (el.price) {
 			activitiesPrice += el.price * (el.priceType === 0 ? nParticipants : 1);
 		}

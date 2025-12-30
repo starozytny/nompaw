@@ -31,7 +31,7 @@ export class ProjectActivities extends Component {
 			imageFile: '',
 			description: '',
 			errors: [],
-			data: JSON.parse(props.activities)
+			data: props.activities
 		}
 
 		this.file = React.createRef();
@@ -97,7 +97,11 @@ export class ProjectActivities extends Component {
 			axios({ method: "POST", url: urlName, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
-					self.setState({ data: Propals.updateList(context, data, response) })
+
+					let nData = Propals.updateList(context, data, response);
+
+					self.setState({ data: nData })
+					self.props.onUpdateData(nData);
 				})
 				.catch(function (error) {
 					modalFormPropal(self);

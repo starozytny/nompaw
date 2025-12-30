@@ -12,9 +12,13 @@ import { ProjectActivities } from "@userPages/Holidays/Project/Components/Projec
 
 import { Input } from "@tailwindComponents/Elements/Fields";
 
-export function ProjectRead ({ elem, userId, houses, lifestyles, activities, todos }) {
+export function ProjectRead ({ elem, userId, oriHouses, oriLifestyles, oriActivities, oriTodos }) {
 	const [activeTab, setActiveTab] = useState('overview');
 	const [participants, setParticipants] = useState(elem.participants);
+	const [houses, setHouses] = useState(JSON.parse(oriHouses));
+	const [lifestyles, setLifestyles] = useState(JSON.parse(oriLifestyles));
+	const [activities, setActivities] = useState(JSON.parse(oriActivities));
+	const [todos, setTodos] = useState(JSON.parse(oriTodos));
 
 	let onChange = (e) => {
 		let value = e.currentTarget.value;
@@ -138,18 +142,21 @@ export function ProjectRead ({ elem, userId, houses, lifestyles, activities, tod
 									projectId={elem.id}
 									houses={houses}
 									userId={userId}
+									onUpdateData={setHouses}
 								/>
 
 								<ProjectLifestyle
 									projectId={elem.id}
 									lifestyles={lifestyles}
 									userId={userId}
+									onUpdateData={setLifestyles}
 								/>
 
 								<ProjectActivities
 									projectId={elem.id}
 									activities={activities}
 									userId={userId}
+									onUpdateData={setActivities}
 								/>
 							</div>
 

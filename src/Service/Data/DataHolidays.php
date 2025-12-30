@@ -25,6 +25,7 @@ class DataHolidays
             ->setParticipants($this->sanitizeData->setIntValue($data->participants, 1))
             ->setDescription($this->sanitizeData->trimData($data->description->html))
             ->setMaxBudget($this->sanitizeData->setFloatValue($data->maxBudget))
+            ->setLocalisation($this->sanitizeData->trimData($data->localisation))
         ;
     }
 
