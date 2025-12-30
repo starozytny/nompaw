@@ -2,6 +2,7 @@
 
 namespace App\Controller\User\Videotheque;
 
+use App\Repository\Video\ViVideoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,10 +25,16 @@ class VideothequeController extends AbstractController
         return $this->render('user/pages/videotheque/index.html.twig', ['finder' => $finder]);
     }
 
-    #[Route('/telecharger/{filename}', name: 'download')]
-    public function download($filename): Response
+    #[Route('/telecharger/{id}', name: 'download', options: ['expose' => true], methods: 'GET')]
+    public function download($id, ViVideoRepository $repository): Response
     {
-        $file = $this->getParameter('private_directory') . 'videotheque/' . $filename;
+        $video = $repository->find($id);
+        if(!$video){
+            $this->addFlash('error', "Fichier introuvable.");
+            return $this->redirectToRoute('user_videotheque_index');
+        }
+
+        $file = $this->getParameter('private_directory') . 'videotheque/' . $video->getFilename();
         if(!file_exists($file)) {
             $this->addFlash('error', "Fichier introuvable.");
             return $this->redirectToRoute('user_videotheque_index');
