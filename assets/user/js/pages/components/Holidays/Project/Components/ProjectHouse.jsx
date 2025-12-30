@@ -30,7 +30,7 @@ export class ProjectHouse extends Component {
 			nbNights: '1',
 			localisation: '',
 			errors: [],
-			data: JSON.parse(props.houses)
+			data: props.houses
 		}
 
 		this.formPropal = React.createRef();
@@ -95,7 +95,11 @@ export class ProjectHouse extends Component {
 			axios({ method: method, url: urlName, data: { name: name, url: url, price: price, nbNights: nbNights, localisation: localisation } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
-					self.setState({ data: Propals.updateList(context, data, response) })
+
+					let nData = Propals.updateList(context, data, response);
+
+					self.setState({ data: nData })
+					self.props.onUpdateData(nData);
 				})
 				.catch(function (error) {
 					modalFormPropal(self);

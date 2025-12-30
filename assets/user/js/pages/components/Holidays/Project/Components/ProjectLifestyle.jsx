@@ -28,7 +28,7 @@ export class ProjectLifestyle extends Component {
 			price: '',
 			priceType: 0,
 			errors: [],
-			data: JSON.parse(props.lifestyles),
+			data: props.lifestyles
 		}
 
 		this.formText = React.createRef();
@@ -77,7 +77,11 @@ export class ProjectLifestyle extends Component {
 			axios({ method: method, url: urlName, data: { name: name, unit: unit, price: price, priceType: priceType } })
 				.then(function (response) {
 					self.formPropal.current.handleClose();
-					self.setState({ data: Propals.updateList(context, data, response) })
+
+					let nData = Propals.updateList(context, data, response);
+
+					self.setState({ data: nData })
+					self.props.onUpdateData(nData);
 				})
 				.catch(function (error) {
 					modalFormPropal(self);

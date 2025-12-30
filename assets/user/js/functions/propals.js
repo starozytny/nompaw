@@ -24,7 +24,13 @@ function deletePropal (self, modalRef, element, data, urlName, modalFunction) {
     axios({ method: "DELETE", url: Routing.generate(urlName, {'id': element.id}), data: {} })
         .then(function (response) {
             modalRef.current.handleClose();
-            self.setState({ data: data.filter(d => { return d.id !== element.id }) })
+
+            let nData = data.filter(d => { return d.id !== element.id });
+
+            self.setState({ data: nData })
+            if(self.props.onUpdateData){
+                self.props.onUpdateData(nData);
+            }
         })
         .catch(function (error) { modalFunction(self); Formulaire.displayErrors(self, error); Formulaire.loader(false); })
     ;

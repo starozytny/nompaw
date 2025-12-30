@@ -25,7 +25,7 @@ export class ProjectTodos extends Component {
 			element: null,
 			name: '',
 			errors: [],
-			data: JSON.parse(props.todos),
+			data: props.todos,
 			todosChecked: []
 		}
 
