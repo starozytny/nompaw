@@ -5,13 +5,13 @@ import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Toastr from "@tailwindFunctions/toastr";
+import Inputs from "@commonFunctions/inputs";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
 import { Input, InputFile } from "@tailwindComponents/Elements/Fields";
-import Inputs from "@commonFunctions/inputs";
 
 const URL_INDEX_PAGE = "user_projects_read";
 const URL_CREATE_ELEMENT = "intern_api_projects_create";
@@ -35,6 +35,7 @@ export function ProjectFormulaire ({ context, element }) {
 		participants={element ? Formulaire.setValue(element.participants) : 1}
         description={element ? Formulaire.setValue(element.description) : ""}
 		maxBudget={element ? Formulaire.setValue(element.maxBudget) : ""}
+		localisation={element ? Formulaire.setValue(element.localisation) : ""}
         imageFile={element ? Formulaire.setValue(element.imageFile) : ""}
     />
 }
@@ -57,6 +58,7 @@ class Form extends Component {
 			participants: props.participants,
 			description: { value: description, html: description },
 			maxBudget: props.maxBudget,
+			localisation: props.localisation,
 			errors: [],
 		}
 
@@ -86,7 +88,7 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { url } = this.props;
-		const { name, startAt, endAt, maxBudget } = this.state;
+		const { name, startAt, endAt, maxBudget, localisation } = this.state;
 
 		this.setState({ errors: [] });
 
@@ -96,7 +98,8 @@ class Form extends Component {
 			{ type: "date", id: 'startAt', value: startAt },
 			{ type: "text", id: 'endAt', value: endAt },
 			{ type: "date", id: 'endAt', value: endAt },
-			{ type: "text", id: 'maxBudget', value: maxBudget }
+			{ type: "text", id: 'maxBudget', value: maxBudget },
+			{ type: "text", id: 'localisation', value: localisation }
 		];
 
 		let validate = Validateur.validateur(paramsToValidate)
@@ -129,7 +132,7 @@ class Form extends Component {
 
 	render () {
         const { context, imageFile } = this.props;
-        const { errors, name, startAt, endAt, participants, description, maxBudget } = this.state;
+        const { errors, name, startAt, endAt, participants, description, maxBudget, localisation } = this.state;
 
         let params0 = { errors: errors, onChange: this.handleChange };
 
@@ -169,6 +172,9 @@ class Form extends Component {
 							<div className="w-full">
 								<Input type="number" identifiant="maxBudget" valeur={maxBudget} {...params0}>Budget max.</Input>
 							</div>
+						</div>
+						<div>
+							<Input identifiant="localisation" valeur={localisation} {...params0}>Localisation</Input>
 						</div>
                         <div>
                             <TinyMCE type={6} identifiant='description' valeur={description.value}

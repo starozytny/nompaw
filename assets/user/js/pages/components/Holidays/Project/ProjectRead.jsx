@@ -12,9 +12,13 @@ import { ProjectActivities } from "@userPages/Holidays/Project/Components/Projec
 
 import { Input } from "@tailwindComponents/Elements/Fields";
 
-export function ProjectRead ({ elem, userId, houses, lifestyles, activities, todos }) {
+export function ProjectRead ({ elem, userId, oriHouses, oriLifestyles, oriActivities, oriTodos }) {
 	const [activeTab, setActiveTab] = useState('overview');
 	const [participants, setParticipants] = useState(elem.participants);
+	const [houses, setHouses] = useState(oriHouses);
+	const [lifestyles, setLifestyles] = useState(oriLifestyles);
+	const [activities, setActivities] = useState(oriActivities);
+	const [todos, setTodos] = useState(oriTodos);
 
 	let onChange = (e) => {
 		let value = e.currentTarget.value;
