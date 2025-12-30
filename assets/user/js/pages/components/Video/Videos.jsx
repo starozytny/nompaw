@@ -7,7 +7,9 @@ import Sort from "@commonFunctions/sort";
 import List from "@commonFunctions/list";
 
 import { VideosList } from "@userPages/Video/VideosList";
+import { VideoFormulaire } from "@userPages/Video/VideoForm";
 
+import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Search } from "@tailwindComponents/Elements/Search";
 import { Filter } from "@tailwindComponents/Elements/Filter";
 import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
@@ -35,6 +37,7 @@ export class Videos extends Component {
 
 		this.pagination = React.createRef();
 		this.delete = React.createRef();
+		this.infos = React.createRef();
 	}
 
 	componentDidMount = () => {
@@ -74,8 +77,8 @@ export class Videos extends Component {
 	}
 
 	handleModal = (identifiant, elem) => {
-		this.delete.current.handleClick();
-		this.setState({ element: elem })
+		this.setState({ element: elem });
+		this[identifiant].current.handleClick();
 	}
 
 	render () {
@@ -106,12 +109,26 @@ export class Videos extends Component {
 					<Pagination ref={this.pagination} items={data} taille={data.length} currentPage={currentPage}
 								perPage={perPage} onUpdate={this.handleUpdateData} onChangeCurrentPage={this.handleChangeCurrentPage} />
 
+					{element
+						? createPortal(
+							<ModalDelete refModal={this.delete} element={element} routeName={URL_DELETE_ELEMENT}
+										 title="Supprimer ce film" msgSuccess="Film supprimé."
+										 onUpdateList={this.handleUpdateList}>
+								Êtes-vous sûr de vouloir supprimer définitivement ce film : <b>{element ? element.name : ""}</b> ?
+							</ModalDelete>,
+							document.body
+						)
+						: null
+					}
+
 					{createPortal(
-						<ModalDelete refModal={this.delete} element={element} routeName={URL_DELETE_ELEMENT}
-									 title="Supprimer ce film" msgSuccess="Film supprimé."
-									 onUpdateList={this.handleUpdateList}>
-							Êtes-vous sûr de vouloir supprimer définitivement ce film : <b>{element ? element.name : ""}</b> ?
-						</ModalDelete>,
+						<Modal ref={this.infos} identifiant="infos" maxWidth={568}
+							   title={element && element.id ? "Modifier les informations" : "Ajouter les informations"} isForm={true}
+							   content={<VideoFormulaire identifiant="infos"
+														 context={element && element.id ? "update" : "create"} element={element}
+														 key={element ? (element.id ? element.id : 1) : 0} />}
+							   footer={null}
+						/>,
 						document.body
 					)}
 				</>

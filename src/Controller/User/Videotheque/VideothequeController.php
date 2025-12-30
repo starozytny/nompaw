@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/espace-membre/videotheque', name: 'user_videotheque_')]
 class VideothequeController extends AbstractController
 {
-    #[Route('/', name: 'index')]
+    #[Route('/', name: 'index', options: ['expose' => true], methods: 'GET')]
     public function index(): Response
     {
         $folder = $this->getParameter('private_directory') . 'videotheque';

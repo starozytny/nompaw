@@ -16,6 +16,24 @@ class ViVideoRepository extends ServiceEntityRepository
         parent::__construct($registry, ViVideo::class);
     }
 
+    public function save(ViVideo $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(ViVideo $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     //    /**
     //     * @return ViVideo[] Returns an array of ViVideo objects
     //     */
