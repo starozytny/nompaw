@@ -54,6 +54,18 @@ class FileUploader
 
             $file->move($directory, $fileName);
 
+            $filePath = $directory . "/" . $fileName;
+
+            // Correction de l'orientation EXIF
+            $mime = mime_content_type($filePath);
+            if(str_contains($mime, "image/") && str_contains($mime, "jpeg")) {
+                $orientation = $this->checkOrientation($filePath);
+                if($orientation > 0) {
+                    $image = imagecreatefromjpeg($filePath);
+                    $this->fixOrientation($orientation, $filePath, $image);
+                }
+            }
+
             if($reducePixel || !$keepOriginalSize){
                 $fileOri = $directory . "/" . $fileName;
 
@@ -77,6 +89,36 @@ class FileUploader
         }
 
         return $fileName;
+    }
+
+    public function checkOrientation($filePath)
+    {
+        $exif = @exif_read_data($filePath);
+        if (!empty($exif['Orientation'])) {
+            if($exif['Orientation'] == 3 || $exif['Orientation'] == 6 || $exif['Orientation'] == 8){
+                return $exif['Orientation'];
+            }
+        }
+
+        return 0;
+    }
+
+    public function fixOrientation($orientation, $filePath, $image): void
+    {
+        switch ($orientation) {
+            case 3:
+                $image = imagerotate($image, 180, 0);
+                break;
+            case 6:
+                $image = imagerotate($image, -90, 0);
+                break;
+            case 8:
+                $image = imagerotate($image, 90, 0);
+                break;
+        }
+
+        imagejpeg($image, $filePath);
+        imagedestroy($image);
     }
 
     /**
