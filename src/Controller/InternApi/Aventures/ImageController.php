@@ -18,11 +18,45 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use ZipArchive;
 
 #[Route('/intern/api/aventures/image', name: 'intern_api_aventures_images_')]
 class ImageController extends AbstractController
 {
+    const IMAGES_PER_PAGE = 20;
+
+    #[Route('/fetch/{id}/{page}', name: 'fetch_images', options: ['expose' => true], methods: 'GET')]
+    public function fetchImages(Request $request, RaRando $rando, int $page, RaImageRepository $repository, ApiResponse $apiResponse, SerializerInterface $serializer): JsonResponse
+    {
+        $offset = ($page - 1) * self::IMAGES_PER_PAGE;
+
+        $allImages = $repository->findBy(['rando' => $rando], ['takenAt' => 'ASC']);
+
+        // Récupérer uniquement les images de la page courante
+        $currentImages = $repository->findBy(
+            ['rando' => $rando],
+            ['takenAt' => 'ASC'],
+            self::IMAGES_PER_PAGE,
+            $offset
+        );
+
+        // Vérifier s'il y a encore des images après
+        $totalImages = count($allImages);
+        $hasMore = ($offset + self::IMAGES_PER_PAGE) < $totalImages;
+
+        $allImages = $serializer->serialize($allImages, 'json', ['groups' => RaImage::LIST]);
+        $currentImages = $serializer->serialize($currentImages, 'json', ['groups' => RaImage::LIST]);
+
+        return $apiResponse->apiJsonResponse([
+            'images' => $allImages,
+            'currentImages' => $currentImages,
+            'hasMore' => $hasMore,
+            'total' => $totalImages,
+            'page' => $page
+        ], RaImage::class);
+    }
+
     /**
      * @throws ImageWorkshopException
      * @throws ImageWorkshopLayerException

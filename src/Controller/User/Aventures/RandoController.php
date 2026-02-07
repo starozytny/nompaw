@@ -3,13 +3,11 @@
 namespace App\Controller\User\Aventures;
 
 use App\Entity\Main\User;
-use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaPropalAdventure;
 use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
-use App\Repository\Rando\RaImageRepository;
 use App\Repository\Rando\RaPropalAdventureRepository;
 use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
@@ -24,23 +22,20 @@ class RandoController extends AbstractController
     #[Route('/{slug}', name: 'read', options: ['expose' => true])]
     public function read($slug, RaRandoRepository $repository, RaPropalDateRepository $propalDateRepository,
                          RaPropalAdventureRepository $adventureRepository, UserRepository $userRepository,
-                         RaImageRepository $imageRepository, SerializerInterface $serializer): Response
+                         SerializerInterface $serializer): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
         $propalDates = $propalDateRepository->findBy(['rando' => $obj]);
         $propalAdvs  = $adventureRepository->findBy(['rando' => $obj]);
-        $images = $imageRepository->findBy(['rando' => $obj], ['takenAt' => 'ASC']);
         $users = $userRepository->findAll();
 
         $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);
         $propalAdvs = $serializer->serialize($propalAdvs,  'json', ['groups' => RaPropalAdventure::LIST]);
-        $images = $serializer->serialize($images, 'json', ['groups' => RaImage::LIST]);
 
         return $this->render('user/pages/aventures/rando/read.html.twig', [
             'elem' => $obj,
             'propalDates' => $propalDates,
             'propalAdvs' => $propalAdvs,
-            'images' => $images,
             'users' => $users,
         ]);
     }
