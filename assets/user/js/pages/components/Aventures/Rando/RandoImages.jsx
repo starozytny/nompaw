@@ -52,7 +52,6 @@ export class RandoImages extends Component {
 		const dropzone = document.querySelector('.drive-dropzone');
 
 		let timeoutHandle;
-		let self = this;
 
 		function stopDrag () {
 			if (dropzone) {
@@ -255,19 +254,19 @@ export class RandoImages extends Component {
 		const { userId } = this.props;
 		const { errors, files, data, selected, nbProgress, nbTotal } = this.state;
 
-		let params = { errors: errors, onChange: this.handleChange }
+		let params0 = { errors: errors, onChange: this.handleChange }
 
 		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 			<div className="flex flex-col items-center justify-between gap-2 mb-4 md:flex-row">
 				<h3 className="text-lg font-semibold text-slate-900">Photos ({data.length})</h3>
 				<div className="flex flex-col gap-2 sm:flex-row">
 					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
-					{data.length !== 0
-						? <Button type="red" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
+					{data.length !== 0 && selected.length === 0
+						? <Button type="red" iconLeft="trash" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
 						: null
 					}
 					{selected.length !== 0
-						? <Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
+						? <Button type="red" iconLeft="trash" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
 						: null
 					}
 				</div>
@@ -294,7 +293,7 @@ export class RandoImages extends Component {
 			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
 								 content={<div>
 									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*"
-												max={500} maxSize={62914560} {...params}>
+												max={500} maxSize={62914560} {...params0}>
 										 Photos (500 maximum par envoi)
 									 </InputFile>
 								 </div>}
