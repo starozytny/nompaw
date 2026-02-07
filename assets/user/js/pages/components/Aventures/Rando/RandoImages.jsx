@@ -325,7 +325,7 @@ export class RandoImages extends Component {
 	}
 
 	render () {
-		const { userId } = this.props;
+		const { userId, randoAuthor } = this.props;
 		const { errors, files, data, selected, nbProgress, nbTotal } = this.state;
 
 		let params0 = { errors: errors, onChange: this.handleChange }
@@ -377,25 +377,29 @@ export class RandoImages extends Component {
 								>
 									Télécharger ({selected.size})
 								</Button>
-								<Button
-									type="red"
-									iconLeft="trash"
-									onClick={() => this.handleModal('deleteFiles', null)}
-								>
-									Supprimer ({selected.size})
-								</Button>
+								{parseInt(userId) === parseInt(randoAuthor)
+									? <Button
+										type="red"
+										iconLeft="trash"
+										onClick={() => this.handleModal('deleteFiles', null)}
+									>
+										Supprimer ({selected.size})
+									</Button>
+									: null
+								}
 							</>
-						) : (
-							/* Action globale si aucune sélection */
-							data.length > 0 && (
-								<Button
-									type="red"
-									iconLeft="trash"
-									onClick={() => this.handleModal('deleteAllFiles', null)}
-								>
-									Supprimer tout
-								</Button>
-							)
+						) : (parseInt(userId) === parseInt(randoAuthor)
+								? data.length > 0 && (
+									<Button
+										type="red"
+										iconLeft="trash"
+										onClick={() => this.handleModal('deleteAllFiles', null)}
+									>
+										Supprimer tout
+									</Button>
+								)
+								: null
+
 						)}
 					</div>
 				)}
