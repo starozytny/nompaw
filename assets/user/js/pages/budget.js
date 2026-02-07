@@ -2,7 +2,7 @@ import '../../css/pages/budget.scss';
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { Budget } from "@userPages/Budget/Budget";
+import Budget from "@userPages/Budget/Budget";
 import { InitForm } from "@userPages/Budget/InitForm";
 import { Recurrences } from "@userPages/Budget/Reccurences/Recurrences";
 import { RecurrentFormulaire } from "@userPages/Budget/Reccurences/RecurrentForm";
