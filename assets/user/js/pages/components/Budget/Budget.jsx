@@ -26,7 +26,7 @@ const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 const URL_USE_SAVING = "intern_api_budget_categories_use";
 
-export function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m, yearMin, initTotal, recurrences }) {
+function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m, yearMin, initTotal, recurrences }) {
 	const deleteRef = useRef(null)
 	const trashRef = useRef(null)
 	const savingRef = useRef(null)
@@ -321,21 +321,12 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 				switch (d.type) {
 					case 0:
 						totalExpense -= d.recurrencePrice;
-						if(!d.isActive){
-							totalExpenseReal -= d.recurrencePrice;
-						}
 						break;
 					case 1:
 						totalIncome -= d.recurrencePrice;
-						if(!d.isActive){
-							totalIncomeReal -= d.recurrencePrice;
-						}
 						break;
 					case 2:
 						totalSaving -= d.recurrencePrice;
-						if(!d.isActive){
-							totalSavingReal -= d.recurrencePrice;
-						}
 						break;
 					default:
 						break;
@@ -409,7 +400,9 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 
 	let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
 	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
-	let totalDispoNow = initial + totalIncomeReal - (totalExpenseReal + totalSavingReal);
+
+	let tmpTotalMinus = totalExpenseReal + totalSavingReal;
+	let totalDispoNow = tmpTotalMinus < 0 ? initial + totalIncomeReal + tmpTotalMinus : initial + totalIncomeReal - tmpTotalMinus;
 
 	let cards = [
 		{ value: 0, name: "Budget disponible", total: totalDispo, total2: totalDispoNow, initial: initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
@@ -520,6 +513,8 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		}
 	</div>
 }
+
+export default Budget
 
 function Year ({ year, yearMin }) {
 	return <div className="flex items-center gap-4">
