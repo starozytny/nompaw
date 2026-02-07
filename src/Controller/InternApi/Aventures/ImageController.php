@@ -13,9 +13,12 @@ use getID3;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use ZipArchive;
 
 #[Route('/intern/api/aventures/image', name: 'intern_api_aventures_images_')]
 class ImageController extends AbstractController
@@ -133,6 +136,60 @@ class ImageController extends AbstractController
     public function download(RaImage $obj): Response
     {
         return $this->file($this->getParameter('private_directory') . RaRando::FOLDER_IMAGES . '/' . $obj->getRando()->getId() . '/' . $obj->getFile());
+    }
+
+    #[Route('/download-selected', name: 'download_selected', options: ['expose' => true], methods: 'POST')]
+    public function downloadSelected(Request $request, RaImageRepository $repository, ApiResponse $apiResponse): BinaryFileResponse|JsonResponse
+    {
+        $data = json_decode($request->getContent());
+
+        if (!is_array($data->imageIds) || empty($data->imageIds)) {
+            return $apiResponse->apiJsonResponseBadRequest("Aucune image sélectionnée.");
+        }
+
+        $imageIds = $data->imageIds;
+
+        $images = $repository->findBy(['id' => $imageIds]);
+
+        if (empty($images)) {
+            return $apiResponse->apiJsonResponseBadRequest("Aucune image trouvée.");
+        }
+
+        $zipFilename = 'selection_' . date('YmdHis') . '_' . uniqid() . '.zip';
+        $zipPath = sys_get_temp_dir() . '/' . $zipFilename;
+
+        // Créer le ZIP
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            return $apiResponse->apiJsonResponseBadRequest("Impossible de créer l'archive ZIP.");
+        }
+
+        $imagesDirectory = $this->getParameter('private_directory');
+        $addedCount = 0;
+
+        /** @var RaImage $image */
+        foreach ($images as $image) {
+            $filePath = $imagesDirectory . $image->getFileFile();
+
+            dump($filePath);
+
+            if (file_exists($filePath)) {
+                $zip->addFile($filePath, $image->getFile());
+                $addedCount++;
+            }
+        }
+
+        $zip->close();
+
+        if ($addedCount === 0) {
+            @unlink($zipPath);
+            return $apiResponse->apiJsonResponseBadRequest("Aucun fichier valide à télécharger.");
+        }
+
+        $response = $this->file($zipPath, 'selection_photos_' . count($images) . '.zip');
+        $response->deleteFileAfterSend(true);
+
+        return $response;
     }
 
     #[Route('/src/thumbs/{id}', name: 'thumbs_src', options: ['expose' => true], methods: 'GET')]

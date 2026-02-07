@@ -18,6 +18,7 @@ const URL_UPLOAD_IMAGES = "intern_api_aventures_images_upload_images";
 const URL_DELETE_IMAGE = "intern_api_aventures_images_image_delete";
 const URL_DELETE_IMAGES = "intern_api_aventures_images_delete";
 const URL_DOWNLOAD_IMAGE = "intern_api_aventures_images_download";
+const URL_DOWNLOAD_SELECTED = "intern_api_aventures_images_download_selected";
 const URL_COVER_IMAGE = "intern_api_aventures_randos_cover";
 const URL_GET_FILE_SRC = "intern_api_aventures_images_file_src";
 const URL_GET_THUMBS_SRC = "intern_api_aventures_images_thumbs_src";
@@ -30,7 +31,7 @@ export class RandoImages extends Component {
 		this.state = {
 			files: "",
 			data: JSON.parse(props.images),
-			selected: [],
+			selected: new Set(),
 			errors: [],
 			image: null,
 			nbProgress: 0,
@@ -46,7 +47,43 @@ export class RandoImages extends Component {
 	}
 
 	componentDidMount () {
-		const { images } = this.props;
+		const { randoId, images } = this.props;
+
+		const body = document.querySelector('body');
+		const dropzone = document.querySelector('.drive-dropzone');
+
+		let timeoutHandle;
+
+		function stopDrag () {
+			if (dropzone) {
+				dropzone.classList.remove('active');
+			}
+		}
+
+		body.addEventListener('dragover', (e) => {
+			e.preventDefault()
+
+			if (dropzone) {
+				if (!dropzone.classList.contains('active')) {
+					dropzone.classList.add('active');
+				}
+			}
+			window.clearTimeout(timeoutHandle);
+			timeoutHandle = window.setTimeout(stopDrag, 200);
+		});
+
+
+		body.addEventListener('drop', (e) => {
+			e.preventDefault();
+
+			const filesArray = Array.from(e.dataTransfer.files);
+			this.handleParallelUpload(filesArray, randoId, 5);
+
+			if (dropzone) {
+				dropzone.classList.remove('active');
+			}
+			e.preventDefault()
+		})
 
 		let data = JSON.parse(images);
 
@@ -63,24 +100,26 @@ export class RandoImages extends Component {
 	}
 
 	handleSelect = (id) => {
-		const { selected } = this.state;
-
-		let find = false;
-		selected.forEach(s => {
-			if (s === id) {
-				find = true;
+		this.setState(prevState => {
+			const newSelected = new Set(prevState.selected);
+			if (newSelected.has(id)) {
+				newSelected.delete(id);
+			} else {
+				newSelected.add(id);
 			}
-		})
+			return { selected: newSelected };
+		});
+	}
 
-		let nSelected = [];
-		if (find) {
-			nSelected = selected.filter(s => s !== id);
-		} else {
-			nSelected = selected;
-			nSelected.push(id);
-		}
-
-		this.setState({ selected: nSelected })
+	handleSelectAll = () => {
+		const { data } = this.state;
+		this.setState(prevState => {
+			if (prevState.selected.size === data.length) {
+				return { selected: new Set() };
+			} else {
+				return { selected: new Set(data.map(img => img.id)) };
+			}
+		});
 	}
 
 	handleModal = (identifiant, image) => {
@@ -155,7 +194,7 @@ export class RandoImages extends Component {
 		Formulaire.loader(true);
 		let self = this;
 		this.deleteFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
-		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: selected } })
+		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: Array.from(selected) } })
 			.then(function (response) {
 				Toastr.toast('info', "Photos supprimée.");
 				location.reload();
@@ -189,6 +228,77 @@ export class RandoImages extends Component {
 		;
 	}
 
+	handleDownloadSelected = () => {
+		const { selected } = this.state;
+
+		if (selected.size === 0) return;
+
+		Formulaire.loader(true);
+		const imageIds = Array.from(selected);
+
+		if (imageIds.length >= 5) {
+			axios({
+				method: "POST",
+				url: Routing.generate(URL_DOWNLOAD_SELECTED),
+				data: { imageIds: imageIds },
+				responseType: 'blob'
+			})
+				.then(response => {
+					const url = window.URL.createObjectURL(new Blob([response.data]));
+					const link = document.createElement('a');
+					link.href = url;
+					link.setAttribute('download', `selection_photos_${imageIds.length}.zip`);
+					document.body.appendChild(link);
+					link.click();
+					link.remove();
+					window.URL.revokeObjectURL(url);
+					Formulaire.loader(false);
+				})
+				.catch(async error => {
+					if (error.response && error.response.data instanceof Blob) {
+						const text = await error.response.data.text();
+						try {
+							const errorData = JSON.parse(text);
+							console.error('Erreur serveur:', errorData);
+							Toastr.toast('error', errorData.message || 'Erreur lors du téléchargement');
+						} catch (e) {
+							console.error('Erreur brute:', text);
+						}
+					} else {
+						Formulaire.displayErrors(null, error);
+					}
+					Formulaire.loader(false);
+				});
+		} else {
+			Promise.all(
+				imageIds.map(imageId =>
+					axios({
+						method: "GET",
+						url: Routing.generate(URL_DOWNLOAD_IMAGE, { id: imageId }),
+						responseType: 'blob'
+					})
+				)
+			)
+				.then(responses => {
+					responses.forEach((response, index) => {
+						const url = window.URL.createObjectURL(new Blob([response.data]));
+						const link = document.createElement('a');
+						link.href = url;
+						link.setAttribute('download', `photo_${imageIds[index]}.jpg`);
+						document.body.appendChild(link);
+						link.click();
+						link.remove();
+						window.URL.revokeObjectURL(url);
+					});
+					Formulaire.loader(false);
+				})
+				.catch(error => {
+					Formulaire.displayErrors(null, error);
+					Formulaire.loader(false);
+				});
+		}
+	}
+
 	handleCover = (image) => {
 		const { randoId } = this.props;
 
@@ -215,25 +325,84 @@ export class RandoImages extends Component {
 	}
 
 	render () {
-		const { userId } = this.props;
+		const { userId, randoAuthor } = this.props;
 		const { errors, files, data, selected, nbProgress, nbTotal } = this.state;
 
-		let params = { errors: errors, onChange: this.handleChange }
+		let params0 = { errors: errors, onChange: this.handleChange }
 
 		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-			<div className="flex flex-col items-center justify-between gap-2 mb-4 md:flex-row">
-				<h3 className="text-lg font-semibold text-slate-900">Photos ({data.length})</h3>
-				<div className="flex flex-col gap-2 sm:flex-row">
-					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>Ajouter des photos</Button>
-					{data.length !== 0
-						? <Button type="red" onClick={() => this.handleModal('deleteAllFiles', null)}>Supprimer toutes les photos</Button>
-						: null
-					}
-					{selected.length !== 0
-						? <Button type="red" onClick={() => this.handleModal('deleteFiles', null)}>Supprimer la sélection</Button>
-						: null
-					}
+			<div className="flex flex-col gap-4 mb-6">
+				<div className="flex items-center justify-between">
+					<div>
+						<h3 className="text-2xl font-bold text-slate-900">Photos</h3>
+						<p className="text-sm text-slate-600 mt-1">
+							<span className="font-medium">{data.length}</span> photo{data.length > 1 ? 's' : ''}
+							{selected.size > 0 && (
+								<>
+									<span className="mx-2">•</span>
+									<span className="font-medium text-blue-600">{selected.size}</span> sélectionnée{selected.size > 1 ? 's' : ''}
+								</>
+							)}
+						</p>
+					</div>
+
+					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>
+						Ajouter
+					</Button>
 				</div>
+
+				{(data.length > 0 || selected.size > 0) && (
+					<div className="flex flex-wrap items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+
+						{data.length > 0 && (
+							<Button
+								type="default"
+								iconLeft={selected.size === data.length ? "check-square" : "square"}
+								onClick={this.handleSelectAll}
+							>
+								{selected.size === data.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+							</Button>
+						)}
+
+						{selected.size > 0 && data.length > 0 && (
+							<div className="h-6 w-px bg-slate-300"></div>
+						)}
+
+						{selected.size > 0 ? (
+							<>
+								<Button
+									type="default"
+									iconLeft="download"
+									onClick={this.handleDownloadSelected}
+								>
+									Télécharger ({selected.size})
+								</Button>
+								{parseInt(userId) === parseInt(randoAuthor)
+									? <Button
+										type="red"
+										iconLeft="trash"
+										onClick={() => this.handleModal('deleteFiles', null)}
+									>
+										Supprimer ({selected.size})
+									</Button>
+									: null
+								}
+							</>
+						) : (parseInt(userId) === parseInt(randoAuthor)
+								? data.length > 0 && (
+									<Button
+										type="red"
+										iconLeft="trash"
+										onClick={() => this.handleModal('deleteAllFiles', null)}
+									>
+										Supprimer tout
+									</Button>
+								)
+								: null
+
+						)}
+					</div>
+				)}
 			</div>
 
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
@@ -257,7 +426,7 @@ export class RandoImages extends Component {
 			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
 								 content={<div>
 									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*"
-												max={500} maxSize={62914560} {...params}>
+												max={500} maxSize={62914560} {...params0}>
 										 Photos (500 maximum par envoi)
 									 </InputFile>
 								 </div>}
@@ -297,20 +466,21 @@ function modalForm (self) {
 }
 
 function modalDeleteImage (self) {
-    self.deleteImage.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImage}>Confirmer la suppression</Button>)
+	self.deleteImage.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImage}>Confirmer la suppression</Button>)
 }
 
 function modalDeleteImages (self) {
-    self.deleteFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImages}>Confirmer la suppression</Button>)
+	self.deleteFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImages}>Confirmer la suppression</Button>)
 }
 
 function modalDeleteAllImages (self) {
-    self.deleteAllFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteAllImages}>Confirmer la suppression</Button>)
+	self.deleteAllFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteAllImages}>Confirmer la suppression</Button>)
 }
 
 function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, selected, userId }) {
 	const [loaded, setLoaded] = useState(Array(currentImages.length).fill(false));
 	const [error, setError] = useState(Array(currentImages.length).fill(false));
+	const [hoveredImage, setHoveredImage] = useState(null);
 
 	const handleImageLoad = (index) => {
 		const updatedLoaded = [...loaded];
@@ -324,6 +494,20 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 		setError(updatedError);
 	};
 
+	const handleCheckboxClick = (e, imageId) => {
+		e.stopPropagation();
+		onSelect(imageId);
+	};
+
+	const handleImageClick = (elem) => {
+		setHoveredImage(null); // Masquer l'overlay avant d'ouvrir la lightbox
+		if (selected.size > 0) {
+			onSelect(elem.id);
+		} else {
+			onLightbox(elem);
+		}
+	};
+
 	useEffect(() => {
 		const timeoutId = currentImages.map((_, index) =>
 			setTimeout(() => {
@@ -334,44 +518,57 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 		);
 
 		return () => {
-			// Nettoyer le timeout à la fin
 			timeoutId.forEach((id) => clearTimeout(id));
 		};
 	}, [loaded]);
 
 	return <>
 		{currentImages.map((elem, index) => {
-			return <div key={elem.id} className="relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md">
+			const isSelected = selected.has(elem.id);
+			const hasSelection = selected.size > 0;
+			const isHovered = hoveredImage === elem.id;
+
+			return <div key={elem.id}
+						className={`relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md ${
+							isSelected ? 'border-8 border-blue-500' : ''
+						}`}
+						onClick={() => handleImageClick(elem)}
+						onMouseEnter={() => setHoveredImage(elem.id)}
+						onMouseLeave={() => setHoveredImage(null)}
+			>
 				{elem.type !== 1
 					? <div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && (!error[index]) ? "opacity-100" : "opacity-0"}`}>
 						<span className="icon-chart-3"></span>
 					</div>
 					: null
 				}
-				<div className={`image-rando absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-all ${selected.includes(elem.id) ? 'active' : ''}`}>
+				<div className={`absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-opacity ${isSelected || isHovered ? 'opacity-100 z-20' : 'opacity-0'} bg-gradient-to-b from-black/10 via-black/20 to-black/50`}>
 					<div className="flex justify-between gap-2 p-2">
-						<div className="group">
-							<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${selected.includes(elem.id) ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-								 onClick={() => onSelect(elem.id)}>
-								<span className={`icon-check1 text-sm ${selected.includes(elem.id) ? "text-white" : "text-transparent"}`}></span>
+						<div>
+							<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center transition-opacity ${
+								isSelected
+									? "bg-blue-700 ring-blue-700"
+									: "bg-white ring-gray-100 hover:bg-blue-100"
+							} ${hasSelection || isHovered ? 'opacity-100' : 'opacity-0'}`}
+								 onClick={(e) => handleCheckboxClick(e, elem.id)}>
+								<span className={`icon-check1 text-sm ${isSelected ? "text-white" : "text-transparent"}`}></span>
 							</div>
 						</div>
-						<div className="flex gap-1">
-							<ButtonIcon type="default" icon="zoom-in" tooltipWidth={80} onClick={() => onLightbox(elem)} tooltipPosition="-bottom-7 right-0">
-								Plein écran
+						<div className={`flex gap-1 transition-opacity ${hasSelection || !isHovered ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+							<ButtonIcon type="default" icon="download" tooltipWidth={80} onClick={(e) => { e.stopPropagation(); location.href = Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id }); }} tooltipPosition="-bottom-7 right-0">
+								Télécharger
 							</ButtonIcon>
 							{parseInt(userId) === elem.author.id && <>
-								<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={() => onCover(elem)} tooltipPosition="-bottom-7 right-0">
+								<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={(e) => { e.stopPropagation(); onCover(elem); }} tooltipPosition="-bottom-7 right-0">
 									Image de couverture
 								</ButtonIcon>
-								<ButtonIcon type="red" icon="trash" onClick={() => onModal('deleteImage', elem)} tooltipPosition="-bottom-7 right-0">
+								<ButtonIcon type="red" icon="trash" onClick={(e) => { e.stopPropagation(); onModal('deleteImage', elem); }} tooltipPosition="-bottom-7 right-0">
 									Supprimer
 								</ButtonIcon>
 							</>}
 						</div>
 					</div>
-					<div className="absolute top-12 w-full h-[calc(100%-6rem)]" onClick={() => onLightbox(elem)}></div>
-					<div className="flex justify-between gap-2 p-2">
+					<div className={`flex justify-between gap-2 p-2 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
 						<div className="flex items-center gap-2">
 							<div className="w-8 h-8 rounded-full shadow">
 								{elem.author.avatarFile
@@ -382,12 +579,6 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 								}
 							</div>
 							<div className="font-medium text-sm text-slate-50">{elem.author.displayName}</div>
-						</div>
-						<div>
-							<ButtonIconA type="default" icon="download"
-										 onClick={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })}>
-								Télécharger
-							</ButtonIconA>
 						</div>
 					</div>
 				</div>
@@ -407,8 +598,8 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 							</video>
 							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt="" key={elem.id}
 								   loading="lazy"
-								   onLoad={() => handleImageLoad(index)} // Appelé quand l'image est chargée
-								   onError={() => handleImageError(index)} // En cas d'erreur de chargement
+								   onLoad={() => handleImageLoad(index)}
+								   onError={() => handleImageError(index)}
 							/>
 						}
 					</>

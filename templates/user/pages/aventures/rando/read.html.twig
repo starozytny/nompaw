@@ -230,10 +230,16 @@
 
     <div id="rando_images"
          data-rando-id="{{ elem.id }}"
+         data-rando-author="{{ elem.author.id }}"
          data-user-id="{{ app.user.id }}"
          data-images="{{ images }}"
     >
         {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+
+
+    <div class="drive-dropzone">
+        <div>Déposez vos fichiers dans cette fenêtre.</div>
     </div>
 </div>
 {% endblock %}
