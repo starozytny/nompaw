@@ -46,7 +46,44 @@ export class RandoImages extends Component {
 	}
 
 	componentDidMount () {
-		const { images } = this.props;
+		const { randoId, images } = this.props;
+
+		const body = document.querySelector('body');
+		const dropzone = document.querySelector('.drive-dropzone');
+
+		let timeoutHandle;
+		let self = this;
+
+		function stopDrag () {
+			if (dropzone) {
+				dropzone.classList.remove('active');
+			}
+		}
+
+		body.addEventListener('dragover', (e) => {
+			e.preventDefault()
+
+			if (dropzone) {
+				if (!dropzone.classList.contains('active')) {
+					dropzone.classList.add('active');
+				}
+			}
+			window.clearTimeout(timeoutHandle);
+			timeoutHandle = window.setTimeout(stopDrag, 200);
+		});
+
+
+		body.addEventListener('drop', (e) => {
+			e.preventDefault();
+
+			const filesArray = Array.from(e.dataTransfer.files);
+			this.handleParallelUpload(filesArray, randoId, 5);
+
+			if (dropzone) {
+				dropzone.classList.remove('active');
+			}
+			e.preventDefault()
+		})
 
 		let data = JSON.parse(images);
 
