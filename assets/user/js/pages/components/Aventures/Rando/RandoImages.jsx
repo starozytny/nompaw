@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 
@@ -12,7 +12,7 @@ import ModalFunctions from '@commonFunctions/modal';
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { LightBox } from "@tailwindComponents/Elements/LightBox";
 import { InputFile } from "@tailwindComponents/Elements/Fields";
-import { Button, ButtonIcon, ButtonIconA } from "@tailwindComponents/Elements/Button";
+import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 
 const URL_UPLOAD_IMAGES = "intern_api_aventures_images_upload_images";
 const URL_DELETE_IMAGE = "intern_api_aventures_images_image_delete";
@@ -23,6 +23,7 @@ const URL_COVER_IMAGE = "intern_api_aventures_randos_cover";
 const URL_GET_FILE_SRC = "intern_api_aventures_images_file_src";
 const URL_GET_THUMBS_SRC = "intern_api_aventures_images_thumbs_src";
 const URL_READ_IMAGE_HD = "intern_api_aventures_images_file_hd_src";
+const URL_FETCH_IMAGES = "intern_api_aventures_images_fetch_images";
 
 export class RandoImages extends Component {
 	constructor (props) {
@@ -30,12 +31,17 @@ export class RandoImages extends Component {
 
 		this.state = {
 			files: "",
-			data: JSON.parse(props.images),
+			allImages: [], // Toutes les images pour la lightbox
+			currentImages: [], // Images affichées (pagination)
 			selected: new Set(),
 			errors: [],
 			image: null,
 			nbProgress: 0,
-			nbTotal: 0
+			nbTotal: 0,
+			page: 1,
+			hasMore: true,
+			loading: false,
+			rankPhoto: 1
 		}
 
 		this.files = React.createRef();
@@ -44,10 +50,12 @@ export class RandoImages extends Component {
 		this.deleteFiles = React.createRef();
 		this.deleteAllFiles = React.createRef();
 		this.lightbox = React.createRef();
+		this.observer = null;
+		this.sentinelRef = React.createRef();
 	}
 
 	componentDidMount () {
-		const { randoId, images } = this.props;
+		const { randoId } = this.props;
 
 		const body = document.querySelector('body');
 		const dropzone = document.querySelector('.drive-dropzone');
@@ -72,7 +80,6 @@ export class RandoImages extends Component {
 			timeoutHandle = window.setTimeout(stopDrag, 200);
 		});
 
-
 		body.addEventListener('drop', (e) => {
 			e.preventDefault();
 
@@ -82,17 +89,80 @@ export class RandoImages extends Component {
 			if (dropzone) {
 				dropzone.classList.remove('active');
 			}
-			e.preventDefault()
 		})
 
-		let data = JSON.parse(images);
+		// Charger la première page
+		this.fetchImages();
 
-		let i = 1;
-		data.forEach(item => {
-			item.rankPhoto = i++;
+		// Setup Intersection Observer pour le scroll infini
+		this.observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && this.state.hasMore && !this.state.loading) {
+					this.fetchImages();
+				}
+			},
+			{ threshold: 0.1 }
+		);
+
+		if (this.sentinelRef.current) {
+			this.observer.observe(this.sentinelRef.current);
+		}
+	}
+
+	componentWillUnmount() {
+		if (this.observer && this.sentinelRef.current) {
+			this.observer.unobserve(this.sentinelRef.current);
+		}
+	}
+
+	fetchImages = () => {
+		const { randoId } = this.props;
+		const { page, loading, hasMore } = this.state;
+
+		if (loading || !hasMore) return;
+
+		this.setState({ loading: true });
+
+		axios({
+			method: "GET",
+			url: Routing.generate(URL_FETCH_IMAGES, { id: randoId, page: page }),
+			data: {}
 		})
+			.then((response) => {
+				let allData = JSON.parse(response.data.images);
+				let currentData = JSON.parse(response.data.currentImages);
 
-		this.setState({ data: data });
+				// Ajouter rankPhoto pour allImages
+				let i = 1;
+				allData.forEach(item => {
+					console.log(item);
+					item.rankPhoto = i++;
+				});
+
+				// Ajouter rankPhoto pour currentImages
+				let j = this.state.rankPhoto;
+				currentData.forEach(item => {
+					item.rankPhoto = j++;
+				});
+
+				this.setState(prevState => ({
+					allImages: allData,
+					currentImages: [...prevState.currentImages, ...currentData],
+					rankPhoto: prevState.rankPhoto + currentData.length,
+					hasMore: response.data.hasMore,
+					page: prevState.page + 1,
+					loading: false
+				}));
+			})
+			.catch((error) => {
+				console.log(error);
+				Formulaire.displayErrors(null, error);
+				this.setState({ loading: false });
+			});
+	}
+
+	handleLoadMore = () => {
+		this.fetchImages();
 	}
 
 	handleChange = (e) => {
@@ -112,12 +182,12 @@ export class RandoImages extends Component {
 	}
 
 	handleSelectAll = () => {
-		const { data } = this.state;
+		const { currentImages } = this.state;
 		this.setState(prevState => {
-			if (prevState.selected.size === data.length) {
+			if (prevState.selected.size === currentImages.length) {
 				return { selected: new Set() };
 			} else {
-				return { selected: new Set(data.map(img => img.id)) };
+				return { selected: new Set(currentImages.map(img => img.id)) };
 			}
 		});
 	}
@@ -208,9 +278,9 @@ export class RandoImages extends Component {
 	}
 
 	handleDeleteAllImages = () => {
-		const { data } = this.state;
+		const { allImages } = this.state;
 
-		let ids = data.map(elem => elem.id);
+		let ids = allImages.map(elem => elem.id);
 
 		Formulaire.loader(true);
 		let self = this;
@@ -318,15 +388,15 @@ export class RandoImages extends Component {
 	}
 
 	handleLightbox = (elem) => {
-		const { data } = this.state;
+		const { allImages } = this.state;
 
-		this.lightbox.current.handleUpdateContent(<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={data} elem={elem} />);
+		this.lightbox.current.handleUpdateContent(<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={allImages} elem={elem} />);
 		this.lightbox.current.handleClick();
 	}
 
 	render () {
 		const { userId, randoAuthor } = this.props;
-		const { errors, files, data, selected, nbProgress, nbTotal } = this.state;
+		const { errors, files, allImages, currentImages, selected, nbProgress, nbTotal, loading, hasMore } = this.state;
 
 		let params0 = { errors: errors, onChange: this.handleChange }
 
@@ -336,7 +406,7 @@ export class RandoImages extends Component {
 					<div>
 						<h3 className="text-2xl font-bold text-slate-900">Photos</h3>
 						<p className="text-sm text-slate-600 mt-1">
-							<span className="font-medium">{data.length}</span> photo{data.length > 1 ? 's' : ''}
+							<span className="font-medium">{allImages.length}</span> photo{allImages.length > 1 ? 's' : ''}
 							{selected.size > 0 && (
 								<>
 									<span className="mx-2">•</span>
@@ -351,20 +421,20 @@ export class RandoImages extends Component {
 					</Button>
 				</div>
 
-				{(data.length > 0 || selected.size > 0) && (
+				{(allImages.length > 0 || selected.size > 0) && (
 					<div className="flex flex-wrap items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
 
-						{data.length > 0 && (
+						{currentImages.length > 0 && (
 							<Button
 								type="default"
-								iconLeft={selected.size === data.length ? "check-square" : "square"}
+								iconLeft={selected.size === currentImages.length ? "check-square" : "square"}
 								onClick={this.handleSelectAll}
 							>
-								{selected.size === data.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+								{selected.size === currentImages.length ? 'Tout désélectionner' : 'Tout sélectionner'}
 							</Button>
 						)}
 
-						{selected.size > 0 && data.length > 0 && (
+						{selected.size > 0 && currentImages.length > 0 && (
 							<div className="h-6 w-px bg-slate-300"></div>
 						)}
 
@@ -389,27 +459,47 @@ export class RandoImages extends Component {
 								}
 							</>
 						) : (parseInt(userId) === parseInt(randoAuthor)
-								? data.length > 0 && (
-									<Button
-										type="red"
-										iconLeft="trash"
-										onClick={() => this.handleModal('deleteAllFiles', null)}
-									>
-										Supprimer tout
-									</Button>
-								)
+								? allImages.length > 0 && (
+								<Button
+									type="red"
+									iconLeft="trash"
+									onClick={() => this.handleModal('deleteAllFiles', null)}
+								>
+									Supprimer tout
+								</Button>
+							)
 								: null
-
 						)}
 					</div>
 				)}
 			</div>
 
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
-				<LazyLoadingGalleryWithPlaceholder currentImages={data}
+				<LazyLoadingGalleryWithPlaceholder currentImages={currentImages}
 												   onModal={this.handleModal} onCover={this.handleCover}
 												   onSelect={this.handleSelect} onLightbox={this.handleLightbox}
-												   selected={selected} userId={userId} />
+												   selected={selected} userId={userId} randoAuthor={randoAuthor} />
+			</div>
+
+			{/* Sentinel pour l'IntersectionObserver */}
+			<div ref={this.sentinelRef} className="h-10"></div>
+
+			{/* Loading et bouton */}
+			<div className="mt-8">
+				{loading && (
+					<div className="text-center text-slate-600 text-sm py-4">
+						<span className="icon-chart-3 animate-spin inline-block mr-2"></span>
+						Chargement...
+					</div>
+				)}
+				{!hasMore && currentImages.length > 0 && (
+					<div className="text-center text-slate-600 text-sm">Toutes les photos sont affichées.</div>
+				)}
+				{hasMore && !loading && currentImages.length > 0 && (
+					<div className="flex items-center justify-center">
+						<Button type="blue" onClick={this.handleLoadMore}>Afficher plus</Button>
+					</div>
+				)}
 			</div>
 
 			{nbProgress !== 0 && nbTotal !== 0
@@ -458,7 +548,7 @@ export class RandoImages extends Component {
 RandoImages.propTypes = {
 	userId: PropTypes.string.isRequired,
 	randoId: PropTypes.string.isRequired,
-	images: PropTypes.string.isRequired,
+	randoAuthor: PropTypes.string,
 }
 
 function modalForm (self) {
@@ -477,21 +567,36 @@ function modalDeleteAllImages (self) {
 	self.deleteAllFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteAllImages}>Confirmer la suppression</Button>)
 }
 
-function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, selected, userId }) {
-	const [loaded, setLoaded] = useState(Array(currentImages.length).fill(false));
-	const [error, setError] = useState(Array(currentImages.length).fill(false));
+function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, selected, userId, randoAuthor }) {
+	const [loaded, setLoaded] = useState(new Set());
+	const [error, setError] = useState(new Set());
 	const [hoveredImage, setHoveredImage] = useState(null);
+	const imageRefs = useRef({});
 
-	const handleImageLoad = (index) => {
-		const updatedLoaded = [...loaded];
-		updatedLoaded[index] = true;
-		setLoaded(updatedLoaded);
+	useEffect(() => {
+		// Vérifier les images déjà chargées (en cache)
+		currentImages.forEach(image => {
+			const imgElement = imageRefs.current[image.id];
+			if (imgElement && imgElement.complete && imgElement.naturalHeight !== 0) {
+				handleImageLoad(image.id);
+			}
+		});
+	}, [currentImages]);
+
+	const handleImageLoad = (imageId) => {
+		setLoaded(prev => {
+			const newSet = new Set(prev);
+			newSet.add(imageId);
+			return newSet;
+		});
 	};
 
-	const handleImageError = (index) => {
-		const updatedError = [...error];
-		updatedError[index] = true;
-		setError(updatedError);
+	const handleImageError = (imageId) => {
+		setError(prev => {
+			const newSet = new Set(prev);
+			newSet.add(imageId);
+			return newSet;
+		});
 	};
 
 	const handleCheckboxClick = (e, imageId) => {
@@ -500,7 +605,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 	};
 
 	const handleImageClick = (elem) => {
-		setHoveredImage(null); // Masquer l'overlay avant d'ouvrir la lightbox
+		setHoveredImage(null);
 		if (selected.size > 0) {
 			onSelect(elem.id);
 		} else {
@@ -508,25 +613,14 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 		}
 	};
 
-	useEffect(() => {
-		const timeoutId = currentImages.map((_, index) =>
-			setTimeout(() => {
-				if (!loaded[index]) {
-					handleImageError(index);
-				}
-			}, 500)
-		);
-
-		return () => {
-			timeoutId.forEach((id) => clearTimeout(id));
-		};
-	}, [loaded]);
-
 	return <>
 		{currentImages.map((elem, index) => {
 			const isSelected = selected.has(elem.id);
 			const hasSelection = selected.size > 0;
 			const isHovered = hoveredImage === elem.id;
+			const isLoaded = loaded.has(elem.id);
+			const hasError = error.has(elem.id);
+			const showPlaceholder = !isLoaded && !hasError;
 
 			return <div key={elem.id}
 						className={`relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md ${
@@ -536,13 +630,15 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 						onMouseEnter={() => setHoveredImage(elem.id)}
 						onMouseLeave={() => setHoveredImage(null)}
 			>
-				{elem.type !== 1
-					? <div className={`w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 ${!loaded[index] && (!error[index]) ? "opacity-100" : "opacity-0"}`}>
-						<span className="icon-chart-3"></span>
+				{elem.type !== 1 && showPlaceholder && (
+					<div className="w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 z-10">
+						<span className="icon-chart-3 text-gray-400 animate-spin"></span>
 					</div>
-					: null
-				}
-				<div className={`absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-opacity ${isSelected || isHovered ? 'opacity-100 z-20' : 'opacity-0'} bg-gradient-to-b from-black/10 via-black/20 to-black/50`}>
+				)}
+
+				<div className={`absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-opacity ${
+					isSelected || isHovered ? 'opacity-100 z-20' : 'opacity-0'
+				} bg-gradient-to-b from-black/10 via-black/20 to-black/50`}>
 					<div className="flex justify-between gap-2 p-2">
 						<div>
 							<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center transition-opacity ${
@@ -555,10 +651,10 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 							</div>
 						</div>
 						<div className={`flex gap-1 transition-opacity ${hasSelection || !isHovered ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-							<ButtonIcon type="default" icon="download" tooltipWidth={80} onClick={(e) => { e.stopPropagation(); location.href = Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id }); }} tooltipPosition="-bottom-7 right-0">
+							<ButtonIcon type="default" icon="download" tooltipWidth={80} onClick={(e) => { e.stopPropagation(); setHoveredImage(null); location.href = Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id }); }} tooltipPosition="-bottom-7 right-0">
 								Télécharger
 							</ButtonIcon>
-							{parseInt(userId) === elem.author.id && <>
+							{parseInt(userId) === parseInt(randoAuthor) && <>
 								<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={(e) => { e.stopPropagation(); onCover(elem); }} tooltipPosition="-bottom-7 right-0">
 									Image de couverture
 								</ButtonIcon>
@@ -582,28 +678,27 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 						</div>
 					</div>
 				</div>
-				{error[index]
-					? <>
-						{elem.type === 1
-							? <video className="h-[205px] md:h-[332px]" controls>
-								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
-							</video>
-							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt="error" key={elem.id + "error"} />
-						}
-					</>
-					: <>
-						{elem.type === 1
-							? <video className="h-[205px] md:h-[332px]" controls>
-								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
-							</video>
-							: <img src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })} alt="" key={elem.id}
-								   loading="lazy"
-								   onLoad={() => handleImageLoad(index)}
-								   onError={() => handleImageError(index)}
-							/>
-						}
-					</>
-				}
+
+				{elem.type === 1 ? (
+					<video className="h-[205px] md:h-[332px]" controls>
+						<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
+					</video>
+				) : (
+					<img
+						ref={el => imageRefs.current[elem.id] = el}
+						src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })}
+						alt=""
+						key={elem.id}
+						className={`pointer-events-none w-full h-auto transition-opacity ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+						loading="lazy"
+						onLoad={(e) => {
+							if (e.target.complete && e.target.naturalHeight !== 0) {
+								handleImageLoad(elem.id);
+							}
+						}}
+						onError={() => handleImageError(elem.id)}
+					/>
+				)}
 			</div>
 		})}
 	</>
@@ -744,7 +839,7 @@ class LightboxContent extends Component {
 					<div>
 						<div className="lightbox-action relative group close-modal cursor-pointer" onClick={this.handleCloseModal}>
 							<span className="icon-close !text-2xl text-gray-400 group-hover:text-white" />
-							<span className="tooltip bg-gray-300 text-black py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Supprimer</span>
+							<span className="tooltip bg-gray-300 text-black py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Fermer</span>
 						</div>
 					</div>
 				</div>
@@ -754,7 +849,7 @@ class LightboxContent extends Component {
 					 onClick={() => this.handlePrev(actualRank > 1 ? actualRank : (images.length + 1))}>
 					<span className="icon-left-chevron !text-2xl text-gray-400 group-hover:text-white"></span>
 				</div>
-				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full"
+				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full cursor-grab"
 					 onMouseDown={this.handleMouseDown}
 					 onMouseMove={this.handleMouseMove}
 					 onMouseUp={this.handleMouseUp}
@@ -765,13 +860,13 @@ class LightboxContent extends Component {
 				>
 					{images.map(image => {
 						if(image.type === 1){
-							return <video className="max-h-dvh" controls>
+							return <video key={image.id} className="max-h-dvh" controls>
 								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
 							</video>
 						}else{
 							return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
-								<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${image.id}`}
-									 className="max-w-[1440px] mx-auto w-full h-full object-contain select-none outline-none transition-transform"
+								<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${elem.file || image.id}`}
+									 className="max-w-[1024px] mx-auto w-full h-full pointer-events-none object-contain select-none outline-none transition-transform"
 									 style={{ transform: `translateX(${currentTranslate}px)` }} />
 							</div>
 						}
