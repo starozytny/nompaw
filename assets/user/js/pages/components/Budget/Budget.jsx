@@ -433,7 +433,7 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 							const isPositive = item.value === 0 && item.total > 0;
 
 							return <div
-								className={`relative min-w-[90%] sm:min-w-72 max-w-72 2xl:min-w-52 overflow-hidden rounded-xl border-2 shadow-lg transition-all hover:shadow-xl ${
+								className={`relative min-w-[90%] sm:min-w-72 max-w-72 2xl:min-w-52 overflow-hidden rounded-xl border-2 transition-all ${
 									item.value === 0
 										? (isPositive ? "bg-gradient-to-br from-green-50 to-green-100 border-green-300" : "bg-gradient-to-br from-red-50 to-red-100 border-red-400")
 										: "bg-white border-gray-200"
@@ -520,7 +520,7 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 							})}
 						</div>
 
-						<div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 border-t flex items-center justify-between">
+						<div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 rounded-b-xl overflow-hidden border-t flex items-center justify-between">
 							<span className="text-sm font-medium text-gray-700">Total économies disponibles</span>
 							<div className="text-right">
 								<div className="font-bold text-lg text-yellow-700">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</div>
@@ -532,7 +532,7 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 			</div>
 			<div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-0 2xl:col-span-3">
 				<div className="bg-white border rounded-xl shadow-md overflow-hidden">
-					<div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+					<div className="p-4 bg-gray-50 border-b">
 						<h3 className="font-semibold text-gray-900 flex items-center gap-2">
 							<span className="icon-cart text-blue-600"></span>
 							Opérations du mois
