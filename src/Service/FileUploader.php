@@ -12,6 +12,7 @@ use App\Entity\Main\Image;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
+use App\Entity\Main\Mail;
 use App\Repository\Main\ImageRepository;
 use Exception;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
