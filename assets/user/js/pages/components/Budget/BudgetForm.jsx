@@ -124,6 +124,7 @@ class Form extends Component {
 				axios({ method: context === "create" ? "POST" : "PUT", url: url, data: this.state })
 					.then(function (response) {
 						Toastr.toast('info', 'Données enregistrées.');
+
 						self.setState({ price: "", name: "" })
 
 						self.props.onUpdateList(response.data, context);
@@ -167,16 +168,16 @@ class Form extends Component {
 		let paramsInput1 = { ...params, ...{ onSelect: this.handleSelect } }
 
 		return <div>
-			<div className="flex flex-col gap-4">
-				<div className="flex gap-4">
+			<div className="flex flex-col gap-2">
+				<div className="flex gap-2">
 					<div className="w-full">
 						{type === 4
-							? <InputView valeur="Economie utilisée" errors={errors}>Type</InputView>
+							? <InputView valeur="Economie utilisée" errors={errors}>Type d'opération</InputView>
 							: recurrenceId
-								? <InputView valeur={typeString[type]} errors={errors}>Type</InputView>
+								? <InputView valeur={typeString[type]} errors={errors}>Type d'opération</InputView>
 								: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
 											classItems="flex flex-wrap gap-2" styleType="fat">
-									Type
+									Type d'opération
 								</Radiobox>
 						}
 					</div>
@@ -184,20 +185,20 @@ class Form extends Component {
 						? null
 						: <div className="w-full max-w-20">
 							<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
-								Réel ?
+								Réalisé
 							</Switcher>
 						</div>
 					}
 				</div>
 
-				<div className="flex gap-4">
+				<div className="flex gap-2">
 					{type === 4
 						? <>
 							<div className="w-full">
 								<InputView valeur={name} errors={errors}>Intitulé</InputView>
 							</div>
 							<div className="w-full">
-								<InputView valeur={price} errors={errors}>Prix</InputView>
+								<InputView valeur={price} errors={errors}>Montant (€)</InputView>
 							</div>
 						</>
 						: <>
@@ -205,40 +206,45 @@ class Form extends Component {
 								<Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
 							</div>
 							<div className="w-full">
-								<Input identifiant="price" valeur={price} {...paramsInput0}>Prix</Input>
+								<Input identifiant="price" valeur={price} {...paramsInput0}>Montant (€)</Input>
 							</div>
 						</>
 					}
 
 				</div>
 
-				<div className="flex gap-4">
-					<div className="w-full">
-						<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+					<div className="w-full flex gap-2 2xl:flex-col 2qhd:flex-row">
+						<div className="w-full">
+							<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
+						</div>
+						<div className="w-full">
+							<Input type="time" identifiant="dateTime" valeur={dateTime} {...params}>
+								Heure <span className="text-gray-500 text-xs">(optionnel)</span>
+							</Input>
+						</div>
 					</div>
 					<div className="w-full">
 						{type === 4
 							? <InputView valeur="Economie" errors={errors}>Catégorie</InputView>
 							: <SelectCombobox identifiant="category" valeur={category} items={categoryItems}
 											  {...paramsInput1} toSort={true}>
-								Catégorie
+								Catégorie {parseInt(type) === 2 && <span className="text-red-500">*</span>}
 							</SelectCombobox>
 						}
 					</div>
 				</div>
-
-				<div className="flex gap-4">
-					<div className="w-full">
-						<Input type="time" identifiant="dateTime" valeur={dateTime} {...params}>Heure</Input>
-					</div>
-					<div className="w-full"></div>
-				</div>
 			</div>
 
-			<div className="mt-4 flex justify-end gap-2">
+			<div className="mt-6 flex justify-end gap-2">
 				{context === "update" && <Button type="default" onClick={onCancel}>Annuler</Button>}
-				<Button type="blue" isSubmit={true} iconLeft={load ? "chart-3" : ""}
-						onClick={this.handleSubmit} width="w-full">Enregistrer</Button>
+				<Button type="blue"
+						isSubmit={true}
+						iconLeft={load ? "chart-3" : ""}
+						onClick={this.handleSubmit}
+						width="w-full sm:w-auto">
+					{context === "create" ? "Enregistrer" : "Modifier"}
+				</Button>
 			</div>
 		</div>
 	}

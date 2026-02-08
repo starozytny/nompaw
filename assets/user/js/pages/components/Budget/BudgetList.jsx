@@ -6,19 +6,8 @@ import { BudgetItem, BudgetItemRecurrent } from "@userPages/Budget/BudgetItem";
 
 export function BudgetList ({ data, recurrencesData, onEdit, onModal, onActive, onCancel, onActiveRecurrence }) {
 	return <div className="list">
-		<div className="list-table bg-white rounded-md shadow">
+		<div className="list-table bg-white overflow-hidden">
 			<div className="items items-budget">
-				<div className="item item-header uppercase text-sm text-gray-600">
-					<div className="item-content">
-						<div className="item-infos">
-							<div className="col-1">Date</div>
-							<div className="col-2">Intitulé</div>
-							<div className="col-3">Prix</div>
-							<div className="col-4 actions" />
-						</div>
-					</div>
-				</div>
-
 				{data.length > 0 || recurrencesData.length > 0
 					? <>
 						{recurrencesData.map(elem => {

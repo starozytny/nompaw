@@ -2,6 +2,7 @@
 
 namespace App\Controller\InternApi\Aventures;
 
+use App\Entity\Main\User;
 use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaImageRepository;
@@ -29,19 +30,16 @@ class ImageController extends AbstractController
     #[Route('/fetch/{id}/{page}', name: 'fetch_images', options: ['expose' => true], methods: 'GET')]
     public function fetchImages(Request $request, RaRando $rando, int $page, RaImageRepository $repository, ApiResponse $apiResponse, SerializerInterface $serializer): JsonResponse
     {
+        /** @var User $user */
+        $user = $this->getUser();
         $offset = ($page - 1) * self::IMAGES_PER_PAGE;
 
-        $allImages = $repository->findBy(['rando' => $rando], ['takenAt' => 'ASC']);
+        $canSeePrivate = $this->canSeePrivateImages($user, $rando);
 
-        // Récupérer uniquement les images de la page courante
-        $currentImages = $repository->findBy(
-            ['rando' => $rando],
-            ['takenAt' => 'ASC'],
-            self::IMAGES_PER_PAGE,
-            $offset
-        );
+        $allImages = $repository->findVisibleImages($rando, $canSeePrivate);
 
-        // Vérifier s'il y a encore des images après
+        $currentImages = array_slice($allImages, $offset, self::IMAGES_PER_PAGE);
+
         $totalImages = count($allImages);
         $hasMore = ($offset + self::IMAGES_PER_PAGE) < $totalImages;
 
@@ -55,6 +53,25 @@ class ImageController extends AbstractController
             'total' => $totalImages,
             'page' => $page
         ], RaImage::class);
+    }
+
+    private function canSeePrivateImages(?User $user, RaRando $rando): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->getIsAdmin()) {
+            return true;
+        }
+
+        $participants = $rando->getParticipants();
+
+        if ($participants === null || $participants === []) {
+            return true;
+        }
+
+        return in_array($user->getId(), $participants);
     }
 
     /**
@@ -205,8 +222,6 @@ class ImageController extends AbstractController
         foreach ($images as $image) {
             $filePath = $imagesDirectory . $image->getFileFile();
 
-            dump($filePath);
-
             if (file_exists($filePath)) {
                 $zip->addFile($filePath, $image->getFile());
                 $addedCount++;
@@ -242,5 +257,14 @@ class ImageController extends AbstractController
     public function getFileHD(RaImage $obj): Response
     {
         return $this->file($this->getParameter('private_directory') . $obj->getLightboxFile());
+    }
+
+    #[Route('/visibility/{id}', name: 'visibility', options: ['expose' => true], methods: 'PUT')]
+    public function visibility(RaImage $obj, RaImageRepository $repository, ApiResponse $apiResponse): Response
+    {
+        $obj->setVisibility(!$obj->getVisibility());
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, RaImage::LIST);
     }
 }

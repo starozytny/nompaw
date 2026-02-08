@@ -22,7 +22,11 @@ export function SocietiesList ({ data, highlight, settings, onModal }) {
 
                 {data.length > 0
                     ? data.map((elem) => {
-                        return <SocietiesItem key={elem.id} elem={elem} highlight={highlight} settings={settings} onModal={onModal} />;
+                        if(elem.isDeletedForList){
+                            return;
+                        }
+
+                        return <SocietiesItem key={elem.id} elem={elem} highlight={highlight} settings={settings} onModal={onModal} />
                     })
                     : <div className="item border-t">
                         <Alert type="gray">Aucun résultat.</Alert>

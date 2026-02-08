@@ -123,7 +123,7 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     public function getTypeIcon(): ?string
     {
-        $values = ['minus', 'add', 'time', '', ''];
+        $values = ['minus', 'add', 'time', 'close', 'arrow-swap-horizontal'];
 
         return $values[$this->type];
     }

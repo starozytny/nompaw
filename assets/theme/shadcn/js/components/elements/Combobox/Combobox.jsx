@@ -21,17 +21,11 @@ export function ComboboxSimple({ identifiant, valeur, items, onSelect, placehold
     const [inputValue, setInputValue] = React.useState("")
     const [open, setOpen] = React.useState(false)
 
-    const inputIdentifiant = "input-select-" + identifiant;
-
-    const handleChange = (e) => {
-        setInputValue(onChange ? onChange(e) : e.currentTarget.value);
-    }
-
     const handleKeyDown = (e) => {
         if(e.keyCode === 13 || e.keyCode === 9){
             if(inputValue.trim() !== ""){
-                setInputValue("")
                 onSelect(identifiant, inputValue);
+                setInputValue("")
                 setOpen(false);
             }
         }
@@ -40,11 +34,9 @@ export function ComboboxSimple({ identifiant, valeur, items, onSelect, placehold
     const handleAdd = (e) => {
         e.preventDefault();
 
-        let input = document.getElementById(inputIdentifiant);
-        if(input && input.value.trim() !== "") {
-            setInputValue("")
-            onSelect(identifiant, input.value);
-        }
+        onSelect(identifiant, inputValue);
+        setInputValue("");
+        setOpen(false);
     }
 
     let iniBtnClassName = "w-full justify-between h-9 font-normal px-3 text-black focus-visible:ring-0";
@@ -76,29 +68,41 @@ export function ComboboxSimple({ identifiant, valeur, items, onSelect, placehold
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0" align="start">
-                {withInput
-                    ? <div className="flex items-stretch justify-between">
-                        <div className="w-full">
-                            <input type="text" name={inputIdentifiant} id={inputIdentifiant} value={inputValue}
-                                   placeholder="Saisir un nouveau élément" onChange={handleChange} onKeyDown={handleKeyDown}
-                                   className="w-full block rounded-md shadow-sm border-0 py-2 px-3 text-sm text-gray-900 ring-b-1 ring-gray-600 placeholder:text-gray-400 placeholder:text-xs focus:ring-0" />
-                        </div>
-                        <div className="flex items-center justify-center px-2 cursor-pointer text-gray-600 hover:text-black" onClick={(e) => handleAdd(e)}>
-                            <span className="icon-add"></span>
-                        </div>
-                    </div>
-                    : null
-                }
-
                 <Command className={listClassName}>
-                    <CommandInput placeholder="Recherche..." className="h-11 py-3 focus-visible:ring-0 border-0" />
+                    <div className="w-full flex items-center">
+                        <CommandInput
+                            placeholder={withInput ? "Rechercher ou ajouter..." : "Recherche..."}
+                            className="w-full h-11 py-3 focus-visible:ring-0 border-0 flex-1"
+                            value={inputValue}
+                            onValueChange={setInputValue}
+                            onKeyDown={withInput ? handleKeyDown : undefined}
+                        />
+                        {withInput && inputValue && (
+                            <div
+                                className="w-10 h-11 border-b flex items-center justify-center px-3 cursor-pointer text-gray-600 hover:text-black"
+                                onClick={(e) => handleAdd(e)}
+                            >
+                                <span className="icon-add"></span>
+                            </div>
+                        )}
+                    </div>
                     <CommandList>
-                        <CommandEmpty>Aucun résultat.</CommandEmpty>
+                        <CommandEmpty>
+                            {withInput
+                                ? <div className="text-gray-600 text-xs">
+                                    {inputValue !== ""
+                                        ? <div>Appuyez sur <span className="font-semibold">Entrée</span> pour ajouter "{inputValue}"</div>
+                                        : <div>Aucun résultat.</div>
+                                    }
+                                </div>
+                                : "Aucun résultat."
+                            }
+                        </CommandEmpty>
                         <CommandGroup>
                             {items.map((choice) => (
                                 <CommandItem
                                     key={choice.value}
-                                    value={choice.value}
+                                    value={choice.value + " " + choice.label}
                                     onSelect={(currentValue) => {
                                         onSelect(identifiant, choice.value === valeur ? "" : choice.value)
                                         setOpen(false)
@@ -128,17 +132,11 @@ export function ComboboxMultiple({ identifiant, valeurs, items, onSelect, placeh
     const [inputValue, setInputValue] = React.useState("")
     const [open, setOpen] = React.useState(false)
 
-    const inputIdentifiant = "input-select-multiple-" + identifiant;
-
-    const handleChange = (e) => {
-        setInputValue(onChange ? onChange(e) : e.currentTarget.value);
-    }
-
     const handleKeyDown = (e) => {
         if(e.keyCode === 13 || e.keyCode === 9){
             if(inputValue.trim() !== ""){
-                setInputValue("")
                 onSelect(identifiant, { value: inputValue, label: inputValue });
+                setInputValue("")
                 setOpen(false);
             }
         }
@@ -146,6 +144,7 @@ export function ComboboxMultiple({ identifiant, valeurs, items, onSelect, placeh
 
     const handleDel = (e, val) => {
         e.preventDefault();
+
         onSelect(identifiant, val);
         setOpen(false);
     }
@@ -153,11 +152,8 @@ export function ComboboxMultiple({ identifiant, valeurs, items, onSelect, placeh
     const handleAdd = (e) => {
         e.preventDefault();
 
-        let input = document.getElementById(inputIdentifiant);
-        if(input && input.value.trim() !== "") {
-            setInputValue("")
-            onSelect(identifiant, { value: input.value, label: input.value });
-        }
+        onSelect(identifiant, { value: inputValue, label: inputValue });
+        setInputValue("")
     }
 
     return (
@@ -200,32 +196,45 @@ export function ComboboxMultiple({ identifiant, valeurs, items, onSelect, placeh
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0" align="start">
-                {withInput
-                    ? <div className="flex items-stretch justify-between">
-                        <div className="w-full">
-                            <input type="text" name={inputIdentifiant} id={inputIdentifiant} value={inputValue}
-                                   placeholder="Saisir un nouveau élément" onChange={handleChange} onKeyDown={handleKeyDown}
-                                   className="w-full block rounded-md shadow-sm border-0 py-2 px-3 text-sm text-gray-900 ring-b-1 ring-gray-600 placeholder:text-gray-400 placeholder:text-xs focus:ring-0" />
-                        </div>
-                        <div className="flex items-center justify-center px-2 cursor-pointer text-gray-600 hover:text-black" onClick={(e) => handleAdd(e)}>
-                            <span className="icon-add"></span>
-                        </div>
-                    </div>
-                    : null
-                }
                 <Command>
-                    {items.length > 10
-                        ? <CommandInput placeholder="Recherche..." className="h-11 py-3 focus-visible:ring-0 border-0" />
+                    {items.length > 10 || withInput
+                        ? <div className="w-full flex items-center">
+                            <CommandInput
+                                placeholder={withInput ? "Rechercher ou ajouter..." : "Recherche..."}
+                                className="w-full h-11 py-3 focus-visible:ring-0 border-0 flex-1"
+                                value={inputValue}
+                                onValueChange={setInputValue}
+                                onKeyDown={withInput ? handleKeyDown : undefined}
+                            />
+                            {withInput && inputValue && (
+                                <div
+                                    className="w-10 h-11 border-b flex items-center justify-center px-3 cursor-pointer text-gray-600 hover:text-black"
+                                    onClick={(e) => handleAdd(e)}
+                                >
+                                    <span className="icon-add"></span>
+                                </div>
+                            )}
+                        </div>
                         : null
                     }
                     {withItems
                         ? <CommandList>
-                            <CommandEmpty>Aucun résultat.</CommandEmpty>
+                            <CommandEmpty>
+                                {withInput
+                                    ? <div className="text-gray-600 text-xs">
+                                        {inputValue !== ""
+                                            ? <div>Appuyez sur <span className="font-semibold">Entrée</span> pour ajouter "{inputValue}"</div>
+                                            : <div>Aucun résultat.</div>
+                                        }
+                                    </div>
+                                    : "Aucun résultat."
+                                }
+                            </CommandEmpty>
                             <CommandGroup>
                                 {items.map((choice) => (
                                     <CommandItem
                                         key={choice.value}
-                                        value={choice.value}
+                                        value={choice.value + " " + choice.label}
                                         onSelect={(currentValue) => {
                                             onSelect(identifiant, choice)
                                         }}

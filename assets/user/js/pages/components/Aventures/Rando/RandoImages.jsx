@@ -24,6 +24,7 @@ const URL_GET_FILE_SRC = "intern_api_aventures_images_file_src";
 const URL_GET_THUMBS_SRC = "intern_api_aventures_images_thumbs_src";
 const URL_READ_IMAGE_HD = "intern_api_aventures_images_file_hd_src";
 const URL_FETCH_IMAGES = "intern_api_aventures_images_fetch_images";
+const URL_VISIBILITY_IMAGE = "intern_api_aventures_images_visibility";
 
 export class RandoImages extends Component {
 	constructor (props) {
@@ -132,14 +133,11 @@ export class RandoImages extends Component {
 				let allData = JSON.parse(response.data.images);
 				let currentData = JSON.parse(response.data.currentImages);
 
-				// Ajouter rankPhoto pour allImages
 				let i = 1;
 				allData.forEach(item => {
-					console.log(item);
 					item.rankPhoto = i++;
 				});
 
-				// Ajouter rankPhoto pour currentImages
 				let j = this.state.rankPhoto;
 				currentData.forEach(item => {
 					item.rankPhoto = j++;
@@ -242,8 +240,8 @@ export class RandoImages extends Component {
 	handleDeleteImage = () => {
 		const { image } = this.state;
 
-		Formulaire.loader(true);
 		let self = this;
+		Formulaire.loader(true);
 		this.deleteImage.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGE, { id: image.id }), data: {} })
 			.then(function (response) {
@@ -261,8 +259,8 @@ export class RandoImages extends Component {
 	handleDeleteImages = () => {
 		const { selected } = this.state;
 
-		Formulaire.loader(true);
 		let self = this;
+		Formulaire.loader(true);
 		this.deleteFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: Array.from(selected) } })
 			.then(function (response) {
@@ -282,8 +280,8 @@ export class RandoImages extends Component {
 
 		let ids = allImages.map(elem => elem.id);
 
-		Formulaire.loader(true);
 		let self = this;
+		Formulaire.loader(true);
 		this.deleteAllFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: ids } })
 			.then(function (response) {
@@ -372,8 +370,8 @@ export class RandoImages extends Component {
 	handleCover = (image) => {
 		const { randoId } = this.props;
 
-		Formulaire.loader(true);
 		let self = this;
+		Formulaire.loader(true);
 		axios({ method: "PUT", url: Routing.generate(URL_COVER_IMAGE, { id: randoId }), data: { image: image.file } })
 			.then(function (response) {
 				Toastr.toast('info', "Photo de couverture modifiée.");
@@ -392,6 +390,42 @@ export class RandoImages extends Component {
 
 		this.lightbox.current.handleUpdateContent(<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={allImages} elem={elem} />);
 		this.lightbox.current.handleClick();
+	}
+
+	handleVisibility = (image) => {
+		const { allImages, currentImages } = this.state;
+
+		let self = this;
+		Formulaire.loader(true);
+		axios({ method: "PUT", url: Routing.generate(URL_VISIBILITY_IMAGE, { id: image.id }), data: {} })
+			.then(function (response) {
+				Toastr.toast('info', "Visibilité modifiée.");
+
+				let nAllImages = allImages.map(el => {
+					if (el.id === image.id) {
+						return { ...el, ...response.data };
+					} else {
+						return el;
+					}
+				});
+
+				let nCurrentImages = currentImages.map(el => {
+					if (el.id === image.id) {
+						return { ...el, ...response.data };
+					} else {
+						return el;
+					}
+				});
+
+				self.setState({ allImages: nAllImages, currentImages: nCurrentImages });
+			})
+			.catch(function (error) {
+				Formulaire.displayErrors(self, error);
+			})
+			.then(function () {
+				Formulaire.loader(false);
+			})
+		;
 	}
 
 	render () {
@@ -478,6 +512,7 @@ export class RandoImages extends Component {
 				<LazyLoadingGalleryWithPlaceholder currentImages={currentImages}
 												   onModal={this.handleModal} onCover={this.handleCover}
 												   onSelect={this.handleSelect} onLightbox={this.handleLightbox}
+												   onVisibility={this.handleVisibility}
 												   selected={selected} userId={userId} randoAuthor={randoAuthor} />
 			</div>
 
@@ -567,7 +602,7 @@ function modalDeleteAllImages (self) {
 	self.deleteAllFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteAllImages}>Confirmer la suppression</Button>)
 }
 
-function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, selected, userId, randoAuthor }) {
+function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, onVisibility, selected, userId, randoAuthor }) {
 	const [loaded, setLoaded] = useState(new Set());
 	const [error, setError] = useState(new Set());
 	const [hoveredImage, setHoveredImage] = useState(null);
@@ -641,12 +676,15 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 				} bg-gradient-to-b from-black/10 via-black/20 to-black/50`}>
 					<div className="flex justify-between gap-2 p-2">
 						<div>
-							<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center transition-opacity ${
-								isSelected
-									? "bg-blue-700 ring-blue-700"
-									: "bg-white ring-gray-100 hover:bg-blue-100"
-							} ${hasSelection || isHovered ? 'opacity-100' : 'opacity-0'}`}
-								 onClick={(e) => handleCheckboxClick(e, elem.id)}>
+							<div onClick={(e) => handleCheckboxClick(e, elem.id)}
+								 className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center transition-opacity ${
+									 isSelected 
+										 ? "bg-blue-700 ring-blue-700" 
+										 : "bg-white ring-gray-100 hover:bg-blue-100"
+								 	 } ${hasSelection || isHovered ? 'opacity-100' : 'opacity-0'}`
+								 }
+							>
+
 								<span className={`icon-check1 text-sm ${isSelected ? "text-white" : "text-transparent"}`}></span>
 							</div>
 						</div>
@@ -655,6 +693,15 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 								Télécharger
 							</ButtonIcon>
 							{parseInt(userId) === parseInt(randoAuthor) && <>
+								{elem.visibility === 1
+									? <ButtonIcon type="default" icon="vision" tooltipWidth={90} onClick={(e) => { e.stopPropagation(); onVisibility(elem); }} tooltipPosition="-bottom-7 right-0">
+										Rendre public
+									</ButtonIcon>
+									: <ButtonIcon type="yellow" icon="padlock" tooltipWidth={85} onClick={(e) => { e.stopPropagation(); onVisibility(elem); }} tooltipPosition="-bottom-7 right-0">
+										Restreindre
+									</ButtonIcon>
+								}
+
 								<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={(e) => { e.stopPropagation(); onCover(elem); }} tooltipPosition="-bottom-7 right-0">
 									Image de couverture
 								</ButtonIcon>
@@ -698,6 +745,14 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 						}}
 						onError={() => handleImageError(elem.id)}
 					/>
+				)}
+				{elem.visibility === 1 && (
+					<div className="absolute bottom-2 right-2 z-10">
+						<div className="bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+							<span className="icon-group text-xs"></span>
+							Participants
+						</div>
+					</div>
 				)}
 			</div>
 		})}
