@@ -135,7 +135,6 @@ export class RandoImages extends Component {
 
 				let i = 1;
 				allData.forEach(item => {
-					console.log(item);
 					item.rankPhoto = i++;
 				});
 

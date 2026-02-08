@@ -112,6 +112,10 @@ class RaRando extends DataEntity
     #[Groups(['rando_form'])]
     private ?string $story = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['rando_form'])]
+    private ?array $participants = [];
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
@@ -453,6 +457,18 @@ class RaRando extends DataEntity
     public function setStory(?string $story): self
     {
         $this->story = $story;
+
+        return $this;
+    }
+
+    public function getParticipants(): ?array
+    {
+        return $this->participants;
+    }
+
+    public function setParticipants(?array $participants): static
+    {
+        $this->participants = $participants;
 
         return $this;
     }

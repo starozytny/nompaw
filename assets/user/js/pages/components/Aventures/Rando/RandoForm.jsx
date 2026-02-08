@@ -25,6 +25,8 @@ export function RandoFormulaire ({ context, element, isAdmin, groupeId, users, u
 		url = Routing.generate(URL_UPDATE_ELEMENT, { groupe: groupeId, id: element.id });
 	}
 
+	console.log(users);
+
 	return <Form
         context={context}
         url={url}
