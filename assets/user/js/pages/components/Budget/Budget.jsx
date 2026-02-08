@@ -424,16 +424,16 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 			</div>
 		</div>
 
-		<div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:px-8 2xl:grid-cols-6">
+		<div className="flex flex-col gap-6 lg:px-8 2xl:grid 2xl:grid-cols-6">
 			<div className="flex flex-col gap-6 2xl:flex-row 2xl:col-span-3">
 				<div className="overflow-hidden w-screen lg:w-full 2xl:min-w-52 2xl:max-w-72">
-					<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 lg:flex-col">
+					<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 2xl:flex-col">
 						{cards.map(item => {
 							const isNegative = item.total < 0;
 							const isPositive = item.value === 0 && item.total > 0;
 
 							return <div
-								className={`relative overflow-hidden rounded-xl border-2 shadow-lg transition-all hover:shadow-xl ${
+								className={`relative min-w-[90%] sm:min-w-72 max-w-72 2xl:min-w-52 overflow-hidden rounded-xl border-2 shadow-lg transition-all hover:shadow-xl ${
 									item.value === 0
 										? (isPositive ? "bg-gradient-to-br from-green-50 to-green-100 border-green-300" : "bg-gradient-to-br from-red-50 to-red-100 border-red-400")
 										: "bg-white border-gray-200"
@@ -530,7 +530,7 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 					</div>}
 				</div>
 			</div>
-			<div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-0 xl:col-span-2 2xl:col-span-3">
+			<div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-0 2xl:col-span-3">
 				<div className="bg-white border rounded-xl shadow-md overflow-hidden">
 					<div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
 						<h3 className="font-semibold text-gray-900 flex items-center gap-2">

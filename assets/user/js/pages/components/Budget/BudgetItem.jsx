@@ -80,7 +80,7 @@ export function BudgetItemRecurrent ({ elem, onModal, onActive }) {
 	return <div className="item border-b last:border-b-0 bg-gray-50/30 hover:bg-gray-50/50 transition-all border-l-4 border-l-gray-400">
 		<div className="item-content">
 			<div className="item-infos flex items-center gap-4">
-				<div className="col-1 min-w-[80px]">
+				<div className="col-1">
 					<div className={`flex w-10 h-10 rounded-lg items-center justify-center flex-shrink-0 ${bgTypes[elem.type]} opacity-60`}>
 						<span className={`icon-${elem.typeIcon} ${typesBudget[elem.type]}`}></span>
 					</div>
@@ -98,7 +98,7 @@ export function BudgetItemRecurrent ({ elem, onModal, onActive }) {
 					</div>
 				</div>
 
-				<div className="col-3 text-right min-w-[100px]">
+				<div className="col-3 text-right">
 					<div className={`font-semibold text-sm ${typesBudget[elem.type]} opacity-60`}>
 						<span className={`icon-${elem.typeIcon} text-sm mr-1`}></span>
 						{Sanitaze.toFormatCurrency(elem.price)}
