@@ -29,6 +29,19 @@ class RandoController extends AbstractController
         $propalAdvs  = $adventureRepository->findBy(['rando' => $obj]);
         $users = $userRepository->findAll();
 
+        $indexUsers = [];
+        foreach($users as $user){
+            $indexUsers[$user->getId()] = $user;
+        }
+
+        $participants = [];
+        foreach($obj->getParticipants() as $pId){
+            $participant = $indexUsers[$pId] ?? null;
+            if($participant){
+                $participants[] = $participant;
+            }
+        }
+
         $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);
         $propalAdvs = $serializer->serialize($propalAdvs,  'json', ['groups' => RaPropalAdventure::LIST]);
 
@@ -36,7 +49,7 @@ class RandoController extends AbstractController
             'elem' => $obj,
             'propalDates' => $propalDates,
             'propalAdvs' => $propalAdvs,
-            'users' => $users,
+            'participants' => $participants,
         ]);
     }
 

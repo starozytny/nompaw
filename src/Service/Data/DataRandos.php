@@ -37,6 +37,7 @@ class DataRandos
             ->setDevPlus($this->sanitizeData->setIntValue($data->devPlus))
             ->setAltitude($this->sanitizeData->setIntValue($data->altitude))
             ->setStory($this->sanitizeData->trimData($data->story))
+            ->setParticipants($data->participants)
         ;
     }
 

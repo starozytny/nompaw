@@ -5,12 +5,13 @@ import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Toastr from "@tailwindFunctions/toastr";
+import Inputs from "@commonFunctions/inputs";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-import { Input, Radiobox, SelectCombobox } from "@tailwindComponents/Elements/Fields";
+import { Input, Radiobox, SelectCombobox, SelectComboboxMultiple } from "@tailwindComponents/Elements/Fields";
 
 const URL_INDEX_PAGE = "user_aventures_randos_read";
 const URL_CREATE_ELEMENT = "intern_api_aventures_randos_create";
@@ -25,7 +26,19 @@ export function RandoFormulaire ({ context, element, isAdmin, groupeId, users, u
 		url = Routing.generate(URL_UPDATE_ELEMENT, { groupe: groupeId, id: element.id });
 	}
 
-	console.log(users);
+	let usersItems = [];
+	let participants = [];
+	users.forEach(us => {
+		usersItems.push({ value: us.id, label: us.displayName })
+
+		if(element) {
+			let participantsIds = Formulaire.setValue(element.participants, []);
+
+			if(participantsIds.includes(us.id)) {
+				participants.push({ value: us.id, label: us.displayName })
+			}
+		}
+	})
 
 	return <Form
         context={context}
@@ -44,6 +57,7 @@ export function RandoFormulaire ({ context, element, isAdmin, groupeId, users, u
         distance={element ? Formulaire.setValue(element.distance) : ""}
         referent={element ? Formulaire.setValue(element.author.id) : userId}
         story={element ? Formulaire.setValue(element.story) : ""}
+        participants={participants}
 
 		adventureId={element && element.adventure ? Formulaire.setValue(element.adventure.id) : ""}
 		adventureName={element && element.adventure ? Formulaire.setValue(element.adventure.name) : ""}
@@ -53,14 +67,13 @@ export function RandoFormulaire ({ context, element, isAdmin, groupeId, users, u
 		adventureDateId={element && element.adventureDate ? Formulaire.setValue(element.adventureDate.id) : ""}
 		adventureDateAt={element && element.adventureDate ? Formulaire.setValueDate(element.adventureDate.dateAt) : ""}
 
-        users={users}
+		usersItems={usersItems}
     />
 }
 
 RandoFormulaire.propTypes = {
 	context: PropTypes.string.isRequired,
 	groupeId: PropTypes.number.isRequired,
-	users: PropTypes.array.isRequired,
 	element: PropTypes.object,
 }
 
@@ -81,6 +94,7 @@ class Form extends Component {
 			distance: props.distance,
 			referent: props.referent,
 			story: props.story,
+			participants: props.participants,
 
 			adventureId: props.adventureId,
 			adventureName: props.adventureName,
@@ -100,6 +114,11 @@ class Form extends Component {
 
 	handleSelect = (identifiant, value) => {
 		this.setState({ [identifiant]: value })
+	}
+
+	handleSelectMultiple = (name, item) => {
+		const newValues = Inputs.functionSelect(this, name, item);
+		this.setState({ [name]: newValues });
 	}
 
 	handleChangeTinyMCE = (name, html) => {
@@ -125,9 +144,15 @@ class Form extends Component {
 		if (!validate.code) {
 			Formulaire.showErrors(this, validate);
 		} else {
-			Formulaire.loader(true);
 			let self = this;
-			axios({ method: context === "create" ? "POST" : "PUT", url: url, data: this.state })
+			Formulaire.loader(true);
+
+			let nState = {
+				...this.state,
+				participants: this.state.participants.map(item => item.value)
+			}
+
+			axios({ method: context === "create" ? "POST" : "PUT", url: url, data: nState })
 				.then(function (response) {
 					Toastr.toast('info', "Données enregistrées.");
 					location.href = Routing.generate(URL_INDEX_PAGE, { 'slug': response.data.slug });
@@ -141,14 +166,15 @@ class Form extends Component {
 	}
 
 	render () {
-        const { context, isAdmin, users } = this.props;
+        const { context, isAdmin, usersItems } = this.props;
         const {
-			errors, name, typeRando, description, localisation, level, altitude, devPlus, distance, referent, story,
+			errors, name, typeRando, description, localisation, level, altitude, devPlus, distance, referent, story, participants,
 			adventureName, adventureDuration, adventureUrl, adventureDateAt
 		} = this.state;
 
         let params0 = { errors: errors, onChange: this.handleChange };
         let params1 = { errors: errors, onSelect: this.handleSelect };
+        let params2 = { errors: errors, onSelect: this.handleSelectMultiple };
 
         let levelItems = [
             { value: 0, label: 'Aucun', identifiant: 'level-0' },
@@ -165,11 +191,6 @@ class Form extends Component {
             { value: 2, label: 'Urbex', identifiant: 'type-2' },
         ]
 
-        let referentsItem = [];
-        users.forEach(us => {
-            referentsItem.push({ value: us.id, label: us.displayName })
-        })
-
         return <form onSubmit={this.handleSubmit}>
             <div className="flex flex-col gap-4 xl:gap-6">
                 <div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
@@ -182,7 +203,7 @@ class Form extends Component {
                     <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
                         <div className="flex gap-4">
                             <div className="w-full">
-								<SelectCombobox identifiant="referent" valeur={referent} items={referentsItem} {...params1} noEmpty={true}>
+								<SelectCombobox identifiant="referent" valeur={referent} items={usersItems} {...params1} noEmpty={true}>
 									Référent *
 								</SelectCombobox>
                             </div>
@@ -260,6 +281,13 @@ class Form extends Component {
 							</>
 							: null
 						}
+
+						<div>
+							<SelectComboboxMultiple identifiant="participants" valeur={participants} items={usersItems}
+													{...params2} toSort={true}>
+								Participants
+							</SelectComboboxMultiple>
+						</div>
 					</div>
 				</div>
             </div>
