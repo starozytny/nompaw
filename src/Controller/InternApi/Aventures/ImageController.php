@@ -33,7 +33,6 @@ class ImageController extends AbstractController
 
         $allImages = $repository->findBy(['rando' => $rando], ['takenAt' => 'ASC']);
 
-        // Récupérer uniquement les images de la page courante
         $currentImages = $repository->findBy(
             ['rando' => $rando],
             ['takenAt' => 'ASC'],
@@ -205,8 +204,6 @@ class ImageController extends AbstractController
         foreach ($images as $image) {
             $filePath = $imagesDirectory . $image->getFileFile();
 
-            dump($filePath);
-
             if (file_exists($filePath)) {
                 $zip->addFile($filePath, $image->getFile());
                 $addedCount++;
@@ -242,5 +239,14 @@ class ImageController extends AbstractController
     public function getFileHD(RaImage $obj): Response
     {
         return $this->file($this->getParameter('private_directory') . $obj->getLightboxFile());
+    }
+
+    #[Route('/visibility/{id}', name: 'visibility', options: ['expose' => true], methods: 'PUT')]
+    public function visibility(RaImage $obj, RaImageRepository $repository, ApiResponse $apiResponse): Response
+    {
+        $obj->setVisibility(!$obj->getVisibility());
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, RaImage::LIST);
     }
 }

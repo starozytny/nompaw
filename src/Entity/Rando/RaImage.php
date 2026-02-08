@@ -53,6 +53,15 @@ class RaImage extends DataEntity
     #[Groups(['ra_img_list'])]
     private ?\DateTime $takenAt = null;
 
+    #[ORM\Column]
+    #[Groups(['ra_img_list'])]
+    private ?int $visibility = null;
+
+    public function __construct()
+    {
+        $this->visibility = 0;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -168,6 +177,18 @@ class RaImage extends DataEntity
     public function setTakenAt(?\DateTime $takenAt): static
     {
         $this->takenAt = $takenAt;
+
+        return $this;
+    }
+
+    public function getVisibility(): ?int
+    {
+        return $this->visibility;
+    }
+
+    public function setVisibility(int $visibility): static
+    {
+        $this->visibility = $visibility;
 
         return $this;
     }
