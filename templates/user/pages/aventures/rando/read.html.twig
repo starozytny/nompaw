@@ -36,9 +36,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 space-y-4">
             <div class="flex items-center gap-2">
-                <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-flex items-center gap-2">
-                    <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
-                    <span class="text-sm font-medium text-amber-800">{{ elem.statusString }}</span>
+                <div class="w-full">
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-flex items-center gap-2">
+                        <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span class="text-sm font-medium text-amber-800">{{ elem.statusString }}</span>
+                    </div>
                 </div>
                 {% if app.user.id == elem.author.id or app.user.isAdmin %}
                     <div class="w-full flex justify-end gap-1">

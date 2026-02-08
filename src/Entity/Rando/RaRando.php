@@ -3,6 +3,7 @@
 namespace App\Entity\Rando;
 
 use App\Entity\DataEntity;
+use App\Entity\Enum\Rando\RandoType;
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Main\User;
 use App\Repository\Rando\RaRandoRepository;
@@ -42,6 +43,10 @@ class RaRando extends DataEntity
     #[ORM\Column]
     #[Groups(['rando_form'])]
     private ?int $status = StatusType::Propal;
+
+    #[ORM\Column]
+    #[Groups(['rando_form'])]
+    private ?int $typeRando = RandoType::Randonnee;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['rando_form'])]
@@ -175,6 +180,18 @@ class RaRando extends DataEntity
             StatusType::End => 'terminée',
             default => 'erreur',
         };
+    }
+
+    public function getTypeRando(): ?int
+    {
+        return $this->typeRando;
+    }
+
+    public function setTypeRando(int $typeRando): static
+    {
+        $this->typeRando = $typeRando;
+
+        return $this;
     }
 
     public function getDescription(): ?string

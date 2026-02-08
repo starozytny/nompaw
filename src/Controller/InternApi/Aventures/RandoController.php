@@ -4,6 +4,8 @@ namespace App\Controller\InternApi\Aventures;
 
 use App\Entity\Enum\Rando\StatusType;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaPropalAdventure;
+use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaImageRepository;
@@ -26,7 +28,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class RandoController extends AbstractController
 {
     public function submitForm($type, RaRandoRepository $repository, RaRando $obj, Request $request, ApiResponse $apiResponse,
-                               ValidatorService $validator, DataRandos $dataEntity, RaGroupe $groupe, UserRepository $userRepository): JsonResponse
+                               ValidatorService $validator, DataRandos $dataEntity, RaGroupe $groupe, UserRepository $userRepository,
+                               RaPropalAdventureRepository $propalAdventureRepository, RaPropalDateRepository $propalDateRepository): JsonResponse
     {
         $data = json_decode($request->getContent());
         if ($data === null) {
@@ -73,6 +76,45 @@ class RandoController extends AbstractController
             }
         }
 
+        if($data->adventureName && trim($data->adventureName) != ""){
+            $dataPropalAdventure = [
+                'name' => $data->adventureName,
+                'duration' => $data->adventureDuration,
+                'url' => $data->adventureUrl,
+            ];
+
+            $propalAdventure = $data->adventureId ? $propalAdventureRepository->find($data->adventureId) : new RaPropalAdventure();
+            if($propalAdventure){
+                $propalAdventure = $dataEntity->setDataPropalAdventure($propalAdventure, json_decode(json_encode($dataPropalAdventure)));
+                $propalAdventure->setRando($obj);
+                $propalAdventure->setAuthor($author);
+
+                $obj->setAdventure($propalAdventure);
+
+                $propalAdventureRepository->save($propalAdventure);
+            }
+        }
+
+
+
+        if($data->adventureDateAt){
+            $dataPropalDate = [
+                'dateAt' => $data->adventureDateAt,
+            ];
+
+            $propalDate = $data->adventureDateId ? $propalDateRepository->find($data->adventureDateId) : new RaPropalDate();
+            if($propalDate){
+                $propalDate = $dataEntity->setDataPropalDate($propalDate, json_decode(json_encode($dataPropalDate)));
+                $propalDate->setRando($obj);
+                $propalDate->setAuthor($author);
+
+                $obj->setAdventureDate($propalDate);
+                $obj->setStartAt($propalDate->getDateAt());
+
+                $propalDateRepository->save($propalDate);
+            }
+        }
+
         $noErrors = $validator->validate($obj);
         if ($noErrors !== true) {
             return $apiResponse->apiJsonResponseValidationFailed($noErrors);
@@ -84,16 +126,18 @@ class RandoController extends AbstractController
 
     #[Route('/groupe/{groupe}/create', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, RaGroupe $groupe, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataRandos $dataEntity, RaRandoRepository $repository, UserRepository $userRepository): Response
+                           DataRandos $dataEntity, RaRandoRepository $repository, UserRepository $userRepository,
+                           RaPropalAdventureRepository $propalAdventureRepository, RaPropalDateRepository $propalDateRepository): Response
     {
-        return $this->submitForm("create", $repository, new RaRando(), $request, $apiResponse, $validator, $dataEntity, $groupe, $userRepository);
+        return $this->submitForm("create", $repository, new RaRando(), $request, $apiResponse, $validator, $dataEntity, $groupe, $userRepository, $propalAdventureRepository, $propalDateRepository);
     }
 
     #[Route('/groupe/{groupe}/update/{id}', name: 'update', options: ['expose' => true], methods: 'PUT')]
     public function update(Request $request, RaGroupe $groupe, RaRando $obj, ApiResponse $apiResponse, ValidatorService $validator,
-                           DataRandos $dataEntity, RaRandoRepository $repository, UserRepository $userRepository): Response
+                           DataRandos $dataEntity, RaRandoRepository $repository, UserRepository $userRepository,
+                           RaPropalAdventureRepository $propalAdventureRepository, RaPropalDateRepository $propalDateRepository): Response
     {
-        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $groupe, $userRepository);
+        return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $groupe, $userRepository,  $propalAdventureRepository, $propalDateRepository);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
