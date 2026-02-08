@@ -62,6 +62,10 @@ class ItemsController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         if($obj->getRecurrenceId()){
             $obj->setType(TypeType::Deleted);
             $repository->save($obj, true);
@@ -76,7 +80,12 @@ class ItemsController extends AbstractController
     #[Route('/active/{id}', name: 'active', options: ['expose' => true], methods: 'PUT')]
     public function active(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $obj->setIsActive(true);
+        $obj->setUpdatedAt(new \DateTime());
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
@@ -85,12 +94,19 @@ class ItemsController extends AbstractController
     #[Route('/cancel/{id}', name: 'cancel', options: ['expose' => true], methods: 'PUT')]
     public function cancel(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
-        if($obj->getRecurrenceId()){
-            $obj->setType($obj->getLastType());
-            $obj->setDateAt(new \DateTime());
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
         }
 
-        $repository->save($obj, true);
-        return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
+        if($obj->getRecurrenceId() && $obj->getType() === TypeType::Deleted){
+            $obj->setType($obj->getLastType());
+            $obj->setDateAt(new \DateTime());
+            $obj->setUpdatedAt(new \DateTime());
+
+            $repository->save($obj, true);
+            return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
+        }
+
+        return $apiResponse->apiJsonResponseBadRequest('Cette opération ne peut pas être annulée.');
     }
 }

@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/espace-membre/planificateur', name: 'user_budget_')]
 class BudgetController extends AbstractController
 {
-    #[Route('/planning/{year}', name: 'index', options: ['expose' => true])]
+    #[Route('/planning/{year}', name: 'index', options: ['expose' => true], methods: ['GET'])]
     public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
                          BuCategoryRepository $categoryRepository, SerializerInterface $serializer,
                          BudgetService $budgetService): Response
@@ -24,6 +24,12 @@ class BudgetController extends AbstractController
         $user = $this->getUser();
         if($year < $user->getBudgetYear()){
             return $this->redirectToRoute('user_budget_index', ['year' => $user->getBudgetYear()]);
+        }
+
+        $currentYear = (int) date('Y');
+        $maxYear = $currentYear + 3;
+        if ($year > $maxYear) {
+            return $this->redirectToRoute('user_budget_index', ['year' => $currentYear]);
         }
 
         [
