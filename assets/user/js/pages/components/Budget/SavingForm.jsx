@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import Inputs from "@commonFunctions/inputs";
+import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
@@ -33,14 +34,6 @@ export class SavingForm extends Component {
 		}
 	}
 
-	handleCloseModal = () => {
-		let body = document.querySelector("body");
-		let modal = document.getElementById(this.props.identifiant);
-
-		body.style.overflow = "auto";
-		modal.style.display = "none";
-	}
-
 	handleChange = (e) => {
 		let name = e.currentTarget.name;
 		let value = e.currentTarget.value;
@@ -64,6 +57,15 @@ export class SavingForm extends Component {
 		if (!validate.code) {
 			Formulaire.showErrors(this, validate);
 		} else {
+			const available = saving.total - saving.used;
+			if (parseFloat(total) > available) {
+				Formulaire.showErrors(this, {
+					code: false,
+					errors: [{ name: "total", message: `Le montant ne peut pas dépasser ${Sanitaze.toFormatCurrency(available)}` }]
+				});
+				return;
+			}
+
 			this.props.onUseSaving(saving, total)
 		}
 	}
@@ -72,18 +74,74 @@ export class SavingForm extends Component {
 		const { identifiant, saving } = this.props;
 		const { errors, total } = this.state;
 
-		let params = { errors: errors, onChange: this.handleChange };
+		if (!saving) return null;
+
+		let params0 = { errors: errors, onChange: this.handleChange };
+
+		const available = saving.total - saving.used;
 
 		return <>
 			<div className="px-4 pb-4 pt-5 sm:px-6 sm:pb-4">
-				<p className="mb-4">Combien souhaitez-vous utiliser depuis les économies de : <b>{saving ? saving.name : ""}</b> ?</p>
+				{/* Info économie */}
+				<div className="mb-6 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+					<div className="flex items-start justify-between">
+						<div>
+							<h4 className="font-semibold text-gray-900 mb-1">{saving.name}</h4>
+							<p className="text-sm text-gray-600">Objectif : {Sanitaze.toFormatCurrency(saving.goal)}</p>
+						</div>
+						<div className="text-right">
+							<div className="text-2xl font-bold text-yellow-700">
+								{Sanitaze.toFormatCurrency(available)}
+							</div>
+							<div className="text-xs text-gray-600">disponible</div>
+						</div>
+					</div>
+				</div>
+
 				<form onSubmit={this.handleSubmit}>
-					<Input identifiant="total" valeur={total} {...params}>Solde à utiliser</Input>
+					<p className="text-sm text-gray-600 mb-4">
+						Combien souhaitez-vous utiliser de cette économie : <b>{saving ? saving.name : ""}</b> ?
+					</p>
+
+					<Input identifiant="total" valeur={total} {...params0} placeholder={`max : ${Sanitaze.toFormatCurrency(available)}`}>
+						Solde à utiliser (€)
+					</Input>
+
+					<div className="mt-3 flex flex-wrap gap-2">
+						<button
+							type="button"
+							className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+							onClick={() => this.setState({ total: (available * 0.25).toFixed(2) })}
+						>
+							25%
+						</button>
+						<button
+							type="button"
+							className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+							onClick={() => this.setState({ total: (available * 0.5).toFixed(2) })}
+						>
+							50%
+						</button>
+						<button
+							type="button"
+							className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+							onClick={() => this.setState({ total: (available * 0.75).toFixed(2) })}
+						>
+							75%
+						</button>
+						<button
+							type="button"
+							className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+							onClick={() => this.setState({ total: available.toFixed(2) })}
+						>
+							Tout
+						</button>
+					</div>
 				</form>
 			</div>
 			<div className="bg-gray-50 px-4 py-3 flex flex-row justify-end gap-2 sm:px-6 border-t">
 				<CloseModalBtn identifiant={identifiant} />
-				<Button type="blue" onClick={this.handleSubmit}>Confirmer</Button>
+				<Button type="blue" onClick={this.handleSubmit}>Confirmer l'utilisation</Button>
 			</div>
 		</>
 	}

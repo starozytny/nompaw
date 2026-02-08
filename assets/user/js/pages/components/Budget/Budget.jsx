@@ -566,7 +566,7 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 
 		{createPortal(
 			<Modal ref={savingRef} identifiant="useSaving" maxWidth={568} title="Utiliser vos économies" isForm={true}
-				   content={<SavingForm saving={saving} onUseSaving={handleUseSaving} />}
+				   content={<SavingForm identifiant="useSaving" saving={saving} onUseSaving={handleUseSaving} />}
 				   footer={null}
 			/>
 			, document.body)
