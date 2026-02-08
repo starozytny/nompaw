@@ -15,6 +15,7 @@ import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
 import { SavingForm } from "@userPages/Budget/SavingForm";
+import { cn } from "@shadcnComponents/lib/utils";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
@@ -428,15 +429,45 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 				<div className="overflow-hidden w-screen lg:w-full 2xl:min-w-52 2xl:max-w-72">
 					<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 lg:flex-col">
 						{cards.map(item => {
-							return <div className={`p-4 rounded-md border flex gap-4 min-w-52 ${item.value === 0 ? (item.total > 0 ? "bg-white" : "bg-red-50 border-red-500") : "bg-white"}`} key={item.value}>
-								<div className={`w-20 h-20 rounded flex items-center justify-center ${item.classCustom}`}>
-									<span className={`icon-${item.icon} text-xl`}></span>
-								</div>
-								<div>
-									<div className="font-semibold text-gray-700">{item.name}</div>
-									<div className="font-bold text-xl">{Sanitaze.toFormatCurrency(item.total)}</div>
-									{item.total2 !== 0 && <div className="text-gray-600 text-sm">Aujourd'hui : {Sanitaze.toFormatCurrency(item.total2)}</div>}
-									{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
+							const isNegative = item.total < 0;
+							const isPositive = item.value === 0 && item.total > 0;
+
+							return <div
+								className={`relative overflow-hidden rounded-xl border-2 shadow-lg transition-all hover:shadow-xl ${
+									item.value === 0
+										? (isPositive ? "bg-gradient-to-br from-green-50 to-green-100 border-green-300" : "bg-gradient-to-br from-red-50 to-red-100 border-red-400")
+										: "bg-white border-gray-200"
+								}`}
+								key={item.value}
+							>
+								<div className="p-6">
+									<div className="flex items-start justify-between mb-4">
+										<div className="flex-1">
+											<p className="text-sm font-medium text-gray-600 mb-1">{item.name}</p>
+											<p className={`text-3xl font-bold ${isNegative ? 'text-red-600' : 'text-gray-900'}`}>
+												{Sanitaze.toFormatCurrency(item.total)}
+											</p>
+										</div>
+										<div className={`w-12 h-12 rounded-lg flex items-center justify-center ${item.classCustom}`}>
+											<span className={`icon-${item.icon} text-2xl`}></span>
+										</div>
+									</div>
+
+									{item.total2 !== 0 && (
+										<div className="mb-2">
+											<div className="flex items-center justify-between text-sm">
+												<span className="text-gray-600">Aujourd'hui :</span>
+												<span className="font-semibold text-gray-900">{Sanitaze.toFormatCurrency(item.total2)}</span>
+											</div>
+										</div>
+									)}
+
+									{item.initial !== null && (
+										<div className="flex items-center justify-between text-sm border-t border-gray-200 pt-2 mt-2">
+											<span className="text-gray-600">Solde initial :</span>
+											<span className="font-medium text-gray-700">{Sanitaze.toFormatCurrency(item.initial)}</span>
+										</div>
+									)}
 								</div>
 							</div>
 						})}
@@ -444,13 +475,14 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 				</div>
 
 				<div className="w-full flex flex-col gap-6 px-4 sm:px-6 lg:px-0">
-					<div className="bg-white border p-4 rounded-md">
-						<BudgetFormulaire context={element ? "update" : "create"} categories={JSON.parse(categories)}
+					<div className="bg-white border rounded-xl shadow-md p-4">
+						<BudgetFormulaire context={element ? "update" : "create"}
+										  categories={JSON.parse(categories)}
 										  element={element} year={year} month={month}
 										  onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
 										  key={month + "-" + (element ? element.id : 0)} />
 					</div>
-					{itemsSavings.length !== 0 && <div className="bg-gray-50 rounded-md border">
+					{itemsSavings.length !== 0 && <div className="bg-gray-50 rounded-xl border">
 						<div className="cursor-pointer p-4 flex justify-between hover:opacity-80" onClick={() => setOpenSaving(!openSaving)}>
 							<h3 className="font-semibold">Utilisation des économies</h3>
 							<div className="lg:hidden">
@@ -459,11 +491,24 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 						</div>
 						<div className={`flex flex-col gap-4 border-t bg-white rounded-b-md ${openSaving ? "opacity-100 h-auto p-4" : "h-0 opacity-0 lg:h-auto lg:opacity-100 lg:p-4"}`}>
 							{itemsSavings.map(sa => {
-
-								let total = sa.total, used = sa.used;
+								let total = sa.total;
+								let used = sa.used;
+								let available = total - used;
+								let progress = sa.goal ? (available / sa.goal) * 100 : 0;
 
 								return <div className="saving-item flex items-start justify-between gap-2" key={sa.id}>
-									<div className="col-1 font-medium text-sm">{sa.name}</div>
+									<div className="col-1 font-medium text-sm">
+										<div className="flex justify-between items-center">
+											<div>{sa.name}</div>
+											<div className="text-xs font-normal text-gray-500">({progress.toFixed(0)}%)</div>
+										</div>
+										<div className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
+											<div
+												className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 transition-all"
+												style={{ width: `${Math.min(progress, 100)}%` }}
+											></div>
+										</div>
+									</div>
 									<div className="col-2">
 										<div className="font-medium text-sm">{Sanitaze.toFormatCurrency(total - used)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
 										<div className="text-xs text-gray-600">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
@@ -474,17 +519,32 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 								</div>
 							})}
 						</div>
-						<div className="px-4 py-2 border-t flex flex-col items-center justify-center gap-2">
-							<div className="font-semibold">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</div>
-							<div className="text-sm text-gray-600">{Sanitaze.toFormatCurrency(totSavingAllUsed)} utilisé</div>
+
+						<div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 border-t flex items-center justify-between">
+							<span className="text-sm font-medium text-gray-700">Total économies disponibles</span>
+							<div className="text-right">
+								<div className="font-bold text-lg text-yellow-700">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</div>
+								<div className="text-xs text-gray-600">{Sanitaze.toFormatCurrency(totSavingAllUsed)} utilisé</div>
+							</div>
 						</div>
 					</div>}
 				</div>
 			</div>
 			<div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-0 xl:col-span-2 2xl:col-span-3">
-				<BudgetList data={nData} recurrencesData={nRecurrencesData}
-							onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
-							onActiveRecurrence={handleActiveRecurrence} key={month} />
+				<div className="bg-white border rounded-xl shadow-md overflow-hidden">
+					<div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+						<h3 className="font-semibold text-gray-900 flex items-center gap-2">
+							<span className="icon-cart text-blue-600"></span>
+							Opérations du mois
+							<span className="text-sm font-normal text-gray-600">({nData.length + nRecurrencesData.length})</span>
+						</h3>
+					</div>
+					<div className="flex flex-col gap-6">
+						<BudgetList data={nData} recurrencesData={nRecurrencesData}
+									onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
+									onActiveRecurrence={handleActiveRecurrence} key={month} />
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -558,13 +618,18 @@ function Months ({ year, active, onSelect, totaux }) {
 			let todayMonth = (elem.id === today.getMonth() + 1 && year === today.getFullYear());
 			let activeMonth = elem.id === active;
 			let statutMonth = totaux[elem.id - 1] < 0;
-			return <div className={`cursor-pointer rounded-md p-2 font-medium text-center min-w-20 ${todayMonth ? "bg-white" : "hover:bg-gray-50"} ${activeMonth ? (statutMonth ? "!bg-red-300" : "!bg-blue-300") : ""}`}
-						onClick={() => onSelect(elem.id)}
-						key={elem.id}>
+			return <div onClick={() => onSelect(elem.id)} key={elem.id}
+						className={cn(
+				"cursor-pointer rounded-md p-2 font-medium text-center min-w-20",
+				todayMonth ? "bg-white border-2 border-gray-300 shadow-md" : "hover:bg-gray-50",
+				activeMonth ? (statutMonth ? "bg-red-500 text-white border-2 border-red-600 shadow-lg scale-105 hover:bg-red-500" : "bg-blue-500 text-white border-2 border-blue-600 shadow-lg scale-105 hover:bg-blue-500") : ""
+			)}>
 				<div className="text-sm">
 					{elem.name}
 				</div>
-				<div className="text-xs text-gray-600">{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}</div>
+				<div className={`text-xs font-medium ${activeMonth ? '' : (statutMonth ? 'text-red-600' : 'text-gray-600')}`}>
+					{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}
+				</div>
 			</div>
 		})}
 	</div>
