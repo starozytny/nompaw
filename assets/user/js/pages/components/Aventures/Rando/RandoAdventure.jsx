@@ -133,7 +133,7 @@ export class RandoAdventure extends Component {
 		let params = { errors: errors, onChange: this.handleChange }
 
 		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-			<h3 className="text-sm font-semibold text-slate-700 mb-3">{haveAdventure ? "Aventure sélectionnée" : "Proposition d'aventures"}</h3>
+			<h3 className="text-sm font-semibold text-slate-700 mb-3">{haveAdventure ? "Activité sélectionnée" : "Proposition d'activité"}</h3>
 
 			<div className="flex items-center justify-between bg-purple-50 border border-purple-200 rounded-lg px-4 py-3">
 				{haveAdventure
@@ -206,17 +206,17 @@ export class RandoAdventure extends Component {
 
 						<div className="group flex items-center gap-2 cursor-pointer" onClick={() => this.handleModal('formPropal', 'create', null)}>
 							<span className="icon-add text-blue-900"></span>
-							<span className="text-sm font-medium text-blue-900 group-hover:underline">Proposer une aventure</span>
+							<span className="text-sm font-medium text-blue-900 group-hover:underline">Proposer une activité</span>
 						</div>
 					</div>
 				}
 			</div>
 
-			<Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une aventure"
+			<Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une activité"
 				   content={<div className="flex flex-col gap-4">
 					   <div className="flex gap-4">
 						   <div className="w-full">
-							   <Input identifiant="name" valeur={name} {...params}>Nom de l'aventure</Input>
+							   <Input identifiant="name" valeur={name} {...params}>Nom de l'activité</Input>
 						   </div>
 						   <div className="w-full">
 							   <Input type="time" identifiant="duration" valeur={duration} {...params}>Durée</Input>
@@ -236,8 +236,8 @@ export class RandoAdventure extends Component {
 				   content={<p>Êtes-vous sûr de vouloir sélectionner <b>{propal ? propal.name : ""}</b> comme étant l'aventure <b>FINALE</b> ?</p>}
 				   footer={null} closeTxt="Annuler" />
 
-			<Modal ref={this.cancelAdventure} identifiant='cancel-adventure' maxWidth={414} title="Annuler l'aventure sélectionnée"
-				   content={<p>Êtes-vous sûr de vouloir revenir sur les propositions des aventures ?</p>}
+			<Modal ref={this.cancelAdventure} identifiant='cancel-adventure' maxWidth={414} title="Annuler l'activité sélectionnée"
+				   content={<p>Êtes-vous sûr de vouloir revenir sur les propositions des activités ?</p>}
 				   footer={null} closeTxt="Annuler" />
 		</div>
 	}

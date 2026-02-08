@@ -128,7 +128,7 @@
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-                        <h2 class="text-xl font-bold text-white">{{ adventure.name }}</h2>
+                        <h2 class="text-xl font-bold text-white">{{ adventure ? adventure.name : "" }}</h2>
                         <p class="text-indigo-100 text-sm mt-1">{{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}</p>
                     </div>
 
@@ -139,84 +139,89 @@
                             </div>
                         {% endif %}
 
-                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 sm:grid-cols-3">
-                            {% if elem.distance %}
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                        <span class="icon-map text-emerald-600"></span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-slate-500">Distance</p>
-                                        <p class="text-sm font-medium text-slate-900">{{ elem.distance }} km</p>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            {% if elem.devPlus %}
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                                        <span class="icon-placeholder text-red-600"></span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-slate-500">D+</p>
-                                        <p class="text-sm font-medium text-slate-900">{{ elem.devPlus }} m</p>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            {% if elem.altitude %}
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                        <span class="icon-placeholder text-amber-600"></span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-slate-500">Altitude</p>
-                                        <p class="text-sm font-medium text-slate-900">{{ elem.altitude }} m</p>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 pt-4 md:grid-cols-3">
-                            {% if elem.localisation %}
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-color0/10 rounded-lg flex items-center justify-center">
-                                        <span class="icon-placeholder text-color0"></span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-slate-500">Lieu</p>
-                                        <p class="text-sm font-medium text-slate-900">{{ elem.localisation }}</p>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            {% if elem.story %}
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <span class="icon-book-1 text-blue-600"></span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-slate-500">Histoire</p>
-                                        <div class="text-sm font-medium">
-                                            <a href="{{ path('user_homepage') ~ "blog/" ~ elem.story }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien vers l'histoire</a>
+                        {% if elem.distance or elem.devPlus or elem.altitude %}
+                            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 sm:grid-cols-3">
+                                {% if elem.distance %}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                            <span class="icon-map text-emerald-600"></span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500">Distance</p>
+                                            <p class="text-sm font-medium text-slate-900">{{ elem.distance }} km</p>
                                         </div>
                                     </div>
-                                </div>
-                            {% endif %}
+                                {% endif %}
 
-                            {% if adventure.url and adventure.url != "https://" %}
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <span class="icon-book-1 text-gray-600"></span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-slate-500">Topo</p>
-                                        <div class="text-sm font-medium">
-                                            <a href="{{ adventure.url }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien du topo</a>
+                                {% if elem.devPlus %}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                            <span class="icon-placeholder text-red-600"></span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500">D+</p>
+                                            <p class="text-sm font-medium text-slate-900">{{ elem.devPlus }} m</p>
                                         </div>
                                     </div>
-                                </div>
-                            {% endif %}
-                        </div>
+                                {% endif %}
+
+                                {% if elem.altitude %}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                            <span class="icon-placeholder text-amber-600"></span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500">Altitude</p>
+                                            <p class="text-sm font-medium text-slate-900">{{ elem.altitude }} m</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        {% if elem.localisation or elem.story or (adventure and adventure.url and adventure.url != "https://") %}
+                            <div class="grid grid-cols-2 gap-4 pt-4 md:grid-cols-3">
+                                {% if elem.localisation %}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-color0/10 rounded-lg flex items-center justify-center">
+                                            <span class="icon-placeholder text-color0"></span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500">Lieu</p>
+                                            <p class="text-sm font-medium text-slate-900">{{ elem.localisation }}</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if elem.story %}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <span class="icon-book-1 text-blue-600"></span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500">Histoire</p>
+                                            <div class="text-sm font-medium">
+                                                <a href="{{ path('user_homepage') ~ "blog/" ~ elem.story }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien vers l'histoire</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if adventure and adventure.url and adventure.url != "https://" %}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                            <span class="icon-book-1 text-gray-600"></span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500">Topo</p>
+                                            <div class="text-sm font-medium">
+                                                <a href="{{ adventure.url }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien du topo</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
 
                         {% if app.user.id == elem.author.id or app.user.isAdmin %}
                             <a class="group pt-4 border-t border-slate-100 flex items-center gap-2 cursor-pointer" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
