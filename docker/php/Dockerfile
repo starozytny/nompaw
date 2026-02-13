@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
+    libmagickwand-dev \
     zip \
     curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -22,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     gd \
     exif \
     opcache \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Installation de Composer

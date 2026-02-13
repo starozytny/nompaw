@@ -92,10 +92,8 @@ export class RandoImages extends Component {
 			}
 		})
 
-		// Charger la première page
 		this.fetchImages();
 
-		// Setup Intersection Observer pour le scroll infini
 		this.observer = new IntersectionObserver(
 			(entries) => {
 				if (entries[0].isIntersecting && this.state.hasMore && !this.state.loading) {
@@ -153,7 +151,6 @@ export class RandoImages extends Component {
 				}));
 			})
 			.catch((error) => {
-				console.log(error);
 				Formulaire.displayErrors(null, error);
 				this.setState({ loading: false });
 			});
@@ -211,6 +208,8 @@ export class RandoImages extends Component {
 	async handleParallelUpload(files, randoId, batchSize) {
 		const total = files.length;
 		let completed = 0;
+
+		this.setState({ nbTotal: total });
 
 		for (let i = 0; i < total; i += batchSize) {
 			const batch = files.slice(i, i + batchSize);
@@ -440,6 +439,9 @@ export class RandoImages extends Component {
 					<div>
 						<h3 className="text-2xl font-bold text-slate-900">Photos</h3>
 						<p className="text-sm text-slate-600 mt-1">
+							Les photos sont redimensionnées automatiquement, pour une utilisation avec les réseaux sociaux.
+							Pour avoir les originaux, adressez vous au propriétaire.
+							<br/>
 							<span className="font-medium">{allImages.length}</span> photo{allImages.length > 1 ? 's' : ''}
 							{selected.size > 0 && (
 								<>
