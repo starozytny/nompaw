@@ -15,6 +15,8 @@ use App\Entity\Rando\RaRando;
 use App\Entity\Main\Mail;
 use App\Repository\Main\ImageRepository;
 use Exception;
+use Imagick;
+use ImagickException;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;
 use PHPImageWorkshop\ImageWorkshop;
@@ -49,7 +51,7 @@ class FileUploader
 
             if($directory){
                 if(!is_dir($directory)){
-                    mkdir($directory, 0777, true);
+                    mkdir($directory, 0755, true);
                 }
             }
 
@@ -92,6 +94,57 @@ class FileUploader
         return $fileName;
     }
 
+    public function uploadDrive(UploadedFile $file, $folder=null): string
+    {
+        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $fileName = $safeFilename.'-'.uniqid().'.'.$file->getClientOriginalExtension();
+
+        try {
+            $directory = $this->getPrivateDirectory() . '/' . $folder;
+
+            if($directory){
+                if(!is_dir($directory)){
+                    mkdir($directory, 0755, true);
+                }
+            }
+
+            $file->move($directory, $fileName);
+
+            $filePath = $directory . "/" . $fileName;
+
+            // Correction de l'orientation EXIF
+            $mime = mime_content_type($filePath);
+            if(str_contains($mime, "image/") && str_contains($mime, "jpeg")) {
+                $orientation = $this->checkOrientation($filePath);
+                if($orientation > 0) {
+                    $image = imagecreatefromjpeg($filePath);
+                    $this->fixOrientation($orientation, $filePath, $image);
+                }
+            }
+
+            $fileOri = $directory . "/" . $fileName;
+
+            $mime = mime_content_type($fileOri);
+            if(str_contains($mime, "image/")){
+                $layer = ImageWorkshop::initFromPath($fileOri);
+
+                if($layer->getWidth() > 1920){
+                    $layer->resizeInPixel(1920, null, true);
+                    $layer->save($directory, $fileName);
+                }else if($layer->getHeight() > 2880){
+                    $layer->resizeInPixel(null, 2880, true);
+                    $layer->save($directory, $fileName);
+
+                }
+            }
+        } catch (FileException|ImageWorkshopException|ImageWorkshopLayerException $e) {
+            return false;
+        }
+
+        return $fileName;
+    }
+
     public function checkOrientation($filePath)
     {
         $exif = @exif_read_data($filePath);
@@ -123,16 +176,15 @@ class FileUploader
     }
 
     /**
-     * @throws ImageWorkshopLayerException
-     * @throws ImageWorkshopException
+     * @throws ImagickException
      */
-    public function thumbs($fileName, $folderImages, $folderThumbs, $isPublic = false): void
+    public function thumbs($fileName, $folderImages, $folderThumbs, $isPublic = false)
     {
         $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
 
         if($folderThumbs){
             if(!is_dir($directory . $folderThumbs)){
-                mkdir($directory . $folderThumbs, 0777, true);
+                mkdir($directory . $folderThumbs, 0755, true);
             }
         }
 
@@ -140,26 +192,37 @@ class FileUploader
         $mime = mime_content_type($fileOri);
 
         if(str_contains($mime, "image/")){
-            $layer = ImageWorkshop::initFromPath($fileOri);
-            if($layer->getHeight() > 350){
-                $layer->resizeInPixel(null, 350, true);
+            $imagick = new Imagick($fileOri);
+
+            $imagick->autoOrient();
+
+            if ($imagick->getImageHeight() > 435) {
+                $imagick->resizeImage(0, 435, Imagick::FILTER_LANCZOS, 1);
             }
 
-            $layer->save($directory . $folderThumbs, $fileName);
+            $imagick->setImageFormat('webp');
+            $imagick->setImageCompressionQuality(80);
+
+            $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
+            $imagick->writeImage($directory . $folderThumbs . '/' . $newFileName);
+            $imagick->clear();
+
+            return $newFileName;
         }
+
+        return $fileName;
     }
 
     /**
-     * @throws ImageWorkshopLayerException
-     * @throws ImageWorkshopException
+     * @throws ImagickException
      */
-    public function lightbox($fileName, $folderImages, $folderLightbox, $isPublic = false): void
+    public function lightbox($fileName, $folderImages, $folderLightbox, $isPublic = false)
     {
         $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
 
         if($folderLightbox){
             if(!is_dir($directory . $folderLightbox)){
-                mkdir($directory . $folderLightbox, 0777, true);
+                mkdir($directory . $folderLightbox, 0755, true);
             }
         }
 
@@ -167,18 +230,29 @@ class FileUploader
         $mime = mime_content_type($fileOri);
 
         if(str_contains($mime, "image/")){
-            $layer = ImageWorkshop::initFromPath($fileOri);
-            if($layer->getWidth() > 1440){
-                $layer->resizeInPixel(1440, null, true);
+            $imagick = new Imagick($fileOri);
+
+            $imagick->autoOrient();
+
+            if ($imagick->getImageWidth() > 1440) {
+                $imagick->resizeImage(1440, 0, Imagick::FILTER_LANCZOS, 1);
             }
 
-            $layer->save($directory . $folderLightbox, $fileName);
+            $imagick->setImageFormat('webp');
+            $imagick->setImageCompressionQuality(80);
+
+            $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
+            $imagick->writeImage($directory . $folderLightbox . '/' . $newFileName);
+            $imagick->clear();
+
+            return $newFileName;
         }
+
+        return $fileName;
     }
 
     /**
-     * @throws ImageWorkshopLayerException
-     * @throws ImageWorkshopException
+     * @throws ImagickException
      */
     public function cover($fileName, $folderImages, $folderThumbs, $isPublic = false): string
     {
@@ -186,7 +260,7 @@ class FileUploader
 
         if($folderThumbs){
             if(!is_dir($directory . $folderThumbs)){
-                mkdir($directory . $folderThumbs, 0777, true);
+                mkdir($directory . $folderThumbs, 0755, true);
             }
         }
 
@@ -194,14 +268,22 @@ class FileUploader
         $mime = mime_content_type($fileOri);
 
         if(str_contains($mime, "image/")){
-            $layer = ImageWorkshop::initFromPath($fileOri);
-            if($layer->getWidth() > 320){
-                $layer->resizeInPixel(320, null, true);
+            $imagick = new Imagick($fileOri);
+
+            $imagick->autoOrient();
+
+            if ($imagick->getImageWidth() > 340) {
+                $imagick->resizeImage(340, 0, Imagick::FILTER_LANCZOS, 1);
             }
 
-            $fileName = "cover-" . $fileName;
+            $imagick->setImageFormat('webp');
+            $imagick->setImageCompressionQuality(80);
 
-            $layer->save($directory . $folderThumbs, $fileName);
+            $newFileName = "cover-" . pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
+            $imagick->writeImage($directory . $folderThumbs . '/' . $newFileName);
+            $imagick->clear();
+
+            return $newFileName;
         }
 
         return $fileName;
@@ -260,8 +342,8 @@ class FileUploader
         $file = $request->files->get('file');
         if($file){
             $folder = match ($type){
-                ImageType::Changelog => Changelog::FOLDER,
-                ImageType::AgEvent => AgEvent::FOLDER,
+                ImageType::Changelog => Changelog::FOLDER_EDITOR,
+                ImageType::AgEvent => AgEvent::FOLDER_EDITOR,
                 ImageType::Groupe => RaGroupe::FOLDER,
                 ImageType::Rando => RaRando::FOLDER,
                 ImageType::Route => RaImage::FOLDER,

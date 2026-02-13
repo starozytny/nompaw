@@ -75,25 +75,20 @@ class ImageController extends AbstractController
     }
 
     /**
-     * @throws ImageWorkshopException
-     * @throws ImageWorkshopLayerException
+     * @throws \ImagickException
      */
     #[Route('/upload/photos/{id}', name: 'upload_images', options: ['expose' => true], methods: 'POST')]
     public function upload(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository,
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
     {
         if($request->files){
-            $images = [];
-
             $randoFile = '/' . $obj->getId();
-            foreach($request->files as $key => $file){
-                $filenameImage = $fileUploader->upload($file, RaRando::FOLDER_IMAGES.$randoFile, false, false, true);
+            foreach($request->files as $file){
+                $filenameImage = $fileUploader->uploadDrive($file, RaRando::FOLDER_IMAGES.$randoFile);
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)
                     ->setMTime($request->get('mtime'))
-                    ->setThumbs($filenameImage)
-                    ->setLightbox($filenameImage)
                     ->setAuthor($this->getUser())
                     ->setRando($obj)
                 ;
@@ -131,16 +126,18 @@ class ImageController extends AbstractController
                     $image->setType(99);
                 }
 
+                $filenameThumbs = $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
+                $filenameLightbox = $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
+
+                $image
+                    ->setThumbs($filenameThumbs)
+                    ->setLightbox($filenameLightbox)
+                ;
+
                 $imageRepository->save($image);
-                $images[] = $image;
             }
 
             $repository->save($obj, true);
-
-            foreach($images as $image){
-                $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
-                $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
-            }
         }
 
         return $apiResponse->apiJsonResponseSuccessful('ok');
