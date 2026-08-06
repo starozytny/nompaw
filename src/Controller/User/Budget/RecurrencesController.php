@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/espace-membre/planificateur/recurrences', name: 'user_budget_recurrences_')]
@@ -34,6 +35,10 @@ class RecurrencesController extends AbstractController
     #[Route('/{id}', name: 'update', options: ['expose' => true])]
     public function update(BuRecurrent $elem, BuCategoryRepository $categoryRepository, SerializerInterface $serializer): Response
     {
+        if($elem->getUser()->getId() != $this->getUser()->getId()){
+            throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
+        }
+
         $categories  = $categoryRepository->findBy(['user' => $this->getUser()]);
 
         $obj        = $serializer->serialize($elem,       'json', ['groups' => BuRecurrent::FORM]);

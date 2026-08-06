@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/espace-membre/planificateur/categories', name: 'user_budget_categories_')]
@@ -27,6 +28,10 @@ class CategoriesController extends AbstractController
     #[Route('/{id}', name: 'update', options: ['expose' => true])]
     public function update(BuCategory $elem, SerializerInterface $serializer): Response
     {
+        if($elem->getUser()->getId() != $this->getUser()->getId()){
+            throw new AccessDeniedException("Vous n'avez pas l'autorisation d'accéder à cette page.");
+        }
+
         $obj = $serializer->serialize($elem, 'json', ['groups' => BuCategory::FORM]);
         return $this->render('user/pages/budget/categories/update.html.twig', ['elem' => $elem, 'obj' => $obj,]);
     }

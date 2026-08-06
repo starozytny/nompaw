@@ -3,12 +3,14 @@
 namespace App\Entity\Budget;
 
 use App\Entity\DataEntity;
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuItemRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BuItemRepository::class)]
 class BuItem extends DataEntity
@@ -23,22 +25,29 @@ class BuItem extends DataEntity
 
     #[ORM\Column]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
     private ?int $year = null;
 
     #[ORM\Column]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
+    #[Assert\Range(min: 1, max: 12)]
     private ?int $month = null;
 
     #[ORM\Column]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
+    #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving, TypeType::Deleted, TypeType::Used])]
     private ?int $type = null;
 
     #[ORM\Column]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
     private ?float $price = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['buitem_list'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -47,6 +56,7 @@ class BuItem extends DataEntity
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
     private ?\DateTimeInterface $dateAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'buItems')]

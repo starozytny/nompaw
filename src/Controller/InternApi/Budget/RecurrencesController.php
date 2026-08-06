@@ -30,6 +30,10 @@ class RecurrencesController extends AbstractController
                                ValidatorService $validator, DataBudget $dataEntity, BuItemRepository $itemRepository,
                                BuCategoryRepository $categoryRepository): JsonResponse
     {
+        if ($type == "update" && $obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
@@ -38,7 +42,7 @@ class RecurrencesController extends AbstractController
         $obj = $dataEntity->setDataRecurrent($obj, $data);
         $obj->setUser($this->getUser());
 
-        $category = $categoryRepository->findOneBy(['id' => $data->category]);
+        $category = $categoryRepository->findOneBy(['id' => $data->category, 'user' => $this->getUser()]);
         $obj->setCategory($category);
 
         if($type == "update") {
@@ -79,6 +83,10 @@ class RecurrencesController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(BuRecurrent $obj, BuRecurrentRepository $repository, ApiResponse $apiResponse, BuItemRepository $itemRepository): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $items = $itemRepository->findBy(['user' => $this->getUser(), 'recurrenceId' => $obj->getId()]);
         foreach($items as $item){
             $item->setRecurrenceId(null);
@@ -93,6 +101,10 @@ class RecurrencesController extends AbstractController
     public function active(Request $request, BuRecurrent $obj, BuItemRepository $repository, ApiResponse $apiResponse,
                            DataBudget $dataEntity, ValidatorService $validator): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
@@ -114,6 +126,10 @@ class RecurrencesController extends AbstractController
     public function trash(Request $request, BuRecurrent $obj, BuItemRepository $repository, ApiResponse $apiResponse,
                           DataBudget $dataEntity, ValidatorService $validator): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');

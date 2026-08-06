@@ -2,12 +2,14 @@
 
 namespace App\Entity\Budget;
 
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuCategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BuCategoryRepository::class)]
 class BuCategory
@@ -24,10 +26,13 @@ class BuCategory
 
     #[ORM\Column]
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
+    #[Assert\NotNull]
+    #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving])]
     private ?int $type = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]

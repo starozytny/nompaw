@@ -3,12 +3,14 @@
 namespace App\Entity\Budget;
 
 use App\Entity\DataEntity;
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuRecurrentRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BuRecurrentRepository::class)]
 class BuRecurrent extends DataEntity
@@ -24,26 +26,35 @@ class BuRecurrent extends DataEntity
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotNull]
+    #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving])]
     private ?int $type = null;
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotNull]
     private ?float $price = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\Count(min: 1, minMessage: 'Sélectionnez au moins un mois.')]
+    #[Assert\All([new Assert\Range(min: 1, max: 12)])]
     private array $months = [];
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotNull]
     private ?int $initYear = null;
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotNull]
+    #[Assert\Range(min: 1, max: 12)]
     private ?int $initMonth = null;
 
     #[ORM\ManyToOne(inversedBy: 'recurrents')]
