@@ -13,6 +13,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BuItemRepository::class)]
+#[ORM\Index(columns: ['user_id', 'year'], name: 'idx_bu_item_user_year')]
+#[ORM\Index(columns: ['user_id', 'type'], name: 'idx_bu_item_user_type')]
 class BuItem extends DataEntity
 {
     const LIST = ['buitem_list'];

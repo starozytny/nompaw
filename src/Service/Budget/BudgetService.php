@@ -21,8 +21,8 @@ class BudgetService
         $data = $repository->findBy(['user' => $user, 'year' => $year], ['dateAt' => 'DESC']);
         $categories = $categoryRepository->findBy(['user' => $user]);
         $savings = $categoryRepository->findBy(['user' => $user, 'type' => TypeType::Saving]);
-        $savingsItems = $repository->findBy(['user' => $user, 'type' => TypeType::Saving]);
-        $savingsUsed = $repository->findBy(['user' => $user, 'type' => TypeType::Used]);
+        $savingsItems = $repository->findByUserAndTypeUpToYear($user, TypeType::Saving, $year);
+        $savingsUsed = $repository->findByUserAndTypeUpToYear($user, TypeType::Used, $year);
         $recurrences = $recurrentRepository->findBy(['user' => $user]);
 
         $totalInit = $user->getBudgetInit();
