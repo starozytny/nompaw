@@ -34,11 +34,10 @@ class BuItem extends DataEntity
     #[Assert\Range(min: 1, max: 12)]
     private ?int $month = null;
 
-    #[ORM\Column]
+    #[ORM\Column(enumType: TypeType::class)]
     #[Groups(['buitem_list'])]
     #[Assert\NotNull]
-    #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving, TypeType::Deleted, TypeType::Used])]
-    private ?int $type = null;
+    private ?TypeType $type = null;
 
     #[ORM\Column]
     #[Groups(['buitem_list'])]
@@ -81,8 +80,8 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     private ?float $recurrencePrice = null;
 
-    #[ORM\Column]
-    private ?int $lastType = null;
+    #[ORM\Column(enumType: TypeType::class)]
+    private ?TypeType $lastType = null;
 
     public function __construct()
     {
@@ -118,12 +117,12 @@ class BuItem extends DataEntity
         return $this;
     }
 
-    public function getType(): ?int
+    public function getType(): ?TypeType
     {
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(?TypeType $type): static
     {
         $this->type = $type;
 
@@ -133,9 +132,14 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     public function getTypeIcon(): ?string
     {
-        $values = ['minus', 'add', 'time', 'close', 'arrow-swap-horizontal'];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'minus',
+            TypeType::Income => 'add',
+            TypeType::Saving => 'time',
+            TypeType::Deleted => 'close',
+            TypeType::Used => 'arrow-swap-horizontal',
+            default => null,
+        };
     }
 
     public function getPrice(): ?float
@@ -258,12 +262,12 @@ class BuItem extends DataEntity
         return $this;
     }
 
-    public function getLastType(): ?int
+    public function getLastType(): ?TypeType
     {
         return $this->lastType;
     }
 
-    public function setLastType(int $lastType): static
+    public function setLastType(?TypeType $lastType): static
     {
         $this->lastType = $lastType;
 

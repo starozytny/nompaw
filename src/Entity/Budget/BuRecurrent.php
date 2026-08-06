@@ -24,11 +24,11 @@ class BuRecurrent extends DataEntity
     #[Groups(['burecu_list', 'burecu_form'])]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(enumType: TypeType::class)]
     #[Groups(['burecu_list', 'burecu_form'])]
     #[Assert\NotNull]
     #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving])]
-    private ?int $type = null;
+    private ?TypeType $type = null;
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
@@ -81,12 +81,12 @@ class BuRecurrent extends DataEntity
         return $this->id;
     }
 
-    public function getType(): ?int
+    public function getType(): ?TypeType
     {
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(?TypeType $type): static
     {
         $this->type = $type;
 
@@ -96,17 +96,23 @@ class BuRecurrent extends DataEntity
     #[Groups(['burecu_list'])]
     public function getTypeIcon(): ?string
     {
-        $values = ['minus', 'add', 'time'];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'minus',
+            TypeType::Income => 'add',
+            TypeType::Saving => 'time',
+            default => null,
+        };
     }
 
     #[Groups(['burecu_list'])]
     public function getTypeString(): ?string
     {
-        $values = ['Dépense', 'Revenu', 'Economie'];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'Dépense',
+            TypeType::Income => 'Revenu',
+            TypeType::Saving => 'Economie',
+            default => null,
+        };
     }
 
     public function getPrice(): ?float

@@ -24,11 +24,11 @@ class BuCategory
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(enumType: TypeType::class)]
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
     #[Assert\NotNull]
     #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving])]
-    private ?int $type = null;
+    private ?TypeType $type = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
@@ -72,12 +72,12 @@ class BuCategory
         return $this;
     }
 
-    public function getType(): ?int
+    public function getType(): ?TypeType
     {
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(?TypeType $type): static
     {
         $this->type = $type;
 
@@ -87,9 +87,12 @@ class BuCategory
     #[Groups(['bucat_list'])]
     public function getTypeString(): ?string
     {
-        $values = ['Dépense', 'Revenu', 'Economie'];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'Dépense',
+            TypeType::Income => 'Revenu',
+            TypeType::Saving => 'Economie',
+            default => null,
+        };
     }
 
     public function getGoal(): ?float
