@@ -30,10 +30,13 @@ class BuRecurrent extends DataEntity
     #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving])]
     private ?TypeType $type = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getPrice()/setPrice().
+     */
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
     #[Assert\NotNull]
-    private ?float $price = null;
+    private ?int $price = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['burecu_list', 'burecu_form'])]
@@ -117,12 +120,12 @@ class BuRecurrent extends DataEntity
 
     public function getPrice(): ?float
     {
-        return $this->price;
+        return $this->price !== null ? $this->price / 100 : null;
     }
 
     public function setPrice(float $price): static
     {
-        $this->price = $price;
+        $this->price = (int) round($price * 100);
 
         return $this;
     }

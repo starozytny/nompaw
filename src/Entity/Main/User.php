@@ -179,8 +179,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Column(nullable: true)]
     private ?int $budgetYear = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getBudgetInit()/setBudgetInit().
+     */
     #[ORM\Column(nullable: true)]
-    private ?float $budgetInit = null;
+    private ?int $budgetInit = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuRecurrent::class)]
     private Collection $buRecurrents;
@@ -1037,12 +1040,12 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
     public function getBudgetInit(): ?float
     {
-        return $this->budgetInit;
+        return $this->budgetInit !== null ? $this->budgetInit / 100 : null;
     }
 
     public function setBudgetInit(?float $budgetInit): static
     {
-        $this->budgetInit = $budgetInit;
+        $this->budgetInit = $budgetInit !== null ? (int) round($budgetInit * 100) : null;
 
         return $this;
     }

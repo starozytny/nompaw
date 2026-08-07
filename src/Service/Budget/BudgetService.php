@@ -45,34 +45,50 @@ class BudgetService
     }
 
     /**
+     * All monetary accumulation below happens in integer cents rather than float euros, to avoid
+     * the rounding drift that repeatedly summing floats over many months/items can introduce.
+     * Conversion only happens at the two boundaries: reading a price out of an entity, and writing
+     * a final total into the arrays returned to callers (which stay float euros, unchanged contract).
+     */
+    private static function eurosToCents(?float $euros): int
+    {
+        return $euros !== null ? (int) round($euros * 100) : 0;
+    }
+
+    private static function centsToEuros(int $cents): float
+    {
+        return $cents / 100;
+    }
+
+    /**
      * Balance carried forward from years prior to $year, added to the user's initial budget.
      * Excludes lifecycle-only movements (cancelled recurrence instances, saving usages).
      */
     private function computeCarriedForwardBalance(User $user, int $year, BuItemRepository $repository): float
     {
-        $totalInit = $user->getBudgetInit();
+        $totalInitCents = self::eurosToCents($user->getBudgetInit());
 
         if ($year > $user->getBudgetYear()) {
             $items = $repository->findBy(['user' => $user]);
 
-            $totalExpense = 0;
-            $totalIncome = 0;
+            $totalExpenseCents = 0;
+            $totalIncomeCents = 0;
             foreach ($items as $item) {
                 if ($item->getType() !== TypeType::Used && $item->getType() !== TypeType::Deleted) {
                     if ($item->getYear() < $year) {
                         if ($item->getType() != TypeType::Income) {
-                            $totalExpense += $item->getPrice();
+                            $totalExpenseCents += self::eurosToCents($item->getPrice());
                         } else {
-                            $totalIncome += $item->getPrice();
+                            $totalIncomeCents += self::eurosToCents($item->getPrice());
                         }
                     }
                 }
             }
 
-            $totalInit = $totalInit + $totalIncome - $totalExpense;
+            $totalInitCents = $totalInitCents + $totalIncomeCents - $totalExpenseCents;
         }
 
-        return $totalInit;
+        return self::centsToEuros($totalInitCents);
     }
 
     /**
@@ -91,15 +107,17 @@ class BudgetService
      */
     private function computeMonthlySummaries(array $items, array $recurrences, int $year, float $totalInit): array
     {
-        $monthlyExpense = array_fill(0, 12, 0.0); // balance purposes: Expense + Saving lumped together
-        $monthlyIncome = array_fill(0, 12, 0.0);
+        $totalInitCents = self::eurosToCents($totalInit);
 
-        $totalExpense = array_fill(0, 12, 0.0); // card purposes: Expense/Income/Saving kept separate
-        $totalIncome = array_fill(0, 12, 0.0);
-        $totalSaving = array_fill(0, 12, 0.0);
-        $totalExpenseReal = array_fill(0, 12, 0.0);
-        $totalIncomeReal = array_fill(0, 12, 0.0);
-        $totalSavingReal = array_fill(0, 12, 0.0);
+        $monthlyExpense = array_fill(0, 12, 0); // balance purposes: Expense + Saving lumped together
+        $monthlyIncome = array_fill(0, 12, 0);
+
+        $totalExpense = array_fill(0, 12, 0); // card purposes: Expense/Income/Saving kept separate
+        $totalIncome = array_fill(0, 12, 0);
+        $totalSaving = array_fill(0, 12, 0);
+        $totalExpenseReal = array_fill(0, 12, 0);
+        $totalIncomeReal = array_fill(0, 12, 0);
+        $totalSavingReal = array_fill(0, 12, 0);
 
         foreach ($recurrences as $recurrent) {
             $months = $recurrent->getMonths();
@@ -126,7 +144,7 @@ class BudgetService
                     continue;
                 }
 
-                $price = $recurrent->getPrice();
+                $price = self::eurosToCents($recurrent->getPrice());
                 switch ($recurrent->getType()) {
                     case TypeType::Expense:
                         $monthlyExpense[$i] += $price;
@@ -146,7 +164,7 @@ class BudgetService
 
         foreach ($items as $item) {
             $i = $item->getMonth() - 1;
-            $price = $item->getPrice();
+            $price = self::eurosToCents($item->getPrice());
             $isActive = $item->isIsActive();
 
             switch ($item->getType()) {
@@ -178,7 +196,7 @@ class BudgetService
             }
 
             if ($item->getRecurrenceId() !== null) {
-                $recurrencePrice = $item->getRecurrencePrice() ?? 0.0;
+                $recurrencePrice = self::eurosToCents($item->getRecurrencePrice());
                 switch ($item->getType()) {
                     case TypeType::Expense:
                         $monthlyExpense[$i] -= $recurrencePrice;
@@ -198,13 +216,13 @@ class BudgetService
 
         $monthlyBalances = [];
         for ($i = 0; $i < 12; $i++) {
-            $tmpDispo = ($i === 0 ? $totalInit : 0.0) + $monthlyIncome[$i] - $monthlyExpense[$i];
+            $tmpDispo = ($i === 0 ? $totalInitCents : 0) + $monthlyIncome[$i] - $monthlyExpense[$i];
             $monthlyBalances[$i] = $i === 0 ? $tmpDispo : $monthlyBalances[$i - 1] + $tmpDispo;
         }
 
         $monthlySummaries = [];
         for ($i = 0; $i < 12; $i++) {
-            $initial = $i !== 0 ? $monthlyBalances[$i - 1] : $totalInit;
+            $initial = $i !== 0 ? $monthlyBalances[$i - 1] : $totalInitCents;
             $totalDispo = $initial + $totalIncome[$i] - ($totalExpense[$i] + $totalSaving[$i]);
 
             $tmpTotalMinus = $totalExpenseReal[$i] + $totalSavingReal[$i];
@@ -214,19 +232,19 @@ class BudgetService
 
             $monthlySummaries[] = [
                 'month' => $i + 1,
-                'totalExpense' => $totalExpense[$i],
-                'totalIncome' => $totalIncome[$i],
-                'totalSaving' => $totalSaving[$i],
-                'totalExpenseReal' => $totalExpenseReal[$i],
-                'totalIncomeReal' => $totalIncomeReal[$i],
-                'totalSavingReal' => $totalSavingReal[$i],
-                'initial' => $initial,
-                'totalDispo' => $totalDispo,
-                'totalDispoNow' => $totalDispoNow,
+                'totalExpense' => self::centsToEuros($totalExpense[$i]),
+                'totalIncome' => self::centsToEuros($totalIncome[$i]),
+                'totalSaving' => self::centsToEuros($totalSaving[$i]),
+                'totalExpenseReal' => self::centsToEuros($totalExpenseReal[$i]),
+                'totalIncomeReal' => self::centsToEuros($totalIncomeReal[$i]),
+                'totalSavingReal' => self::centsToEuros($totalSavingReal[$i]),
+                'initial' => self::centsToEuros($initial),
+                'totalDispo' => self::centsToEuros($totalDispo),
+                'totalDispoNow' => self::centsToEuros($totalDispoNow),
             ];
         }
 
-        return [$monthlyBalances, $monthlySummaries];
+        return [array_map([self::class, 'centsToEuros'], $monthlyBalances), $monthlySummaries];
     }
 
     /**
@@ -245,8 +263,8 @@ class BudgetService
                 'id' => $category->getId(),
                 'name' => $category->getName(),
                 'goal' => $category->getGoal(),
-                'totalByMonth' => $this->cumulativeByMonth($savingsItems, $category, $year),
-                'usedByMonth' => $this->cumulativeByMonth($savingsUsed, $category, $year),
+                'totalByMonth' => array_map([self::class, 'centsToEuros'], $this->cumulativeByMonth($savingsItems, $category, $year)),
+                'usedByMonth' => array_map([self::class, 'centsToEuros'], $this->cumulativeByMonth($savingsUsed, $category, $year)),
             ];
         }
 
@@ -255,21 +273,22 @@ class BudgetService
 
     /**
      * @param BuItem[] $items
-     * @return float[] 12 cumulative totals, one per month of $year
+     * @return int[] 12 cumulative totals in cents, one per month of $year
      */
     private function cumulativeByMonth(array $items, BuCategory $category, int $year): array
     {
-        $byMonth = array_fill(0, 12, 0.0);
+        $byMonth = array_fill(0, 12, 0);
 
         foreach ($items as $item) {
             if ($item->getCategory() === null || $item->getCategory()->getId() !== $category->getId()) {
                 continue;
             }
 
+            $price = self::eurosToCents($item->getPrice());
             for ($i = 0; $i < 12; $i++) {
                 $monthNumber = $i + 1;
                 if ($item->getYear() < $year || ($item->getYear() === $year && $item->getMonth() <= $monthNumber)) {
-                    $byMonth[$i] += $item->getPrice();
+                    $byMonth[$i] += $price;
                 }
             }
         }

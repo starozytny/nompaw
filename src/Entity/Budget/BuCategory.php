@@ -35,9 +35,12 @@ class BuCategory
     #[Assert\NotBlank]
     private ?string $name = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getGoal()/setGoal().
+     */
     #[ORM\Column(nullable: true)]
     #[Groups(['bucat_list', 'bucat_form'])]
-    private ?float $goal = null;
+    private ?int $goal = null;
 
     #[ORM\ManyToOne(inversedBy: 'buCategories')]
     #[ORM\JoinColumn(nullable: false)]
@@ -97,12 +100,12 @@ class BuCategory
 
     public function getGoal(): ?float
     {
-        return $this->goal;
+        return $this->goal !== null ? $this->goal / 100 : null;
     }
 
     public function setGoal(?float $goal): static
     {
-        $this->goal = $goal;
+        $this->goal = $goal !== null ? (int) round($goal * 100) : null;
 
         return $this;
     }

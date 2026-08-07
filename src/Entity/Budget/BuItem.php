@@ -41,10 +41,13 @@ class BuItem extends DataEntity
     #[Assert\NotNull]
     private ?TypeType $type = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getPrice()/setPrice().
+     */
     #[ORM\Column]
     #[Groups(['buitem_list'])]
     #[Assert\NotNull]
-    private ?float $price = null;
+    private ?int $price = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['buitem_list'])]
@@ -78,9 +81,12 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     private ?int $recurrenceId = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getRecurrencePrice()/setRecurrencePrice().
+     */
     #[ORM\Column(nullable: true)]
     #[Groups(['buitem_list'])]
-    private ?float $recurrencePrice = null;
+    private ?int $recurrencePrice = null;
 
     #[ORM\Column(enumType: TypeType::class)]
     private ?TypeType $lastType = null;
@@ -146,12 +152,12 @@ class BuItem extends DataEntity
 
     public function getPrice(): ?float
     {
-        return $this->price;
+        return $this->price !== null ? $this->price / 100 : null;
     }
 
     public function setPrice(float $price): static
     {
-        $this->price = $price;
+        $this->price = (int) round($price * 100);
 
         return $this;
     }
@@ -254,12 +260,12 @@ class BuItem extends DataEntity
 
     public function getRecurrencePrice(): ?float
     {
-        return $this->recurrencePrice;
+        return $this->recurrencePrice !== null ? $this->recurrencePrice / 100 : null;
     }
 
     public function setRecurrencePrice(?float $recurrencePrice): static
     {
-        $this->recurrencePrice = $recurrencePrice;
+        $this->recurrencePrice = $recurrencePrice !== null ? (int) round($recurrencePrice * 100) : null;
 
         return $this;
     }
