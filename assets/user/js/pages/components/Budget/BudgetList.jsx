@@ -2,9 +2,9 @@ import React from 'react';
 
 import { BudgetItem, BudgetItemRecurrent } from "@userPages/Budget/BudgetItem";
 
-export function BudgetList ({ data, recurrencesData, onEdit, onModal, onActive, onCancel, onActiveRecurrence }) {
+export function BudgetList ({ data, recurrencesData, onEdit, onModal, onActive, onCancel, onActiveRecurrence, emptyMessage = "Aucune opération pour ce mois." }) {
 	if (data.length === 0 && recurrencesData.length === 0) {
-		return <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune opération pour ce mois.</div>;
+		return <div className="px-4 py-8 text-center text-sm text-muted-foreground">{emptyMessage}</div>;
 	}
 
 	return <div className="flex flex-col">

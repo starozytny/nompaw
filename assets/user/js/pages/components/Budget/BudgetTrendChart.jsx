@@ -12,7 +12,7 @@ const W = 640;
 const H = 128;
 const PAD = 6;
 
-export function BudgetTrendChart ({ balances, activeMonth, onSelectMonth }) {
+export function BudgetTrendChart ({ balances, activeMonth, onSelectMonth, todayValue }) {
 	const wrapRef = useRef(null);
 	const [hover, setHover] = useState(null);
 
@@ -32,7 +32,8 @@ export function BudgetTrendChart ({ balances, activeMonth, onSelectMonth }) {
 		return { min, max, points, linePath, areaPath, zeroY: y(0) };
 	}, [balances]);
 
-	const shown = hover !== null ? hover : activeMonth - 1;
+	const isHovering = hover !== null;
+	const shown = isHovering ? hover : activeMonth - 1;
 	const shownValue = balances[shown];
 
 	const showTooltip = (i, evt) => {
@@ -50,7 +51,12 @@ export function BudgetTrendChart ({ balances, activeMonth, onSelectMonth }) {
 			<div className={cn('text-2xl font-bold tabular-nums', shownValue < 0 ? 'text-[var(--status-critical)]' : 'text-[var(--status-good)]')}>
 				{Sanitaze.toFormatCurrency(shownValue)}
 			</div>
-			<div className="text-xs text-muted-foreground">{MONTH_NAMES[shown]}</div>
+			<div className="text-xs text-muted-foreground">
+				{MONTH_NAMES[shown]}
+				{!isHovering && todayValue !== undefined && (
+					<> · Aujourd'hui <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(todayValue)}</b></>
+				)}
+			</div>
 		</div>
 
 		<div ref={wrapRef} className="relative mt-1">

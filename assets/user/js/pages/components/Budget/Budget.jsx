@@ -8,6 +8,7 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 
 import { Button } from "@tailwindComponents/Elements/Button";
+import { Search } from "@tailwindComponents/Elements/Search";
 import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/card";
 import { Progress } from "@shadcnComponents/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shadcnComponents/ui/tabs";
@@ -74,6 +75,8 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 	const [saving, setSaving] = useState(null)
 	const [savingOpen, setSavingOpen] = useState(false)
 	const [load, setLoad] = useState(false)
+	const [search, setSearch] = useState("")
+	const [detailOpen, setDetailOpen] = useState(false)
 
 	let refetchPlanning = (targetYear) => {
 		return axios({ method: "GET", url: Routing.generate(URL_PLANNING, { year: targetYear }) })
@@ -259,7 +262,6 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 	let totSavingAllUsed = itemsSavings.reduce((acc, sa) => acc + sa.used, 0);
 
 	let cards = [
-		{ value: 0, name: "Budget disponible", total: currentSummary.totalDispo, total2: currentSummary.totalDispoNow, initial: currentSummary.initial, icon: "cart", status: true },
 		{ value: 1, name: "Dépenses", total: currentSummary.totalExpense, total2: currentSummary.totalExpenseReal, icon: "minus", cat: "expense" },
 		{ value: 2, name: "Revenus", total: currentSummary.totalIncome, total2: currentSummary.totalIncomeReal, icon: "add", cat: "income" },
 		{ value: 3, name: "Économies", total: currentSummary.totalSaving, total2: currentSummary.totalSavingReal, icon: "time", cat: "saving" },
@@ -269,7 +271,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 	let categoryBreakdown = (() => {
 		let byCategory = new Map();
 		nData.forEach(elem => {
-			if (elem.type === 3 || elem.type === 4) return;
+			if (elem.type === 1 || elem.type === 3 || elem.type === 4) return;
 			let key = elem.category ? elem.category.id : 'none';
 			let row = byCategory.get(key);
 			if (!row) {
@@ -284,14 +286,32 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 			row.total += elem.price;
 		});
 
-		let rows = Array.from(byCategory.values()).sort((a, b) => b.total - a.total).slice(0, 6);
-		let max = rows.length ? rows[0].total : 1;
-		return rows.map(r => ({ ...r, pct: max ? Math.max((r.total / max) * 100, 3) : 0 }));
+		return Array.from(byCategory.values()).sort((a, b) => b.total - a.total).slice(0, 6);
 	})();
+
+	const DONUT_R = 15.5;
+	const DONUT_C = 2 * Math.PI * DONUT_R;
+	let donutTotal = categoryBreakdown.reduce((acc, r) => acc + r.total, 0) || 1;
+	let donutAcc = 0;
+	let donutSegments = categoryBreakdown.map(r => {
+		let frac = r.total / donutTotal;
+		let seg = { key: r.key, color: r.color, frac, offset: donutAcc };
+		donutAcc += frac;
+		return seg;
+	});
+
+	let searchLower = search.trim().toLowerCase();
+	let filteredData = searchLower ? nData.filter(d => d.name.toLowerCase().includes(searchLower)) : nData;
+	let filteredRecurrences = searchLower ? visibleRecurrences.filter(r => r.name.toLowerCase().includes(searchLower)) : visibleRecurrences;
 
 	return <div className="flex flex-col gap-5">
 		<div className="flex flex-wrap items-end justify-between gap-3">
-			<div className="text-sm text-muted-foreground">Année {year}</div>
+			<div>
+				<div className="text-sm text-muted-foreground">Année {year}</div>
+				<div className="text-xs text-muted-foreground">
+					Solde initial <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(currentSummary.initial)}</b>
+				</div>
+			</div>
 			<div className="flex items-center gap-1 rounded-lg bg-muted p-1">
 				{year - 1 >= yearMin
 					? <a className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-card" href={Routing.generate(URL_INDEX_PAGE, { year: year - 1 })}>
@@ -334,37 +354,32 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 
 		<div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
 			<div className="xl:col-span-5 flex flex-col gap-5">
-				<Card>
+				<Card
+					className={cn(currentSummary.totalDispo < 0 && "border-[var(--status-critical)]")}
+					style={currentSummary.totalDispo < 0 ? { background: 'var(--status-critical-soft)' } : undefined}
+				>
 					<CardContent className="p-4">
 						<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Solde disponible · tendance sur l'année</div>
-						<BudgetTrendChart balances={balances} activeMonth={month} onSelectMonth={setMonth} />
+						<BudgetTrendChart balances={balances} activeMonth={month} onSelectMonth={setMonth} todayValue={currentSummary.totalDispoNow} />
 					</CardContent>
 				</Card>
 
 				<div className="grid grid-cols-2 gap-3">
 					{cards.map(card => {
-						const isNeg = card.total < 0;
-						const catColor = card.cat ? `var(--cat-${card.cat})` : null;
-						const catSoft = card.cat ? `var(--cat-${card.cat}-soft)` : null;
-						return <Card
-							key={card.value}
-							className={cn(card.value === 0 && "col-span-2", card.status && (isNeg ? "border-[var(--status-critical)]" : ""))}
-							style={card.status && isNeg ? { background: 'var(--status-critical-soft)' } : undefined}
-						>
+						const catColor = `var(--cat-${card.cat})`;
+						const catSoft = `var(--cat-${card.cat}-soft)`;
+						return <Card key={card.value}>
 							<CardContent className="p-4 flex flex-col gap-2">
 								<div className="flex items-start justify-between gap-2">
 									<div>
 										<div className="text-xs text-muted-foreground">{card.name}</div>
-										<div className={cn("font-bold tabular-nums", card.value === 0 ? "text-2xl" : "text-lg", card.status && isNeg && "text-[var(--status-critical)]")}>
+										<div className="text-lg font-bold tabular-nums">
 											{Sanitaze.toFormatCurrency(card.total)}
 										</div>
 									</div>
 									<div
 										className="flex h-7 w-7 flex-none items-center justify-center rounded-lg"
-										style={{
-											background: card.status ? (isNeg ? 'var(--status-critical)' : 'var(--status-good-soft)') : catSoft,
-											color: card.status ? (isNeg ? '#fff' : 'var(--status-good)') : catColor,
-										}}
+										style={{ background: catSoft, color: catColor }}
 									>
 										<span className={`icon-${card.icon} text-sm`}></span>
 									</div>
@@ -375,25 +390,61 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 										<span className="font-semibold tabular-nums">{Sanitaze.toFormatCurrency(card.total2)}</span>
 									</div>
 								)}
-								{card.initial !== undefined && (
-									<div className="flex items-center justify-between border-t pt-2 text-xs">
-										<span className="text-muted-foreground">Solde initial</span>
-										<span className="font-medium tabular-nums">{Sanitaze.toFormatCurrency(card.initial)}</span>
-									</div>
-								)}
 							</CardContent>
 						</Card>
 					})}
+
+					{categoryBreakdown.length !== 0 && <Card>
+						<CardContent className="p-4 flex flex-col gap-2">
+							<div className="flex items-start justify-between gap-2">
+								<div>
+									<div className="text-xs text-muted-foreground">Répartition</div>
+									<div className="text-lg font-bold tabular-nums">{categoryBreakdown.length} catégorie{categoryBreakdown.length > 1 ? "s" : ""}</div>
+								</div>
+								<svg viewBox="0 0 36 36" className="h-7 w-7 flex-none -rotate-90 overflow-visible">
+									<circle cx="18" cy="18" r={DONUT_R} fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
+									{donutSegments.map(seg => (
+										<circle
+											key={seg.key} cx="18" cy="18" r={DONUT_R} fill="none" stroke={seg.color} strokeWidth="5"
+											strokeDasharray={`${seg.frac * DONUT_C} ${DONUT_C - seg.frac * DONUT_C}`}
+											strokeDashoffset={-seg.offset * DONUT_C}
+										/>
+									))}
+								</svg>
+							</div>
+							<div className="flex flex-col gap-1 text-xs">
+								{categoryBreakdown.slice(0, 2).map(row => (
+									<div key={row.key} className="flex items-center justify-between gap-2">
+										<span className="flex min-w-0 items-center gap-1.5 truncate text-muted-foreground">
+											<span className="h-1.5 w-1.5 flex-none rounded-full" style={{ background: row.color }} />
+											<span className="truncate">{row.name}</span>
+										</span>
+										<span className="flex-none font-semibold tabular-nums">{Sanitaze.toFormatCurrency(row.total)}</span>
+									</div>
+								))}
+							</div>
+							<button
+								type="button"
+								onClick={() => setDetailOpen(o => !o)}
+								className="flex items-center gap-1 self-start text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+							>
+								{detailOpen ? "Réduire" : "Voir le détail"}
+								<span className={`icon-${detailOpen ? "up-chevron" : "down-chevron"} text-[9px]`}></span>
+							</button>
+						</CardContent>
+					</Card>}
 				</div>
 
-				{categoryBreakdown.length !== 0 && <Card>
+				{detailOpen && categoryBreakdown.length !== 0 && <Card>
 					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
-						<CardTitle className="text-sm">Répartition par catégorie</CardTitle>
+						<CardTitle className="text-sm">Détail par catégorie</CardTitle>
 						<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{categoryBreakdown.length} catégorie{categoryBreakdown.length > 1 ? "s" : ""}</span>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-3 p-4">
-						{categoryBreakdown.map(row => (
-							<div key={row.key} className="flex flex-col gap-1">
+						{categoryBreakdown.map(row => {
+							let maxTotal = categoryBreakdown[0].total || 1;
+							let pct = Math.max((row.total / maxTotal) * 100, 3);
+							return <div key={row.key} className="flex flex-col gap-1">
 								<div className="flex items-center justify-between gap-2">
 									<span className="flex items-center gap-1.5 text-xs font-medium">
 										<span className="h-2 w-2 flex-none rounded-full" style={{ background: row.color }} />
@@ -402,10 +453,10 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 									<span className="text-xs font-semibold tabular-nums">{Sanitaze.toFormatCurrency(row.total)}</span>
 								</div>
 								<div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-									<div className="h-full rounded-full transition-all" style={{ width: `${row.pct}%`, background: row.color }} />
+									<div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: row.color }} />
 								</div>
 							</div>
-						))}
+						})}
 					</CardContent>
 				</Card>}
 
@@ -443,18 +494,22 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 
 			<div className="xl:col-span-7">
 				<Card className="overflow-hidden">
-					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
-						<CardTitle className="text-sm">
-							Opérations du mois <span className="font-normal text-muted-foreground">({nData.length + visibleRecurrences.length})</span>
-						</CardTitle>
-						<Button type="blue" onClick={handleOpenCreate}>
-							<span className="icon-add mr-1"></span>Ajouter
-						</Button>
+					<CardHeader className="flex flex-col gap-3 space-y-0 border-b p-4">
+						<div className="flex items-center justify-between gap-3">
+							<CardTitle className="text-sm">
+								Opérations du mois <span className="font-normal text-muted-foreground">({filteredData.length + filteredRecurrences.length})</span>
+							</CardTitle>
+							<Button type="blue" onClick={handleOpenCreate}>
+								<span className="icon-add mr-1"></span>Ajouter
+							</Button>
+						</div>
+						<Search placeholder="Rechercher une opération..." onSearch={setSearch} />
 					</CardHeader>
 					<CardContent className="p-0">
-						<BudgetList data={nData} recurrencesData={visibleRecurrences}
+						<BudgetList data={filteredData} recurrencesData={filteredRecurrences}
 									onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
-									onActiveRecurrence={handleActiveRecurrence} />
+									onActiveRecurrence={handleActiveRecurrence}
+									emptyMessage={searchLower ? "Aucune opération ne correspond à la recherche." : "Aucune opération pour ce mois."} />
 					</CardContent>
 				</Card>
 			</div>

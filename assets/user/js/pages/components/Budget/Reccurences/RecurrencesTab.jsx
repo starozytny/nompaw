@@ -7,6 +7,7 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 
 import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Search } from "@tailwindComponents/Elements/Search";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/card";
 import { Badge } from "@shadcnComponents/ui/badge";
@@ -28,6 +29,7 @@ export function RecurrencesTab () {
 	const [toDelete, setToDelete] = useState(null);
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [load, setLoad] = useState(false);
+	const [search, setSearch] = useState("");
 
 	const fetchData = () => {
 		setLoading(true);
@@ -60,20 +62,28 @@ export function RecurrencesTab () {
 		}
 	}
 
+	let searchLower = search.trim().toLowerCase();
+	let filteredItems = searchLower ? items.filter(elem => elem.name.toLowerCase().includes(searchLower)) : items;
+
 	return <Card>
-		<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 pb-3">
-			<CardTitle className="text-sm">Récurrences <span className="font-normal text-muted-foreground">({items.length})</span></CardTitle>
-			<Button type="blue" onClick={handleOpenCreate}>
-				<span className="icon-add mr-1"></span>Ajouter
-			</Button>
+		<CardHeader className="flex flex-col gap-3 space-y-0 pb-3">
+			<div className="flex items-center justify-between gap-3">
+				<CardTitle className="text-sm">Récurrences <span className="font-normal text-muted-foreground">({filteredItems.length})</span></CardTitle>
+				<Button type="blue" onClick={handleOpenCreate}>
+					<span className="icon-add mr-1"></span>Ajouter
+				</Button>
+			</div>
+			<Search placeholder="Rechercher une récurrence..." onSearch={setSearch} />
 		</CardHeader>
 		<CardContent className="p-0">
 			{loading
 				? <div className="p-6"><LoaderElements /></div>
 				: items.length === 0
 					? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune récurrence pour l'instant.</div>
-					: <div className="flex flex-col">
-						{items.map(elem => (
+					: filteredItems.length === 0
+						? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune récurrence ne correspond à la recherche.</div>
+						: <div className="flex flex-col">
+						{filteredItems.map(elem => (
 							<div key={elem.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-b-0 hover:bg-accent/50">
 								<div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg" style={{ background: TYPE_SOFT[elem.type], color: TYPE_COLOR[elem.type] }}>
 									<span className={`icon-${elem.typeIcon}`}></span>
