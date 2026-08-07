@@ -101,6 +101,18 @@ input[type=number] {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* Budget module: category identity + status colors (dataviz-validated categorical/status palette) */
+    --cat-income: #2a78d6;
+    --cat-income-soft: #eaf1fb;
+    --cat-expense: #eb6834;
+    --cat-expense-soft: #fdf0ea;
+    --cat-saving: #eda100;
+    --cat-saving-soft: #fdf1de;
+    --status-good: #0ca30c;
+    --status-good-soft: #e9f7e9;
+    --status-critical: #d03b3b;
+    --status-critical-soft: #fbeaea;
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -127,6 +139,17 @@ input[type=number] {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --cat-income: #5b9ce6;
+    --cat-income-soft: #16233a;
+    --cat-expense: #f0855a;
+    --cat-expense-soft: #2c1e17;
+    --cat-saving: #e0a326;
+    --cat-saving-soft: #2c2410;
+    --status-good: #3fbf3f;
+    --status-good-soft: #10240f;
+    --status-critical: #e66767;
+    --status-critical-soft: #2b1414;
   }
 }
 

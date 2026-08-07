@@ -1,5 +1,4 @@
-import React, { useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState } from 'react';
 
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
@@ -8,13 +7,19 @@ import Sort from "@commonFunctions/sort";
 import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Modal } from "@tailwindComponents/Elements/Modal";
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/card";
+import { Progress } from "@shadcnComponents/ui/progress";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shadcnComponents/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
+import { cn } from "@shadcnComponents/lib/utils";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
 import { SavingForm } from "@userPages/Budget/SavingForm";
-import { cn } from "@shadcnComponents/lib/utils";
+import { BudgetTrendChart } from "@userPages/Budget/BudgetTrendChart";
+import { RecurrencesTab } from "@userPages/Budget/Reccurences/RecurrencesTab";
+import { CategoriesTab } from "@userPages/Budget/Categories/CategoriesTab";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
@@ -27,10 +32,34 @@ const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 const URL_USE_SAVING = "intern_api_budget_categories_use";
 
-function Budget ({ donnees, categories, savings, recurrences, y, m, yearMin, monthlyBalances, monthlySummaries, savingsSummaries }) {
-	const deleteRef = useRef(null)
-	const trashRef = useRef(null)
-	const savingRef = useRef(null)
+const MONTHS_SHORT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+export default function Budget (props) {
+	const [activeTab, setActiveTab] = useState('planning');
+
+	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-5">
+		<TabsList className="self-start">
+			<TabsTrigger value="planning">Planning</TabsTrigger>
+			<TabsTrigger value="recurrences">Récurrences</TabsTrigger>
+			<TabsTrigger value="categories">Catégories</TabsTrigger>
+		</TabsList>
+
+		{/* forceMount + explicit hidden class: the planning tab keeps its state (selected year/month, loaded
+		    data) when switching tabs. Radix's own forceMount visibility toggling isn't reliable enough here,
+		    so visibility is driven directly off activeTab instead. */}
+		<TabsContent value="planning" forceMount className={activeTab === 'planning' ? '' : 'hidden'}>
+			<PlanningTab {...props} />
+		</TabsContent>
+		<TabsContent value="recurrences">
+			<RecurrencesTab />
+		</TabsContent>
+		<TabsContent value="categories">
+			<CategoriesTab />
+		</TabsContent>
+	</Tabs>
+}
+
+function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin, monthlyBalances, monthlySummaries, savingsSummaries }) {
 	const [year, setYear] = useState(parseInt(y))
 	const [month, setMonth] = useState(parseInt(m))
 	const [data, setData] = useState(JSON.parse(donnees))
@@ -40,15 +69,14 @@ function Budget ({ donnees, categories, savings, recurrences, y, m, yearMin, mon
 	const [summaries, setSummaries] = useState(JSON.parse(monthlySummaries))
 	const [savingsSummariesData, setSavingsSummariesData] = useState(JSON.parse(savingsSummaries))
 	const [element, setElement] = useState(null)
+	const [sheetOpen, setSheetOpen] = useState(false)
 	const [elementToDelete, setElementToDelete] = useState(null)
+	const [deleteOpen, setDeleteOpen] = useState(false)
+	const [trashOpen, setTrashOpen] = useState(false)
 	const [saving, setSaving] = useState(null)
+	const [savingOpen, setSavingOpen] = useState(false)
 	const [load, setLoad] = useState(false)
-	const [openSaving, setOpenSaving] = useState(false)
 
-	// Every mutation below re-fetches the whole planning payload rather than patching local state:
-	// the totals are computed server-side (recurrences, cancelled instances, savings balances, ...)
-	// and re-deriving them client-side would just re-introduce the untested duplicate logic this
-	// component used to have.
 	let refetchPlanning = (targetYear) => {
 		return axios({ method: "GET", url: Routing.generate(URL_PLANNING, { year: targetYear }) })
 			.then(function (response) {
@@ -67,51 +95,39 @@ function Budget ({ donnees, categories, savings, recurrences, y, m, yearMin, mon
 		refetchPlanning(year).then(() => setElement(null));
 	}
 
-	let handleCancelEdit = () => {
-		setElement(null)
+	let handleOpenCreate = () => {
+		setElement(null);
+		setSheetOpen(true);
 	}
 
 	let handleEdit = (elem) => {
 		setElement(elem);
+		setSheetOpen(true);
+	}
+
+	let handleSheetOpenChange = (open) => {
+		setSheetOpen(open);
+		if (!open) setElement(null);
 	}
 
 	let handleModal = (identifiant, elem) => {
-		let ref;
-		switch (identifiant) {
-			case 'deleteRef':
-				ref = deleteRef;
-				setElementToDelete(elem);
-				deleteRef.current.handleUpdateFooter(<Button type="red" onClick={() => handleDelete(elem)}>Confirmer la suppression</Button>)
-				break;
-			case 'trashRef':
-				ref = trashRef;
-				setElementToDelete(elem);
-				trashRef.current.handleUpdateFooter(<Button type="red" onClick={() => handleDeleteRecurrence(elem)}>Confirmer la suppression</Button>)
-				break;
-			case 'savingRef':
-				ref = savingRef;
-				setSaving(elem);
-				break;
-			default:
-				break;
-		}
-		if (ref) {
-			ref.current.handleClick();
-		}
+		setElementToDelete(elem);
+		if (identifiant === 'deleteRef') setDeleteOpen(true);
+		if (identifiant === 'trashRef') setTrashOpen(true);
+		if (identifiant === 'savingRef') { setSaving(elem); setSavingOpen(true); }
 	}
 
-	let handleDelete = (elem) => {
-		if (!load) {
+	let handleDelete = () => {
+		if (!load && elementToDelete) {
 			setLoad(true)
-			deleteRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
-			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { id: elem.id }), data: {} })
+			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { id: elementToDelete.id }), data: {} })
 				.then(function () {
 					return refetchPlanning(year);
 				})
 				.then(function () {
 					setElementToDelete(null);
-					deleteRef.current.handleClose();
+					setDeleteOpen(false);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -159,18 +175,17 @@ function Budget ({ donnees, categories, savings, recurrences, y, m, yearMin, mon
 		}
 	}
 
-	let handleDeleteRecurrence = (elem) => {
-		if (!load) {
+	let handleDeleteRecurrence = () => {
+		if (!load && elementToDelete) {
 			setLoad(true)
-			trashRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
-			axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, { id: elem.id }), data: { year: year, month: month } })
+			axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, { id: elementToDelete.id }), data: { year: year, month: month } })
 				.then(function () {
 					return refetchPlanning(year);
 				})
 				.then(function () {
 					setElementToDelete(null);
-					trashRef.current.handleClose();
+					setTrashOpen(false);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -205,17 +220,16 @@ function Budget ({ donnees, categories, savings, recurrences, y, m, yearMin, mon
 			setLoad(true)
 			Formulaire.loader(true)
 
-			let self = this;
 			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total } })
 				.then(function () {
 					return refetchPlanning(year);
 				})
 				.then(function () {
 					setSaving(null);
-					savingRef.current.handleClose();
+					setSavingOpen(false);
 				})
 				.catch(function (error) {
-					Formulaire.displayErrors(self, error);
+					Formulaire.displayErrors(null, error);
 				})
 				.then(function () {
 					setLoad(false);
@@ -247,229 +261,189 @@ function Budget ({ donnees, categories, savings, recurrences, y, m, yearMin, mon
 	let totSavingAllUsed = itemsSavings.reduce((acc, sa) => acc + sa.used, 0);
 
 	let cards = [
-		{ value: 0, name: "Budget disponible", total: currentSummary.totalDispo, total2: currentSummary.totalDispoNow, initial: currentSummary.initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
-		{ value: 1, name: "Dépenses", total: currentSummary.totalExpense, total2: currentSummary.totalExpenseReal, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
-		{ value: 2, name: "Revenus", total: currentSummary.totalIncome, total2: currentSummary.totalIncomeReal, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
-		{ value: 3, name: "Économies", total: currentSummary.totalSaving, total2: currentSummary.totalSavingReal, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
+		{ value: 0, name: "Budget disponible", total: currentSummary.totalDispo, total2: currentSummary.totalDispoNow, initial: currentSummary.initial, icon: "cart", status: true },
+		{ value: 1, name: "Dépenses", total: currentSummary.totalExpense, total2: currentSummary.totalExpenseReal, icon: "minus", cat: "expense" },
+		{ value: 2, name: "Revenus", total: currentSummary.totalIncome, total2: currentSummary.totalIncomeReal, icon: "add", cat: "income" },
+		{ value: 3, name: "Économies", total: currentSummary.totalSaving, total2: currentSummary.totalSavingReal, icon: "time", cat: "saving" },
 	]
 
-	return <div className="flex flex-col gap-6">
-		<div className="flex flex-col items-center justify-center gap-4 w-full lg:mx-auto">
-			<div className="px-4 sm:px-6 lg:px-8">
-				<Year year={year} yearMin={parseInt(yearMin)} />
-			</div>
-			<div className="overflow-hidden w-screen lg:w-full lg:px-8">
-				<Months year={year} active={month} onSelect={setMonth} totaux={balances} />
+	return <div className="flex flex-col gap-5">
+		<div className="flex flex-wrap items-end justify-between gap-3">
+			<div className="text-sm text-muted-foreground">Année {year}</div>
+			<div className="flex items-center gap-1 rounded-lg bg-muted p-1">
+				{year - 1 >= yearMin
+					? <a className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-card" href={Routing.generate(URL_INDEX_PAGE, { year: year - 1 })}>
+						<span className="icon-left-arrow text-sm" />
+					</a>
+					: <div className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/40">
+						<span className="icon-left-arrow text-sm" />
+					</div>
+				}
+				<span className="px-2 text-sm font-semibold tabular-nums">{year}</span>
+				<a className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-card" href={Routing.generate(URL_INDEX_PAGE, { year: year + 1 })}>
+					<span className="icon-right-arrow text-sm" />
+				</a>
 			</div>
 		</div>
 
-		<div className="flex flex-col gap-6 lg:px-8 2xl:grid 2xl:grid-cols-6">
-			<div className="flex flex-col gap-6 2xl:flex-row 2xl:col-span-3">
-				<div className="overflow-hidden w-screen lg:w-full 2xl:min-w-52 2xl:max-w-72">
-					<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 2xl:flex-col">
-						{cards.map(item => {
-							const isNegative = item.total < 0;
-							const isPositive = item.value === 0 && item.total > 0;
+		<div className="grid grid-cols-12 gap-1.5 overflow-x-auto pb-1">
+			{MONTHS_SHORT.map((label, i) => {
+				const isActive = i + 1 === month;
+				const isNeg = balances[i] < 0;
+				return <button key={i} type="button" onClick={() => setMonth(i + 1)}
+					className={cn(
+						"col-span-1 min-w-[58px] flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-center transition-colors",
+						isActive ? "border-foreground bg-foreground text-background" : "hover:border-foreground/30"
+					)}
+				>
+					<span className={cn("text-[11px] font-semibold uppercase tracking-wide", isActive ? "text-background/70" : "text-muted-foreground")}>{label}</span>
+					<span className={cn("text-xs font-semibold tabular-nums", isActive ? (isNeg ? "text-red-300" : "text-background") : (isNeg ? "text-[var(--status-critical)]" : ""))}>
+						{Sanitaze.toFormatCurrency(balances[i], true)}
+					</span>
+				</button>
+			})}
+		</div>
 
-							return <div
-								className={`relative min-w-[90%] sm:min-w-72 max-w-72 2xl:min-w-52 overflow-hidden rounded-xl border-2 transition-all ${
-									item.value === 0
-										? (isPositive ? "bg-gradient-to-br from-green-50 to-green-100 border-green-300" : "bg-gradient-to-br from-red-50 to-red-100 border-red-400")
-										: "bg-white border-gray-200"
-								}`}
-								key={item.value}
-							>
-								<div className="p-6">
-									<div className="flex items-start justify-between mb-4">
-										<div className="flex-1">
-											<p className="text-sm font-medium text-gray-600 mb-1">{item.name}</p>
-											<p className={`text-3xl font-bold ${isNegative ? 'text-red-600' : 'text-gray-900'}`}>
-												{Sanitaze.toFormatCurrency(item.total)}
-											</p>
-										</div>
-										<div className={`w-12 h-12 rounded-lg flex items-center justify-center ${item.classCustom}`}>
-											<span className={`icon-${item.icon} text-2xl`}></span>
+		<div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+			<div className="xl:col-span-5 flex flex-col gap-5">
+				<Card>
+					<CardContent className="p-4">
+						<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Solde disponible · tendance sur l'année</div>
+						<BudgetTrendChart balances={balances} activeMonth={month} onSelectMonth={setMonth} />
+					</CardContent>
+				</Card>
+
+				<div className="grid grid-cols-2 gap-3">
+					{cards.map(card => {
+						const isNeg = card.total < 0;
+						const catColor = card.cat ? `var(--cat-${card.cat})` : null;
+						const catSoft = card.cat ? `var(--cat-${card.cat}-soft)` : null;
+						return <Card
+							key={card.value}
+							className={cn(card.value === 0 && "col-span-2", card.status && (isNeg ? "border-[var(--status-critical)]" : ""))}
+							style={card.status && isNeg ? { background: 'var(--status-critical-soft)' } : undefined}
+						>
+							<CardContent className="p-4 flex flex-col gap-2">
+								<div className="flex items-start justify-between gap-2">
+									<div>
+										<div className="text-xs text-muted-foreground">{card.name}</div>
+										<div className={cn("font-bold tabular-nums", card.value === 0 ? "text-2xl" : "text-lg", card.status && isNeg && "text-[var(--status-critical)]")}>
+											{Sanitaze.toFormatCurrency(card.total)}
 										</div>
 									</div>
+									<div
+										className="flex h-7 w-7 flex-none items-center justify-center rounded-lg"
+										style={{
+											background: card.status ? (isNeg ? 'var(--status-critical)' : 'var(--status-good-soft)') : catSoft,
+											color: card.status ? (isNeg ? '#fff' : 'var(--status-good)') : catColor,
+										}}
+									>
+										<span className={`icon-${card.icon} text-sm`}></span>
+									</div>
+								</div>
+								{card.total2 !== 0 && (
+									<div className="flex items-center justify-between text-xs">
+										<span className="text-muted-foreground">Aujourd'hui</span>
+										<span className="font-semibold tabular-nums">{Sanitaze.toFormatCurrency(card.total2)}</span>
+									</div>
+								)}
+								{card.initial !== undefined && (
+									<div className="flex items-center justify-between border-t pt-2 text-xs">
+										<span className="text-muted-foreground">Solde initial</span>
+										<span className="font-medium tabular-nums">{Sanitaze.toFormatCurrency(card.initial)}</span>
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					})}
+				</div>
 
-									{item.total2 !== 0 && (
-										<div className="mb-2">
-											<div className="flex items-center justify-between text-sm">
-												<span className="text-gray-600">Aujourd'hui :</span>
-												<span className="font-semibold text-gray-900">{Sanitaze.toFormatCurrency(item.total2)}</span>
-											</div>
-										</div>
-									)}
-
-									{item.initial !== null && (
-										<div className="flex items-center justify-between text-sm border-t border-gray-200 pt-2 mt-2">
-											<span className="text-gray-600">Solde initial :</span>
-											<span className="font-medium text-gray-700">{Sanitaze.toFormatCurrency(item.initial)}</span>
-										</div>
-									)}
+				{itemsSavings.length !== 0 && <Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="text-sm">Utilisation des économies</CardTitle>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-4 pt-0">
+						{itemsSavings.map(sa => {
+							let available = sa.total - sa.used;
+							let progress = sa.goal ? (available / sa.goal) * 100 : 0;
+							return <div key={sa.id} className="flex flex-col gap-1.5">
+								<div className="flex items-baseline justify-between gap-2">
+									<span className="text-sm font-medium">{sa.name}</span>
+									<span className="text-xs text-muted-foreground">{progress.toFixed(0)}%</span>
+								</div>
+								<Progress value={progress} indicatorClassName="bg-[var(--cat-saving)]" />
+								<div className="flex items-center justify-between text-xs text-muted-foreground">
+									<span>Disponible <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(available)}</b></span>
+									<div className="flex items-center gap-2">
+										<span>Objectif {Sanitaze.toFormatCurrency(sa.goal)}</span>
+										<button type="button" className="text-xs font-semibold text-[var(--cat-saving)] hover:underline" onClick={() => handleModal('savingRef', sa)}>Utiliser</button>
+									</div>
 								</div>
 							</div>
 						})}
-					</div>
-				</div>
-
-				<div className="w-full flex flex-col gap-6 px-4 sm:px-6 lg:px-0">
-					<div className="bg-white border rounded-xl shadow-md p-4">
-						<BudgetFormulaire context={element ? "update" : "create"}
-										  categories={JSON.parse(categories)}
-										  element={element} year={year} month={month}
-										  onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
-										  key={month + "-" + (element ? element.id : 0)} />
-					</div>
-					{itemsSavings.length !== 0 && <div className="bg-gray-50 rounded-xl border">
-						<div className="cursor-pointer p-4 flex justify-between hover:opacity-80" onClick={() => setOpenSaving(!openSaving)}>
-							<h3 className="font-semibold">Utilisation des économies</h3>
-							<div className="lg:hidden">
-								<span className={`icon-${openSaving ? "minus" : "add"}`}></span>
-							</div>
+						<div className="flex items-center justify-between border-t pt-3">
+							<span className="text-xs text-muted-foreground">Total économies disponibles</span>
+							<span className="font-bold tabular-nums">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</span>
 						</div>
-						<div className={`flex flex-col gap-4 border-t bg-white rounded-b-md ${openSaving ? "opacity-100 h-auto p-4" : "h-0 opacity-0 lg:h-auto lg:opacity-100 lg:p-4"}`}>
-							{itemsSavings.map(sa => {
-								let total = sa.total;
-								let used = sa.used;
-								let available = total - used;
-								let progress = sa.goal ? (available / sa.goal) * 100 : 0;
-
-								return <div className="saving-item flex items-start justify-between gap-2" key={sa.id}>
-									<div className="col-1 font-medium text-sm">
-										<div className="flex justify-between items-center">
-											<div>{sa.name}</div>
-											<div className="text-xs font-normal text-gray-500">({progress.toFixed(0)}%)</div>
-										</div>
-										<div className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
-											<div
-												className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 transition-all"
-												style={{ width: `${Math.min(progress, 100)}%` }}
-											></div>
-										</div>
-									</div>
-									<div className="col-2">
-										<div className="font-medium text-sm">{Sanitaze.toFormatCurrency(total - used)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
-										<div className="text-xs text-gray-600">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
-									</div>
-									<div className="col-3">
-										<ButtonIcon type="default" icon="credit-card" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
-									</div>
-								</div>
-							})}
-						</div>
-
-						<div className="px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 rounded-b-xl overflow-hidden border-t flex items-center justify-between">
-							<span className="text-sm font-medium text-gray-700">Total économies disponibles</span>
-							<div className="text-right">
-								<div className="font-bold text-lg text-yellow-700">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</div>
-								<div className="text-xs text-gray-600">{Sanitaze.toFormatCurrency(totSavingAllUsed)} utilisé</div>
-							</div>
-						</div>
-					</div>}
-				</div>
+					</CardContent>
+				</Card>}
 			</div>
-			<div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-0 2xl:col-span-3">
-				<div className="bg-white border rounded-xl shadow-md overflow-hidden">
-					<div className="p-4 bg-gray-50 border-b">
-						<h3 className="font-semibold text-gray-900 flex items-center gap-2">
-							<span className="icon-cart text-blue-600"></span>
-							Opérations du mois
-							<span className="text-sm font-normal text-gray-600">({nData.length + visibleRecurrences.length})</span>
-						</h3>
-					</div>
-					<div className="flex flex-col gap-6">
+
+			<div className="xl:col-span-7">
+				<Card className="overflow-hidden">
+					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 pb-3">
+						<CardTitle className="text-sm">
+							Opérations du mois <span className="font-normal text-muted-foreground">({nData.length + visibleRecurrences.length})</span>
+						</CardTitle>
+						<Button type="blue" onClick={handleOpenCreate}>
+							<span className="icon-add mr-1"></span>Ajouter
+						</Button>
+					</CardHeader>
+					<CardContent className="p-0">
 						<BudgetList data={nData} recurrencesData={visibleRecurrences}
 									onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
-									onActiveRecurrence={handleActiveRecurrence} key={month} />
-					</div>
-				</div>
+									onActiveRecurrence={handleActiveRecurrence} />
+					</CardContent>
+				</Card>
 			</div>
 		</div>
 
-		{createPortal(
-			<Modal ref={deleteRef} identifiant="deleteItem" maxWidth={568} title="Supprimer un élément"
-				   content={<p>Souhaitez-vous supprimer définitivement : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
-				   footer={null}
-			/>
-			, document.body)
-		}
+		<BudgetFormulaire context={element ? "update" : "create"}
+						  categories={JSON.parse(categories)}
+						  element={element} year={year} month={month}
+						  open={sheetOpen} onOpenChange={handleSheetOpenChange}
+						  onUpdateList={handleUpdateList} />
 
-		{createPortal(
-			<Modal ref={trashRef} identifiant="trashRecurrence" maxWidth={568} title="Supprimer un élément"
-				   content={<p>Souhaitez-vous supprimer cet élément récurrent : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
-				   footer={null}
-			/>
-			, document.body)
-		}
+		<SavingForm open={savingOpen} onOpenChange={setSavingOpen} saving={saving} onUseSaving={handleUseSaving} />
 
-		{createPortal(
-			<Modal ref={savingRef} identifiant="useSaving" maxWidth={568} title="Utiliser vos économies" isForm={true}
-				   content={<SavingForm identifiant="useSaving" saving={saving} onUseSaving={handleUseSaving} />}
-				   footer={null}
-			/>
-			, document.body)
-		}
-	</div>
-}
+		<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Supprimer un élément</DialogTitle>
+					<DialogDescription>
+						Souhaitez-vous supprimer définitivement <b>{elementToDelete ? elementToDelete.name : ""}</b> ?
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<Button type="default" onClick={() => setDeleteOpen(false)}>Annuler</Button>
+					<Button type="red" onClick={handleDelete} iconLeft={load ? "chart-3" : ""}>Confirmer la suppression</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 
-export default Budget
-
-function Year ({ year, yearMin }) {
-	return <div className="flex items-center gap-4">
-		{year - 1 >= yearMin
-			? <a className="cursor-pointer flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
-				 href={Routing.generate(URL_INDEX_PAGE, { year: year - 1 })}>
-				<span className="icon-left-arrow" />
-			</a>
-			: <div className="cursor-not-allowed flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-gray-100 text-gray-400 hover:bg-gray-50 ring-1 ring-inset ring-gray-300">
-				<span className="icon-left-arrow" />
-			</div>
-		}
-		<div className="p-2 font-medium text-lg text-blue-600">{year}</div>
-		<a className="cursor-pointer flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
-		   href={Routing.generate(URL_INDEX_PAGE, { year: year + 1 })}>
-			<span className="icon-right-arrow" />
-		</a>
-	</div>
-}
-
-function Months ({ year, active, onSelect, totaux }) {
-	let data = [
-		{ id: 1, name: 'Janvier', shortName: 'Jan.' },
-		{ id: 2, name: 'Février', shortName: 'Fev.' },
-		{ id: 3, name: 'Mars', shortName: 'Mar.' },
-		{ id: 4, name: 'Avril', shortName: 'Avr.' },
-		{ id: 5, name: 'Mai', shortName: 'Mai.' },
-		{ id: 6, name: 'Juin', shortName: 'Jui.' },
-		{ id: 7, name: 'Juillet', shortName: 'Jui.' },
-		{ id: 8, name: 'Août', shortName: 'Aoû.' },
-		{ id: 9, name: 'Septembre', shortName: 'Sep.' },
-		{ id: 10, name: 'Octobre', shortName: 'Oct.' },
-		{ id: 11, name: 'Novembre', shortName: 'Nov.' },
-		{ id: 12, name: 'Décembre', shortName: 'Dèc.' },
-	];
-
-	let today = new Date();
-
-	return <div className="flex items-center gap-4 overflow-auto border-y py-4 px-4 sm:px-6 lg:px-0 lg:flex-wrap lg:justify-center">
-		{data.map(elem => {
-			let todayMonth = (elem.id === today.getMonth() + 1 && year === today.getFullYear());
-			let activeMonth = elem.id === active;
-			let statutMonth = totaux[elem.id - 1] < 0;
-			return <div onClick={() => onSelect(elem.id)} key={elem.id}
-						className={cn(
-				"cursor-pointer rounded-md p-2 font-medium text-center min-w-20",
-				todayMonth ? "bg-white border-2 border-gray-300 shadow-md" : "hover:bg-gray-50",
-				activeMonth ? (statutMonth ? "bg-red-500 text-white border-2 border-red-600 shadow-lg scale-105 hover:bg-red-500" : "bg-blue-500 text-white border-2 border-blue-600 shadow-lg scale-105 hover:bg-blue-500") : ""
-			)}>
-				<div className="text-sm">
-					{elem.name}
-				</div>
-				<div className={`text-xs font-medium ${activeMonth ? '' : (statutMonth ? 'text-red-600' : 'text-gray-600')}`}>
-					{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}
-				</div>
-			</div>
-		})}
+		<Dialog open={trashOpen} onOpenChange={setTrashOpen}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Supprimer un élément récurrent</DialogTitle>
+					<DialogDescription>
+						Souhaitez-vous supprimer cet élément récurrent <b>{elementToDelete ? elementToDelete.name : ""}</b> pour ce mois ?
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<Button type="default" onClick={() => setTrashOpen(false)}>Annuler</Button>
+					<Button type="red" onClick={handleDeleteRecurrence} iconLeft={load ? "chart-3" : ""}>Confirmer la suppression</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	</div>
 }

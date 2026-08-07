@@ -14,36 +14,48 @@ import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Input, Radiobox, InputView, Switcher, SelectCombobox } from "@tailwindComponents/Elements/Fields";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@shadcnComponents/ui/sheet";
 
 const URL_CREATE_ELEMENT = "intern_api_budget_items_create";
 const URL_UPDATE_ELEMENT = "intern_api_budget_items_update";
 
-export function BudgetFormulaire ({ context, categories, element, year, month, onCancel, onUpdateList }) {
+export function BudgetFormulaire ({ context, categories, element, year, month, open, onOpenChange, onUpdateList }) {
 	let url = Routing.generate(URL_CREATE_ELEMENT);
 
 	if (context === "update") {
 		url = Routing.generate(URL_UPDATE_ELEMENT, { id: element.id });
 	}
 
-	return <Form
-		context={context}
-		categories={categories}
-		url={url}
+	return <Sheet open={open} onOpenChange={onOpenChange}>
+		<SheetContent className="flex flex-col p-0 sm:max-w-lg [&_label]:mb-1.5 [&_label]:mt-0">
+			<SheetHeader>
+				<SheetTitle>{context === "create" ? "Ajouter une opération" : "Modifier l'opération"}</SheetTitle>
+			</SheetHeader>
 
-		year={element ? Formulaire.setValue(element.year) : year}
-		month={element ? Formulaire.setValue(element.month) : month}
-		type={element ? Formulaire.setValue(element.type) : 0}
-		price={element ? Formulaire.setValue(element.price) : ""}
-		name={element ? Formulaire.setValue(element.name) : ""}
-		category={element && element.category ? Formulaire.setValue(element.category.id) : ""}
-		isActive={element ? Formulaire.setValue(element.isActive) : false}
-		dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('YYYY-MM-DD')}
-		dateTime={element ? Formulaire.setValueTime(element.dateAt) : ""}
-		recurrenceId={element ? Formulaire.setValue(element.recurrenceId) : ""}
+			<div className="flex-1 overflow-y-auto px-6 py-5">
+				<Form
+					key={month + "-" + (element ? element.id : 0)}
+					context={context}
+					categories={categories}
+					url={url}
 
-		onCancel={onCancel}
-		onUpdateList={onUpdateList}
-	/>
+					year={element ? Formulaire.setValue(element.year) : year}
+					month={element ? Formulaire.setValue(element.month) : month}
+					type={element ? Formulaire.setValue(element.type) : 0}
+					price={element ? Formulaire.setValue(element.price) : ""}
+					name={element ? Formulaire.setValue(element.name) : ""}
+					category={element && element.category ? Formulaire.setValue(element.category.id) : ""}
+					isActive={element ? Formulaire.setValue(element.isActive) : false}
+					dateAt={element ? Formulaire.setValueDate(element.dateAt) : moment(new Date()).format('YYYY-MM-DD')}
+					dateTime={element ? Formulaire.setValueTime(element.dateAt) : ""}
+					recurrenceId={element ? Formulaire.setValue(element.recurrenceId) : ""}
+
+					onClose={() => onOpenChange(false)}
+					onUpdateList={onUpdateList}
+				/>
+			</div>
+		</SheetContent>
+	</Sheet>;
 }
 
 class Form extends Component {
@@ -125,9 +137,8 @@ class Form extends Component {
 					.then(function (response) {
 						Toastr.toast('info', 'Données enregistrées.');
 
-						self.setState({ price: "", name: "" })
-
 						self.props.onUpdateList(response.data, context);
+						self.props.onClose();
 					})
 					.catch(function (error) {
 						Formulaire.displayErrors(self, error);
@@ -142,7 +153,7 @@ class Form extends Component {
 	}
 
 	render () {
-		const { context, categories, onCancel, recurrenceId } = this.props;
+		const { context, categories, onClose, recurrenceId } = this.props;
 		const { errors, load, type, price, name, category, isActive, dateAt, dateTime } = this.state;
 
 		let typeItems = [
@@ -167,10 +178,10 @@ class Form extends Component {
 		let paramsInput0 = { ...params, ...{ onChange: this.handleChange } }
 		let paramsInput1 = { ...params, ...{ onSelect: this.handleSelect } }
 
-		return <div>
-			<div className="flex flex-col gap-2">
-				<div className="flex gap-2">
-					<div className="w-full">
+		return <div className="flex flex-col gap-6">
+			<div className="flex flex-col gap-5">
+				<div className="flex items-start gap-4">
+					<div className="flex-1">
 						{type === 4
 							? <InputView valeur="Economie utilisée" errors={errors}>Type d'opération</InputView>
 							: recurrenceId
@@ -183,7 +194,7 @@ class Form extends Component {
 					</div>
 					{type === 4
 						? null
-						: <div className="w-full max-w-20">
+						: <div className="flex-none">
 							<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
 								Réalisé
 							</Switcher>
@@ -191,53 +202,39 @@ class Form extends Component {
 					}
 				</div>
 
-				<div className="flex gap-2">
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					{type === 4
 						? <>
-							<div className="w-full">
-								<InputView valeur={name} errors={errors}>Intitulé</InputView>
-							</div>
-							<div className="w-full">
-								<InputView valeur={price} errors={errors}>Montant (€)</InputView>
-							</div>
+							<InputView valeur={name} errors={errors}>Intitulé</InputView>
+							<InputView valeur={price} errors={errors}>Montant (€)</InputView>
 						</>
 						: <>
-							<div className="w-full">
-								<Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
-							</div>
-							<div className="w-full">
-								<Input identifiant="price" valeur={price} {...paramsInput0}>Montant (€)</Input>
-							</div>
+							<Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
+							<Input identifiant="price" valeur={price} {...paramsInput0}>Montant (€)</Input>
 						</>
 					}
-
 				</div>
 
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-					<div className="w-full flex gap-2 2xl:flex-col 2qhd:flex-row">
-						<div className="w-full">
-							<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
-						</div>
-						<div className="w-full">
-							<Input type="time" identifiant="dateTime" valeur={dateTime} {...params}>
-								Heure <span className="text-gray-500 text-xs">(optionnel)</span>
-							</Input>
-						</div>
-					</div>
-					<div className="w-full">
-						{type === 4
-							? <InputView valeur="Economie" errors={errors}>Catégorie</InputView>
-							: <SelectCombobox identifiant="category" valeur={category} items={categoryItems}
-											  {...paramsInput1} toSort={true}>
-								Catégorie {parseInt(type) === 2 && <span className="text-red-500">*</span>}
-							</SelectCombobox>
-						}
-					</div>
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
+					<Input type="time" identifiant="dateTime" valeur={dateTime} {...params}>
+						Heure <span className="text-gray-500 text-xs">(optionnel)</span>
+					</Input>
+				</div>
+
+				<div>
+					{type === 4
+						? <InputView valeur="Economie" errors={errors}>Catégorie</InputView>
+						: <SelectCombobox identifiant="category" valeur={category} items={categoryItems}
+										  {...paramsInput1} toSort={true}>
+							Catégorie {parseInt(type) === 2 && <span className="text-red-500">*</span>}
+						</SelectCombobox>
+					}
 				</div>
 			</div>
 
-			<div className="mt-6 flex justify-end gap-2">
-				{context === "update" && <Button type="default" onClick={onCancel}>Annuler</Button>}
+			<div className="flex justify-end gap-2">
+				{context === "update" && <Button type="default" onClick={onClose}>Annuler</Button>}
 				<Button type="blue"
 						isSubmit={true}
 						iconLeft={load ? "chart-3" : ""}
