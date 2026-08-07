@@ -37,16 +37,13 @@ const MONTHS_SHORT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août
 export default function Budget (props) {
 	const [activeTab, setActiveTab] = useState('planning');
 
-	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-5">
+	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-1">
 		<TabsList className="self-start">
 			<TabsTrigger value="planning">Planning</TabsTrigger>
 			<TabsTrigger value="recurrences">Récurrences</TabsTrigger>
 			<TabsTrigger value="categories">Catégories</TabsTrigger>
 		</TabsList>
 
-		{/* forceMount + explicit hidden class: the planning tab keeps its state (selected year/month, loaded
-		    data) when switching tabs. Radix's own forceMount visibility toggling isn't reliable enough here,
-		    so visibility is driven directly off activeTab instead. */}
 		<TabsContent value="planning" forceMount className={activeTab === 'planning' ? '' : 'hidden'}>
 			<PlanningTab {...props} />
 		</TabsContent>
@@ -293,7 +290,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 				return <button key={i} type="button" onClick={() => setMonth(i + 1)}
 					className={cn(
 						"col-span-1 min-w-[58px] flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-center transition-colors",
-						isActive ? "border-foreground bg-foreground text-background" : "hover:border-foreground/30"
+						isActive ? "border-foreground bg-foreground text-background" : "bg-white hover:border-foreground/30"
 					)}
 				>
 					<span className={cn("text-[11px] font-semibold uppercase tracking-wide", isActive ? "text-background/70" : "text-muted-foreground")}>{label}</span>
@@ -391,7 +388,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 
 			<div className="xl:col-span-7">
 				<Card className="overflow-hidden">
-					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 pb-3">
+					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 p-4">
 						<CardTitle className="text-sm">
 							Opérations du mois <span className="font-normal text-muted-foreground">({nData.length + visibleRecurrences.length})</span>
 						</CardTitle>
