@@ -68,6 +68,20 @@ class DataBudget
         ;
     }
 
+    public function setDataIncomeFromSaving(BuItem $obj, BuCategory $category, $data): BuItem
+    {
+        return ($obj)
+            ->setYear($this->sanitizeData->setIntValue($data->year))
+            ->setMonth($this->sanitizeData->setIntValue($data->month))
+            ->setType(TypeType::Income)
+            ->setLastType(TypeType::Income)
+            ->setPrice($this->sanitizeData->setFloatValue($data->total))
+            ->setName('Utilisation économie : ' . $category->getName())
+            ->setIsActive(true)
+            ->setDateAt(new \DateTime())
+        ;
+    }
+
     public function setDataInit(User $obj, $data): User
     {
         return ($obj)
