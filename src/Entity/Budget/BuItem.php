@@ -91,6 +91,15 @@ class BuItem extends DataEntity
     #[ORM\Column(enumType: TypeType::class)]
     private ?TypeType $lastType = null;
 
+    /**
+     * Id of the counterpart BuItem this one was generated from/for (e.g. the Income item created
+     * when a saving is used, and vice versa) — a plain id reference, following the same convention
+     * as $recurrenceId, not a Doctrine association.
+     */
+    #[ORM\Column(nullable: true)]
+    #[Groups(['buitem_list'])]
+    private ?int $linkedItemId = null;
+
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
@@ -278,6 +287,18 @@ class BuItem extends DataEntity
     public function setLastType(?TypeType $lastType): static
     {
         $this->lastType = $lastType;
+
+        return $this;
+    }
+
+    public function getLinkedItemId(): ?int
+    {
+        return $this->linkedItemId;
+    }
+
+    public function setLinkedItemId(?int $linkedItemId): static
+    {
+        $this->linkedItemId = $linkedItemId;
 
         return $this;
     }

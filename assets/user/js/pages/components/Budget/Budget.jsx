@@ -216,12 +216,12 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 		}
 	}
 
-	let handleUseSaving = (sa, total) => {
+	let handleUseSaving = (sa, total, addAsIncome) => {
 		if (!load) {
 			setLoad(true)
 			Formulaire.loader(true)
 
-			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total } })
+			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total, addAsIncome: addAsIncome } })
 				.then(function () {
 					return refetchPlanning(year);
 				})

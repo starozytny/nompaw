@@ -124,6 +124,23 @@ class CategoriesController extends AbstractController
         }
 
         $repository->save($obj, true);
+
+        if (!empty($data->addAsIncome)) {
+            $income = $dataEntity->setDataIncomeFromSaving(new BuItem(), $obj->getCategory(), $data);
+            $income->setUser($user);
+            $income->setLinkedItemId($obj->getId());
+
+            $noErrorsIncome = $validator->validate($income);
+            if ($noErrorsIncome !== true) {
+                return $apiResponse->apiJsonResponseValidationFailed($noErrorsIncome);
+            }
+
+            $repository->save($income, true);
+
+            $obj->setLinkedItemId($income->getId());
+            $repository->save($obj, true);
+        }
+
         return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
     }
 }

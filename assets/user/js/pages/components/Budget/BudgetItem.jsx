@@ -51,6 +51,11 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel }) {
 						<span className="icon-refresh1 text-[10px] mr-1"></span>Récurrent
 					</Badge>
 				)}
+				{elem.linkedItemId && (
+					<Badge variant="muted" title="Liée à une autre opération">
+						<span className="icon-link text-[10px] mr-1"></span>Liée
+					</Badge>
+				)}
 				{elem.type !== 4 && elem.category && (
 					<Badge variant="outline" style={{ borderColor: TYPE_COLOR[elem.category.type] + '55', color: TYPE_COLOR[elem.category.type] }}>
 						{elem.category.name}

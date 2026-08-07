@@ -5,7 +5,7 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
-import { Input } from "@tailwindComponents/Elements/Fields";
+import { Input, Switcher } from "@tailwindComponents/Elements/Fields";
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@shadcnComponents/ui/dialog";
 
@@ -15,6 +15,7 @@ export class SavingForm extends Component {
 
 		this.state = {
 			total: '',
+			addAsIncome: [1],
 			errors: [],
 		}
 	}
@@ -25,6 +26,10 @@ export class SavingForm extends Component {
 
 		if (name === "total") {
 			value = Inputs.textMoneyMinusInput(value, this.state.total);
+		}
+
+		if (name === "addAsIncome") {
+			value = (e.currentTarget.checked) ? [1] : [0];
 		}
 
 		this.setState({ [name]: value })
@@ -51,13 +56,13 @@ export class SavingForm extends Component {
 				return;
 			}
 
-			this.props.onUseSaving(saving, total)
+			this.props.onUseSaving(saving, total, this.state.addAsIncome[0] === 1)
 		}
 	}
 
 	render () {
 		const { open, onOpenChange, saving } = this.props;
-		const { errors, total } = this.state;
+		const { errors, total, addAsIncome } = this.state;
 
 		const available = saving ? saving.total - saving.used : 0;
 
@@ -103,6 +108,14 @@ export class SavingForm extends Component {
 									{pct === 1 ? 'Tout' : `${pct * 100}%`}
 								</button>
 							))}
+						</div>
+
+						<div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2.5">
+							<div className="min-w-0">
+								<div className="text-sm font-medium">Ajouter aussi en revenu</div>
+								<div className="text-xs text-muted-foreground">Crée une opération "Revenu" liée, pour garder les totaux cohérents.</div>
+							</div>
+							<Switcher valeur={addAsIncome} identifiant="addAsIncome" items={[{ value: 1, identifiant: 'ai-1' }]} errors={errors} onChange={this.handleChange} />
 						</div>
 					</form>
 
