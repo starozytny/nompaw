@@ -180,46 +180,42 @@ class Form extends Component {
 
 		return <div className="flex flex-col gap-6">
 			<div className="flex flex-col gap-5">
-				<div className="flex items-start gap-4">
-					<div className="flex-1">
+				<div>
+					{type === 4
+						? <InputView valeur="Economie utilisée" errors={errors}>Type d'opération</InputView>
+						: recurrenceId
+							? <InputView valeur={typeString[type]} errors={errors}>Type d'opération</InputView>
+							: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
+										classItems="flex flex-wrap gap-2" styleType="fat">
+								Type d'opération
+							</Radiobox>
+					}
+				</div>
+
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<div>
 						{type === 4
-							? <InputView valeur="Economie utilisée" errors={errors}>Type d'opération</InputView>
-							: recurrenceId
-								? <InputView valeur={typeString[type]} errors={errors}>Type d'opération</InputView>
-								: <Radiobox items={typeItems} identifiant="type" valeur={type} {...paramsInput0}
-											classItems="flex flex-wrap gap-2" styleType="fat">
-									Type d'opération
-								</Radiobox>
+							? <InputView valeur={price} errors={errors}>Montant (€)</InputView>
+							: <Input identifiant="price" valeur={price} {...paramsInput0}>Montant (€)</Input>
 						}
 					</div>
-					{type === 4
-						? null
-						: <div className="flex-none">
-							<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
-								Réalisé
-							</Switcher>
-						</div>
-					}
+					<div>
+						<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
+					</div>
 				</div>
 
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					{type === 4
-						? <>
-							<InputView valeur={name} errors={errors}>Intitulé</InputView>
-							<InputView valeur={price} errors={errors}>Montant (€)</InputView>
-						</>
-						: <>
-							<Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
-							<Input identifiant="price" valeur={price} {...paramsInput0}>Montant (€)</Input>
-						</>
-					}
-				</div>
-
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<Input type="date" identifiant="dateAt" valeur={dateAt} {...paramsInput0}>Date</Input>
-					<Input type="time" identifiant="dateTime" valeur={dateTime} {...params}>
-						Heure <span className="text-gray-500 text-xs">(optionnel)</span>
-					</Input>
+					<div>
+						{type === 4
+							? <InputView valeur={name} errors={errors}>Intitulé</InputView>
+							: <Input identifiant="name" valeur={name} {...paramsInput0}>Intitulé</Input>
+						}
+					</div>
+					<div>
+						<Input type="time" identifiant="dateTime" valeur={dateTime} {...params}>
+							Heure <span className="text-gray-500 text-xs">(optionnel)</span>
+						</Input>
+					</div>
 				</div>
 
 				<div>
@@ -231,6 +227,14 @@ class Form extends Component {
 						</SelectCombobox>
 					}
 				</div>
+
+				{type !== 4 && (
+					<div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3 [&_label]:mb-0">
+						<Switcher valeur={isActive} identifiant="isActive" items={activeItems} {...paramsInput0}>
+							Déjà réalisée
+						</Switcher>
+					</div>
+				)}
 			</div>
 
 			<div className="flex justify-end gap-2">

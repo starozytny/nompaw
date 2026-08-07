@@ -33,6 +33,7 @@ const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 const URL_USE_SAVING = "intern_api_budget_categories_use";
 
 const MONTHS_SHORT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+const TODAY = new Date();
 
 export default function Budget (props) {
 	const [activeTab, setActiveTab] = useState('planning');
@@ -264,6 +265,30 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 		{ value: 3, name: "Économies", total: currentSummary.totalSaving, total2: currentSummary.totalSavingReal, icon: "time", cat: "saving" },
 	]
 
+	const CAT_TYPE_COLOR = ['var(--cat-expense)', 'var(--cat-income)', 'var(--cat-saving)'];
+	let categoryBreakdown = (() => {
+		let byCategory = new Map();
+		nData.forEach(elem => {
+			if (elem.type === 3 || elem.type === 4) return;
+			let key = elem.category ? elem.category.id : 'none';
+			let row = byCategory.get(key);
+			if (!row) {
+				row = {
+					key,
+					name: elem.category ? elem.category.name : 'Sans catégorie',
+					color: elem.category ? CAT_TYPE_COLOR[elem.category.type] : 'hsl(var(--muted-foreground))',
+					total: 0,
+				};
+				byCategory.set(key, row);
+			}
+			row.total += elem.price;
+		});
+
+		let rows = Array.from(byCategory.values()).sort((a, b) => b.total - a.total).slice(0, 6);
+		let max = rows.length ? rows[0].total : 1;
+		return rows.map(r => ({ ...r, pct: max ? Math.max((r.total / max) * 100, 3) : 0 }));
+	})();
+
 	return <div className="flex flex-col gap-5">
 		<div className="flex flex-wrap items-end justify-between gap-3">
 			<div className="text-sm text-muted-foreground">Année {year}</div>
@@ -286,14 +311,20 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 		<div className="grid grid-cols-12 gap-1.5 overflow-x-auto pb-1">
 			{MONTHS_SHORT.map((label, i) => {
 				const isActive = i + 1 === month;
+				const isToday = year === TODAY.getFullYear() && i + 1 === TODAY.getMonth() + 1;
 				const isNeg = balances[i] < 0;
 				return <button key={i} type="button" onClick={() => setMonth(i + 1)}
+					title={isToday ? "Mois actuel" : undefined}
 					className={cn(
 						"col-span-1 min-w-[58px] flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-center transition-colors",
-						isActive ? "border-foreground bg-foreground text-background" : "bg-white hover:border-foreground/30"
+						isActive ? "border-foreground bg-foreground text-background" : "bg-gray-50 hover:bg-whiter hover:border-foreground/30",
+						isToday && !isActive && "ring-1 ring-inset ring-foreground/35"
 					)}
 				>
-					<span className={cn("text-[11px] font-semibold uppercase tracking-wide", isActive ? "text-background/70" : "text-muted-foreground")}>{label}</span>
+					<span className={cn("flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide", isActive ? "text-background/70" : "text-muted-foreground")}>
+						{label}
+						{isToday && <span className={cn("h-1 w-1 rounded-full", isActive ? "bg-background/70" : "bg-foreground/60")} />}
+					</span>
 					<span className={cn("text-xs font-semibold tabular-nums", isActive ? (isNeg ? "text-red-300" : "text-background") : (isNeg ? "text-[var(--status-critical)]" : ""))}>
 						{Sanitaze.toFormatCurrency(balances[i], true)}
 					</span>
@@ -355,11 +386,35 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 					})}
 				</div>
 
-				{itemsSavings.length !== 0 && <Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Utilisation des économies</CardTitle>
+				{categoryBreakdown.length !== 0 && <Card>
+					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
+						<CardTitle className="text-sm">Répartition par catégorie</CardTitle>
+						<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{categoryBreakdown.length} catégorie{categoryBreakdown.length > 1 ? "s" : ""}</span>
 					</CardHeader>
-					<CardContent className="flex flex-col gap-4 pt-0">
+					<CardContent className="flex flex-col gap-3 p-4">
+						{categoryBreakdown.map(row => (
+							<div key={row.key} className="flex flex-col gap-1">
+								<div className="flex items-center justify-between gap-2">
+									<span className="flex items-center gap-1.5 text-xs font-medium">
+										<span className="h-2 w-2 flex-none rounded-full" style={{ background: row.color }} />
+										{row.name}
+									</span>
+									<span className="text-xs font-semibold tabular-nums">{Sanitaze.toFormatCurrency(row.total)}</span>
+								</div>
+								<div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+									<div className="h-full rounded-full transition-all" style={{ width: `${row.pct}%`, background: row.color }} />
+								</div>
+							</div>
+						))}
+					</CardContent>
+				</Card>}
+
+				{itemsSavings.length !== 0 && <Card>
+					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
+						<CardTitle className="text-sm">Utilisation des économies</CardTitle>
+						<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{itemsSavings.length} catégorie{itemsSavings.length > 1 ? "s" : ""}</span>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-4 pt-4">
 						{itemsSavings.map(sa => {
 							let available = sa.total - sa.used;
 							let progress = sa.goal ? (available / sa.goal) * 100 : 0;
@@ -368,7 +423,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 									<span className="text-sm font-medium">{sa.name}</span>
 									<span className="text-xs text-muted-foreground">{progress.toFixed(0)}%</span>
 								</div>
-								<Progress value={progress} indicatorClassName="bg-[var(--cat-saving)]" />
+								<Progress value={progress} indicatorStyle={{ background: 'var(--cat-saving-gradient)' }} />
 								<div className="flex items-center justify-between text-xs text-muted-foreground">
 									<span>Disponible <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(available)}</b></span>
 									<div className="flex items-center gap-2">
@@ -388,7 +443,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 
 			<div className="xl:col-span-7">
 				<Card className="overflow-hidden">
-					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 p-4">
+					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
 						<CardTitle className="text-sm">
 							Opérations du mois <span className="font-normal text-muted-foreground">({nData.length + visibleRecurrences.length})</span>
 						</CardTitle>

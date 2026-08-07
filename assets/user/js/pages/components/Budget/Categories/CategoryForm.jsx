@@ -152,13 +152,17 @@ class Form extends Component {
 
 				<div className="flex flex-col gap-4 bg-muted/40 p-5 rounded-lg border">
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						<Input identifiant="name" valeur={name} {...paramsInput0} placeholder="Ex: Alimentation">
-							Nom de la catégorie
-						</Input>
-						{parseInt(type) === 2 && (
-							<Input identifiant="goal" valeur={goal} {...paramsInput0} placeholder="Ex: 5000.00">
-								Objectif (€) <span className="text-gray-500 text-xs">(optionnel)</span>
+						<div>
+							<Input identifiant="name" valeur={name} {...paramsInput0} placeholder="Ex: Alimentation">
+								Nom de la catégorie
 							</Input>
+						</div>
+						{parseInt(type) === 2 && (
+							<div>
+								<Input identifiant="goal" valeur={goal} {...paramsInput0} placeholder="Ex: 5000.00">
+									Objectif (€) <span className="text-gray-500 text-xs">(optionnel)</span>
+								</Input>
+							</div>
 						)}
 					</div>
 

@@ -229,12 +229,16 @@ class Form extends Component {
 						}
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						<Input identifiant="name" valeur={name} {...paramsInput0} placeholder="Ex: Loyer mensuel">
-							Intitulé
-						</Input>
-						<Input identifiant="price" valeur={price} {...paramsInput0} placeholder="Ex: 850.00">
-							Montant (€)
-						</Input>
+						<div>
+							<Input identifiant="name" valeur={name} {...paramsInput0} placeholder="Ex: Loyer mensuel">
+								Intitulé
+							</Input>
+						</div>
+						<div>
+							<Input identifiant="price" valeur={price} {...paramsInput0} placeholder="Ex: 850.00">
+								Montant (€)
+							</Input>
+						</div>
 					</div>
 
 					<div>

@@ -5,10 +5,11 @@ import { cn } from "@shadcnComponents/lib/utils"
 export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number
   indicatorClassName?: string
+  indicatorStyle?: React.CSSProperties
 }
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
-  ({ className, value = 0, indicatorClassName, ...props }, ref) => (
+  ({ className, value = 0, indicatorClassName, indicatorStyle, ...props }, ref) => (
     <div
       ref={ref}
       role="progressbar"
@@ -26,7 +27,7 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
           "h-full flex-1 bg-primary transition-all",
           indicatorClassName
         )}
-        style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+        style={{ width: `${Math.min(Math.max(value, 0), 100)}%`, ...indicatorStyle }}
       />
     </div>
   )

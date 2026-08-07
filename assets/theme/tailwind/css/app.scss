@@ -109,6 +109,7 @@ input[type=number] {
     --cat-expense-soft: #fdf0ea;
     --cat-saving: #eda100;
     --cat-saving-soft: #fdf1de;
+    --cat-saving-gradient: linear-gradient(90deg, #f8cc73, #eda100);
     --status-good: #0ca30c;
     --status-good-soft: #e9f7e9;
     --status-critical: #d03b3b;
@@ -146,6 +147,7 @@ input[type=number] {
     --cat-expense-soft: #2c1e17;
     --cat-saving: #e0a326;
     --cat-saving-soft: #2c2410;
+    --cat-saving-gradient: linear-gradient(90deg, #f0bf5e, #e0a326);
     --status-good: #3fbf3f;
     --status-good-soft: #10240f;
     --status-critical: #e66767;
