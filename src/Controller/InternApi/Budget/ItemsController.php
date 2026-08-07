@@ -21,6 +21,10 @@ class ItemsController extends AbstractController
     public function submitForm($type, BuItemRepository $repository, BuItem $obj, Request $request, ApiResponse $apiResponse,
                                ValidatorService $validator, DataBudget $dataEntity, BuCategoryRepository $categoryRepository): JsonResponse
     {
+        if ($type == "update" && $obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
@@ -29,7 +33,7 @@ class ItemsController extends AbstractController
         $obj = $dataEntity->setDataItem($obj, $data);
         $obj->setUser($this->getUser());
 
-        $category = $categoryRepository->findOneBy(['id' => $data->category]);
+        $category = $categoryRepository->findOneBy(['id' => $data->category, 'user' => $this->getUser()]);
         $obj->setCategory($category);
 
         if($type == "update") {

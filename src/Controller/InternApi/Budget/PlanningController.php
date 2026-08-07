@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Api\Budget;
+namespace App\Controller\InternApi\Budget;
 
 use App\Entity\Main\User;
 use App\Repository\Budget\BuCategoryRepository;
@@ -9,21 +9,21 @@ use App\Repository\Budget\BuRecurrentRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Budget\BudgetService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/budget', name: 'api_budget_')]
-class BudgetController extends AbstractController
+#[Route('/intern/api/budget/planning', name: 'intern_api_budget_planning_')]
+class PlanningController extends AbstractController
 {
-    #[Route('/planning/{year}', name: 'index', methods: 'GET')]
-    public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
-                         BuCategoryRepository $categoryRepository, SerializerInterface $serializer,
-                         ApiResponse $apiResponse, BudgetService $budgetService): JsonResponse
+    #[Route('/{year}', name: 'index', options: ['expose' => true], methods: 'GET')]
+    public function index(int $year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
+                          BuCategoryRepository $categoryRepository, SerializerInterface $serializer,
+                          ApiResponse $apiResponse, BudgetService $budgetService): Response
     {
         /** @var User $user */
         $user = $this->getUser();
-        if($year < $user->getBudgetYear()){
+        if ($year < $user->getBudgetYear()) {
             $year = $user->getBudgetYear();
         }
 
@@ -32,7 +32,6 @@ class BudgetController extends AbstractController
         $today = new \DateTime();
 
         return $apiResponse->apiJsonResponseCustom([
-            'userBudgetYear' => $user->getBudgetYear(),
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
             'donnees' => json_decode($budget['donnees']),

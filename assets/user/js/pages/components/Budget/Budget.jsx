@@ -4,7 +4,6 @@ import { createPortal } from 'react-dom';
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import List from "@commonFunctions/list";
 import Sort from "@commonFunctions/sort";
 import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
@@ -20,6 +19,7 @@ import { cn } from "@shadcnComponents/lib/utils";
 const SORTER = Sort.compareDateAtInverseThenId;
 
 const URL_INDEX_PAGE = "user_budget_index"
+const URL_PLANNING = "intern_api_budget_planning_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
 const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
@@ -27,27 +27,44 @@ const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 const URL_USE_SAVING = "intern_api_budget_categories_use";
 
-function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m, yearMin, initTotal, recurrences }) {
+function Budget ({ donnees, categories, savings, recurrences, y, m, yearMin, monthlyBalances, monthlySummaries, savingsSummaries }) {
 	const deleteRef = useRef(null)
 	const trashRef = useRef(null)
 	const savingRef = useRef(null)
 	const [year, setYear] = useState(parseInt(y))
 	const [month, setMonth] = useState(parseInt(m))
 	const [data, setData] = useState(JSON.parse(donnees))
-	const [nSavingsItems, setNSavingsItems] = useState(JSON.parse(savingsItems))
-	const [nSavingsUsed, setNSavingsUsed] = useState(JSON.parse(savingsUsed))
+	const [nRecurrencesData, setNRecurrencesData] = useState(JSON.parse(recurrences))
+	const [nSavings, setNSavings] = useState(JSON.parse(savings))
+	const [balances, setBalances] = useState(JSON.parse(monthlyBalances))
+	const [summaries, setSummaries] = useState(JSON.parse(monthlySummaries))
+	const [savingsSummariesData, setSavingsSummariesData] = useState(JSON.parse(savingsSummaries))
 	const [element, setElement] = useState(null)
 	const [elementToDelete, setElementToDelete] = useState(null)
 	const [saving, setSaving] = useState(null)
 	const [load, setLoad] = useState(false)
 	const [openSaving, setOpenSaving] = useState(false)
 
-	let handleUpdateList = (elem, context) => {
-		setData(List.updateDataMuta(elem, context, data, SORTER));
-		if (elem.type === 2) { // saving type
-			setNSavingsItems(List.updateDataMuta(elem, context, nSavingsItems, SORTER));
-		}
-		setElement(null);
+	// Every mutation below re-fetches the whole planning payload rather than patching local state:
+	// the totals are computed server-side (recurrences, cancelled instances, savings balances, ...)
+	// and re-deriving them client-side would just re-introduce the untested duplicate logic this
+	// component used to have.
+	let refetchPlanning = (targetYear) => {
+		return axios({ method: "GET", url: Routing.generate(URL_PLANNING, { year: targetYear }) })
+			.then(function (response) {
+				let d = response.data;
+				setData(d.donnees);
+				setNRecurrencesData(d.recurrences);
+				setNSavings(d.savings);
+				setBalances(d.monthlyBalances);
+				setSummaries(d.monthlySummaries);
+				setSavingsSummariesData(d.savingsSummaries);
+			})
+		;
+	}
+
+	let handleUpdateList = () => {
+		refetchPlanning(year).then(() => setElement(null));
 	}
 
 	let handleCancelEdit = () => {
@@ -89,14 +106,10 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 			deleteRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
 			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { id: elem.id }), data: {} })
-				.then(function (response) {
-					if (elem.recurrenceId) {
-						handleUpdateList(response.data, "update")
-					} else {
-						handleUpdateList(elem, "delete")
-						setNSavingsUsed(List.updateDataMuta(elem, "delete", nSavingsUsed, SORTER));
-					}
-
+				.then(function () {
+					return refetchPlanning(year);
+				})
+				.then(function () {
 					setElementToDelete(null);
 					deleteRef.current.handleClose();
 				})
@@ -115,8 +128,8 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 			setLoad(true)
 
 			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_ELEMENT, { id: elem.id }), data: {} })
-				.then(function (response) {
-					handleUpdateList(response.data, "update")
+				.then(function () {
+					return refetchPlanning(year);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -133,8 +146,8 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 			setLoad(true)
 
 			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_RECURRENCE, { id: elem.id }), data: { year: year, month: month } })
-				.then(function (response) {
-					handleUpdateList(response.data, "create")
+				.then(function () {
+					return refetchPlanning(year);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -152,8 +165,10 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 			trashRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
 			axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, { id: elem.id }), data: { year: year, month: month } })
-				.then(function (response) {
-					handleUpdateList(response.data, "create")
+				.then(function () {
+					return refetchPlanning(year);
+				})
+				.then(function () {
 					setElementToDelete(null);
 					trashRef.current.handleClose();
 				})
@@ -172,8 +187,8 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 			setLoad(true)
 
 			axios({ method: "PUT", url: Routing.generate(URL_CANCEL_ELEMENT, { id: elem.id }), data: {} })
-				.then(function (response) {
-					handleUpdateList(response.data, "update")
+				.then(function () {
+					return refetchPlanning(year);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -192,9 +207,10 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 
 			let self = this;
 			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total } })
-				.then(function (response) {
-					handleUpdateList(response.data, "create")
-					setNSavingsUsed(List.updateDataMuta(response.data, "create", nSavingsUsed, SORTER));
+				.then(function () {
+					return refetchPlanning(year);
+				})
+				.then(function () {
 					setSaving(null);
 					savingRef.current.handleClose();
 				})
@@ -209,210 +225,33 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 		}
 	}
 
-	let recurrencesData = JSON.parse(recurrences);
-	let nSavings = JSON.parse(savings);
-	let totauxExpense = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	let totauxIncome = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let currentSummary = summaries[month - 1];
 
-	let totalExpense = 0, totalIncome = 0, totalSaving = 0;
-	let nData = [], nRecurrencesData = [];
+	let nData = data.filter(d => d.month === month).sort(SORTER);
+	let visibleRecurrences = nRecurrencesData.filter(r => {
+		let eligible = (year > r.initYear || (r.initYear === year && month >= r.initMonth)) && r.months.includes(month);
+		if (!eligible) return false;
 
-	// set totaux with recurrences
-	for (let i = 0 ; i < 12 ; i++) {
-		recurrencesData.forEach(d => {
-			if (year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth)) {
-				if (d.months.includes(i + 1)) {
+		// A real item for this month already represents this recurrence (activated or cancelled).
+		return !nData.some(d => d.recurrenceId === r.id);
+	});
 
-					let notDeleted = true;
-					data.forEach(realD => {
-						if(realD.recurrenceId === d.id && realD.month === i + 1 && realD.type === 3){
-							notDeleted = false;
-						}
-					})
+	let itemsSavings = nSavings.map(sa => {
+		let summary = savingsSummariesData.find(s => s.id === sa.id);
+		let total = summary ? summary.totalByMonth[month - 1] : 0;
+		let used = summary ? summary.usedByMonth[month - 1] : 0;
 
-					if(notDeleted){
-						switch (d.type) {
-							case 0:
-							case 2:
-								totauxExpense[i] += d.price;
-								break;
-							case 1:
-								totauxIncome[i] += d.price;
-								break;
-							default:
-								break;
-						}
-					}
-				}
-			}
-		})
-
-		if (i + 1 === month) {
-			recurrencesData.forEach(d => {
-				if (year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth)) {
-					if (d.months.includes(i + 1)) {
-
-						let notDeleted = true;
-						data.forEach(realD => {
-							if(realD.recurrenceId === d.id && realD.month === i + 1 && realD.type === 3){
-								notDeleted = false;
-							}
-						})
-
-						if(notDeleted){
-							switch (d.type) {
-								case 0:
-									totalExpense += d.price;
-									break;
-								case 1:
-									totalIncome += d.price;
-									break;
-								case 2:
-									totalSaving += d.price;
-									break;
-								default:
-									break;
-							}
-						}
-					}
-				}
-			})
-		}
-	}
-
-	// add only recurrences eligible
-	recurrencesData.forEach(r => {
-		if (year > r.initYear || (r.initYear === year && month >= r.initMonth)) {
-			if (r.months.includes(month)) {
-				nRecurrencesData.push(r);
-			}
-		}
-	})
-
-	// update totaux with items and update with itemRecurrence
-	let totalExpenseReal = 0, totalIncomeReal = 0, totalSavingReal = 0;
-	data.forEach(d => {
-		if (d.month === month) {
-			switch (d.type) {
-				case 0:
-					totalExpense += d.price;
-					if(d.isActive){
-						totalExpenseReal += d.price;
-					}
-					break;
-				case 1:
-					totalIncome += d.price;
-					if(d.isActive){
-						totalIncomeReal += d.price;
-					}
-					break;
-				case 2:
-					totalSaving += d.price;
-					if(d.isActive){
-						totalSavingReal += d.price;
-					}
-					break;
-				default:
-					break;
-			}
-
-			nData.push(d);
-			if (d.recurrenceId) {
-				nRecurrencesData = nRecurrencesData.filter(r => r.id !== d.recurrenceId);
-				switch (d.type) {
-					case 0:
-						totalExpense -= d.recurrencePrice;
-						break;
-					case 1:
-						totalIncome -= d.recurrencePrice;
-						break;
-					case 2:
-						totalSaving -= d.recurrencePrice;
-						break;
-					default:
-						break;
-				}
-			}
-		}
-
-		switch (d.type) {
-			case 0:
-			case 2:
-				totauxExpense[d.month - 1] += d.price;
-				break;
-			case 1:
-				totauxIncome[d.month - 1] += d.price;
-				break;
-			default:
-				break;
-		}
-
-		if (d.recurrenceId) {
-			switch (d.type) {
-				case 0:
-				case 2:
-					totauxExpense[d.month - 1] -= d.recurrencePrice;
-					break;
-				case 1:
-					totauxIncome[d.month - 1] -= d.recurrencePrice;
-					break;
-				default:
-					break;
-			}
-		}
-	})
-
-	//totaux eco through months years
-	let totSavingAll = 0, totSavingAllUsed = 0, itemsSavings = [];
-	nSavings.forEach(sa => {
-
-		let total = 0, used = 0;
-		nSavingsItems.forEach(s => {
-			if (s.category && s.category.id === sa.id) {
-				if (s.year <= year) {
-					if (s.year < year || (s.year === year && s.month <= month)) {
-						total += s.price;
-						totSavingAll += s.price;
-					}
-				}
-			}
-		})
-		nSavingsUsed.forEach(s => {
-			if (s.category && s.category.id === sa.id) {
-				if (s.year <= year) {
-					if (s.year < year || (s.year === year && s.month <= month)) {
-						used += s.price;
-						totSavingAllUsed += s.price;
-					}
-				}
-			}
-		})
-
-		sa.total = total;
-		sa.used = used;
-		itemsSavings.push(sa);
-	})
-
-	let totaux = [];
-	for (let i = 0 ; i < 12 ; i++) {
-		let tmpDispo = (i === 0 ? parseFloat(initTotal) : 0) + totauxIncome[i] - totauxExpense[i];
-		totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
-	}
-
-	let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
-	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
-
-	let tmpTotalMinus = totalExpenseReal + totalSavingReal;
-	let totalDispoNow = tmpTotalMinus < 0 ? initial + totalIncomeReal + tmpTotalMinus : initial + totalIncomeReal - tmpTotalMinus;
+		return { ...sa, total, used };
+	});
+	let totSavingAll = itemsSavings.reduce((acc, sa) => acc + sa.total, 0);
+	let totSavingAllUsed = itemsSavings.reduce((acc, sa) => acc + sa.used, 0);
 
 	let cards = [
-		{ value: 0, name: "Budget disponible", total: totalDispo, total2: totalDispoNow, initial: initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
-		{ value: 1, name: "Dépenses", total: totalExpense, total2: totalExpenseReal, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
-		{ value: 2, name: "Revenus", total: totalIncome, total2: totalIncomeReal, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
-		{ value: 3, name: "Économies", total: totalSaving, total2: totalSavingReal, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
+		{ value: 0, name: "Budget disponible", total: currentSummary.totalDispo, total2: currentSummary.totalDispoNow, initial: currentSummary.initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
+		{ value: 1, name: "Dépenses", total: currentSummary.totalExpense, total2: currentSummary.totalExpenseReal, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
+		{ value: 2, name: "Revenus", total: currentSummary.totalIncome, total2: currentSummary.totalIncomeReal, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
+		{ value: 3, name: "Économies", total: currentSummary.totalSaving, total2: currentSummary.totalSavingReal, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
 	]
-
-	nData.sort(SORTER);
 
 	return <div className="flex flex-col gap-6">
 		<div className="flex flex-col items-center justify-center gap-4 w-full lg:mx-auto">
@@ -420,7 +259,7 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 				<Year year={year} yearMin={parseInt(yearMin)} />
 			</div>
 			<div className="overflow-hidden w-screen lg:w-full lg:px-8">
-				<Months year={year} active={month} onSelect={setMonth} totaux={totaux} />
+				<Months year={year} active={month} onSelect={setMonth} totaux={balances} />
 			</div>
 		</div>
 
@@ -536,11 +375,11 @@ function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m
 						<h3 className="font-semibold text-gray-900 flex items-center gap-2">
 							<span className="icon-cart text-blue-600"></span>
 							Opérations du mois
-							<span className="text-sm font-normal text-gray-600">({nData.length + nRecurrencesData.length})</span>
+							<span className="text-sm font-normal text-gray-600">({nData.length + visibleRecurrences.length})</span>
 						</h3>
 					</div>
 					<div className="flex flex-col gap-6">
-						<BudgetList data={nData} recurrencesData={nRecurrencesData}
+						<BudgetList data={nData} recurrencesData={visibleRecurrences}
 									onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
 									onActiveRecurrence={handleActiveRecurrence} key={month} />
 					</div>

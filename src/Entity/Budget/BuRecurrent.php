@@ -3,12 +3,14 @@
 namespace App\Entity\Budget;
 
 use App\Entity\DataEntity;
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuRecurrentRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BuRecurrentRepository::class)]
 class BuRecurrent extends DataEntity
@@ -22,28 +24,40 @@ class BuRecurrent extends DataEntity
     #[Groups(['burecu_list', 'burecu_form'])]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(enumType: TypeType::class)]
     #[Groups(['burecu_list', 'burecu_form'])]
-    private ?int $type = null;
+    #[Assert\NotNull]
+    #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving])]
+    private ?TypeType $type = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getPrice()/setPrice().
+     */
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
-    private ?float $price = null;
+    #[Assert\NotNull]
+    private ?int $price = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\Count(min: 1, minMessage: 'Sélectionnez au moins un mois.')]
+    #[Assert\All([new Assert\Range(min: 1, max: 12)])]
     private array $months = [];
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotNull]
     private ?int $initYear = null;
 
     #[ORM\Column]
     #[Groups(['burecu_list', 'burecu_form'])]
+    #[Assert\NotNull]
+    #[Assert\Range(min: 1, max: 12)]
     private ?int $initMonth = null;
 
     #[ORM\ManyToOne(inversedBy: 'recurrents')]
@@ -70,12 +84,12 @@ class BuRecurrent extends DataEntity
         return $this->id;
     }
 
-    public function getType(): ?int
+    public function getType(): ?TypeType
     {
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(?TypeType $type): static
     {
         $this->type = $type;
 
@@ -85,27 +99,33 @@ class BuRecurrent extends DataEntity
     #[Groups(['burecu_list'])]
     public function getTypeIcon(): ?string
     {
-        $values = ['minus', 'add', 'time'];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'minus',
+            TypeType::Income => 'add',
+            TypeType::Saving => 'time',
+            default => null,
+        };
     }
 
     #[Groups(['burecu_list'])]
     public function getTypeString(): ?string
     {
-        $values = ['Dépense', 'Revenu', 'Economie'];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'Dépense',
+            TypeType::Income => 'Revenu',
+            TypeType::Saving => 'Economie',
+            default => null,
+        };
     }
 
     public function getPrice(): ?float
     {
-        return $this->price;
+        return $this->price !== null ? $this->price / 100 : null;
     }
 
     public function setPrice(float $price): static
     {
-        $this->price = $price;
+        $this->price = (int) round($price * 100);
 
         return $this;
     }

@@ -32,28 +32,23 @@ class BudgetController extends AbstractController
             return $this->redirectToRoute('user_budget_index', ['year' => $currentYear]);
         }
 
-        [
-            $data,
-            $categories,
-            $savings,
-            $savingsItems,
-            $savingsUsed,
-            $recurrences,
-            $totalInit
-        ] = $budgetService->getData($serializer, $user, $year, $repository, $recurrentRepository, $categoryRepository);
+        $budget = $budgetService->getData($serializer, $user, $year, $repository, $recurrentRepository, $categoryRepository);
 
         $today = new \DateTime();
 
         return $this->render('user/pages/budget/index.html.twig', [
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
-            'donnees' => $data,
-            'categories' => $categories,
-            'savings' => $savings,
-            'savingsItems' => $savingsItems,
-            'savingsUsed' => $savingsUsed,
-            'recurrences' => $recurrences,
-            'initTotal' => $totalInit,
+            'donnees' => $budget['donnees'],
+            'categories' => $budget['categories'],
+            'savings' => $budget['savings'],
+            'savingsItems' => $budget['savingsItems'],
+            'savingsUsed' => $budget['savingsUsed'],
+            'recurrences' => $budget['recurrences'],
+            'initTotal' => $budget['initTotal'],
+            'monthlyBalances' => json_encode($budget['monthlyBalances']),
+            'monthlySummaries' => json_encode($budget['monthlySummaries']),
+            'savingsSummaries' => json_encode($budget['savingsSummaries']),
         ]);
     }
 }
