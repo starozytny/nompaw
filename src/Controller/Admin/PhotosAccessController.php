@@ -138,6 +138,24 @@ class PhotosAccessController extends AbstractController
         return $apiResponse->apiJsonResponseData($this->serializeGuest($token->getUser()));
     }
 
+    #[Route('/lien/{id}/reactiver', name: 'reactivate_token', options: ['expose' => true], methods: 'PUT')]
+    public function reactivateToken(PhAccessToken $token, PhAccessTokenRepository $tokenRepository, ApiResponse $apiResponse): Response
+    {
+        $token->setRevokedAt(null);
+        $tokenRepository->save($token, true);
+
+        return $apiResponse->apiJsonResponseData($this->serializeGuest($token->getUser()));
+    }
+
+    #[Route('/lien/{id}', name: 'delete_token', options: ['expose' => true], methods: 'DELETE')]
+    public function deleteToken(PhAccessToken $token, PhAccessTokenRepository $tokenRepository, ApiResponse $apiResponse): Response
+    {
+        $guest = $token->getUser();
+        $tokenRepository->remove($token, true);
+
+        return $apiResponse->apiJsonResponseData($this->serializeGuest($guest));
+    }
+
     #[Route('/membre/{id}/bloquer', name: 'toggle_blocked', options: ['expose' => true], methods: 'PUT')]
     public function toggleBlocked(User $guest, UserRepository $userRepository, ApiResponse $apiResponse): Response
     {
