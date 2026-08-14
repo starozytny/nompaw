@@ -21,4 +21,15 @@ class StorytellingController extends AbstractController
         }
         return $response;
     }
+
+    // Version HD pour la lightbox : sert le fichier du sous-dossier hd/ s'il existe,
+    // sinon retombe sur la miniature (une photo n'a pas forcément de version HD déposée).
+    #[Route('/src/file-hd/{groupe}/{aventure}/{filename}', name: 'file_hd_src', options: ['expose' => true], methods: 'GET')]
+    public function getFileHD($groupe, $aventure, $filename): Response
+    {
+        $base = $this->getParameter('private_directory') . "storytelling/" . $groupe . "/" . $aventure . "/";
+        $hdFile = $base . "hd/" . $filename;
+
+        return new BinaryFileResponse(is_file($hdFile) ? $hdFile : $base . $filename);
+    }
 }
