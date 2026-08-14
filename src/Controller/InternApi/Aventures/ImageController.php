@@ -74,9 +74,6 @@ class ImageController extends AbstractController
         return in_array($user->getId(), $participants);
     }
 
-    /**
-     * @throws \ImagickException
-     */
     #[Route('/upload/photos/{id}', name: 'upload_images', options: ['expose' => true], methods: 'POST')]
     public function upload(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository,
                            FileUploader $fileUploader, RaImageRepository $imageRepository): Response
@@ -85,6 +82,10 @@ class ImageController extends AbstractController
             $randoFile = '/' . $obj->getId();
             foreach($request->files as $file){
                 $filenameImage = $fileUploader->uploadDrive($file, RaRando::FOLDER_IMAGES.$randoFile);
+
+                if ($filenameImage === false) {
+                    continue;
+                }
 
                 $image = (new RaImage())
                     ->setFile($filenameImage)

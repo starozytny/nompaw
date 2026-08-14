@@ -63,6 +63,14 @@ class PhMediaRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function getTotalSize(): int
+    {
+        return (int) ($this->createQueryBuilder('m')
+            ->select('SUM(m.fileSize)')
+            ->getQuery()
+            ->getSingleScalarResult() ?? 0);
+    }
+
     /**
      * @return User[]
      */

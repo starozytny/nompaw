@@ -4,7 +4,7 @@ import { PhotosGallery } from "@userPages/Photos/PhotosGallery";
 
 let el = document.getElementById("photos_gallery");
 if (el) {
-    createRoot(el).render(<PhotosGallery userId={el.dataset.userId} isAdmin={el.dataset.isAdmin === '1'} />)
+    createRoot(el).render(<PhotosGallery userId={el.dataset.userId} isAdmin={el.dataset.isAdmin === '1'} homepageUrl={el.dataset.homepageUrl} />)
 }
 
 if ('serviceWorker' in navigator) {

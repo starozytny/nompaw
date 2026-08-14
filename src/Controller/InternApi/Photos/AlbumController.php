@@ -5,6 +5,7 @@ namespace App\Controller\InternApi\Photos;
 use App\Entity\Main\User;
 use App\Entity\Photo\PhAlbum;
 use App\Repository\Photo\PhAlbumRepository;
+use App\Repository\Photo\PhMediaRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Data\DataAlbum;
 use App\Service\ValidatorService;
@@ -24,6 +25,43 @@ class AlbumController extends AbstractController
         $albums = $repository->findBy([], ['createdAt' => 'DESC']);
 
         return new JsonResponse($serializer->serialize($albums, 'json', ['groups' => PhAlbum::LIST]), 200, [], true);
+    }
+
+    #[Route('/{id}/cover', name: 'cover', options: ['expose' => true], methods: 'GET')]
+    public function cover(PhAlbum $obj): Response
+    {
+        $media = $obj->getCoverMedia();
+
+        if (!$media) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->file($this->getParameter('private_directory') . $media->getThumbsFile());
+    }
+
+    #[Route('/{id}/cover', name: 'set_cover', options: ['expose' => true], methods: 'PUT')]
+    public function setCover(PhAlbum $obj, Request $request, PhMediaRepository $mediaRepository,
+                             PhAlbumRepository $albumRepository, ApiResponse $apiResponse): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($obj->getAuthor() !== $user && !$user->getIsAdmin()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $data = json_decode($request->getContent());
+        $media = !empty($data->mediaId ?? null) ? $mediaRepository->find($data->mediaId) : null;
+
+        // On ne permet de choisir comme couverture qu'une photo appartenant déjà à cet album.
+        if (!$media || $media->getAlbum() !== $obj) {
+            return $apiResponse->apiJsonResponseBadRequest("Cette photo n'appartient pas à cet album.");
+        }
+
+        $obj->setCover($media);
+        $albumRepository->save($obj, true);
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
     private function submitForm(PhAlbum $obj, Request $request, ApiResponse $apiResponse, ValidatorService $validator,

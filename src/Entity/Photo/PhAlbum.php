@@ -18,12 +18,12 @@ class PhAlbum
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['ph_album_list'])]
+    #[Groups(['ph_album_list', 'ph_media_list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le nom de l'album est obligatoire.")]
-    #[Groups(['ph_album_list'])]
+    #[Groups(['ph_album_list', 'ph_media_list'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 1000, nullable: true)]
@@ -133,15 +133,26 @@ class PhAlbum
     }
 
     #[Groups(['ph_album_list'])]
-    public function getCoverFile(): ?string
+    public function getTotalSize(): int
+    {
+        $total = 0;
+
+        foreach ($this->media as $medium) {
+            $total += $medium->getFileSize() ?? 0;
+        }
+
+        return $total;
+    }
+
+    public function getCoverMedia(): ?PhMedia
     {
         if ($this->cover) {
-            return $this->cover->getThumbsFile();
+            return $this->cover;
         }
 
         $last = $this->media->last();
 
-        return $last ? $last->getThumbsFile() : null;
+        return $last ?: null;
     }
 
     public function addMedium(PhMedia $medium): static

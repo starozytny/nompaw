@@ -1,0 +1,22 @@
+{% extends 'base_tailwind.html.twig' %}
+
+{% block title %}Photos | Nompaw.fr{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_app') }}
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#111827">
+{% endblock %}
+
+{% block body %}
+    {% include "layout/components/page-loader.html.twig" %}
+
+    {% block main_content %}{% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_app') }}
+    {{ encore_entry_script_tags('user_photos') }}
+{% endblock %}

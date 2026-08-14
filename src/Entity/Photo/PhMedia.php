@@ -42,6 +42,10 @@ class PhMedia extends DataEntity
     #[Groups(['ph_media_list'])]
     private ?int $type = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['ph_media_list'])]
+    private ?int $fileSize = null;
+
     #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'phMedia')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['ph_media_list'])]
@@ -168,6 +172,18 @@ class PhMedia extends DataEntity
     public function setType(?int $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getFileSize(): ?int
+    {
+        return $this->fileSize;
+    }
+
+    public function setFileSize(?int $fileSize): self
+    {
+        $this->fileSize = $fileSize;
 
         return $this;
     }
