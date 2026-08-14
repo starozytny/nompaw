@@ -16,6 +16,8 @@ class DataAlbum
         return ($obj)
             ->setName($this->sanitizeData->trimData($data->name))
             ->setDescription($this->sanitizeData->trimData($data->description ?? null))
+            ->setDate(!empty($data->date ?? null) ? new \DateTime($data->date) : null)
+            ->setLocation($this->sanitizeData->trimData($data->location ?? null))
         ;
     }
 }

@@ -30,6 +30,14 @@ class PhAlbum
     #[Groups(['ph_album_list'])]
     private ?string $description = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['ph_album_list'])]
+    private ?\DateTime $date = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['ph_album_list'])]
+    private ?string $location = null;
+
     #[ORM\ManyToOne(fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['ph_album_list'])]
@@ -78,6 +86,30 @@ class PhAlbum
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTime
+    {
+        return $this->date;
+    }
+
+    public function setDate(?\DateTime $date): static
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?string $location): static
+    {
+        $this->location = $location;
 
         return $this;
     }

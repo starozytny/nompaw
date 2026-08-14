@@ -1,0 +1,52 @@
+{# En-tête de section façon "Jour X" / nom de lieu #}
+{% macro day_header(label, title) %}
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        <span class="block text-sm text-blue-600 font-normal">{{ label }}</span>
+        {{ title }}
+    </h2>
+{% endmacro %}
+
+{# Un média unique (photo ou vidéo). item = {file, video: bool, aspect: bool, lazy: bool} #}
+{% macro media(item, groupe, aventure) %}
+    {% if item.video is defined and item.video %}
+        <div class="video-container">
+            <video controls>
+                <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: item.file}) }}" type="video/mp4" />
+            </video>
+        </div>
+    {% else %}
+        <div class="bg-gray-200 rounded-lg overflow-hidden"{% if item.aspect is defined and item.aspect %} style="aspect-ratio: 4/3;"{% endif %}>
+            <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: item.file}) }}"{% if item.lazy is defined and item.lazy %} loading="lazy"{% endif %} />
+            </div>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{# Galerie : liste de médias (photos/vidéos mélangeables) + légende optionnelle.
+   cols = 1 (empilé), 2 ou 3 colonnes. #}
+{% macro gallery(items, groupe, aventure, cols = 2, caption = null) %}
+    <figure class="mb-6">
+        <div class="{% if cols == 1 %}flex flex-col{% else %}grid grid-cols-{{ cols }}{% endif %} gap-3{% if caption %} mb-3{% endif %}">
+            {% for item in items %}
+                {{ _self.media(item, groupe, aventure) }}
+            {% endfor %}
+        </div>
+        {% if caption %}
+            <figcaption class="text-sm text-gray-600 italic">{{ caption }}</figcaption>
+        {% endif %}
+    </figure>
+{% endmacro %}
+
+{# Encadré coloré (alerte, mot de fin...). color = "orange" | "green" | "blue" #}
+{% macro callout(color, text) %}
+    {% set styles = {
+        orange: {box: 'bg-orange-50 border-l-4 border-orange-500 p-4 mb-6', text: 'text-sm text-orange-900'},
+        blue: {box: 'bg-blue-50 border-l-4 border-blue-500 p-4 mb-6', text: 'text-sm text-blue-900'},
+        green: {box: 'bg-green-50 border-l-4 border-green-500 p-6 rounded-r-lg', text: 'text-lg text-green-900 font-semibold text-center'},
+    } %}
+    {% set s = styles[color] %}
+    <div class="{{ s.box }}">
+        <p class="{{ s.text }}">{{ text|raw }}</p>
+    </div>
+{% endmacro %}

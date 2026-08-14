@@ -1,0 +1,89 @@
+{# Carte Leaflet + suivi de scroll, partagée par tous les articles storytelling.
+   Attend : map_center {lat, lng}, map_zoom, map_path (liste de [lat, lng]),
+   ces valeurs devant venir d'une source unique (places + path_order) côté article. #}
+<script>
+    window.addEventListener('load', function () {
+        const map = L.map('map').setView([{{ map_center.lat }}, {{ map_center.lng }}], {{ map_zoom }});
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        const markers = {};
+        let currentMarker = null;
+
+        const pathCoordinates = {{ map_path|json_encode|raw }};
+
+        const polyline = L.polyline(pathCoordinates, {
+            color: '#3b82f6',
+            weight: 3,
+            opacity: 0.7
+        }).addTo(map);
+
+        map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+
+        document.querySelectorAll('[data-section]').forEach(section => {
+            const lat = parseFloat(section.dataset.lat);
+            const lng = parseFloat(section.dataset.lng);
+            const sectionName = section.dataset.section;
+
+            const marker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="background: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                    iconSize: [20, 20]
+                })
+            }).addTo(map);
+
+            markers[sectionName] = marker;
+        });
+
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateActiveSection();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        function updateActiveSection() {
+            const sections = document.querySelectorAll('[data-section]');
+            const scrollPos = window.scrollY + window.innerHeight / 2;
+            let activeSection = null;
+
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                const sectionTop = rect.top + window.scrollY;
+                const sectionBottom = sectionTop + rect.height;
+
+                if (scrollPos >= sectionTop && scrollPos <= sectionBottom) {
+                    activeSection = section.dataset.section;
+                }
+            });
+
+            if (activeSection && activeSection !== currentMarker) {
+                Object.values(markers).forEach(marker => {
+                    marker._icon.querySelector('div').style.background = '#3b82f6';
+                    marker._icon.querySelector('div').style.transform = 'scale(1)';
+                });
+
+                if (markers[activeSection]) {
+                    markers[activeSection]._icon.querySelector('div').style.background = '#10b981';
+                    markers[activeSection]._icon.querySelector('div').style.transform = 'scale(1.3)';
+                    markers[activeSection]._icon.querySelector('div').style.transition = 'all 0.3s ease';
+
+                    const lat = parseFloat(document.querySelector(`[data-section="${activeSection}"]`).dataset.lat);
+                    const lng = parseFloat(document.querySelector(`[data-section="${activeSection}"]`).dataset.lng);
+                    map.panTo([lat, lng], { animate: true, duration: 0.5 });
+                }
+
+                currentMarker = activeSection;
+            }
+        }
+
+        updateActiveSection();
+    });
+</script>
