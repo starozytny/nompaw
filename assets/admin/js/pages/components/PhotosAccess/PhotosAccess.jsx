@@ -10,15 +10,17 @@ import Formulaire from "@commonFunctions/formulaire";
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { Input, InputFile } from "@tailwindComponents/Elements/Fields";
 import { Button } from "@tailwindComponents/Elements/Button";
-import { Camera, Plus, Lock, Unlock, Trash2, Check, Copy } from "lucide-react";
+import { Camera, Plus, Lock, Unlock, Trash2, Check, Copy, RotateCcw } from "lucide-react";
 
 const URL_LIST = "admin_photos_access_list";
 const URL_CREATE = "admin_photos_access_create";
 const URL_UPDATE = "admin_photos_access_update";
 const URL_GENERATE_TOKEN = "admin_photos_access_generate_token";
 const URL_REVOKE_TOKEN = "admin_photos_access_revoke_token";
+const URL_REACTIVATE_TOKEN = "admin_photos_access_reactivate_token";
 const URL_TOGGLE_BLOCKED = "admin_photos_access_toggle_blocked";
 const URL_DELETE = "admin_photos_access_delete";
+const URL_DELETE_TOKEN = "admin_photos_access_delete_token";
 const URL_LIST_ACCOUNTS = "admin_photos_access_list_accounts";
 const URL_TOGGLE_ACCOUNT_ACCESS = "admin_photos_access_toggle_account_access";
 
@@ -36,11 +38,13 @@ export function PhotosAccess () {
 	const [editTarget, setEditTarget] = useState(null);
 	const [editDisplayName, setEditDisplayName] = useState("");
 	const [editErrors, setEditErrors] = useState([]);
+	const [tokenDeleteTarget, setTokenDeleteTarget] = useState(null);
 
 	const createModal = useRef();
 	const tokenModal = useRef();
 	const deleteModal = useRef();
 	const editModal = useRef();
+	const tokenDeleteModal = useRef();
 	const avatarInput = useRef();
 	const editAvatarInput = useRef();
 
@@ -75,6 +79,12 @@ export function PhotosAccess () {
 			<Button type="blue" onClick={handleConfirmEdit}>Enregistrer</Button>
 		);
 	}, [editTarget, editDisplayName, editErrors]);
+
+	useEffect(() => {
+		tokenDeleteModal.current?.handleUpdateFooter(
+			<Button type="red" onClick={handleConfirmDeleteToken}>Confirmer la suppression</Button>
+		);
+	}, [tokenDeleteTarget]);
 
 	const fetchGuests = () => {
 		setLoading(true);
@@ -203,6 +213,38 @@ export function PhotosAccess () {
 			.then((response) => {
 				setGuests(prev => prev.map(g => g.id === response.data.data.id ? response.data.data : g));
 				Toastr.toast('info', "Lien révoqué.");
+			})
+			.catch((error) => Formulaire.displayErrors(null, error))
+			.then(() => Formulaire.loader(false))
+		;
+	}
+
+	const handleReactivateToken = (tokenId) => {
+		Formulaire.loader(true);
+		axios({ method: "PUT", url: Routing.generate(URL_REACTIVATE_TOKEN, { id: tokenId }) })
+			.then((response) => {
+				setGuests(prev => prev.map(g => g.id === response.data.data.id ? response.data.data : g));
+				Toastr.toast('info', "Lien réactivé.");
+			})
+			.catch((error) => Formulaire.displayErrors(null, error))
+			.then(() => Formulaire.loader(false))
+		;
+	}
+
+	const handleDeleteToken = (token) => {
+		setTokenDeleteTarget(token);
+		tokenDeleteModal.current.handleClick();
+	}
+
+	const handleConfirmDeleteToken = () => {
+		if (!tokenDeleteTarget) return;
+
+		Formulaire.loader(true);
+		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_TOKEN, { id: tokenDeleteTarget.id }) })
+			.then((response) => {
+				setGuests(prev => prev.map(g => g.id === response.data.data.id ? response.data.data : g));
+				tokenDeleteModal.current.handleClose();
+				Toastr.toast('info', "Lien supprimé.");
 			})
 			.catch((error) => Formulaire.displayErrors(null, error))
 			.then(() => Formulaire.loader(false))
@@ -349,7 +391,7 @@ export function PhotosAccess () {
 										<span className="text-xs text-slate-500 truncate">{token.link}</span>
 									</div>
 									<div className="flex gap-1 flex-shrink-0">
-										{token.isActive && (
+										{token.isActive ? (
 											<>
 												<button type="button" onClick={() => handleCopy(token.link, token.id)}
 													className="flex items-center justify-center gap-2 rounded-md py-2 px-4 text-sm font-semibold shadow-sm transition-colors bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300">
@@ -360,7 +402,16 @@ export function PhotosAccess () {
 													Révoquer
 												</Button>
 											</>
+										) : token.revokedAt && (
+											<button type="button" onClick={() => handleReactivateToken(token.id)}
+												className="flex items-center justify-center gap-2 rounded-md py-2 px-4 text-sm font-semibold shadow-sm transition-colors bg-blue-600 text-slate-50 hover:bg-blue-500 ring-1 ring-inset ring-blue-600">
+												<RotateCcw size={16} />
+												Réactiver
+											</button>
 										)}
+										<IconButton type="red" icon={Trash2} onClick={() => handleDeleteToken(token)} tooltipPosition="-bottom-7 right-0">
+											Supprimer le lien
+										</IconButton>
 									</div>
 								</div>
 							))}
@@ -407,6 +458,13 @@ export function PhotosAccess () {
 
 		{createPortal(<Modal ref={deleteModal} identifiant="delete-guest" maxWidth={414} title="Supprimer ce membre"
 							 content={<p>Êtes-vous sûr de vouloir supprimer <b>{deleteTarget?.displayName}</b> ? Tous ses liens seront supprimés.</p>}
+							 footer={null}
+							 closeTxt="Annuler" />
+			, document.body
+		)}
+
+		{createPortal(<Modal ref={tokenDeleteModal} identifiant="delete-token" maxWidth={414} title="Supprimer ce lien"
+							 content={<p>Êtes-vous sûr de vouloir supprimer le lien <b>{tokenDeleteTarget?.label || "Lien"}</b> ? Cette action est définitive.</p>}
 							 footer={null}
 							 closeTxt="Annuler" />
 			, document.body
