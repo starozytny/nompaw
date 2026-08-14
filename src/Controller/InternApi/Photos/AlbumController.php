@@ -98,6 +98,13 @@ class AlbumController extends AbstractController
     public function update(PhAlbum $obj, Request $request, ApiResponse $apiResponse, ValidatorService $validator,
                            DataAlbum $dataAlbum, PhAlbumRepository $repository): JsonResponse
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($obj->getAuthor() !== $user && !$user->getIsAdmin()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
         return $this->submitForm($obj, $request, $apiResponse, $validator, $dataAlbum, $repository);
     }
 

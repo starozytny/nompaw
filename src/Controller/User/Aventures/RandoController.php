@@ -35,10 +35,12 @@ class RandoController extends AbstractController
         }
 
         $participants = [];
-        foreach($obj->getParticipants() as $pId){
-            $participant = $indexUsers[$pId] ?? null;
-            if($participant){
-                $participants[] = $participant;
+        if($obj->getParticipants()){
+            foreach($obj->getParticipants() as $pId){
+                $participant = $indexUsers[$pId] ?? null;
+                if($participant){
+                    $participants[] = $participant;
+                }
             }
         }
 

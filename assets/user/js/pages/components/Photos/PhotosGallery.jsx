@@ -17,6 +17,7 @@ import { Button } from "@tailwindComponents/Elements/Button";
 import {
 	ChevronLeft, ChevronRight, Image, Download, Trash2, Plus, Check,
 	CheckSquare, Square, Folder, Loader2, Play, Share2, X, HardDrive,
+	Pencil, Calendar, MapPin,
 } from "lucide-react";
 
 const URL_FETCH_MEDIA = "intern_api_photos_media_fetch";
@@ -32,6 +33,7 @@ const URL_GET_THUMBS_SRC = "intern_api_photos_media_thumbs_src";
 const URL_READ_MEDIUM_HD = "intern_api_photos_media_file_hd_src";
 const URL_ALBUM_LIST = "intern_api_photos_album_list";
 const URL_ALBUM_CREATE = "intern_api_photos_album_create";
+const URL_ALBUM_UPDATE = "intern_api_photos_album_update";
 const URL_ALBUM_DELETE = "intern_api_photos_album_delete";
 const URL_ALBUM_COVER = "intern_api_photos_album_cover";
 const URL_ALBUM_SET_COVER = "intern_api_photos_album_set_cover";
@@ -44,6 +46,12 @@ export class PhotosGallery extends Component {
 		this.state = {
 			albumName: "",
 			albumDescription: "",
+			albumDate: "",
+			albumLocation: "",
+			editAlbumName: "",
+			editAlbumDescription: "",
+			editAlbumDate: "",
+			editAlbumLocation: "",
 			allMedia: [],
 			currentMedia: [],
 			selected: new Set(),
@@ -68,6 +76,7 @@ export class PhotosGallery extends Component {
 
 		this.fileInputRef = React.createRef();
 		this.formAlbum = React.createRef();
+		this.editAlbum = React.createRef();
 		this.deleteMedium = React.createRef();
 		this.deleteFiles = React.createRef();
 		this.deleteAlbum = React.createRef();
@@ -505,19 +514,57 @@ export class PhotosGallery extends Component {
 	handleCreateAlbum = (e) => {
 		e.preventDefault();
 
-		const { albumName, albumDescription } = this.state;
+		const { albumName, albumDescription, albumDate, albumLocation } = this.state;
 
 		let self = this;
 		Formulaire.loader(true);
 
 		let formData = new FormData();
-		formData.append("data", JSON.stringify({ name: albumName, description: albumDescription }));
+		formData.append("data", JSON.stringify({ name: albumName, description: albumDescription, date: albumDate, location: albumLocation }));
 
 		axios({ method: "POST", url: Routing.generate(URL_ALBUM_CREATE), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
 			.then(function () {
 				Toastr.toast('info', "Album créé.");
 				self.formAlbum.current.handleClose();
-				self.setState({ albumName: "", albumDescription: "" });
+				self.setState({ albumName: "", albumDescription: "", albumDate: "", albumLocation: "" });
+				self.fetchAlbums();
+			})
+			.catch(function (error) {
+				Formulaire.displayErrors(self, error);
+			})
+			.then(function () {
+				Formulaire.loader(false);
+			})
+		;
+	}
+
+	handleEditAlbum = (album) => {
+		this.setState({
+			editAlbumName: album.name || "",
+			editAlbumDescription: album.description || "",
+			editAlbumDate: album.date ? album.date.substring(0, 10) : "",
+			editAlbumLocation: album.location || "",
+			errors: [],
+		});
+		this.editAlbum.current.handleClick();
+	}
+
+	handleConfirmEditAlbum = (e) => {
+		e.preventDefault();
+
+		const { selectedAlbum, editAlbumName, editAlbumDescription, editAlbumDate, editAlbumLocation } = this.state;
+
+		let self = this;
+		Formulaire.loader(true);
+
+		let formData = new FormData();
+		formData.append("data", JSON.stringify({ name: editAlbumName, description: editAlbumDescription, date: editAlbumDate, location: editAlbumLocation }));
+
+		axios({ method: "POST", url: Routing.generate(URL_ALBUM_UPDATE, { id: selectedAlbum.id }), data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
+			.then(function (response) {
+				Toastr.toast('info', "Album mis à jour.");
+				self.editAlbum.current.handleClose();
+				self.setState({ selectedAlbum: response.data });
 				self.fetchAlbums();
 			})
 			.catch(function (error) {
@@ -532,7 +579,8 @@ export class PhotosGallery extends Component {
 	render () {
 		const { userId, isAdmin, homepageUrl } = this.props;
 		const { errors, allMedia, currentMedia, selected, nbProgress, nbTotal, loading, hasMore,
-			authors, albums, authorFilter, albumName, albumDescription,
+			authors, albums, authorFilter, albumName, albumDescription, albumDate, albumLocation,
+			editAlbumName, editAlbumDescription, editAlbumDate, editAlbumLocation,
 			view, selectedAlbum, albumsScope, coverBump, totalSize } = this.state;
 
 		return <div className="bg-gray-900 min-h-screen text-white">
@@ -597,6 +645,15 @@ export class PhotosGallery extends Component {
 							<span className="text-lg font-medium text-white truncate">{selectedAlbum.name}</span>
 						</div>
 						<div className="flex items-center gap-2 flex-shrink-0">
+							{(String(selectedAlbum.author?.id) === String(userId) || isAdmin) && (
+								<button
+									className="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-white flex-shrink-0"
+									onClick={() => this.handleEditAlbum(selectedAlbum)}
+									aria-label="Modifier l'album"
+								>
+									<Pencil size={16} />
+								</button>
+							)}
 							{(String(selectedAlbum.author?.id) === String(userId) || isAdmin) && (
 								<button
 									className="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-red-400 flex-shrink-0"
@@ -687,6 +744,8 @@ export class PhotosGallery extends Component {
 							<p className="flex items-center flex-wrap gap-x-1 text-sm text-gray-300 mt-1">
 								<span>{selectedAlbum.mediaCount} élément{selectedAlbum.mediaCount > 1 ? 's' : ''}</span>
 								{selectedAlbum.author?.displayName && <span>• par {selectedAlbum.author.displayName}</span>}
+								{selectedAlbum.date && <span className="inline-flex items-center gap-1">• <Calendar size={12} />{Sanitaze.toFormatDate(selectedAlbum.date, 'D MMMM YYYY')}</span>}
+								{selectedAlbum.location && <span className="inline-flex items-center gap-1">• <MapPin size={12} />{selectedAlbum.location}</span>}
 								{isAdmin && (
 									<span className="inline-flex items-center gap-1 ml-1 px-2 py-0.5 rounded-full bg-white/10 text-xs font-medium text-gray-200">
 										<HardDrive size={11} className="text-blue-300" />
@@ -696,6 +755,10 @@ export class PhotosGallery extends Component {
 							</p>
 						</div>
 					</div>
+
+					{selectedAlbum.description && (
+						<p className="px-4 pt-3 text-sm text-gray-300 leading-relaxed whitespace-pre-line">{selectedAlbum.description}</p>
+					)}
 
 					<div className="flex flex-wrap items-center gap-2 px-4 py-3">
 						<button className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-white text-black hover:bg-gray-200" onClick={this.handleUploadClick}>
@@ -811,8 +874,33 @@ export class PhotosGallery extends Component {
 									 <TextArea identifiant="albumDescription" valeur={albumDescription} onChange={(e) => this.setState({ albumDescription: e.target.value })} errors={errors}>
 										 Description (optionnel)
 									 </TextArea>
+									 <Input type="date" identifiant="albumDate" valeur={albumDate} onChange={(e) => this.setState({ albumDate: e.target.value })} errors={errors}>
+										 Date (optionnel)
+									 </Input>
+									 <Input identifiant="albumLocation" valeur={albumLocation} onChange={(e) => this.setState({ albumLocation: e.target.value })} errors={errors}>
+										 Emplacement (optionnel)
+									 </Input>
 								 </form>}
 								 footer={<Button type="blue" onClick={this.handleCreateAlbum}>Créer</Button>} closeTxt="Annuler" />
+				, document.body
+			)}
+
+			{createPortal(<Modal ref={this.editAlbum} identifiant="edit-album" maxWidth={480} title="Modifier l'album"
+								 content={<form onSubmit={this.handleConfirmEditAlbum} className="flex flex-col gap-4">
+									 <Input identifiant="editAlbumName" valeur={editAlbumName} onChange={(e) => this.setState({ editAlbumName: e.target.value })} errors={errors}>
+										 Nom de l'album
+									 </Input>
+									 <TextArea identifiant="editAlbumDescription" valeur={editAlbumDescription} onChange={(e) => this.setState({ editAlbumDescription: e.target.value })} errors={errors}>
+										 Description (optionnel)
+									 </TextArea>
+									 <Input type="date" identifiant="editAlbumDate" valeur={editAlbumDate} onChange={(e) => this.setState({ editAlbumDate: e.target.value })} errors={errors}>
+										 Date (optionnel)
+									 </Input>
+									 <Input identifiant="editAlbumLocation" valeur={editAlbumLocation} onChange={(e) => this.setState({ editAlbumLocation: e.target.value })} errors={errors}>
+										 Emplacement (optionnel)
+									 </Input>
+								 </form>}
+								 footer={<Button type="blue" onClick={this.handleConfirmEditAlbum}>Enregistrer</Button>} closeTxt="Annuler" />
 				, document.body
 			)}
 
@@ -1018,7 +1106,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentMedia, onModal, onSelect, o
 
 			return <div key={elem.id}
 						className={`relative cursor-pointer flex items-center justify-center aspect-square group gallery-item overflow-hidden rounded-md select-none transition-colors ${
-							isSelected ? 'bg-gray-600' : 'bg-gray-900'
+							isSelected ? 'bg-gray-600' : 'bg-gray-800/80'
 						}`}
 						style={{ WebkitTouchCallout: 'none' }}
 						onClick={() => handleMediumClick(elem)}
