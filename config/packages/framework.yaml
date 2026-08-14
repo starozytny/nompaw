@@ -23,6 +23,12 @@ framework:
     php_errors:
         log: true
 
+    http_client:
+        scoped_clients:
+            coingecko.client:
+                base_uri: 'https://api.coingecko.com/api/v3/'
+                timeout: 5
+
 when@test:
     framework:
         test: true

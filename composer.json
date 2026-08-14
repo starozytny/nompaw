@@ -8,14 +8,17 @@
         "ext-ctype": "*",
         "ext-exif": "*",
         "ext-fileinfo": "*",
+        "ext-gd": "*",
         "ext-iconv": "*",
+        "ext-imagick": "*",
         "ext-openssl": "*",
         "ext-pdo": "*",
-        "ext-gd": "*",
+        "ext-zip": "*",
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.13",
+        "dompdf/dompdf": "^3.1",
         "fakerphp/faker": "^1.21",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "google/apiclient": "^2.15",
@@ -64,9 +67,7 @@
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.5",
-        "twig/twig": "^2.12|^3.0",
-      "ext-zip": "*",
-      "ext-imagick": "*"
+        "twig/twig": "^2.12|^3.0"
     },
     "config": {
         "allow-plugins": {

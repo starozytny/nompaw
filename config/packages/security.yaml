@@ -33,9 +33,15 @@ security:
                 enable_csrf: true
             logout:
                 path: app_logout
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 315360000 # ~10 years, "effectively never expires" for family photo magic links
+                path: /
+                always_remember_me: true
             custom_authenticators:
                 - App\Security\GoogleAuthenticator
                 - App\Security\FacebookAuthenticator
+                - App\Security\PhotosMagicLinkAuthenticator
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -57,6 +63,9 @@ security:
          - { path: ^/intern/api/users/create,                   roles: PUBLIC_ACCESS }
          - { path: ^/intern/api/contacts/create,                roles: PUBLIC_ACCESS }
          - { path: ^/api/login_check,                           roles: PUBLIC_ACCESS }
+         - { path: ^/connexion-photos,                          roles: PUBLIC_ACCESS }
+         - { path: ^/espace-membre/photos,                      roles: [ROLE_FAMILY_PHOTOS, ROLE_USER] }
+         - { path: ^/intern/api/photos,                         roles: [ROLE_FAMILY_PHOTOS, ROLE_USER] }
          - { path: ^/intern/api,                                roles: ROLE_USER }
          - { path: ^/api,                                       roles: ROLE_USER }
          - { path: ^/espace-membre,                             roles: ROLE_USER }

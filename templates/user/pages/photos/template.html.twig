@@ -1,0 +1,12 @@
+{% extends 'user/layout/layout.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1f2937">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_photos') }}
+{% endblock %}

@@ -46,16 +46,16 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups([
         'user_list', 'user_form', 'com_read', 'user_select',
         'pr_date_list', 'pr_house_list', 'pr_act_list',
-        'ra_img_list', 'rando_form', 'bi_present_list'
+        'ra_img_list', 'ph_media_list', 'ph_album_list', 'rando_form', 'bi_present_list'
     ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'bi_present_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list', 'bi_present_list'])]
     private ?string $displayName = null;
 
     #[ORM\Column]
@@ -73,11 +73,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -191,6 +191,16 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CrTrade::class)]
     private Collection $crTrades;
 
+    #[ORM\Column]
+    #[Groups(['user_list', 'user_form'])]
+    private bool $photosOnly = false;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: \App\Entity\Photo\PhMedia::class)]
+    private Collection $phMedia;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: \App\Entity\Photo\PhAccessToken::class)]
+    private Collection $phAccessTokens;
+
     /**
      * @throws Exception
      */
@@ -217,6 +227,8 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->mails = new ArrayCollection();
         $this->buRecurrents = new ArrayCollection();
         $this->crTrades = new ArrayCollection();
+        $this->phMedia = new ArrayCollection();
+        $this->phAccessTokens = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -262,7 +274,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $firstLetter . $etoiles . $domain;
     }
 
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     public function getAvatarFile(): ?string
     {
         return $this->getFileOrDefault(
@@ -321,11 +333,22 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
      */
     public function getRoles(): array
     {
+        if ($this->isIsBlocked()) {
+            return ['ROLE_BLOCKED'];
+        }
+
+        // photosOnly accounts (family magic-link guests) are restricted to the photos
+        // space and must never carry ROLE_USER, otherwise they'd pass the generic
+        // espace-membre/intern-api access_control rules meant for full accounts.
+        if ($this->isPhotosOnly()) {
+            return ['ROLE_FAMILY_PHOTOS'];
+        }
+
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        return $this->isIsBlocked() ? ['ROLE_BLOCKED'] : array_unique($roles);
+        return array_unique($roles);
     }
 
     public function setRoles(array $roles): self
@@ -1104,6 +1127,76 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($crTrade->getUser() === $this) {
                 $crTrade->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isPhotosOnly(): bool
+    {
+        return $this->photosOnly;
+    }
+
+    public function setPhotosOnly(bool $photosOnly): static
+    {
+        $this->photosOnly = $photosOnly;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, \App\Entity\Photo\PhMedia>
+     */
+    public function getPhMedia(): Collection
+    {
+        return $this->phMedia;
+    }
+
+    public function addPhMedia(\App\Entity\Photo\PhMedia $phMedia): static
+    {
+        if (!$this->phMedia->contains($phMedia)) {
+            $this->phMedia->add($phMedia);
+            $phMedia->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removePhMedia(\App\Entity\Photo\PhMedia $phMedia): static
+    {
+        if ($this->phMedia->removeElement($phMedia)) {
+            if ($phMedia->getAuthor() === $this) {
+                $phMedia->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, \App\Entity\Photo\PhAccessToken>
+     */
+    public function getPhAccessTokens(): Collection
+    {
+        return $this->phAccessTokens;
+    }
+
+    public function addPhAccessToken(\App\Entity\Photo\PhAccessToken $phAccessToken): static
+    {
+        if (!$this->phAccessTokens->contains($phAccessToken)) {
+            $this->phAccessTokens->add($phAccessToken);
+            $phAccessToken->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePhAccessToken(\App\Entity\Photo\PhAccessToken $phAccessToken): static
+    {
+        if ($this->phAccessTokens->removeElement($phAccessToken)) {
+            if ($phAccessToken->getUser() === $this) {
+                $phAccessToken->setUser(null);
             }
         }
 

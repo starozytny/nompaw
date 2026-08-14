@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1a1a1a; }
+        h1 { font-size: 16px; margin: 0 0 4px; color: #4a3aa7; }
+        .subtitle { font-size: 11px; color: #555; margin: 0 0 12px; }
+        .disclaimer { background: #fdf6e3; border: 1px solid #e0c98f; padding: 8px 10px; margin-bottom: 14px; font-size: 9px; color: #6b5320; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 5px 6px; text-align: left; }
+        th { background: #efecfb; color: #4a3aa7; font-size: 9px; text-transform: uppercase; }
+        td { font-size: 10px; }
+        .num { text-align: right; }
+        .missing { color: #b91c1c; font-weight: bold; }
+        tfoot td { font-weight: bold; border-top: 2px solid #4a3aa7; }
+    </style>
+</head>
+<body>
+    <h1>Rapport fiscal crypto — {{ year }}</h1>
+    <p class="subtitle">{{ user.email }}</p>
+
+    <div class="disclaimer">
+        Ce rapport applique l'art. 150 VH bis du CGI selon une compréhension non vérifiée par un professionnel.
+        À faire valider avant toute déclaration réelle.
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Coin cédé</th>
+                <th>Quantité</th>
+                <th class="num">Prix de cession (€)</th>
+                <th class="num">Coût d'acquisition cumulé (€)</th>
+                <th class="num">Valeur portefeuille (€)</th>
+                <th>Source</th>
+                <th class="num">Plus-value (€)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in lines %}
+                <tr>
+                    <td>{{ line.tradeAt }}</td>
+                    <td>{{ line.fromCoin }}</td>
+                    <td>{{ line.fromNbToken }}</td>
+                    <td class="num">{{ line.cessionPrice|number_format(2, ',', ' ') }}</td>
+                    <td class="num">{{ line.cumulativeAcquisitionCost|number_format(2, ',', ' ') }}</td>
+                    <td class="num">
+                        {% if line.portfolioValue is null %}
+                            <span class="missing">manquant ({{ line.missingCoins|join(', ') }})</span>
+                        {% else %}
+                            {{ line.portfolioValue|number_format(2, ',', ' ') }}
+                        {% endif %}
+                    </td>
+                    <td>{{ line.portfolioValueSource ?? '-' }}</td>
+                    <td class="num">
+                        {% if line.plusValue is null %}
+                            N/A
+                        {% else %}
+                            {{ line.plusValue|number_format(2, ',', ' ') }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7">Total plus-value {{ year }}</td>
+                <td class="num">{{ totalPlusValue|number_format(2, ',', ' ') }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>

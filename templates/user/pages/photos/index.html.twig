@@ -1,0 +1,10 @@
+{% extends is_granted('ROLE_USER') ? 'user/pages/photos/template.html.twig' : 'user/pages/photos/template_guest.html.twig' %}
+
+{% set page_title %}Photos{% endset %}
+{% set page_subtitle %}Les photos et vidéos partagées par la famille.{% endset %}
+
+{% block main_content %}
+    <div id="photos_gallery" data-user-id="{{ app.user.id }}" data-is-admin="{{ app.user.isAdmin ? '1' : '0' }}">
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+{% endblock %}

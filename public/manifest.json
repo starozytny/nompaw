@@ -1,0 +1,18 @@
+{
+  "name": "Nompaw Photos",
+  "short_name": "Nompaw Photos",
+  "description": "Espace photos et vidéos privé de la famille",
+  "start_url": "/espace-membre/photos/",
+  "scope": "/espace-membre/photos/",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#1f2937",
+  "icons": [
+    {
+      "src": "/logo-apple-touch.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

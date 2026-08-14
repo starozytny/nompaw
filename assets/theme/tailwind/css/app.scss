@@ -110,6 +110,10 @@ input[type=number] {
     --cat-saving: #eda100;
     --cat-saving-soft: #fdf1de;
     --cat-saving-gradient: linear-gradient(90deg, #f8cc73, #eda100);
+    /* Crypto module: slot 7 (violet) of the same validated categorical palette, unused until now */
+    --cat-crypto: #4a3aa7;
+    --cat-crypto-soft: #efecfb;
+    --cat-crypto-gradient: linear-gradient(90deg, #8f7fe0, #4a3aa7);
     --status-good: #0ca30c;
     --status-good-soft: #e9f7e9;
     --status-critical: #d03b3b;
@@ -148,6 +152,9 @@ input[type=number] {
     --cat-saving: #e0a326;
     --cat-saving-soft: #2c2410;
     --cat-saving-gradient: linear-gradient(90deg, #f0bf5e, #e0a326);
+    --cat-crypto: #9085e9;
+    --cat-crypto-soft: #221d3d;
+    --cat-crypto-gradient: linear-gradient(90deg, #b3a8f5, #9085e9);
     --status-good: #3fbf3f;
     --status-good-soft: #10240f;
     --status-critical: #e66767;
