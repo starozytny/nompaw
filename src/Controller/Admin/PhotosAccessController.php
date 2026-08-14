@@ -8,6 +8,7 @@ use App\Repository\Main\SocietyRepository;
 use App\Repository\Main\UserRepository;
 use App\Repository\Photo\PhAccessTokenRepository;
 use App\Service\Api\ApiResponse;
+use App\Service\FileUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,12 +35,47 @@ class PhotosAccessController extends AbstractController
         return $apiResponse->apiJsonResponseData($data);
     }
 
+    #[Route('/comptes', name: 'list_accounts', options: ['expose' => true], methods: 'GET')]
+    public function listAccounts(UserRepository $userRepository, ApiResponse $apiResponse): Response
+    {
+        $users = $userRepository->findBy(['photosOnly' => false], ['displayName' => 'ASC']);
+
+        $data = array_map(fn (User $user) => [
+            'id' => $user->getId(),
+            'displayName' => $user->getDisplayName(),
+            'email' => $user->getEmail(),
+            'isAdmin' => $user->getIsAdmin(),
+            'photosAccess' => $user->isPhotosAccess(),
+        ], $users);
+
+        return $apiResponse->apiJsonResponseData($data);
+    }
+
+    #[Route('/comptes/{id}/acces', name: 'toggle_account_access', options: ['expose' => true], methods: 'PUT')]
+    public function toggleAccountAccess(User $user, UserRepository $userRepository, ApiResponse $apiResponse): Response
+    {
+        if ($user->isPhotosOnly()) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce compte est un compte lien-magique, pas un compte complet.");
+        }
+
+        $user->setPhotosAccess(!$user->isPhotosAccess());
+        $userRepository->save($user, true);
+
+        return $apiResponse->apiJsonResponseData([
+            'id' => $user->getId(),
+            'displayName' => $user->getDisplayName(),
+            'email' => $user->getEmail(),
+            'isAdmin' => $user->getIsAdmin(),
+            'photosAccess' => $user->isPhotosAccess(),
+        ]);
+    }
+
     #[Route('/membre/creer', name: 'create', options: ['expose' => true], methods: 'POST')]
     public function create(Request $request, UserRepository $userRepository, SocietyRepository $societyRepository,
                            PhAccessTokenRepository $tokenRepository, UserPasswordHasherInterface $passwordHasher,
-                           ApiResponse $apiResponse): Response
+                           FileUploader $fileUploader, ApiResponse $apiResponse): Response
     {
-        $data = json_decode($request->getContent());
+        $data = json_decode($request->get('data'));
 
         if (!$data || empty(trim((string) ($data->displayName ?? '')))) {
             return $apiResponse->apiJsonResponseBadRequest('Le nom du membre est obligatoire.');
@@ -57,6 +93,11 @@ class PhotosAccessController extends AbstractController
             ->setLastname(trim($data->displayName))
         ;
         $guest->setPassword($passwordHasher->hashPassword($guest, bin2hex(random_bytes(16))));
+
+        $file = $request->files->get('avatar');
+        if ($file) {
+            $guest->setAvatar($fileUploader->replaceFile($file, User::FOLDER, null));
+        }
 
         $userRepository->save($guest);
 
@@ -110,6 +151,31 @@ class PhotosAccessController extends AbstractController
         return $apiResponse->apiJsonResponseData($this->serializeGuest($guest));
     }
 
+    #[Route('/membre/{id}', name: 'update', options: ['expose' => true], methods: 'POST')]
+    public function update(User $guest, Request $request, UserRepository $userRepository,
+                           FileUploader $fileUploader, ApiResponse $apiResponse): Response
+    {
+        if (!$guest->isPhotosOnly()) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce membre n'est pas un compte photos.");
+        }
+
+        $data = json_decode($request->get('data'));
+
+        if ($data && !empty(trim((string) ($data->displayName ?? '')))) {
+            $guest->setDisplayName(trim($data->displayName));
+            $guest->setLastname(trim($data->displayName));
+        }
+
+        $file = $request->files->get('avatar');
+        if ($file) {
+            $guest->setAvatar($fileUploader->replaceFile($file, User::FOLDER, $guest->getAvatar()));
+        }
+
+        $userRepository->save($guest, true);
+
+        return $apiResponse->apiJsonResponseData($this->serializeGuest($guest));
+    }
+
     #[Route('/membre/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(User $guest, UserRepository $userRepository, ApiResponse $apiResponse): Response
     {
@@ -133,6 +199,7 @@ class PhotosAccessController extends AbstractController
         return [
             'id' => $guest->getId(),
             'displayName' => $guest->getDisplayName(),
+            'avatarFile' => $guest->getAvatarFile(),
             'isBlocked' => $guest->isIsBlocked(),
             'mediaCount' => $guest->getPhMedia()->count(),
             'tokens' => array_map(fn (PhAccessToken $token) => [

@@ -195,6 +195,16 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups(['user_list', 'user_form'])]
     private bool $photosOnly = false;
 
+    /**
+     * Accès explicite d'un compte complet (ROLE_USER classique) à l'espace photos famille.
+     * Contrairement à photosOnly (comptes lien-magique), ce flag ne restreint rien : il ajoute
+     * juste ROLE_FAMILY_PHOTOS à un compte qui a par ailleurs son accès normal. Nécessaire car
+     * certains comptes ROLE_USER (amis) ne doivent pas voir l'espace photos famille par défaut.
+     */
+    #[ORM\Column]
+    #[Groups(['user_list', 'user_form'])]
+    private bool $photosAccess = false;
+
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: \App\Entity\Photo\PhMedia::class)]
     private Collection $phMedia;
 
@@ -347,6 +357,13 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
+
+        // L'espace photos famille n'est plus ouvert à tout ROLE_USER par défaut (des amis ont
+        // parfois un compte complet pour d'autres fonctionnalités) : il faut soit être admin,
+        // soit avoir été explicitement autorisé via photosAccess.
+        if ($this->photosAccess || $this->getIsAdmin()) {
+            $roles[] = 'ROLE_FAMILY_PHOTOS';
+        }
 
         return array_unique($roles);
     }
@@ -1141,6 +1158,18 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setPhotosOnly(bool $photosOnly): static
     {
         $this->photosOnly = $photosOnly;
+
+        return $this;
+    }
+
+    public function isPhotosAccess(): bool
+    {
+        return $this->photosAccess;
+    }
+
+    public function setPhotosAccess(bool $photosAccess): static
+    {
+        $this->photosAccess = $photosAccess;
 
         return $this;
     }

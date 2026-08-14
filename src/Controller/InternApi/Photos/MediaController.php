@@ -70,9 +70,21 @@ class MediaController extends AbstractController
         return $apiResponse->apiJsonResponseData($data);
     }
 
-    /**
-     * @throws \ImagickException
-     */
+    #[Route('/stats', name: 'stats', options: ['expose' => true], methods: 'GET')]
+    public function stats(PhMediaRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user->getIsAdmin()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        return $apiResponse->apiJsonResponseCustom([
+            'totalSize' => $repository->getTotalSize(),
+        ]);
+    }
+
     #[Route('/upload', name: 'upload', options: ['expose' => true], methods: 'POST')]
     public function upload(Request $request, ApiResponse $apiResponse, PhMediaRepository $mediaRepository,
                            PhAlbumRepository $albumRepository, FileUploader $fileUploader): Response
@@ -81,10 +93,19 @@ class MediaController extends AbstractController
             $album = $request->get('albumId') ? $albumRepository->find($request->get('albumId')) : null;
 
             foreach ($request->files as $file) {
-                $filename = $fileUploader->uploadDrive($file, PhMedia::FOLDER);
+                $fileSize = $file->getSize();
+
+                // keepOriginalSize=true : contrairement aux photos de rando, le but de cet espace
+                // est justement de conserver les photos/vidéos du téléphone en pleine résolution.
+                $filename = $fileUploader->uploadDrive($file, PhMedia::FOLDER, true);
+
+                if ($filename === false) {
+                    continue;
+                }
 
                 $media = (new PhMedia())
                     ->setFile($filename)
+                    ->setFileSize($fileSize)
                     ->setMTime($request->get('mtime'))
                     ->setAuthor($this->getUser())
                     ->setAlbum($album)
@@ -136,6 +157,26 @@ class MediaController extends AbstractController
 
             $mediaRepository->flush();
         }
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/media/{id}/album', name: 'assign_album', options: ['expose' => true], methods: 'PUT')]
+    public function assignAlbum(PhMedia $obj, Request $request, PhMediaRepository $repository,
+                                PhAlbumRepository $albumRepository, ApiResponse $apiResponse): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($obj->getAuthor() !== $user && !$user->getIsAdmin()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $data = json_decode($request->getContent());
+        $album = !empty($data->albumId ?? null) ? $albumRepository->find($data->albumId) : null;
+
+        $obj->setAlbum($album);
+        $repository->save($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }

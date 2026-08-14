@@ -11,8 +11,11 @@ import ModalFunctions from '@commonFunctions/modal';
 
 import { Modal } from "@tailwindComponents/Elements/Modal";
 import { LightBox } from "@tailwindComponents/Elements/LightBox";
-import { InputFile } from "@tailwindComponents/Elements/Fields";
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button } from "@tailwindComponents/Elements/Button";
+import {
+	ChevronLeft, ChevronRight, Image, Download, Trash2, Check, Loader2,
+	Share2, X, Eye, Lock, Users,
+} from "lucide-react";
 
 const URL_UPLOAD_IMAGES = "intern_api_aventures_images_upload_images";
 const URL_DELETE_IMAGE = "intern_api_aventures_images_image_delete";
@@ -31,11 +34,9 @@ export class RandoImages extends Component {
 		super(props);
 
 		this.state = {
-			files: "",
 			allImages: [], // Toutes les images pour la lightbox
 			currentImages: [], // Images affichées (pagination)
 			selected: new Set(),
-			errors: [],
 			image: null,
 			nbProgress: 0,
 			nbTotal: 0,
@@ -45,11 +46,9 @@ export class RandoImages extends Component {
 			rankPhoto: 1
 		}
 
-		this.files = React.createRef();
-		this.formFiles = React.createRef();
+		this.fileInputRef = React.createRef();
 		this.deleteImage = React.createRef();
 		this.deleteFiles = React.createRef();
-		this.deleteAllFiles = React.createRef();
 		this.lightbox = React.createRef();
 		this.observer = null;
 		this.sentinelRef = React.createRef();
@@ -106,9 +105,13 @@ export class RandoImages extends Component {
 		if (this.sentinelRef.current) {
 			this.observer.observe(this.sentinelRef.current);
 		}
+
+		window.addEventListener('beforeunload', this.handleBeforeUnload);
 	}
 
 	componentWillUnmount() {
+		window.removeEventListener('beforeunload', this.handleBeforeUnload);
+
 		if (this.observer && this.sentinelRef.current) {
 			this.observer.unobserve(this.sentinelRef.current);
 		}
@@ -160,10 +163,6 @@ export class RandoImages extends Component {
 		this.fetchImages();
 	}
 
-	handleChange = (e) => {
-		this.setState({ [e.currentTarget.name]: e.currentTarget.value })
-	}
-
 	handleSelect = (id) => {
 		this.setState(prevState => {
 			const newSelected = new Set(prevState.selected);
@@ -188,28 +187,40 @@ export class RandoImages extends Component {
 	}
 
 	handleModal = (identifiant, image) => {
-		modalForm(this);
 		modalDeleteImage(this);
 		modalDeleteImages(this);
-		modalDeleteAllImages(this);
 		this.setState({ image: image })
 		this[identifiant].current.handleClick();
 	}
 
-	handleSubmit = (e) => {
-		e.preventDefault();
+	handleBeforeUnload = (e) => {
+		const { nbTotal, nbProgress } = this.state;
 
-		const { randoId } = this.props;
-		const files = this.files.current.state.files;
+		if (nbTotal > 0 && nbProgress < nbTotal) {
+			e.preventDefault();
+			e.returnValue = '';
+		}
+	}
 
-		this.handleParallelUpload(files, randoId, 5);
+	handleUploadClick = () => {
+		this.fileInputRef.current.click();
+	}
+
+	handleFilesSelected = (e) => {
+		const files = Array.from(e.target.files);
+		e.target.value = '';
+
+		if (files.length > 0) {
+			this.handleParallelUpload(files, this.props.randoId, 5);
+		}
 	}
 
 	async handleParallelUpload(files, randoId, batchSize) {
 		const total = files.length;
 		let completed = 0;
+		let failed = 0;
 
-		this.setState({ nbTotal: total });
+		this.setState({ nbTotal: total, nbProgress: 0 });
 
 		for (let i = 0; i < total; i += batchSize) {
 			const batch = files.slice(i, i + batchSize);
@@ -225,15 +236,29 @@ export class RandoImages extends Component {
 						formData
 					);
 					completed++;
-					this.setState({ nbProgress: completed, nbTotal: total });
 				} catch (error) {
+					failed++;
 					console.error('Upload failed:', error);
 				}
+				this.setState({ nbProgress: completed + failed, nbTotal: total });
 			}));
 		}
 
-		Toastr.toast('info', "Photos envoyées.");
-		location.reload();
+		if (failed > 0) {
+			Toastr.toast('warning', `${completed} photo${completed > 1 ? 's' : ''} envoyée${completed > 1 ? 's' : ''}, ${failed} échec${failed > 1 ? 's' : ''}.`);
+		}
+
+		setTimeout(() => {
+			this.setState({ nbTotal: 0, nbProgress: 0 });
+			this.refreshAfterUpload();
+		}, 1200);
+	}
+
+	refreshAfterUpload = () => {
+		this.setState({
+			allImages: [], currentImages: [], selected: new Set(),
+			page: 1, hasMore: true, rankPhoto: 1, loading: false
+		}, () => this.fetchImages());
 	}
 
 	handleDeleteImage = () => {
@@ -262,27 +287,6 @@ export class RandoImages extends Component {
 		Formulaire.loader(true);
 		this.deleteFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
 		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: Array.from(selected) } })
-			.then(function (response) {
-				Toastr.toast('info', "Photos supprimée.");
-				location.reload();
-			})
-			.catch(function (error) {
-				modalDeleteImages(self);
-				Formulaire.displayErrors(self, error);
-				Formulaire.loader(false);
-			})
-		;
-	}
-
-	handleDeleteAllImages = () => {
-		const { allImages } = this.state;
-
-		let ids = allImages.map(elem => elem.id);
-
-		let self = this;
-		Formulaire.loader(true);
-		this.deleteAllFiles.current.handleUpdateFooter(<Button iconLeft="chart-3" type="red">Confirmer la suppression</Button>);
-		axios({ method: "DELETE", url: Routing.generate(URL_DELETE_IMAGES), data: { selected: ids } })
 			.then(function (response) {
 				Toastr.toast('info', "Photos supprimée.");
 				location.reload();
@@ -386,8 +390,18 @@ export class RandoImages extends Component {
 
 	handleLightbox = (elem) => {
 		const { allImages } = this.state;
+		const { userId, randoAuthor } = this.props;
 
-		this.lightbox.current.handleUpdateContent(<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={allImages} elem={elem} />);
+		this.lightbox.current.handleUpdateContent(
+			<LightboxContent key={elem.rankPhoto} identifiant="lightbox" images={allImages} elem={elem}
+							  userId={userId} randoAuthor={randoAuthor}
+							  onVisibility={this.handleVisibility}
+							  onCover={this.handleCover}
+							  onDelete={(image) => {
+								  this.lightbox.current.handleClose();
+								  this.handleModal('deleteImage', image);
+							  }} />
+		);
 		this.lightbox.current.handleClick();
 	}
 
@@ -429,9 +443,7 @@ export class RandoImages extends Component {
 
 	render () {
 		const { userId, randoAuthor } = this.props;
-		const { errors, files, allImages, currentImages, selected, nbProgress, nbTotal, loading, hasMore } = this.state;
-
-		let params0 = { errors: errors, onChange: this.handleChange }
+		const { allImages, currentImages, selected, nbProgress, nbTotal, loading, hasMore } = this.state;
 
 		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 			<div className="flex flex-col gap-4 mb-6">
@@ -452,7 +464,7 @@ export class RandoImages extends Component {
 						</p>
 					</div>
 
-					<Button type="blue" iconLeft="add" onClick={() => this.handleModal('formFiles', null)}>
+					<Button type="blue" iconLeft="add" onClick={this.handleUploadClick}>
 						Ajouter
 					</Button>
 				</div>
@@ -474,7 +486,7 @@ export class RandoImages extends Component {
 							<div className="h-6 w-px bg-slate-300"></div>
 						)}
 
-						{selected.size > 0 ? (
+						{selected.size > 0 && (
 							<>
 								<Button
 									type="default"
@@ -494,28 +506,21 @@ export class RandoImages extends Component {
 									: null
 								}
 							</>
-						) : (parseInt(userId) === parseInt(randoAuthor)
-								? allImages.length > 0 && (
-								<Button
-									type="red"
-									iconLeft="trash"
-									onClick={() => this.handleModal('deleteAllFiles', null)}
-								>
-									Supprimer tout
-								</Button>
-							)
-								: null
 						)}
 					</div>
 				)}
 			</div>
 
 			<div className="grid grid-cols-2 gap-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 pswp-gallery" id="gallery">
-				<LazyLoadingGalleryWithPlaceholder currentImages={currentImages}
-												   onModal={this.handleModal} onCover={this.handleCover}
-												   onSelect={this.handleSelect} onLightbox={this.handleLightbox}
-												   onVisibility={this.handleVisibility}
-												   selected={selected} userId={userId} randoAuthor={randoAuthor} />
+				{loading && currentImages.length === 0 ? (
+					<GridSkeleton />
+				) : (
+					<LazyLoadingGalleryWithPlaceholder currentImages={currentImages}
+													   onModal={this.handleModal} onCover={this.handleCover}
+													   onSelect={this.handleSelect} onLightbox={this.handleLightbox}
+													   onVisibility={this.handleVisibility}
+													   selected={selected} userId={userId} randoAuthor={randoAuthor} />
+				)}
 			</div>
 
 			{/* Sentinel pour l'IntersectionObserver */}
@@ -523,9 +528,9 @@ export class RandoImages extends Component {
 
 			{/* Loading et bouton */}
 			<div className="mt-8">
-				{loading && (
-					<div className="text-center text-slate-600 text-sm py-4">
-						<span className="icon-chart-3 animate-spin inline-block mr-2"></span>
+				{loading && currentImages.length > 0 && (
+					<div className="flex items-center justify-center text-slate-600 text-sm py-4">
+						<Loader2 size={16} className="animate-spin mr-2" />
 						Chargement...
 					</div>
 				)}
@@ -539,25 +544,29 @@ export class RandoImages extends Component {
 				)}
 			</div>
 
-			{nbProgress !== 0 && nbTotal !== 0
-				? <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800/80 z-30">
-					<div className="text-xl font-semibold text-white pt-24">{nbProgress} / {nbTotal}</div>
-				</div>
-				: null
-			}
+			<input ref={this.fileInputRef} type="file" multiple
+				   accept="video/*,image/*,.heic,.heif,.dng,.cr2,.cr3,.nef,.arw,.raf,.orf,.rw2,.3gp,.mkv"
+				   className="hidden" onChange={this.handleFilesSelected} />
 
-			{createPortal(<LightBox ref={this.lightbox} identifiant="lightbox" content={null} />
-				, document.body
+			{nbTotal > 0 && (
+				<div className="fixed bottom-4 left-4 z-40 bg-gray-800 text-white rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 min-w-[220px]">
+					{nbProgress < nbTotal ? (
+						<Loader2 size={20} className="animate-spin text-blue-400" />
+					) : (
+						<span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+							<Check size={14} className="text-white" />
+						</span>
+					)}
+					<div className="text-sm">
+						<div className="font-medium">
+							{nbProgress < nbTotal ? `Envoi de ${nbTotal} photo${nbTotal > 1 ? 's' : ''}...` : "Envoi terminé"}
+						</div>
+						<div className="text-gray-400 text-xs">{nbProgress} / {nbTotal}</div>
+					</div>
+				</div>
 			)}
 
-			{createPortal(<Modal ref={this.formFiles} identifiant="form-rando-images" maxWidth={1024} margin={1} title="Ajouter des photos"
-								 content={<div>
-									 <InputFile ref={this.files} type="multiple" identifiant="files" valeur={files} accept="video/*,image/*"
-												max={500} maxSize={62914560} {...params0}>
-										 Photos (500 maximum par envoi)
-									 </InputFile>
-								 </div>}
-								 footer={null} closeTxt="Annuler" />
+			{createPortal(<LightBox ref={this.lightbox} identifiant="lightbox" content={null} />
 				, document.body
 			)}
 
@@ -573,11 +582,6 @@ export class RandoImages extends Component {
 				, document.body
 			)}
 
-			{createPortal(<Modal ref={this.deleteAllFiles} identifiant='delete-all-files' maxWidth={414} title="Supprimer les photos"
-								 content={<p>Êtes-vous sûr de vouloir supprimer <b>les photos</b> ?</p>}
-								 footer={null} closeTxt="Annuler" />
-				, document.body
-			)}
 		</div>
 	}
 }
@@ -588,10 +592,6 @@ RandoImages.propTypes = {
 	randoAuthor: PropTypes.string,
 }
 
-function modalForm (self) {
-	self.formFiles.current.handleUpdateFooter(<Button type="blue" onClick={self.handleSubmit}>Confirmer</Button>)
-}
-
 function modalDeleteImage (self) {
 	self.deleteImage.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImage}>Confirmer la suppression</Button>)
 }
@@ -600,15 +600,23 @@ function modalDeleteImages (self) {
 	self.deleteFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteImages}>Confirmer la suppression</Button>)
 }
 
-function modalDeleteAllImages (self) {
-	self.deleteAllFiles.current.handleUpdateFooter(<Button type="red" onClick={self.handleDeleteAllImages}>Confirmer la suppression</Button>)
+function GridSkeleton ({ count = 24 }) {
+	return <>
+		{Array.from({ length: count }).map((_, i) => (
+			<div key={i} className="min-h-[205px] md:min-h-[332px] rounded-md bg-slate-200 animate-pulse"></div>
+		))}
+	</>
 }
+
+const LONG_PRESS_DURATION = 450;
 
 function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, onVisibility, selected, userId, randoAuthor }) {
 	const [loaded, setLoaded] = useState(new Set());
 	const [error, setError] = useState(new Set());
 	const [hoveredImage, setHoveredImage] = useState(null);
 	const imageRefs = useRef({});
+	const pressTimerRef = useRef(null);
+	const longPressIdRef = useRef(null);
 
 	useEffect(() => {
 		// Vérifier les images déjà chargées (en cache)
@@ -642,12 +650,30 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 	};
 
 	const handleImageClick = (elem) => {
+		if (longPressIdRef.current === elem.id) {
+			longPressIdRef.current = null;
+			return;
+		}
+
 		setHoveredImage(null);
 		if (selected.size > 0) {
 			onSelect(elem.id);
 		} else {
 			onLightbox(elem);
 		}
+	};
+
+	const handlePressStart = (elem) => {
+		clearTimeout(pressTimerRef.current);
+		pressTimerRef.current = setTimeout(() => {
+			longPressIdRef.current = elem.id;
+			onSelect(elem.id);
+			if (navigator.vibrate) navigator.vibrate(30);
+		}, LONG_PRESS_DURATION);
+	};
+
+	const handlePressEnd = () => {
+		clearTimeout(pressTimerRef.current);
 	};
 
 	return <>
@@ -660,56 +686,78 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 			const showPlaceholder = !isLoaded && !hasError;
 
 			return <div key={elem.id}
-						className={`relative cursor-pointer flex items-center justify-center bg-gray-900 min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md ${
-							isSelected ? 'border-8 border-blue-500' : ''
+						className={`relative cursor-pointer flex items-center justify-center min-h-[205px] md:min-h-[332px] group gallery-item overflow-hidden rounded-md select-none transition-colors ${
+							isSelected ? 'bg-gray-600' : 'bg-gray-900'
 						}`}
+						style={{ WebkitTouchCallout: 'none' }}
 						onClick={() => handleImageClick(elem)}
+						onContextMenu={(e) => e.preventDefault()}
 						onMouseEnter={() => setHoveredImage(elem.id)}
-						onMouseLeave={() => setHoveredImage(null)}
+						onMouseLeave={() => { setHoveredImage(null); handlePressEnd(); }}
+						onMouseDown={() => handlePressStart(elem)}
+						onMouseUp={handlePressEnd}
+						onTouchStart={() => handlePressStart(elem)}
+						onTouchEnd={handlePressEnd}
+						onTouchMove={handlePressEnd}
+						onTouchCancel={handlePressEnd}
 			>
 				{elem.type !== 1 && showPlaceholder && (
 					<div className="w-full h-full bg-white flex items-center justify-center absolute top-0 left-0 z-10">
-						<span className="icon-chart-3 text-gray-400 animate-spin"></span>
+						<Loader2 size={16} className="text-gray-400 animate-spin" />
 					</div>
 				)}
 
+				<div className={`absolute top-2 left-2 z-30 transition-opacity ${hasSelection || isHovered ? 'opacity-100' : 'opacity-0'}`}>
+					<div onClick={(e) => handleCheckboxClick(e, elem.id)}
+						 className={`cursor-pointer w-6 h-6 rounded-full flex items-center justify-center ${
+							 isSelected
+								 ? "bg-blue-600 ring-1 ring-white"
+								 : "bg-transparent ring-1 ring-white hover:bg-white/20"
+						 	 }`}
+					>
+						<Check size={14} className={isSelected ? "text-white" : "text-transparent"} />
+					</div>
+				</div>
+
 				<div className={`absolute top-0 left-0 h-full w-full flex flex-col justify-between gap-2 transition-opacity ${
-					isSelected || isHovered ? 'opacity-100 z-20' : 'opacity-0'
+					isHovered ? 'opacity-100 z-20' : 'opacity-0 pointer-events-none'
 				} bg-gradient-to-b from-black/10 via-black/20 to-black/50`}>
-					<div className="flex justify-between gap-2 p-2">
-						<div>
-							<div onClick={(e) => handleCheckboxClick(e, elem.id)}
-								 className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center transition-opacity ${
-									 isSelected 
-										 ? "bg-blue-700 ring-blue-700" 
-										 : "bg-white ring-gray-100 hover:bg-blue-100"
-								 	 } ${hasSelection || isHovered ? 'opacity-100' : 'opacity-0'}`
-								 }
+					<div className="flex justify-end gap-2 p-2">
+						<div className={`flex gap-1.5 transition-opacity ${hasSelection ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+							<button
+								className="relative w-7 h-7 rounded-full bg-black/60 hover:bg-white text-white hover:text-black flex items-center justify-center transition-colors"
+								onClick={(e) => { e.stopPropagation(); setHoveredImage(null); location.href = Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id }); }}
+								aria-label="Télécharger"
 							>
-
-								<span className={`icon-check1 text-sm ${isSelected ? "text-white" : "text-transparent"}`}></span>
-							</div>
-						</div>
-						<div className={`flex gap-1 transition-opacity ${hasSelection || !isHovered ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-							<ButtonIcon type="default" icon="download" tooltipWidth={80} onClick={(e) => { e.stopPropagation(); setHoveredImage(null); location.href = Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id }); }} tooltipPosition="-bottom-7 right-0">
-								Télécharger
-							</ButtonIcon>
+								<Download size={14} />
+								<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -bottom-7 right-0 text-xs hidden whitespace-nowrap">Télécharger</span>
+							</button>
 							{parseInt(userId) === parseInt(randoAuthor) && <>
-								{elem.visibility === 1
-									? <ButtonIcon type="default" icon="vision" tooltipWidth={90} onClick={(e) => { e.stopPropagation(); onVisibility(elem); }} tooltipPosition="-bottom-7 right-0">
-										Rendre public
-									</ButtonIcon>
-									: <ButtonIcon type="yellow" icon="padlock" tooltipWidth={85} onClick={(e) => { e.stopPropagation(); onVisibility(elem); }} tooltipPosition="-bottom-7 right-0">
-										Restreindre
-									</ButtonIcon>
-								}
+								<button
+									className={`relative w-7 h-7 rounded-full flex items-center justify-center transition-colors ${elem.visibility === 1 ? "bg-black/60 hover:bg-white text-white hover:text-black" : "bg-yellow-500 hover:bg-yellow-400 text-white"}`}
+									onClick={(e) => { e.stopPropagation(); onVisibility(elem); }}
+									aria-label={elem.visibility === 1 ? "Rendre public" : "Restreindre"}
+								>
+									{elem.visibility === 1 ? <Eye size={14} /> : <Lock size={14} />}
+									<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -bottom-7 right-0 text-xs hidden whitespace-nowrap">{elem.visibility === 1 ? "Rendre public" : "Restreindre"}</span>
+								</button>
 
-								<ButtonIcon type="default" icon="image" tooltipWidth={132} onClick={(e) => { e.stopPropagation(); onCover(elem); }} tooltipPosition="-bottom-7 right-0">
-									Image de couverture
-								</ButtonIcon>
-								<ButtonIcon type="red" icon="trash" onClick={(e) => { e.stopPropagation(); onModal('deleteImage', elem); }} tooltipPosition="-bottom-7 right-0">
-									Supprimer
-								</ButtonIcon>
+								<button
+									className="relative w-7 h-7 rounded-full bg-black/60 hover:bg-blue-600 text-white flex items-center justify-center transition-colors"
+									onClick={(e) => { e.stopPropagation(); onCover(elem); }}
+									aria-label="Image de couverture"
+								>
+									<Image size={14} />
+									<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -bottom-7 right-0 text-xs hidden whitespace-nowrap">Image de couverture</span>
+								</button>
+								<button
+									className="relative w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors"
+									onClick={(e) => { e.stopPropagation(); onModal('deleteImage', elem); }}
+									aria-label="Supprimer"
+								>
+									<Trash2 size={14} />
+									<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -bottom-7 right-0 text-xs hidden whitespace-nowrap">Supprimer</span>
+								</button>
 							</>}
 						</div>
 					</div>
@@ -729,8 +777,8 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 				</div>
 
 				{elem.type === 1 ? (
-					<video className="h-[205px] md:h-[332px]" controls>
-						<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
+					<video className={`h-[205px] md:h-[332px] transition-transform duration-150 ${isSelected ? 'scale-[0.82] rounded-lg' : ''}`} controls>
+						<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} />
 					</video>
 				) : (
 					<img
@@ -738,7 +786,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 						src={Routing.generate(URL_GET_THUMBS_SRC, { id: elem.id })}
 						alt=""
 						key={elem.id}
-						className={`pointer-events-none w-full h-auto transition-opacity ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+						className={`pointer-events-none w-full h-auto transition-all duration-150 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isSelected ? 'scale-[0.92] rounded-lg' : ''}`}
 						loading="lazy"
 						onLoad={(e) => {
 							if (e.target.complete && e.target.naturalHeight !== 0) {
@@ -751,7 +799,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 				{elem.visibility === 1 && (
 					<div className="absolute bottom-2 right-2 z-10">
 						<div className="bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
-							<span className="icon-group text-xs"></span>
+							<Users size={14} />
 							Participants
 						</div>
 					</div>
@@ -785,6 +833,44 @@ class LightboxContent extends Component {
 		let [body, modal, modalContent, btns] = ModalFunctions.getElements(identifiant);
 
 		ModalFunctions.closeM(body, modal, modalContent);
+	}
+
+	handleShare = async () => {
+		const { elem } = this.state;
+		const absoluteUrl = window.location.origin + Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id });
+
+		if (navigator.share) {
+			try {
+				await navigator.share({ url: absoluteUrl, title: 'Photo Nompaw' });
+			} catch (e) {
+				// annulé par l'utilisateur, rien à faire
+			}
+		} else if (navigator.clipboard) {
+			await navigator.clipboard.writeText(absoluteUrl);
+			Toastr.toast('info', 'Lien copié.');
+		}
+	}
+
+	handleVisibilityToggle = () => {
+		const { onVisibility } = this.props;
+		const { elem } = this.state;
+
+		onVisibility(elem);
+		this.setState({ elem: { ...elem, visibility: elem.visibility === 1 ? 0 : 1 } });
+	}
+
+	handleCoverClick = () => {
+		const { onCover } = this.props;
+		const { elem } = this.state;
+
+		onCover(elem);
+	}
+
+	handleDeleteClick = () => {
+		const { onDelete } = this.props;
+		const { elem } = this.state;
+
+		onDelete(elem);
 	}
 
 	handleMouseDown = (e) => {
@@ -876,49 +962,71 @@ class LightboxContent extends Component {
 	}
 
 	render () {
-		const { images } = this.props;
+		const { images, userId, randoAuthor } = this.props;
 		const { actualRank, elem, currentTranslate } = this.state;
 
 		if(!elem){
 			return;
 		}
 
-		return <>
-			<div className="fixed bg-gradient-to-t from-gray-800 to-black/30 bottom-0 md:bottom-auto md:top-0 md:bg-none left-0 w-full flex justify-between p-4 md:p-8 text-white z-20">
+		const isOwner = parseInt(userId) === parseInt(randoAuthor);
+
+		return <div className="w-full h-full"
+					onMouseDown={this.handleMouseDown}
+					onMouseMove={this.handleMouseMove}
+					onMouseUp={this.handleMouseUp}
+					onMouseLeave={this.handleMouseUp}
+					onTouchStart={this.handleTouchStart}
+					onTouchMove={this.handleTouchMove}
+					onTouchEnd={this.handleTouchEnd}
+		>
+			<div className="fixed z-50 bg-gradient-to-t from-gray-800 to-black/30 top-0 md:bg-none left-0 w-full flex justify-between items-start p-4 md:p-8 text-white">
 				<div className="text-gray-400">{elem.rankPhoto} / {images.length}</div>
-				<div className="flex gap-4">
-					<div>
-						<a className="lightbox-action relative group" href={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })} download>
-							<span className="icon-download !text-2xl text-gray-400 group-hover:text-white" />
-							<span className="tooltip bg-gray-300 text-black py-1 px-2 rounded absolute -top-10 right-0 text-xs hidden">Télécharger</span>
-						</a>
-					</div>
-					<div>
-						<div className="lightbox-action relative group close-modal cursor-pointer" onClick={this.handleCloseModal}>
-							<span className="icon-close !text-2xl text-gray-400 group-hover:text-white" />
-							<span className="tooltip bg-gray-300 text-black py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Fermer</span>
-						</div>
+				<div>
+					<div className="lightbox-action relative group close-modal cursor-pointer" onClick={this.handleCloseModal}>
+						<X size={24} className="text-gray-400 group-hover:text-white" />
+						<span className="tooltip bg-gray-300 text-black py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden">Fermer</span>
 					</div>
 				</div>
 			</div>
+
+			<div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-4 z-20 flex justify-center gap-8 text-white">
+				<button className="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white" onClick={this.handleShare}>
+					<Share2 size={20} />
+					Partager
+				</button>
+				<a className="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white" href={Routing.generate(URL_DOWNLOAD_IMAGE, { id: elem.id })} download>
+					<Download size={20} />
+					Télécharger
+				</a>
+				{isOwner && (
+					<>
+						<button className="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white" onClick={this.handleVisibilityToggle}>
+							{elem.visibility === 1 ? <Eye size={20} /> : <Lock size={20} />}
+							{elem.visibility === 1 ? "Rendre public" : "Restreindre"}
+						</button>
+						<button className="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white" onClick={this.handleCoverClick}>
+							<Image size={20} />
+							Couverture
+						</button>
+						<button className="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-red-400" onClick={this.handleDeleteClick}>
+							<Trash2 size={20} />
+							Supprimer
+						</button>
+					</>
+				)}
+			</div>
+
 			<div className="flex justify-center items-center w-full h-full">
 				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full left-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
 					 onClick={() => this.handlePrev(actualRank > 1 ? actualRank : (images.length + 1))}>
-					<span className="icon-left-chevron !text-2xl text-gray-400 group-hover:text-white"></span>
+					<ChevronLeft size={28} className="text-gray-400 group-hover:text-white" />
 				</div>
-				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full cursor-grab"
-					 onMouseDown={this.handleMouseDown}
-					 onMouseMove={this.handleMouseMove}
-					 onMouseUp={this.handleMouseUp}
-					 onMouseLeave={this.handleMouseUp}
-					 onTouchStart={this.handleTouchStart}
-					 onTouchMove={this.handleTouchMove}
-					 onTouchEnd={this.handleTouchEnd}
-				>
+				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full cursor-grab">
 					{images.map(image => {
 						if(image.type === 1){
 							return <video key={image.id} className="max-h-dvh" controls>
-								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} type="video/mp4" />
+								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} />
 							</video>
 						}else{
 							return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
@@ -931,9 +1039,9 @@ class LightboxContent extends Component {
 				</div>
 				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full right-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
 					 onClick={() => this.handleNext(actualRank < images.length ? actualRank : 1)}>
-					<span className="icon-right-chevron !text-2xl text-gray-400 group-hover:text-white"></span>
+					<ChevronRight size={28} className="text-gray-400 group-hover:text-white" />
 				</div>
 			</div>
-		</>
+		</div>
 	}
 }

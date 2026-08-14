@@ -1,10 +1,16 @@
-{% extends is_granted('ROLE_USER') ? 'user/pages/photos/template.html.twig' : 'user/pages/photos/template_guest.html.twig' %}
-
-{% set page_title %}Photos{% endset %}
-{% set page_subtitle %}Les photos et vidéos partagées par la famille.{% endset %}
+{% extends 'layout/layout_photos_pwa.html.twig' %}
 
 {% block main_content %}
-    <div id="photos_gallery" data-user-id="{{ app.user.id }}" data-is-admin="{{ app.user.isAdmin ? '1' : '0' }}">
-        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    <div id="photos_gallery" data-user-id="{{ app.user.id }}" data-is-admin="{{ app.user.isAdmin ? '1' : '0' }}"
+         data-homepage-url="{{ is_granted('ROLE_USER') ? path('user_homepage') : '' }}" class="bg-gray-900 min-h-screen">
+        <div class="sticky top-0 z-20 flex items-center gap-2 px-4 py-3 bg-gray-900/95">
+            <span class="icon-image text-2xl text-blue-400"></span>
+            <span class="text-lg font-medium text-white">Photos</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1 px-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
+            {% for i in 1..24 %}
+                <div class="aspect-square rounded-md bg-gray-800 animate-pulse"></div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

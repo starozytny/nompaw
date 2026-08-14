@@ -1,6 +1,9 @@
 FROM php:8.1-fpm
 
 # Installation des dépendances système
+# libheif-examples (heif-convert) et libraw-bin (dcraw_emu) servent à pré-convertir les photos
+# HEIC/HEIF et RAW (DNG, CR2, NEF...) issues des téléphones en un format qu'Imagick sait lire,
+# plutôt que de dépendre du délégué HEIC/RAW interne (et peu prévisible) d'ImageMagick.
 RUN apt-get update && apt-get install -y \
     make \
     git \
@@ -13,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libmagickwand-dev \
+    libheif-examples \
+    libraw-bin \
     zip \
     curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
