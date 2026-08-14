@@ -22,8 +22,9 @@ export function initStoryLightbox () {
 
     function show (index) {
         currentIndex = (index + images.length) % images.length;
-        imgEl.src = images[currentIndex].currentSrc || images[currentIndex].src;
-        imgEl.alt = images[currentIndex].alt || '';
+        const current = images[currentIndex];
+        imgEl.src = current.dataset.fullSrc || current.currentSrc || current.src;
+        imgEl.alt = current.alt || '';
         counterEl.textContent = `${currentIndex + 1} / ${images.length}`;
     }
 
