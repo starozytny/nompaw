@@ -2,11 +2,13 @@
 
 namespace App\Entity\Crypto;
 
+use App\Entity\Enum\Crypto\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Crypto\CrTradeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CrTradeRepository::class)]
 class CrTrade
@@ -21,51 +23,76 @@ class CrTrade
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['trade_list'])]
+    #[Assert\NotNull]
     private ?\DateTimeInterface $tradeAt = null;
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
+    #[Assert\NotNull]
+    #[Assert\Choice(choices: [TypeType::Achat, TypeType::Vente, TypeType::Depot, TypeType::Retrait, TypeType::Recuperation, TypeType::Stacking, TypeType::Transfert])]
     private ?int $type = null;
 
     #[ORM\Column(length: 10)]
     #[Groups(['trade_list'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 10)]
     private ?string $fromCoin = null;
 
     #[ORM\Column(length: 10)]
     #[Groups(['trade_list'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 10)]
     private ?string $toCoin = null;
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero]
     private ?float $fromPrice = null;
 
     #[ORM\Column(nullable: true)]
     #[Groups(['trade_list'])]
+    #[Assert\PositiveOrZero]
     private ?float $toPrice = null;
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero]
     private ?float $costPrice = null;
 
     #[ORM\Column(length: 10)]
     #[Groups(['trade_list'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 10)]
     private ?string $costCoin = null;
 
     #[ORM\Column]
     #[Groups(['trade_list'])]
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero]
     private ?float $fromNbToken = null;
 
     #[ORM\Column(nullable: true)]
     #[Groups(['trade_list'])]
+    #[Assert\PositiveOrZero]
     private ?float $toNbToken = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getTotalReal()/setTotalReal().
+     */
     #[ORM\Column]
     #[Groups(['trade_list'])]
-    private ?float $totalReal = null;
+    #[Assert\NotNull]
+    private ?int $totalReal = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getTotal()/setTotal().
+     */
     #[ORM\Column]
     #[Groups(['trade_list'])]
-    private ?float $total = null;
+    #[Assert\NotNull]
+    private ?int $total = null;
 
     #[ORM\ManyToOne(inversedBy: 'crTrades')]
     #[ORM\JoinColumn(nullable: false)]
@@ -80,6 +107,23 @@ class CrTrade
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $importedId = null;
+
+    /**
+     * Manual override of the "valeur globale du portefeuille" (CGI art. 150 VH bis) at the moment of
+     * this disposal, used by CrTaxReportService when the automatic price lookup can't resolve it.
+     * Stored in cents to avoid float rounding drift; exposed as euros via get/setManualPortfolioValueTotal().
+     */
+    #[ORM\Column(nullable: true)]
+    #[Groups(['trade_list'])]
+    private ?int $manualPortfolioValueTotal = null;
+
+    /**
+     * How the last computed "valeur globale du portefeuille" for this disposal was obtained: 'api',
+     * 'manual', or null if not computed yet. See CrTaxReportService.
+     */
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['trade_list'])]
+    private ?string $portfolioValueSource = null;
 
     public function getId(): ?int
     {
@@ -208,24 +252,24 @@ class CrTrade
 
     public function getTotalReal(): ?float
     {
-        return $this->totalReal;
+        return $this->totalReal !== null ? $this->totalReal / 100 : null;
     }
 
     public function setTotalReal(float $totalReal): static
     {
-        $this->totalReal = $totalReal;
+        $this->totalReal = (int) round($totalReal * 100);
 
         return $this;
     }
 
     public function getTotal(): ?float
     {
-        return $this->total;
+        return $this->total !== null ? $this->total / 100 : null;
     }
 
     public function setTotal(float $total): static
     {
-        $this->total = $total;
+        $this->total = (int) round($total * 100);
 
         return $this;
     }
@@ -274,6 +318,30 @@ class CrTrade
     public function setImportedId(?string $importedId): static
     {
         $this->importedId = $importedId;
+
+        return $this;
+    }
+
+    public function getManualPortfolioValueTotal(): ?float
+    {
+        return $this->manualPortfolioValueTotal !== null ? $this->manualPortfolioValueTotal / 100 : null;
+    }
+
+    public function setManualPortfolioValueTotal(?float $manualPortfolioValueTotal): static
+    {
+        $this->manualPortfolioValueTotal = $manualPortfolioValueTotal !== null ? (int) round($manualPortfolioValueTotal * 100) : null;
+
+        return $this;
+    }
+
+    public function getPortfolioValueSource(): ?string
+    {
+        return $this->portfolioValueSource;
+    }
+
+    public function setPortfolioValueSource(?string $portfolioValueSource): static
+    {
+        $this->portfolioValueSource = $portfolioValueSource;
 
         return $this;
     }

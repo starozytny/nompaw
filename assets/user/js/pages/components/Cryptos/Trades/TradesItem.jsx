@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Sanitaze from "@commonFunctions/sanitaze";
 
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
-import { Badge } from "@tailwindComponents/Elements/Badge";
+import { Badge } from "@shadcnComponents/ui/badge";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -14,58 +14,57 @@ const RECUP = 4;
 const STAKING = 5;
 const TRANSFERT = 6;
 
-export function TradesItem ({ elem, onModal, onEditElement }) {
-	let typesString = ['Achat', "Vente", "Dépôt", "Retrait", "Récup.", "Staking", "Transfert"];
-	let typesBadge = ['blue', "red", "indigo", "yellow", "indigo", "gray", "gray"];
+const TYPE_LABEL = ['Achat', 'Vente', 'Dépôt', 'Retrait', 'Récupération', 'Stacking', 'Transfert'];
+const TYPE_ICON = ['cart', 'receipt', 'download', 'upload', 'refresh1', 'time', 'arrow-swap-horizontal'];
+const TYPE_COLOR = ['var(--cat-crypto)', 'var(--status-good)', 'var(--cat-income)', 'var(--cat-expense)', 'var(--cat-saving)', 'var(--cat-saving)', 'hsl(var(--muted-foreground))'];
+const TYPE_SOFT = ['var(--cat-crypto-soft)', 'var(--status-good-soft)', 'var(--cat-income-soft)', 'var(--cat-expense-soft)', 'var(--cat-saving-soft)', 'var(--cat-saving-soft)', 'hsl(var(--muted))'];
 
-	return <div className="item border-t hover:bg-slate-50">
-		<div className="item-content">
-			<div className="item-infos text-sm xl:text-base">
-				<div className="col-1">
-					<div className="text-sm font-medium">{Sanitaze.toFormatDate(elem.tradeAt, 'L')}</div>
-					<div className="text-xs">{Sanitaze.toFormatDate(elem.tradeAt, 'LT')}</div>
-				</div>
-				<div className="col-2">
-					<Badge type={typesBadge[elem.type]}>{typesString[elem.type]}</Badge>
-					<div className="text-sm">{elem.importedFrom}</div>
-				</div>
-				<div className="col-3">
-					{elem.type === DEPOT
-						? null
-						: <div className="inline-block rounded-full bg-gray-100 py-1 px-2 text-right">
-							<span className="text-sm">{elem.fromCoin === "EUR" ? Sanitaze.toFormatCurrency(elem.fromNbToken) : elem.fromNbToken}</span>
-							<span className="inline-block ml-2 text-xs bg-white py-1 px-2 rounded-full">{elem.fromCoin}</span>
-						</div>
-					}
-				</div>
-				<div className="col-4">
-					<div className={`inline-block rounded-full py-1 px-2 ${elem.type === RETRAIT ? "bg-red-100" : (elem.type === DEPOT ? "bg-indigo-100" : "bg-gray-100")}`}>
-						<span className="inline-block mr-2 text-xs bg-white py-1 px-2 rounded-full">{elem.toCoin}</span>
-						{elem.toNbToken === null
-							? <span className="text-sm">?</span>
-							: <span className="text-sm">{elem.type === RETRAIT ? "-" : ""}{elem.toCoin === "EUR" ? Sanitaze.toFormatCurrency(elem.toNbToken) : elem.toNbToken}</span>
-						}
-					</div>
-				</div>
-				<div className="col-5">
-					{elem.type === DEPOT
-						? null
-						: (elem.type === ACHAT ? <div className="text-sm">{elem.toPrice}</div> : <div className="text-sm">{elem.fromPrice}</div>)
-					}
-				</div>
-				<div className="col-6">
-					<div className="text-sm">{elem.costPrice} {elem.costCoin}</div>
-				</div>
-				<div className="col-7">
-					<div className={elem.type === RETRAIT ? "text-red-500" : (elem.type === DEPOT ? "text-indigo-600" : "")}>
-						{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.totalReal)}
-					</div>
-				</div>
-				<div className="col-8 actions">
-					<ButtonIcon type="default" icon="pencil" onClick={() => onEditElement(elem)}>Modifier</ButtonIcon>
-					<ButtonIcon type="default" icon="trash" onClick={() => onModal('delete', elem)}>Supprimer</ButtonIcon>
-				</div>
+function formatAmount (qty, coin) {
+	return coin === "EUR" ? Sanitaze.toFormatCurrency(qty) : `${qty} ${coin}`;
+}
+
+export function TradesItem ({ elem, onModal, onEditElement }) {
+	const color = TYPE_COLOR[elem.type];
+	const soft = TYPE_SOFT[elem.type];
+	const sameCoin = elem.fromCoin === elem.toCoin;
+
+	return <div className="flex items-center gap-3 border-b px-4 py-2.5 last:border-b-0 hover:bg-accent/50 transition-colors">
+		<div className="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center flex-shrink-0" style={{ background: soft, color: color }}>
+			<span className={`icon-${TYPE_ICON[elem.type]}`} />
+		</div>
+
+		<div className="w-14 flex-shrink-0 text-xs text-muted-foreground leading-tight">
+			<div className="font-medium text-foreground">{Sanitaze.toFormatDate(elem.tradeAt, 'D MMM')}</div>
+			<div>{Sanitaze.toFormatDate(elem.tradeAt, 'H[h]mm')}</div>
+		</div>
+
+		<div className="flex-1 min-w-0">
+			<div className="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+				<Badge variant="outline" style={{ borderColor: color + '55', color: color }}>{TYPE_LABEL[elem.type]}</Badge>
+
+				{sameCoin
+					? <span className="tabular-nums">{formatAmount(elem.toNbToken, elem.toCoin)}</span>
+					: <span className="flex items-center gap-1.5 tabular-nums">
+						{formatAmount(elem.fromNbToken, elem.fromCoin)}
+						<span className="icon-right-arrow text-[10px] text-muted-foreground" />
+						{elem.toNbToken === null ? <span className="text-muted-foreground">?</span> : formatAmount(elem.toNbToken, elem.toCoin)}
+					</span>
+				}
 			</div>
+
+			{(elem.importedFrom || elem.costPrice > 0) && <div className="flex flex-wrap items-center gap-1.5 mt-1">
+				{elem.importedFrom && <Badge variant="muted">Importé · {elem.importedFrom}</Badge>}
+				{elem.costPrice > 0 && <Badge variant="muted">Frais {formatAmount(elem.costPrice, elem.costCoin)}</Badge>}
+			</div>}
+		</div>
+
+		<div className="text-sm font-semibold tabular-nums whitespace-nowrap" style={{ color: color }}>
+			{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.totalReal)}
+		</div>
+
+		<div className="flex gap-0.5 flex-shrink-0">
+			<ButtonIcon type="default" icon="pencil" onClick={() => onEditElement(elem)}>Modifier</ButtonIcon>
+			<ButtonIcon type="default" icon="trash" onClick={() => onModal('delete', elem)}>Supprimer</ButtonIcon>
 		</div>
 	</div>
 }

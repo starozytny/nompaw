@@ -67,6 +67,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 	const [balances, setBalances] = useState(JSON.parse(monthlyBalances))
 	const [summaries, setSummaries] = useState(JSON.parse(monthlySummaries))
 	const [savingsSummariesData, setSavingsSummariesData] = useState(JSON.parse(savingsSummaries))
+	const [savingsOpen, setSavingsOpen] = useState(() => window.matchMedia('(min-width: 768px)').matches)
 	const [element, setElement] = useState(null)
 	const [sheetOpen, setSheetOpen] = useState(false)
 	const [elementToDelete, setElementToDelete] = useState(null)
@@ -328,7 +329,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 			</div>
 		</div>
 
-		<div className="grid grid-cols-12 gap-1.5 overflow-x-auto pb-1">
+		<div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-1.5">
 			{MONTHS_SHORT.map((label, i) => {
 				const isActive = i + 1 === month;
 				const isToday = year === TODAY.getFullYear() && i + 1 === TODAY.getMonth() + 1;
@@ -336,7 +337,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 				return <button key={i} type="button" onClick={() => setMonth(i + 1)}
 					title={isToday ? "Mois actuel" : undefined}
 					className={cn(
-						"col-span-1 min-w-[58px] flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-center transition-colors",
+						"flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-center transition-colors",
 						isActive ? "border-foreground bg-foreground text-background" : "bg-gray-50 hover:bg-whiter hover:border-foreground/30",
 						isToday && !isActive && "ring-1 ring-inset ring-foreground/35"
 					)}
@@ -461,11 +462,14 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 				</Card>}
 
 				{itemsSavings.length !== 0 && <Card>
-					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
+					<button type="button" className="flex w-full items-center justify-between gap-3 p-4 text-left" onClick={() => setSavingsOpen(o => !o)}>
 						<CardTitle className="text-sm">Utilisation des économies</CardTitle>
-						<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{itemsSavings.length} catégorie{itemsSavings.length > 1 ? "s" : ""}</span>
-					</CardHeader>
-					<CardContent className="flex flex-col gap-4 pt-4">
+						<div className="flex items-center gap-2">
+							<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{itemsSavings.length} catégorie{itemsSavings.length > 1 ? "s" : ""}</span>
+							<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", savingsOpen && "rotate-180")} />
+						</div>
+					</button>
+					{savingsOpen && <CardContent className="flex flex-col gap-4 border-t pt-4">
 						{itemsSavings.map(sa => {
 							let available = sa.total - sa.used;
 							let progress = sa.goal ? (available / sa.goal) * 100 : 0;
@@ -488,7 +492,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 							<span className="text-xs text-muted-foreground">Total économies disponibles</span>
 							<span className="font-bold tabular-nums">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</span>
 						</div>
-					</CardContent>
+					</CardContent>}
 				</Card>}
 			</div>
 

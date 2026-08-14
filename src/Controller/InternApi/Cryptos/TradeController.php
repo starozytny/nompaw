@@ -29,6 +29,10 @@ class TradeController extends AbstractController
     public function submitForm($type, CrTradeRepository $repository, CrTrade $obj, Request $request, ApiResponse $apiResponse,
                                ValidatorService $validator, DataCrypto $dataEntity): JsonResponse
     {
+        if ($type == "update" && $obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
@@ -69,6 +73,10 @@ class TradeController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(CrTrade $obj, CrTradeRepository $repository, ApiResponse $apiResponse): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $repository->remove($obj, true);
 
         return $apiResponse->apiJsonResponseSuccessful("ok");
