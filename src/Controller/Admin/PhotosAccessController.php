@@ -177,7 +177,8 @@ class PhotosAccessController extends AbstractController
     }
 
     #[Route('/membre/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(User $guest, UserRepository $userRepository, ApiResponse $apiResponse): Response
+    public function delete(User $guest, UserRepository $userRepository, PhAccessTokenRepository $tokenRepository,
+                           ApiResponse $apiResponse): Response
     {
         if (!$guest->isPhotosOnly()) {
             return $apiResponse->apiJsonResponseBadRequest("Ce membre n'est pas un compte photos.");
@@ -187,6 +188,10 @@ class PhotosAccessController extends AbstractController
             return $apiResponse->apiJsonResponseBadRequest(
                 'Ce membre a déjà déposé des photos, révoquez ses liens plutôt que de le supprimer.'
             );
+        }
+
+        foreach ($guest->getPhAccessTokens() as $token) {
+            $tokenRepository->remove($token);
         }
 
         $userRepository->remove($guest, true);
