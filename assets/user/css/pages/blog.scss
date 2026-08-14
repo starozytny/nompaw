@@ -141,7 +141,95 @@ video{
   margin: 10px 0;
 }
 
+// --------------------------- LIGHTBOX (galeries storytelling)
+
+.story-lightbox-trigger {
+  cursor: zoom-in;
+}
+
+.story-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.92);
+
+  &.active {
+    display: flex;
+  }
+}
+
+.story-lightbox-img {
+  max-width: 90vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 0.25rem;
+}
+
+.story-lightbox-close,
+.story-lightbox-prev,
+.story-lightbox-next {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.story-lightbox-close {
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.story-lightbox-prev,
+.story-lightbox-next {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.25rem;
+}
+
+.story-lightbox-prev {
+  left: 1rem;
+}
+
+.story-lightbox-next {
+  right: 1rem;
+}
+
+.story-lightbox-counter {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+}
+
 @media(max-width: 720px) {
+  .story-lightbox-prev,
+  .story-lightbox-next {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+  }
+
   .header-title {
     font-size: 1.5em;
   }
