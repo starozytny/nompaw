@@ -36,18 +36,24 @@ class MediaController extends AbstractController
 
         $offset = ($page - 1) * self::MEDIA_PER_PAGE;
 
-        $allMedia = $repository->findFiltered($author, $album);
-        $currentMedia = array_slice($allMedia, $offset, self::MEDIA_PER_PAGE);
-
-        $totalMedia = count($allMedia);
+        $currentMedia = $repository->findFilteredPage($author, $album, $offset, self::MEDIA_PER_PAGE);
+        $totalMedia = $repository->countFiltered($author, $album);
         $hasMore = ($offset + self::MEDIA_PER_PAGE) < $totalMedia;
 
-        $allMediaData = json_decode($serializer->serialize($allMedia, 'json', ['groups' => PhMedia::LIST]));
         $currentMediaData = json_decode($serializer->serialize($currentMedia, 'json', ['groups' => PhMedia::LIST]));
 
-        $sharedUntil = $shareLinkRepository->findActiveIndexedByMediaIds(array_map(fn (PhMedia $m) => $m->getId(), $allMedia));
-        $this->applySharedUntil($allMediaData, $sharedUntil);
+        $sharedUntil = $shareLinkRepository->findActiveIndexedByMediaIds(array_map(fn (PhMedia $m) => $m->getId(), $currentMedia));
         $this->applySharedUntil($currentMediaData, $sharedUntil);
+
+        // La liste complète (nécessaire côté front pour le saut direct à un mois et pour la
+        // navigation dans la lightbox) n'est envoyée qu'à la première page : la renvoyer en
+        // entier à chaque page de scroll infini forçait Doctrine à hydrater et sérialiser toute
+        // la photothèque à chaque requête, pour un contenu identique déjà en mémoire côté client.
+        $allMediaData = null;
+        if ($page === 1) {
+            $allMedia = $repository->findFiltered($author, $album);
+            $allMediaData = json_decode($serializer->serialize($allMedia, 'json', ['groups' => PhMedia::LIST]));
+        }
 
         return $apiResponse->apiJsonResponseCustom([
             'media' => $allMediaData,
