@@ -30,9 +30,9 @@ const URL_FETCH_IMAGES = "intern_api_aventures_images_fetch_images";
 const URL_VISIBILITY_IMAGE = "intern_api_aventures_images_visibility";
 
 // Nombre d'envois simultanés lors d'un upload groupé — voir la même constante dans
-// PhotosGallery.jsx pour le détail des jauges de ressources cPanel (o2switch) ayant justifié ce
-// doublement de 5 à 10.
-const UPLOAD_BATCH_SIZE = 10;
+// PhotosGallery.jsx pour le détail des jauges de ressources cPanel (o2switch) ayant motivé
+// de revenir à 5 (l'E/S disque devient le facteur limitant au-delà, pas le CPU/RAM).
+const UPLOAD_BATCH_SIZE = 5;
 
 export class RandoImages extends Component {
 	constructor (props) {

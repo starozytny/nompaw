@@ -51,12 +51,11 @@ const URL_SHARE_MINE = "intern_api_photos_share_mine";
 // elle-même (qui continue d'utiliser la valeur renvoyée par le serveur).
 const MEDIA_PER_PAGE_JS = 24;
 
-// Nombre d'envois simultanés lors d'un upload groupé. Doublé de 5 à 10 après vérification des
-// jauges de ressources cPanel (o2switch, hébergement mutualisé CloudLinux) pendant un envoi de
-// 680 photos : CPU à 10 %, mémoire à 1,4 %, processus à 3-5 % de leurs plafonds — seule l'E/S
-// disque approchait de sa limite (~53 % à 5 envois en parallèle). Ne pas remonter beaucoup plus
-// sans revérifier ces jauges : au-delà, l'E/S devient le facteur limitant, pas le CPU.
-const UPLOAD_BATCH_SIZE = 10;
+// Nombre d'envois simultanés lors d'un upload groupé. Remis à 5 : à 10 en parallèle sur
+// l'hébergement mutualisé o2switch (CloudLinux), l'E/S disque — déjà à ~53 % à 5 envois
+// simultanés — devenait le facteur limitant plutôt que le CPU/RAM (largement sous leurs
+// plafonds). Revoir les jauges de ressources cPanel avant de remonter cette valeur.
+const UPLOAD_BATCH_SIZE = 5;
 
 const SHARE_DURATIONS = [
 	{ value: '1d', label: '1 jour' },
