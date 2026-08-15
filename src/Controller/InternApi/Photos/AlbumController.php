@@ -6,6 +6,7 @@ use App\Entity\Main\User;
 use App\Entity\Photo\PhAlbum;
 use App\Repository\Photo\PhAlbumRepository;
 use App\Repository\Photo\PhMediaRepository;
+use App\Repository\Photo\PhShareLinkRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Data\DataAlbum;
 use App\Service\ValidatorService;
@@ -20,11 +21,18 @@ use Symfony\Component\Serializer\SerializerInterface;
 class AlbumController extends AbstractController
 {
     #[Route('/list', name: 'list', options: ['expose' => true], methods: 'GET')]
-    public function list(PhAlbumRepository $repository, SerializerInterface $serializer): JsonResponse
+    public function list(PhAlbumRepository $repository, PhShareLinkRepository $shareLinkRepository, SerializerInterface $serializer): JsonResponse
     {
         $albums = $repository->findBy([], ['createdAt' => 'DESC']);
 
-        return new JsonResponse($serializer->serialize($albums, 'json', ['groups' => PhAlbum::LIST]), 200, [], true);
+        $albumsData = json_decode($serializer->serialize($albums, 'json', ['groups' => PhAlbum::LIST]));
+
+        $sharedUntil = $shareLinkRepository->findActiveIndexedByAlbumIds(array_map(fn (PhAlbum $a) => $a->getId(), $albums));
+        foreach ($albumsData as $albumData) {
+            $albumData->sharedUntil = isset($sharedUntil[$albumData->id]) ? $sharedUntil[$albumData->id]->format('c') : null;
+        }
+
+        return new JsonResponse($albumsData, 200);
     }
 
     #[Route('/{id}/cover', name: 'cover', options: ['expose' => true], methods: 'GET')]

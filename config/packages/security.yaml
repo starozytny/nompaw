@@ -64,6 +64,7 @@ security:
          - { path: ^/intern/api/contacts/create,                roles: PUBLIC_ACCESS }
          - { path: ^/api/login_check,                           roles: PUBLIC_ACCESS }
          - { path: ^/connexion-photos,                          roles: PUBLIC_ACCESS }
+         - { path: ^/partage-photos,                            roles: PUBLIC_ACCESS }
          - { path: ^/espace-membre/photos,                      roles: ROLE_FAMILY_PHOTOS }
          - { path: ^/intern/api/photos,                         roles: ROLE_FAMILY_PHOTOS }
          - { path: ^/intern/api,                                roles: ROLE_USER }
