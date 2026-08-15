@@ -17,7 +17,7 @@ import { Button } from "@tailwindComponents/Elements/Button";
 import {
 	ChevronLeft, ChevronRight, Image, Download, Trash2, Plus, Check,
 	CheckSquare, Square, Folder, Loader2, Play, Share2, X, HardDrive,
-	Pencil, Calendar, MapPin,
+	Pencil, Calendar, MapPin, Copy, Link2,
 } from "lucide-react";
 
 const URL_FETCH_MEDIA = "intern_api_photos_media_fetch";
@@ -38,6 +38,47 @@ const URL_ALBUM_DELETE = "intern_api_photos_album_delete";
 const URL_ALBUM_COVER = "intern_api_photos_album_cover";
 const URL_ALBUM_SET_COVER = "intern_api_photos_album_set_cover";
 const URL_MEDIA_STATS = "intern_api_photos_media_stats";
+const URL_SHARE_GET_MEDIA = "intern_api_photos_share_get_media";
+const URL_SHARE_CREATE_MEDIA = "intern_api_photos_share_create_media";
+const URL_SHARE_GET_ALBUM = "intern_api_photos_share_get_album";
+const URL_SHARE_CREATE_ALBUM = "intern_api_photos_share_create_album";
+const URL_SHARE_REVOKE = "intern_api_photos_share_revoke";
+const URL_SHARE_MINE = "intern_api_photos_share_mine";
+
+const SHARE_DURATIONS = [
+	{ value: '1d', label: '1 jour' },
+	{ value: '7d', label: '7 jours' },
+	{ value: '30d', label: '30 jours' },
+];
+
+// takenAt (ou createdAt en repli) est déjà utilisé par le tri serveur (takenAt DESC, createdAt
+// DESC) : on regroupe donc sur le même champ pour que les séparateurs suivent l'ordre affiché.
+function monthKeyOf (medium) {
+	const date = medium.takenAt || medium.createdAt;
+
+	return date ? date.substring(0, 7) : null; // "YYYY-MM"
+}
+
+function monthLabelOf (monthKey) {
+	const label = Sanitaze.toFormatDate(monthKey + '-01', 'MMMM YYYY');
+
+	return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+// allMedia est déjà trié du plus récent au plus ancien par le serveur : parcourir dans cet
+// ordre et dédupliquer via une Map préserve directement l'ordre chronologique décroissant.
+function buildMonthList (allMedia) {
+	const counts = new Map();
+
+	allMedia.forEach(medium => {
+		const key = monthKeyOf(medium);
+		if (!key) return;
+
+		counts.set(key, (counts.get(key) || 0) + 1);
+	});
+
+	return Array.from(counts.entries());
+}
 
 export class PhotosGallery extends Component {
 	constructor (props) {
@@ -65,13 +106,18 @@ export class PhotosGallery extends Component {
 			rankMedia: 1,
 			authors: [],
 			albums: [],
-			authorFilter: null,
+			authorFilter: props.userId, // "Mes photos" par défaut plutôt que "Tous"
 			albumFilter: null,
 			view: "stream", // "stream" | "albums" | "albumDetail"
 			selectedAlbum: null,
 			albumsScope: "all", // "all" | "mine"
 			coverBump: 0, // incrémenté à chaque changement de couverture pour casser le cache image
 			totalSize: null, // taille totale de la photothèque en octets, admin uniquement
+			shareTarget: null, // { type: 'media'|'album', id } de l'élément en cours de partage
+			shareLink: null, // lien actif courant pour shareTarget, ou null si aucun
+			shareLoading: false,
+			myShares: [],
+			mySharesLoading: false,
 		}
 
 		this.fileInputRef = React.createRef();
@@ -81,9 +127,11 @@ export class PhotosGallery extends Component {
 		this.deleteFiles = React.createRef();
 		this.deleteAlbum = React.createRef();
 		this.lightbox = React.createRef();
+		this.sharePanel = React.createRef();
 		this.observer = null;
 		this.observedNode = null;
 		this.sentinelRef = React.createRef();
+		this.pendingJumpMonth = null; // { monthKey, targetCount } le temps de charger les pages nécessaires
 	}
 
 	componentDidMount () {
@@ -149,7 +197,7 @@ export class PhotosGallery extends Component {
 		window.addEventListener('beforeunload', this.handleBeforeUnload);
 	}
 
-	componentDidUpdate () {
+	componentDidUpdate (prevProps, prevState) {
 		// Le sentinel est démonté/remonté à chaque changement de vue (stream/albums/albumDetail),
 		// ce qui crée un nouveau nœud DOM : l'observer doit se réattacher dessus, sinon il continue
 		// de surveiller un nœud orphelin et le scroll infini s'arrête silencieusement.
@@ -159,6 +207,12 @@ export class PhotosGallery extends Component {
 			}
 			this.observedNode = this.sentinelRef.current;
 			this.observer.observe(this.observedNode);
+		}
+
+		// Le flux est chargé page par page au fil du scroll : "aller à un mois" doit d'abord
+		// enchaîner les fetchMedia() nécessaires avant de pouvoir défiler jusqu'à son séparateur.
+		if (this.pendingJumpMonth && prevState.loading && !this.state.loading) {
+			this.continueJumpToMonth();
 		}
 	}
 
@@ -233,6 +287,34 @@ export class PhotosGallery extends Component {
 
 	handleLoadMore = () => {
 		this.fetchMedia();
+	}
+
+	handleJumpToMonth = (monthKey) => {
+		const { allMedia } = this.state;
+
+		const targetIndex = allMedia.findIndex(m => monthKeyOf(m) === monthKey);
+		if (targetIndex === -1) return;
+
+		this.pendingJumpMonth = { monthKey, targetCount: targetIndex + 1 };
+		this.continueJumpToMonth();
+	}
+
+	continueJumpToMonth = () => {
+		const pending = this.pendingJumpMonth;
+		if (!pending) return;
+
+		const { currentMedia, hasMore, loading } = this.state;
+
+		if (currentMedia.length >= pending.targetCount || !hasMore) {
+			this.pendingJumpMonth = null;
+			const el = document.getElementById(`month-${pending.monthKey}`);
+			if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			return;
+		}
+
+		if (!loading) {
+			this.fetchMedia();
+		}
 	}
 
 	handleFilter = (authorFilter, albumFilter) => {
@@ -496,6 +578,7 @@ export class PhotosGallery extends Component {
 			<LightboxContent key={elem.rankMedia} identifiant="lightbox" images={allMedia} elem={elem}
 							  userId={userId} isAdmin={isAdmin} albums={albums}
 							  onAssignAlbum={this.handleAssignAlbum}
+							  onShareMedia={(mediaId) => this.handleOpenShare('media', mediaId)}
 							  onSetCover={canSetCover ? (mediaId) => this.handleSetCover(selectedAlbum.id, mediaId) : null}
 							  onDelete={(medium) => {
 								  this.lightbox.current.handleClose();
@@ -524,6 +607,64 @@ export class PhotosGallery extends Component {
 			})
 			.catch((error) => Formulaire.displayErrors(null, error))
 		;
+	}
+
+	handleOpenShare = (type, id) => {
+		this.setState({ shareTarget: { type, id }, shareLink: null, shareLoading: true });
+		this.sharePanel.current.handleClick();
+
+		axios({ method: "GET", url: Routing.generate(type === 'media' ? URL_SHARE_GET_MEDIA : URL_SHARE_GET_ALBUM, { id }) })
+			.then((response) => this.setState({ shareLink: response.data.data, shareLoading: false }))
+			.catch((error) => { Formulaire.displayErrors(null, error); this.setState({ shareLoading: false }); })
+		;
+	}
+
+	handleCreateShare = (duration) => {
+		const { shareTarget } = this.state;
+		if (!shareTarget) return;
+
+		this.setState({ shareLoading: true });
+
+		axios({
+			method: "POST",
+			url: Routing.generate(shareTarget.type === 'media' ? URL_SHARE_CREATE_MEDIA : URL_SHARE_CREATE_ALBUM, { id: shareTarget.id }),
+			data: { duration }
+		})
+			.then((response) => this.setState({ shareLink: response.data.data, shareLoading: false }))
+			.catch((error) => { Formulaire.displayErrors(null, error); this.setState({ shareLoading: false }); })
+		;
+	}
+
+	handleRevokeShare = (linkId) => {
+		let self = this;
+		const { shareLink } = this.state;
+		const targetId = linkId || shareLink?.id;
+
+		if (!targetId) return;
+
+		axios({ method: "PUT", url: Routing.generate(URL_SHARE_REVOKE, { id: targetId }) })
+			.then(() => {
+				Toastr.toast('info', "Lien de partage révoqué.");
+				self.setState(prev => ({
+					shareLink: prev.shareLink?.id === targetId ? null : prev.shareLink,
+					myShares: prev.myShares.filter(l => l.id !== targetId),
+				}));
+			})
+			.catch((error) => Formulaire.displayErrors(null, error))
+		;
+	}
+
+	fetchMyShares = () => {
+		this.setState({ mySharesLoading: true });
+
+		axios({ method: "GET", url: Routing.generate(URL_SHARE_MINE) })
+			.then((response) => this.setState({ myShares: response.data.data, mySharesLoading: false }))
+			.catch((error) => { Formulaire.displayErrors(null, error); this.setState({ mySharesLoading: false }); })
+		;
+	}
+
+	handleShowShares = () => {
+		this.setState({ view: "shares" }, () => this.fetchMyShares());
 	}
 
 	handleCreateAlbum = (e) => {
@@ -596,7 +737,8 @@ export class PhotosGallery extends Component {
 		const { errors, allMedia, currentMedia, selected, nbProgress, nbTotal, loading, hasMore,
 			authors, albums, authorFilter, albumName, albumDescription, albumDate, albumLocation,
 			editAlbumName, editAlbumDescription, editAlbumDate, editAlbumLocation,
-			view, selectedAlbum, albumsScope, coverBump, totalSize } = this.state;
+			view, selectedAlbum, albumsScope, coverBump, totalSize,
+			shareLink, shareLoading, myShares, mySharesLoading } = this.state;
 
 		return <div className="bg-gray-900 min-h-screen text-white">
 			{/* Barre du haut façon Google Photos, contextuelle à la vue */}
@@ -663,6 +805,15 @@ export class PhotosGallery extends Component {
 							{(String(selectedAlbum.author?.id) === String(userId) || isAdmin) && (
 								<button
 									className="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-white flex-shrink-0"
+									onClick={() => this.handleOpenShare('album', selectedAlbum.id)}
+									aria-label="Partager l'album"
+								>
+									<Share2 size={16} />
+								</button>
+							)}
+							{(String(selectedAlbum.author?.id) === String(userId) || isAdmin) && (
+								<button
+									className="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-white flex-shrink-0"
 									onClick={() => this.handleEditAlbum(selectedAlbum)}
 									aria-label="Modifier l'album"
 								>
@@ -678,6 +829,17 @@ export class PhotosGallery extends Component {
 									<Trash2 size={18} />
 								</button>
 							)}
+						</div>
+					</>
+				)}
+
+				{view === "shares" && (
+					<>
+						<div className="flex items-center gap-2">
+							<button className="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-white" onClick={this.handleShowStream} aria-label="Retour">
+								<ChevronLeft size={20} />
+							</button>
+							<span className="text-lg font-medium text-white">Mes partages</span>
 						</div>
 					</>
 				)}
@@ -714,6 +876,14 @@ export class PhotosGallery extends Component {
 							<Folder size={16} />
 							Albums {albums.length > 0 && `(${albums.length})`}
 						</button>
+						<button
+							className="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 flex items-center gap-1"
+							onClick={this.handleShowShares}
+						>
+							<Link2 size={16} />
+							Partages
+						</button>
+						<MonthJumpMenu months={buildMonthList(allMedia)} onJump={this.handleJumpToMonth} />
 					</div>
 
 					{(allMedia.length > 0 || selected.size > 0) && (
@@ -780,6 +950,8 @@ export class PhotosGallery extends Component {
 							<Plus size={16} className="mr-1" />Ajouter des photos
 						</button>
 
+						<MonthJumpMenu months={buildMonthList(allMedia)} onJump={this.handleJumpToMonth} />
+
 						{(allMedia.length > 0 || selected.size > 0) && currentMedia.length > 0 && (
 							<button
 								className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-800 text-gray-200 hover:bg-gray-700"
@@ -811,6 +983,8 @@ export class PhotosGallery extends Component {
 							onOpenAlbum={this.handleOpenAlbum}
 							onDeleteAlbum={(album) => this.handleModal('deleteAlbum', album)}
 							onCreateAlbum={() => this.formAlbum.current.handleClick()} />
+			) : view === "shares" ? (
+				<MySharesPanel shares={myShares} loading={mySharesLoading} onRevoke={this.handleRevokeShare} />
 			) : (
 				<>
 					<div className="grid grid-cols-3 gap-1 px-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 pswp-gallery" id="gallery">
@@ -878,6 +1052,13 @@ export class PhotosGallery extends Component {
 			)}
 
 			{createPortal(<LightBox ref={this.lightbox} identifiant="lightbox" content={null} />
+				, document.body
+			)}
+
+			{createPortal(<Modal ref={this.sharePanel} identifiant="share-panel" maxWidth={420} title="Partager"
+								 content={<SharePanel link={shareLink} loading={shareLoading}
+													   onCreate={this.handleCreateShare} onRevoke={() => this.handleRevokeShare()} />}
+								 footer={null} closeTxt="Fermer" />
 				, document.body
 			)}
 
@@ -1003,6 +1184,11 @@ function AlbumsGrid ({ albums, userId, isAdmin, scope, coverBump, onScopeChange,
 							</div>
 						)}
 
+						{album.sharedUntil && (
+							<div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white" title={`Partagé jusqu'au ${Sanitaze.toFormatDate(album.sharedUntil, 'D MMMM YYYY')}`}>
+								<Link2 size={12} />
+							</div>
+						)}
 						{(String(album.author?.id) === String(userId) || isAdmin) && (
 							<button
 								className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-red-600/90 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1038,6 +1224,155 @@ function AlbumsGrid ({ albums, userId, isAdmin, scope, coverBump, onScopeChange,
 			</div>
 		)}
 	</div>
+}
+
+function SharePanel ({ link, loading, onCreate, onRevoke }) {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async () => {
+		if (!link) return;
+
+		await navigator.clipboard.writeText(link.url);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	};
+
+	const handleNativeShare = async () => {
+		if (!link || !navigator.share) return;
+
+		try {
+			await navigator.share({ url: link.url, title: 'Photo Nompaw' });
+		} catch (e) {
+			// annulé par l'utilisateur, rien à faire
+		}
+	};
+
+	if (loading && !link) {
+		return <div className="flex items-center justify-center py-6 text-gray-400">
+			<Loader2 size={20} className="animate-spin" />
+		</div>;
+	}
+
+	if (!link) {
+		return <div className="flex flex-col gap-3">
+			<p className="text-sm text-gray-600">
+				Choisissez une durée de validité : n'importe qui avec ce lien pourra voir cet élément, sans compte.
+			</p>
+			<div className="flex gap-2">
+				{SHARE_DURATIONS.map(d => (
+					<Button key={d.value} type="default" onClick={() => onCreate(d.value)}>{d.label}</Button>
+				))}
+			</div>
+		</div>;
+	}
+
+	return <div className="flex flex-col gap-3">
+		<p className="text-sm text-gray-600">
+			Ce lien est actif jusqu'au <span className="font-medium">{Sanitaze.toFormatDate(link.expiresAt, 'D MMMM YYYY à HH:mm')}</span>.
+		</p>
+		<div className="flex items-center gap-2">
+			<input readOnly value={link.url} onFocus={(e) => e.target.select()}
+				   className="flex-1 min-w-0 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-gray-50" />
+			{/* Boutons natifs plutôt que <Button> : ce composant partagé regroupe tous ses
+			    enfants dans un unique <span> (pas de flex), donc icône + texte n'y sont pas
+			    alignés côte à côte comme attendu ici. */}
+			<button type="button" onClick={handleCopy}
+					className="inline-flex items-center justify-center gap-2 rounded-md py-2 px-3 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300">
+				<Copy size={16} />
+			</button>
+		</div>
+		{copied && <p className="text-xs text-green-600">Lien copié.</p>}
+		<div className="flex gap-2">
+			{typeof navigator !== 'undefined' && navigator.share && (
+				<button type="button" onClick={handleNativeShare}
+						className="inline-flex items-center gap-2 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300">
+					<Share2 size={16} />Partager
+				</button>
+			)}
+			<button type="button" onClick={onRevoke}
+					className="inline-flex items-center gap-2 rounded-md py-2 px-4 text-sm font-semibold shadow-sm bg-red-600 text-slate-50 hover:bg-red-500">
+				<Trash2 size={16} />Révoquer le lien
+			</button>
+		</div>
+	</div>;
+}
+
+function MySharesPanel ({ shares, loading, onRevoke }) {
+	if (loading) {
+		return <div className="flex items-center justify-center py-8 text-gray-400">
+			<Loader2 size={20} className="animate-spin" />
+		</div>;
+	}
+
+	if (shares.length === 0) {
+		return <div className="text-center text-gray-500 text-sm py-8 px-4">Aucun lien de partage actif.</div>;
+	}
+
+	return <div className="flex flex-col gap-2 px-4 pb-8">
+		{shares.map(share => (
+			<div key={share.id} className="flex items-center gap-3 p-3 bg-gray-800/80 rounded-lg">
+				<div className="w-14 h-14 rounded-md overflow-hidden bg-gray-900 flex-shrink-0 flex items-center justify-center">
+					{share.target.type === 'media'
+						? <img src={share.target.thumbUrl} alt="" className="w-full h-full object-cover" />
+						: (share.target.coverUrl
+							? <img src={share.target.coverUrl} alt="" className="w-full h-full object-cover" />
+							: <Folder size={24} className="text-gray-600" />)
+					}
+				</div>
+				<div className="flex-1 min-w-0">
+					<div className="text-sm font-medium text-white truncate">
+						{share.target.type === 'album' ? share.target.name : 'Photo'}
+					</div>
+					<div className="text-xs text-gray-400">
+						Expire le {Sanitaze.toFormatDate(share.expiresAt, 'D MMMM YYYY à HH:mm')}
+						{share.viewCount > 0 && ` • ${share.viewCount} consultation${share.viewCount > 1 ? 's' : ''}`}
+					</div>
+				</div>
+				<button
+					className="w-8 h-8 rounded-full hover:bg-gray-700 flex items-center justify-center text-gray-300 hover:text-white flex-shrink-0"
+					onClick={() => { navigator.clipboard.writeText(share.url); Toastr.toast('info', 'Lien copié.'); }}
+					aria-label="Copier le lien"
+				>
+					<Copy size={14} />
+				</button>
+				<button
+					className="w-8 h-8 rounded-full hover:bg-red-600/90 flex items-center justify-center text-gray-300 hover:text-white flex-shrink-0"
+					onClick={() => onRevoke(share.id)}
+					aria-label="Révoquer le lien"
+				>
+					<Trash2 size={14} />
+				</button>
+			</div>
+		))}
+	</div>;
+}
+
+function MonthJumpMenu ({ months, onJump }) {
+	const [open, setOpen] = useState(false);
+
+	if (months.length === 0) return null;
+
+	return <div className="relative">
+		<button
+			className="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 flex items-center gap-1"
+			onClick={() => setOpen(o => !o)}
+		>
+			<Calendar size={16} />
+			Aller à un mois
+		</button>
+		{open && (
+			<div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-lg shadow-lg py-2 w-56 max-h-72 overflow-y-auto z-30">
+				{months.map(([key, count]) => (
+					<button key={key}
+							className="w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 flex items-center justify-between gap-2"
+							onClick={() => { onJump(key); setOpen(false); }}>
+						<span>{monthLabelOf(key)}</span>
+						<span className="text-gray-500 text-xs">{count}</span>
+					</button>
+				))}
+			</div>
+		)}
+	</div>;
 }
 
 function GridSkeleton ({ count = 24 }) {
@@ -1110,7 +1445,7 @@ function LazyLoadingGalleryWithPlaceholder ({ currentMedia, onModal, onSelect, o
 	};
 
 	return <>
-		{currentMedia.map((elem) => {
+		{currentMedia.map((elem, index) => {
 			const isSelected = selected.has(elem.id);
 			const hasSelection = selected.size > 0;
 			const isHovered = hoveredMedium === elem.id;
@@ -1119,8 +1454,16 @@ function LazyLoadingGalleryWithPlaceholder ({ currentMedia, onModal, onSelect, o
 			const showPlaceholder = !isLoaded && !hasError;
 			const canDelete = String(elem.author.id) === String(userId) || isAdmin;
 
-			return <div key={elem.id}
-						className={`relative cursor-pointer flex items-center justify-center aspect-square group gallery-item overflow-hidden rounded-md select-none transition-colors ${
+			const monthKey = monthKeyOf(elem);
+			const showMonthDivider = monthKey && monthKey !== (index > 0 ? monthKeyOf(currentMedia[index - 1]) : null);
+
+			return <React.Fragment key={elem.id}>
+				{showMonthDivider && (
+					<div id={`month-${monthKey}`} className="col-span-full pt-4 pb-1 first:pt-0">
+						<h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">{monthLabelOf(monthKey)}</h3>
+					</div>
+				)}
+				<div className={`relative cursor-pointer flex items-center justify-center aspect-square group gallery-item overflow-hidden rounded-md select-none transition-colors ${
 							isSelected ? 'bg-gray-600' : 'bg-gray-800/80'
 						}`}
 						style={{ WebkitTouchCallout: 'none' }}
@@ -1228,7 +1571,14 @@ function LazyLoadingGalleryWithPlaceholder ({ currentMedia, onModal, onSelect, o
 						onError={() => handleImageError(elem.id)}
 					/>
 				)}
-			</div>
+
+				{elem.sharedUntil && (
+					<div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white" title={`Partagé jusqu'au ${Sanitaze.toFormatDate(elem.sharedUntil, 'D MMMM YYYY')}`}>
+						<Link2 size={12} />
+					</div>
+				)}
+				</div>
+			</React.Fragment>
 		})}
 	</>
 }
@@ -1294,20 +1644,11 @@ class LightboxContent extends Component {
 		this.handleSwipeEnd();
 	};
 
-	handleShare = async () => {
+	handleShare = () => {
+		const { onShareMedia } = this.props;
 		const { elem } = this.state;
-		const absoluteUrl = window.location.origin + Routing.generate(URL_DOWNLOAD_MEDIUM, { id: elem.id });
 
-		if (navigator.share) {
-			try {
-				await navigator.share({ url: absoluteUrl, title: 'Photo Nompaw' });
-			} catch (e) {
-				// annulé par l'utilisateur, rien à faire
-			}
-		} else if (navigator.clipboard) {
-			await navigator.clipboard.writeText(absoluteUrl);
-			Toastr.toast('info', 'Lien copié.');
-		}
+		onShareMedia(elem.id);
 	}
 
 	toggleAlbumPicker = () => {

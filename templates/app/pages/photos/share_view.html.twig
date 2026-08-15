@@ -1,0 +1,66 @@
+{% extends 'app/pages/security/template.html.twig' %}
+
+{% block noindex %}
+    <meta name="robots" content="noindex">
+    <meta name="googlebot" content="noindex">
+{% endblock %}
+
+{% block main_content %}
+    <div class="min-h-full max-w-screen-xl mx-auto sm:my-8 px-4">
+        {% if media %}
+            <div class="bg-white border rounded-xl shadow-xl p-4 sm:p-6">
+                <div class="flex items-center justify-center bg-gray-900 rounded-lg overflow-hidden">
+                    {% if media.type == 1 %}
+                        <video class="max-h-[80vh] w-full" controls>
+                            <source src="{{ path('app_photos_share_file', {token: link.token, mediaId: media.id}) }}">
+                        </video>
+                    {% else %}
+                        <img src="{{ path('app_photos_share_hd', {token: link.token, mediaId: media.id}) }}" alt=""
+                             class="max-h-[80vh] w-full object-contain">
+                    {% endif %}
+                </div>
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <p class="text-sm text-gray-500">Ce lien expire le {{ link.expiresAt|date('d/m/Y à H:i') }}.</p>
+                    <a href="{{ path('app_photos_share_download', {token: link.token, mediaId: media.id}) }}"
+                       class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                        Télécharger
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="bg-white border rounded-xl shadow-xl p-4 sm:p-6">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ album.name }}</h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ album.mediaCount }} élément{{ album.mediaCount > 1 ? 's' : '' }}
+                    {%- if album.date %} • {{ album.date|date('d/m/Y') }}{% endif %}
+                    {%- if album.location %} • {{ album.location }}{% endif %}
+                </p>
+                {% if album.description %}
+                    <p class="text-sm text-gray-700 mt-3 whitespace-pre-line">{{ album.description }}</p>
+                {% endif %}
+                <p class="text-sm text-gray-500 mt-3">Ce lien expire le {{ link.expiresAt|date('d/m/Y à H:i') }}.</p>
+
+                <div class="grid grid-cols-2 gap-2 mt-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {% for medium in albumMedia %}
+                        <div class="relative aspect-square rounded-md overflow-hidden bg-gray-900 group">
+                            {% if medium.type == 1 %}
+                                <video class="w-full h-full object-cover" controls preload="metadata">
+                                    <source src="{{ path('app_photos_share_file', {token: link.token, mediaId: medium.id}) }}">
+                                </video>
+                            {% else %}
+                                <a href="{{ path('app_photos_share_hd', {token: link.token, mediaId: medium.id}) }}" target="_blank" rel="noopener">
+                                    <img src="{{ path('app_photos_share_thumb', {token: link.token, mediaId: medium.id}) }}" alt=""
+                                         class="w-full h-full object-cover" loading="lazy">
+                                </a>
+                            {% endif %}
+                            <a href="{{ path('app_photos_share_download', {token: link.token, mediaId: medium.id}) }}"
+                               class="absolute bottom-1 right-1 rounded-full bg-black/70 hover:bg-black/90 px-2 py-1 text-[11px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                Télécharger
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

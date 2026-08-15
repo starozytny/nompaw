@@ -7,6 +7,7 @@ use App\Entity\Photo\PhMedia;
 use App\Repository\Main\UserRepository;
 use App\Repository\Photo\PhAlbumRepository;
 use App\Repository\Photo\PhMediaRepository;
+use App\Repository\Photo\PhShareLinkRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\FileUploader;
 use DateTime;
@@ -27,7 +28,8 @@ class MediaController extends AbstractController
 
     #[Route('/fetch/{page}', name: 'fetch', options: ['expose' => true], methods: 'GET')]
     public function fetch(Request $request, int $page, PhMediaRepository $repository, UserRepository $userRepository,
-                          PhAlbumRepository $albumRepository, ApiResponse $apiResponse, SerializerInterface $serializer): JsonResponse
+                          PhAlbumRepository $albumRepository, PhShareLinkRepository $shareLinkRepository,
+                          ApiResponse $apiResponse, SerializerInterface $serializer): JsonResponse
     {
         $author = $request->query->get('authorId') ? $userRepository->find($request->query->get('authorId')) : null;
         $album = $request->query->get('albumId') ? $albumRepository->find($request->query->get('albumId')) : null;
@@ -40,13 +42,30 @@ class MediaController extends AbstractController
         $totalMedia = count($allMedia);
         $hasMore = ($offset + self::MEDIA_PER_PAGE) < $totalMedia;
 
+        $allMediaData = json_decode($serializer->serialize($allMedia, 'json', ['groups' => PhMedia::LIST]));
+        $currentMediaData = json_decode($serializer->serialize($currentMedia, 'json', ['groups' => PhMedia::LIST]));
+
+        $sharedUntil = $shareLinkRepository->findActiveIndexedByMediaIds(array_map(fn (PhMedia $m) => $m->getId(), $allMedia));
+        $this->applySharedUntil($allMediaData, $sharedUntil);
+        $this->applySharedUntil($currentMediaData, $sharedUntil);
+
         return $apiResponse->apiJsonResponseCustom([
-            'media' => json_decode($serializer->serialize($allMedia, 'json', ['groups' => PhMedia::LIST])),
-            'currentMedia' => json_decode($serializer->serialize($currentMedia, 'json', ['groups' => PhMedia::LIST])),
+            'media' => $allMediaData,
+            'currentMedia' => $currentMediaData,
             'hasMore' => $hasMore,
             'total' => $totalMedia,
             'page' => $page,
         ]);
+    }
+
+    /**
+     * @param array<int, \DateTime> $sharedUntil [mediaId => expiresAt]
+     */
+    private function applySharedUntil(array $items, array $sharedUntil): void
+    {
+        foreach ($items as $item) {
+            $item->sharedUntil = isset($sharedUntil[$item->id]) ? $sharedUntil[$item->id]->format('c') : null;
+        }
     }
 
     #[Route('/authors', name: 'authors', options: ['expose' => true], methods: 'GET')]
