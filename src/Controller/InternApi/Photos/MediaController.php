@@ -174,8 +174,7 @@ class MediaController extends AbstractController
                     $media->setType(99);
                 }
 
-                $filenameThumbs = $fileUploader->thumbs($media->getFile(), PhMedia::FOLDER, PhMedia::FOLDER_THUMBS);
-                $filenameLightbox = $fileUploader->lightbox($media->getFile(), PhMedia::FOLDER, PhMedia::FOLDER_LIGHTBOX);
+                [$filenameThumbs, $filenameLightbox] = $fileUploader->thumbsAndLightbox($media->getFile(), PhMedia::FOLDER, PhMedia::FOLDER_THUMBS, PhMedia::FOLDER_LIGHTBOX);
 
                 $media
                     ->setThumbs($filenameThumbs)
