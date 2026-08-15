@@ -269,13 +269,18 @@ export class PhotosGallery extends Component {
 			url: Routing.generate(URL_FETCH_MEDIA, { page: page, authorId: authorFilter, albumId: albumFilter }),
 		})
 			.then((response) => {
+				// Le serveur ne renvoie la liste complète (nécessaire au saut par mois et à la
+				// navigation dans la lightbox) qu'à la première page ; sur les pages suivantes on
+				// garde celle déjà en mémoire, identique, plutôt que d'écraser avec `null`.
 				let allData = response.data.media;
 				let currentData = response.data.currentMedia;
 
-				let i = 1;
-				allData.forEach(item => {
-					item.rankMedia = i++;
-				});
+				if (allData) {
+					let i = 1;
+					allData.forEach(item => {
+						item.rankMedia = i++;
+					});
+				}
 
 				let j = this.state.rankMedia;
 				currentData.forEach(item => {
@@ -283,7 +288,7 @@ export class PhotosGallery extends Component {
 				});
 
 				this.setState(prevState => ({
-					allMedia: allData,
+					allMedia: allData || prevState.allMedia,
 					currentMedia: [...prevState.currentMedia, ...currentData],
 					rankMedia: prevState.rankMedia + currentData.length,
 					hasMore: response.data.hasMore,
@@ -1857,7 +1862,10 @@ class LightboxContent extends Component {
 					<ChevronLeft size={28} className="text-gray-400 group-hover:text-white" />
 				</div>
 				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full cursor-grab">
-					{images.map(image => {
+					{/* images contient toute la photothèque filtrée (potentiellement des milliers d'éléments) :
+						ne monter que le média courant et ses voisins immédiats évite de déclencher un
+						téléchargement HD pour chaque photo dès l'ouverture de la lightbox. */}
+					{images.filter(image => Math.abs(image.rankMedia - actualRank) <= 1).map(image => {
 						const isCurrent = elem.id === image.id;
 
 						return <div key={image.id} className={`${isCurrent ? "opacity-100" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 w-full h-full flex items-center justify-center`}>

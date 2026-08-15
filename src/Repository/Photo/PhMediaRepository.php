@@ -48,6 +48,36 @@ class PhMediaRepository extends ServiceEntityRepository
 
     public function findFiltered(?User $author, ?PhAlbum $album): array
     {
+        return $this->filteredQueryBuilder($author, $album)->getQuery()->getResult();
+    }
+
+    public function findFilteredPage(?User $author, ?PhAlbum $album, int $offset, int $limit): array
+    {
+        return $this->filteredQueryBuilder($author, $album)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function countFiltered(?User $author, ?PhAlbum $album): int
+    {
+        $qb = $this->createQueryBuilder('m')->select('COUNT(m.id)');
+
+        if ($author) {
+            $qb->andWhere('m.author = :author')->setParameter('author', $author);
+        }
+
+        if ($album) {
+            $qb->andWhere('m.album = :album')->setParameter('album', $album);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function filteredQueryBuilder(?User $author, ?PhAlbum $album)
+    {
         $qb = $this->createQueryBuilder('m')
             ->orderBy('m.takenAt', 'DESC')
             ->addOrderBy('m.createdAt', 'DESC');
@@ -60,7 +90,7 @@ class PhMediaRepository extends ServiceEntityRepository
             $qb->andWhere('m.album = :album')->setParameter('album', $album);
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     public function getTotalSize(): int
