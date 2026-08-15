@@ -81,6 +81,13 @@ class ImageController extends AbstractController
         if($request->files){
             $randoFile = '/' . $obj->getId();
             foreach($request->files as $file){
+                // Lu AVANT uploadDrive() : sa correction d'orientation (GD, pour les JPEG mal
+                // orientés — la quasi-totalité des photos de téléphone) réécrit le fichier et
+                // efface tout l'EXIF au passage, DateTimeOriginal compris. Lu après coup, la date
+                // de prise de vue retombait donc systématiquement sur mtime (date d'upload) dès
+                // qu'une rotation était nécessaire.
+                $exif = @exif_read_data($file->getPathname());
+
                 $filenameImage = $fileUploader->uploadDrive($file, RaRando::FOLDER_IMAGES.$randoFile);
 
                 if ($filenameImage === false) {
@@ -94,9 +101,6 @@ class ImageController extends AbstractController
                     ->setRando($obj)
                 ;
 
-                $fileUploaded = $this->getParameter('private_directory') . $image->getFileFile();
-                $exif = @exif_read_data($fileUploaded);
-
                 if ($exif && isset($exif['DateTimeOriginal'])) {
                     $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
                     $image->setTakenAt($date ?: new \DateTime());
@@ -105,6 +109,7 @@ class ImageController extends AbstractController
                     $image->setTakenAt($date->setTimestamp($request->get('mtime')));
                 }
 
+                $fileUploaded = $this->getParameter('private_directory') . $image->getFileFile();
                 $mime = mime_content_type($fileUploaded);
 
                 if(str_contains($mime, "image/")){

@@ -114,6 +114,13 @@ class MediaController extends AbstractController
             foreach ($request->files as $file) {
                 $fileSize = $file->getSize();
 
+                // Lu AVANT uploadDrive() : sa correction d'orientation (GD, pour les JPEG mal
+                // orientés — la quasi-totalité des photos de téléphone) réécrit le fichier et
+                // efface tout l'EXIF au passage, DateTimeOriginal compris. Lu après coup, la date
+                // de prise de vue retombait donc systématiquement sur mtime (date d'upload) dès
+                // qu'une rotation était nécessaire.
+                $exif = @exif_read_data($file->getPathname());
+
                 // keepOriginalSize=true : contrairement aux photos de rando, le but de cet espace
                 // est justement de conserver les photos/vidéos du téléphone en pleine résolution.
                 $filename = $fileUploader->uploadDrive($file, PhMedia::FOLDER, true);
@@ -130,9 +137,6 @@ class MediaController extends AbstractController
                     ->setAlbum($album)
                 ;
 
-                $fileUploaded = $this->getParameter('private_directory') . $media->getFileFile();
-                $exif = @exif_read_data($fileUploaded);
-
                 if ($exif && isset($exif['DateTimeOriginal'])) {
                     $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
                     $media->setTakenAt($date ?: new \DateTime());
@@ -141,6 +145,7 @@ class MediaController extends AbstractController
                     $media->setTakenAt($date->setTimestamp($request->get('mtime')));
                 }
 
+                $fileUploaded = $this->getParameter('private_directory') . $media->getFileFile();
                 $mime = mime_content_type($fileUploaded);
 
                 if (str_contains($mime, "image/")) {

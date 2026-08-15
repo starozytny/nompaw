@@ -45,6 +45,11 @@ const URL_SHARE_CREATE_ALBUM = "intern_api_photos_share_create_album";
 const URL_SHARE_REVOKE = "intern_api_photos_share_revoke";
 const URL_SHARE_MINE = "intern_api_photos_share_mine";
 
+// Doit rester cohérent avec MediaController::MEDIA_PER_PAGE côté serveur : sert de taille de
+// lot lors d'un saut direct vers un mois (voir handleJumpToMonth), pas à la pagination réseau
+// elle-même (qui continue d'utiliser la valeur renvoyée par le serveur).
+const MEDIA_PER_PAGE_JS = 24;
+
 const SHARE_DURATIONS = [
 	{ value: '1d', label: '1 jour' },
 	{ value: '7d', label: '7 jours' },
@@ -59,25 +64,39 @@ function monthKeyOf (medium) {
 	return date ? date.substring(0, 7) : null; // "YYYY-MM"
 }
 
-function monthLabelOf (monthKey) {
-	const label = Sanitaze.toFormatDate(monthKey + '-01', 'MMMM YYYY');
+function yearOf (monthKey) {
+	return monthKey.slice(0, 4);
+}
+
+function monthNameOnly (monthKey) {
+	const label = Sanitaze.toFormatDate(monthKey + '-01', 'MMMM');
 
 	return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 // allMedia est déjà trié du plus récent au plus ancien par le serveur : parcourir dans cet
-// ordre et dédupliquer via une Map préserve directement l'ordre chronologique décroissant.
-function buildMonthList (allMedia) {
-	const counts = new Map();
+// ordre et dédupliquer via des Map préserve directement l'ordre chronologique décroissant,
+// à la fois pour les années et pour les mois qu'elles contiennent.
+function buildYearMonthList (allMedia) {
+	const years = new Map();
 
 	allMedia.forEach(medium => {
 		const key = monthKeyOf(medium);
 		if (!key) return;
 
-		counts.set(key, (counts.get(key) || 0) + 1);
+		const year = yearOf(key);
+		if (!years.has(year)) {
+			years.set(year, { count: 0, months: new Map() });
+		}
+
+		const entry = years.get(year);
+		entry.count++;
+		entry.months.set(key, (entry.months.get(key) || 0) + 1);
 	});
 
-	return Array.from(counts.entries());
+	return Array.from(years.entries()).map(([year, { count, months }]) => ({
+		year, count, months: Array.from(months.entries()),
+	}));
 }
 
 export class PhotosGallery extends Component {
@@ -131,7 +150,6 @@ export class PhotosGallery extends Component {
 		this.observer = null;
 		this.observedNode = null;
 		this.sentinelRef = React.createRef();
-		this.pendingJumpMonth = null; // { monthKey, targetCount } le temps de charger les pages nécessaires
 	}
 
 	componentDidMount () {
@@ -207,12 +225,6 @@ export class PhotosGallery extends Component {
 			}
 			this.observedNode = this.sentinelRef.current;
 			this.observer.observe(this.observedNode);
-		}
-
-		// Le flux est chargé page par page au fil du scroll : "aller à un mois" doit d'abord
-		// enchaîner les fetchMedia() nécessaires avant de pouvoir défiler jusqu'à son séparateur.
-		if (this.pendingJumpMonth && prevState.loading && !this.state.loading) {
-			this.continueJumpToMonth();
 		}
 	}
 
@@ -290,31 +302,38 @@ export class PhotosGallery extends Component {
 	}
 
 	handleJumpToMonth = (monthKey) => {
-		const { allMedia } = this.state;
+		const { allMedia, currentMedia } = this.state;
 
 		const targetIndex = allMedia.findIndex(m => monthKeyOf(m) === monthKey);
 		if (targetIndex === -1) return;
 
-		this.pendingJumpMonth = { monthKey, targetCount: targetIndex + 1 };
-		this.continueJumpToMonth();
-	}
-
-	continueJumpToMonth = () => {
-		const pending = this.pendingJumpMonth;
-		if (!pending) return;
-
-		const { currentMedia, hasMore, loading } = this.state;
-
-		if (currentMedia.length >= pending.targetCount || !hasMore) {
-			this.pendingJumpMonth = null;
-			const el = document.getElementById(`month-${pending.monthKey}`);
-			if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		if (currentMedia.length > targetIndex) {
+			this.scrollToMonth(monthKey);
 			return;
 		}
 
-		if (!loading) {
-			this.fetchMedia();
-		}
+		// allMedia contient déjà la liste complète (le serveur la renvoie en entier à chaque
+		// fetch, currentMedia n'en est qu'une fenêtre affichée progressivement) : on peut donc
+		// révéler directement le bon morceau depuis les données déjà en mémoire, sans enchaîner
+		// des allers-retours réseau un par un jusqu'à la page voulue — ce qui rendait le saut
+		// vers un mois ancien lent quand il y avait beaucoup de mois à traverser.
+		// Arrondi au multiple de MEDIA_PER_PAGE_JS supérieur : la pagination réseau normale
+		// (IntersectionObserver / "Afficher plus") reprendra ensuite exactement là où ce saut
+		// s'est arrêté, sans recouvrement ni trou avec ce qui vient d'être révélé localement.
+		const pagesNeeded = Math.ceil((targetIndex + 1) / MEDIA_PER_PAGE_JS);
+		const revealCount = Math.min(allMedia.length, pagesNeeded * MEDIA_PER_PAGE_JS);
+
+		this.setState({
+			currentMedia: allMedia.slice(0, revealCount),
+			page: pagesNeeded + 1,
+			hasMore: revealCount < allMedia.length,
+			rankMedia: revealCount + 1,
+		}, () => this.scrollToMonth(monthKey));
+	}
+
+	scrollToMonth = (monthKey) => {
+		const el = document.getElementById(`month-${monthKey}`);
+		if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	}
 
 	handleFilter = (authorFilter, albumFilter) => {
@@ -883,7 +902,7 @@ export class PhotosGallery extends Component {
 							<Link2 size={16} />
 							Partages
 						</button>
-						<MonthJumpMenu months={buildMonthList(allMedia)} onJump={this.handleJumpToMonth} />
+						<TimelineJumpMenu years={buildYearMonthList(allMedia)} onJump={this.handleJumpToMonth} />
 					</div>
 
 					{(allMedia.length > 0 || selected.size > 0) && (
@@ -950,7 +969,7 @@ export class PhotosGallery extends Component {
 							<Plus size={16} className="mr-1" />Ajouter des photos
 						</button>
 
-						<MonthJumpMenu months={buildMonthList(allMedia)} onJump={this.handleJumpToMonth} />
+						<TimelineJumpMenu years={buildYearMonthList(allMedia)} onJump={this.handleJumpToMonth} />
 
 						{(allMedia.length > 0 || selected.size > 0) && currentMedia.length > 0 && (
 							<button
@@ -1064,18 +1083,26 @@ export class PhotosGallery extends Component {
 
 			{createPortal(<Modal ref={this.formAlbum} identifiant="form-new-album" maxWidth={480} title="Nouvel album"
 								 content={<form onSubmit={this.handleCreateAlbum} className="flex flex-col gap-4">
-									 <Input identifiant="albumName" valeur={albumName} onChange={(e) => this.setState({ albumName: e.target.value })} errors={errors}>
-										 Nom de l'album
-									 </Input>
-									 <TextArea identifiant="albumDescription" valeur={albumDescription} onChange={(e) => this.setState({ albumDescription: e.target.value })} errors={errors}>
-										 Description (optionnel)
-									 </TextArea>
-									 <Input type="date" identifiant="albumDate" valeur={albumDate} onChange={(e) => this.setState({ albumDate: e.target.value })} errors={errors}>
-										 Date (optionnel)
-									 </Input>
-									 <Input identifiant="albumLocation" valeur={albumLocation} onChange={(e) => this.setState({ albumLocation: e.target.value })} errors={errors}>
-										 Emplacement (optionnel)
-									 </Input>
+									 <div>
+										 <Input identifiant="albumName" valeur={albumName} onChange={(e) => this.setState({ albumName: e.target.value })} errors={errors}>
+											 Nom de l'album
+										 </Input>
+									 </div>
+									 <div>
+										 <TextArea identifiant="albumDescription" valeur={albumDescription} onChange={(e) => this.setState({ albumDescription: e.target.value })} errors={errors}>
+											 Description (optionnel)
+										 </TextArea>
+									 </div>
+									 <div>
+										 <Input type="date" identifiant="albumDate" valeur={albumDate} onChange={(e) => this.setState({ albumDate: e.target.value })} errors={errors}>
+											 Date (optionnel)
+										 </Input>
+									 </div>
+									 <div>
+										 <Input identifiant="albumLocation" valeur={albumLocation} onChange={(e) => this.setState({ albumLocation: e.target.value })} errors={errors}>
+											 Emplacement (optionnel)
+										 </Input>
+									 </div>
 								 </form>}
 								 footer={<Button type="blue" onClick={this.handleCreateAlbum}>Créer</Button>} closeTxt="Annuler" />
 				, document.body
@@ -1347,10 +1374,10 @@ function MySharesPanel ({ shares, loading, onRevoke }) {
 	</div>;
 }
 
-function MonthJumpMenu ({ months, onJump }) {
+function TimelineJumpMenu ({ years, onJump }) {
 	const [open, setOpen] = useState(false);
 
-	if (months.length === 0) return null;
+	if (years.length === 0) return null;
 
 	return <div className="relative">
 		<button
@@ -1358,17 +1385,28 @@ function MonthJumpMenu ({ months, onJump }) {
 			onClick={() => setOpen(o => !o)}
 		>
 			<Calendar size={16} />
-			Aller à un mois
+			Aller à une date
 		</button>
 		{open && (
-			<div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-lg shadow-lg py-2 w-56 max-h-72 overflow-y-auto z-30">
-				{months.map(([key, count]) => (
-					<button key={key}
-							className="w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 flex items-center justify-between gap-2"
-							onClick={() => { onJump(key); setOpen(false); }}>
-						<span>{monthLabelOf(key)}</span>
-						<span className="text-gray-500 text-xs">{count}</span>
-					</button>
+			<div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-lg shadow-lg py-2 w-64 max-h-80 overflow-y-auto z-30">
+				{years.map(({ year, count, months }) => (
+					<div key={year}>
+						<button
+							className="w-full text-left px-4 py-2 text-sm font-bold text-white hover:bg-gray-700 flex items-center justify-between gap-2"
+							onClick={() => { onJump(months[0][0]); setOpen(false); }}
+						>
+							<span>{year}</span>
+							<span className="text-gray-500 text-xs font-normal">{count}</span>
+						</button>
+						{months.map(([key, monthCount]) => (
+							<button key={key}
+									className="w-full text-left pl-8 pr-4 py-1.5 text-sm text-gray-300 hover:bg-gray-700 flex items-center justify-between gap-2"
+									onClick={() => { onJump(key); setOpen(false); }}>
+								<span>{monthNameOnly(key)}</span>
+								<span className="text-gray-500 text-xs">{monthCount}</span>
+							</button>
+						))}
+					</div>
 				))}
 			</div>
 		)}
@@ -1455,12 +1493,24 @@ function LazyLoadingGalleryWithPlaceholder ({ currentMedia, onModal, onSelect, o
 			const canDelete = String(elem.author.id) === String(userId) || isAdmin;
 
 			const monthKey = monthKeyOf(elem);
-			const showMonthDivider = monthKey && monthKey !== (index > 0 ? monthKeyOf(currentMedia[index - 1]) : null);
+			const prevMonthKey = index > 0 ? monthKeyOf(currentMedia[index - 1]) : null;
+			const showMonthDivider = monthKey && monthKey !== prevMonthKey;
+			const showYearDivider = showMonthDivider && (!prevMonthKey || yearOf(monthKey) !== yearOf(prevMonthKey));
 
 			return <React.Fragment key={elem.id}>
 				{showMonthDivider && (
-					<div id={`month-${monthKey}`} className="col-span-full pt-4 pb-1 first:pt-0">
-						<h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">{monthLabelOf(monthKey)}</h3>
+					<div id={`month-${monthKey}`} className={`col-span-full ${index === 0 ? '' : (showYearDivider ? 'pt-8' : 'pt-4')} pb-2`}>
+						{showYearDivider ? (
+							<div className={`flex items-baseline gap-3 ${index === 0 ? '' : 'border-t border-gray-700 pt-4'}`}>
+								<h2 className="text-2xl font-extrabold text-white">{yearOf(monthKey)}</h2>
+								<span className="text-sm font-semibold text-blue-400 uppercase tracking-wide">{monthNameOnly(monthKey)}</span>
+							</div>
+						) : (
+							<h3 className="flex items-center gap-2 text-sm font-semibold text-gray-300 uppercase tracking-wide">
+								<span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+								{monthNameOnly(monthKey)}
+							</h3>
+						)}
 					</div>
 				)}
 				<div className={`relative cursor-pointer flex items-center justify-center aspect-square group gallery-item overflow-hidden rounded-md select-none transition-colors ${
@@ -1808,17 +1858,22 @@ class LightboxContent extends Component {
 				</div>
 				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full cursor-grab">
 					{images.map(image => {
-						if(image.type === 1){
-							return <video key={image.id} className="max-h-dvh" preload="metadata" controls>
-								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} />
-							</video>
-						}else{
-							return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
-								<img src={Routing.generate(URL_READ_MEDIUM_HD, { id: elem.id })} alt={`Photo ${elem.file || image.id}`}
+						const isCurrent = elem.id === image.id;
+
+						return <div key={image.id} className={`${isCurrent ? "opacity-100" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 w-full h-full flex items-center justify-center`}>
+							{image.type === 1 ? (
+								// max-h-[70dvh] : laisse une marge par rapport aux barres fixes (haut/bas, z-20) —
+								// sans ça, les contrôles natifs de la vidéo (collés à son bord bas) atterrissent
+								// sous la barre d'actions fixe, qui capte le clic avant qu'il n'atteigne la vidéo.
+								<video className="max-h-[70dvh] max-w-full mx-auto" preload="metadata" controls={isCurrent}>
+									<source src={Routing.generate(URL_GET_FILE_SRC, { id: image.id })} />
+								</video>
+							) : (
+								<img src={Routing.generate(URL_READ_MEDIUM_HD, { id: image.id })} alt={`Photo ${image.file || image.id}`}
 									 className="max-w-[1024px] mx-auto w-full h-full pointer-events-none object-contain select-none outline-none transition-transform"
 									 style={{ transform: `translateX(${currentTranslate}px)` }} />
-							</div>
-						}
+							)}
+						</div>
 					})}
 				</div>
 				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full right-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
