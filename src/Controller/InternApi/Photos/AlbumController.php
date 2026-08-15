@@ -36,7 +36,7 @@ class AlbumController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        return $this->file($this->getParameter('private_directory') . $media->getThumbsFile());
+        return $this->file($this->getParameter('private_directory') . $media->getLightboxFile());
     }
 
     #[Route('/{id}/cover', name: 'set_cover', options: ['expose' => true], methods: 'PUT')]

@@ -82,6 +82,7 @@ export class PhotosGallery extends Component {
 		this.deleteAlbum = React.createRef();
 		this.lightbox = React.createRef();
 		this.observer = null;
+		this.observedNode = null;
 		this.sentinelRef = React.createRef();
 	}
 
@@ -138,7 +139,8 @@ export class PhotosGallery extends Component {
 		);
 
 		if (this.sentinelRef.current) {
-			this.observer.observe(this.sentinelRef.current);
+			this.observedNode = this.sentinelRef.current;
+			this.observer.observe(this.observedNode);
 		}
 
 		// Avertit avant de quitter la page tant qu'un envoi est en cours : ça ne protège pas
@@ -147,11 +149,24 @@ export class PhotosGallery extends Component {
 		window.addEventListener('beforeunload', this.handleBeforeUnload);
 	}
 
+	componentDidUpdate () {
+		// Le sentinel est démonté/remonté à chaque changement de vue (stream/albums/albumDetail),
+		// ce qui crée un nouveau nœud DOM : l'observer doit se réattacher dessus, sinon il continue
+		// de surveiller un nœud orphelin et le scroll infini s'arrête silencieusement.
+		if (this.observer && this.sentinelRef.current && this.sentinelRef.current !== this.observedNode) {
+			if (this.observedNode) {
+				this.observer.unobserve(this.observedNode);
+			}
+			this.observedNode = this.sentinelRef.current;
+			this.observer.observe(this.observedNode);
+		}
+	}
+
 	componentWillUnmount() {
 		window.removeEventListener('beforeunload', this.handleBeforeUnload);
 
-		if (this.observer && this.sentinelRef.current) {
-			this.observer.unobserve(this.sentinelRef.current);
+		if (this.observer && this.observedNode) {
+			this.observer.unobserve(this.observedNode);
 		}
 	}
 
