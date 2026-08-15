@@ -243,94 +243,87 @@ class FileUploader
             || in_array($extension, ['heic', 'heif'], true);
     }
 
-    public function thumbs($fileName, $folderImages, $folderThumbs, $isPublic = false)
+    /**
+     * Génère la miniature et le rendu HD en un seul décodage de l'original : appeler deux méthodes
+     * séparées relançait chacune indépendamment le process externe de conversion pour les formats
+     * non natifs (heif-convert/dcraw_emu pour HEIC/HEIF, RAW), doublant pour rien le temps CPU
+     * passé par photo pendant l'upload.
+     *
+     * @return array{0: string, 1: string} [$thumbFileName, $lightboxFileName]
+     */
+    public function thumbsAndLightbox($fileName, $folderImages, $folderThumbs, $folderLightbox, $isPublic = false): array
     {
         $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
 
-        if($folderThumbs){
-            if(!is_dir($directory . $folderThumbs)){
-                mkdir($directory . $folderThumbs, 0755, true);
-            }
+        if ($folderThumbs && !is_dir($directory . $folderThumbs)) {
+            mkdir($directory . $folderThumbs, 0755, true);
+        }
+
+        if ($folderLightbox && !is_dir($directory . $folderLightbox)) {
+            mkdir($directory . $folderLightbox, 0755, true);
         }
 
         $fileOri = $directory . $folderImages . "/" . $fileName;
 
-        if($this->isPreviewable($fileOri)){
-            [$decodedPath, $isTemp] = $this->decodeForPreview($fileOri);
-
-            try {
-                $imagick = new Imagick($decodedPath);
-
-                $imagick->autoOrient();
-
-                if ($imagick->getImageHeight() > 435) {
-                    $imagick->resizeImage(0, 435, Imagick::FILTER_LANCZOS, 1);
-                }
-
-                $imagick->setImageFormat('webp');
-                $imagick->setImageCompressionQuality(80);
-
-                $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
-                $imagick->writeImage($directory . $folderThumbs . '/' . $newFileName);
-                $imagick->clear();
-
-                return $newFileName;
-            } catch (ImagickException $e) {
-                // Format sans délégué Imagick disponible : on garde le fichier original
-                // plutôt que de faire échouer tout l'envoi.
-                return $fileName;
-            } finally {
-                if ($isTemp) {
-                    @unlink($decodedPath);
-                }
-            }
+        if (!$this->isPreviewable($fileOri)) {
+            return [$fileName, $fileName];
         }
 
-        return $fileName;
-    }
+        [$decodedPath, $isTemp] = $this->decodeForPreview($fileOri);
+        $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
 
-    public function lightbox($fileName, $folderImages, $folderLightbox, $isPublic = false)
-    {
-        $directory = $isPublic ? $this->getPublicDirectory() : $this->getPrivateDirectory();
+        try {
+            $original = new Imagick($decodedPath);
+            $original->autoOrient();
 
-        if($folderLightbox){
-            if(!is_dir($directory . $folderLightbox)){
-                mkdir($directory . $folderLightbox, 0755, true);
-            }
-        }
+            $thumbFileName = $fileName;
+            $lightboxFileName = $fileName;
 
-        $fileOri = $directory . $folderImages . "/" . $fileName;
+            // Le thumbnail (435px) part de la version déjà réduite pour la lightbox, quand elle est
+            // demandée, plutôt que de l'original plein format : bien moins de pixels à traiter pour
+            // un résultat visuellement identique à cette taille d'affichage.
+            $sourceForThumb = $original;
 
-        if($this->isPreviewable($fileOri)){
-            [$decodedPath, $isTemp] = $this->decodeForPreview($fileOri);
+            if ($folderLightbox) {
+                $lightboxImagick = clone $original;
 
-            try {
-                $imagick = new Imagick($decodedPath);
-
-                $imagick->autoOrient();
-
-                if ($imagick->getImageWidth() > 1440) {
-                    $imagick->resizeImage(1440, 0, Imagick::FILTER_LANCZOS, 1);
+                if ($lightboxImagick->getImageWidth() > 1440) {
+                    $lightboxImagick->resizeImage(1440, 0, Imagick::FILTER_LANCZOS, 1);
                 }
 
-                $imagick->setImageFormat('webp');
-                $imagick->setImageCompressionQuality(80);
+                $lightboxImagick->setImageFormat('webp');
+                $lightboxImagick->setImageCompressionQuality(80);
+                $lightboxImagick->writeImage($directory . $folderLightbox . '/' . $newFileName);
+                $lightboxFileName = $newFileName;
+                $sourceForThumb = $lightboxImagick;
+            }
 
-                $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
-                $imagick->writeImage($directory . $folderLightbox . '/' . $newFileName);
-                $imagick->clear();
-
-                return $newFileName;
-            } catch (ImagickException $e) {
-                return $fileName;
-            } finally {
-                if ($isTemp) {
-                    @unlink($decodedPath);
+            if ($folderThumbs) {
+                if ($sourceForThumb->getImageHeight() > 435) {
+                    $sourceForThumb->resizeImage(0, 435, Imagick::FILTER_LANCZOS, 1);
                 }
+
+                $sourceForThumb->setImageFormat('webp');
+                $sourceForThumb->setImageCompressionQuality(80);
+                $sourceForThumb->writeImage($directory . $folderThumbs . '/' . $newFileName);
+                $thumbFileName = $newFileName;
+            }
+
+            $original->clear();
+            if ($sourceForThumb !== $original) {
+                $sourceForThumb->clear();
+            }
+
+            return [$thumbFileName, $lightboxFileName];
+        } catch (ImagickException $e) {
+            // Format sans délégué Imagick disponible : on garde le fichier original
+            // plutôt que de faire échouer tout l'envoi.
+            return [$fileName, $fileName];
+        } finally {
+            if ($isTemp) {
+                @unlink($decodedPath);
             }
         }
-
-        return $fileName;
     }
 
     public function cover($fileName, $folderImages, $folderThumbs, $isPublic = false): string

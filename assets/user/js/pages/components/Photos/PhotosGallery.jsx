@@ -14,6 +14,7 @@ import { Modal } from "@tailwindComponents/Elements/Modal";
 import { LightBox } from "@tailwindComponents/Elements/LightBox";
 import { Input, TextArea } from "@tailwindComponents/Elements/Fields";
 import { Button } from "@tailwindComponents/Elements/Button";
+import { enqueueFiles, getAllQueued, dequeue as dequeueUpload } from "./uploadQueueDB";
 import {
 	ChevronLeft, ChevronRight, Image, Download, Trash2, Plus, Check,
 	CheckSquare, Square, Folder, Loader2, Play, Share2, X, HardDrive,
@@ -49,6 +50,13 @@ const URL_SHARE_MINE = "intern_api_photos_share_mine";
 // lot lors d'un saut direct vers un mois (voir handleJumpToMonth), pas à la pagination réseau
 // elle-même (qui continue d'utiliser la valeur renvoyée par le serveur).
 const MEDIA_PER_PAGE_JS = 24;
+
+// Nombre d'envois simultanés lors d'un upload groupé. Doublé de 5 à 10 après vérification des
+// jauges de ressources cPanel (o2switch, hébergement mutualisé CloudLinux) pendant un envoi de
+// 680 photos : CPU à 10 %, mémoire à 1,4 %, processus à 3-5 % de leurs plafonds — seule l'E/S
+// disque approchait de sa limite (~53 % à 5 envois en parallèle). Ne pas remonter beaucoup plus
+// sans revérifier ces jauges : au-delà, l'E/S devient le facteur limitant, pas le CPU.
+const UPLOAD_BATCH_SIZE = 10;
 
 const SHARE_DURATIONS = [
 	{ value: '1d', label: '1 jour' },
@@ -180,7 +188,7 @@ export class PhotosGallery extends Component {
 			e.preventDefault();
 
 			const filesArray = Array.from(e.dataTransfer.files);
-			this.handleParallelUpload(filesArray, 5);
+			this.startUpload(filesArray);
 
 			if (dropzone) {
 				dropzone.classList.remove('active');
@@ -190,6 +198,7 @@ export class PhotosGallery extends Component {
 		this.fetchMedia();
 		this.fetchAuthors();
 		this.fetchAlbums();
+		this.resumeQueuedUploads();
 
 		if (this.props.isAdmin) {
 			this.fetchStats();
@@ -426,24 +435,55 @@ export class PhotosGallery extends Component {
 		e.target.value = ''; // permet de resélectionner les mêmes fichiers plus tard
 
 		if (files.length > 0) {
-			this.handleParallelUpload(files, 5);
+			this.startUpload(files);
 		}
 	}
 
-	async handleParallelUpload(files, batchSize) {
+	// Persiste les fichiers dans la file IndexedDB avant de lancer l'envoi : s'ils ne sont pas
+	// tous confirmés uploadés (onglet fermé, appli mise en arrière-plan sur mobile...),
+	// resumeQueuedUploads les reprendra automatiquement à la prochaine ouverture de la page.
+	startUpload = async (files) => {
 		const { view, selectedAlbum } = this.state;
 		const albumId = (view === 'albumDetail' && selectedAlbum) ? selectedAlbum.id : null;
 
-		const total = files.length;
+		let items;
+		try {
+			const ids = await enqueueFiles(files, albumId);
+			items = files.map((file, index) => ({ id: ids[index], file, albumId }));
+		} catch (error) {
+			// Stockage persistant indisponible (mode privé, quota, vieux navigateur) : l'envoi
+			// continue normalement, seule la reprise après fermeture accidentelle est perdue.
+			console.error('Impossible de persister la file d\'upload', error);
+			items = files.map((file) => ({ id: null, file, albumId }));
+		}
+
+		this.runUploadQueue(items, UPLOAD_BATCH_SIZE);
+	}
+
+	resumeQueuedUploads = async () => {
+		try {
+			const queued = await getAllQueued();
+
+			if (queued.length > 0) {
+				Toastr.toast('info', `Reprise de l'envoi de ${queued.length} photo${queued.length > 1 ? 's' : ''} interrompu${queued.length > 1 ? 's' : ''}.`);
+				this.runUploadQueue(queued, UPLOAD_BATCH_SIZE);
+			}
+		} catch (error) {
+			console.error('Impossible de lire la file d\'upload en attente', error);
+		}
+	}
+
+	async runUploadQueue(items, batchSize) {
+		const total = items.length;
 		let completed = 0;
 		let failed = 0;
 
 		this.setState({ nbTotal: total, nbProgress: 0 });
 
 		for (let i = 0; i < total; i += batchSize) {
-			const batch = files.slice(i, i + batchSize);
+			const batch = items.slice(i, i + batchSize);
 
-			await Promise.all(batch.map(async (file) => {
+			await Promise.all(batch.map(async ({ id, file, albumId }) => {
 				const formData = new FormData();
 				formData.append('file', file);
 				formData.append('mtime', Math.floor(file.lastModified / 1000));
@@ -454,6 +494,10 @@ export class PhotosGallery extends Component {
 				try {
 					await axios.post(Routing.generate(URL_UPLOAD_MEDIA), formData);
 					completed++;
+
+					if (id != null) {
+						dequeueUpload(id).catch(() => {});
+					}
 				} catch (error) {
 					failed++;
 					console.error('Upload failed:', error);

@@ -36,15 +36,20 @@ class ImageController extends AbstractController
 
         $canSeePrivate = $this->canSeePrivateImages($user, $rando);
 
-        $allImages = $repository->findVisibleImages($rando, $canSeePrivate);
-
-        $currentImages = array_slice($allImages, $offset, self::IMAGES_PER_PAGE);
-
-        $totalImages = count($allImages);
+        $currentImages = $repository->findVisibleImagesPage($rando, $canSeePrivate, $offset, self::IMAGES_PER_PAGE);
+        $totalImages = $repository->countVisibleImages($rando, $canSeePrivate);
         $hasMore = ($offset + self::IMAGES_PER_PAGE) < $totalImages;
 
-        $allImages = $serializer->serialize($allImages, 'json', ['groups' => RaImage::LIST]);
         $currentImages = $serializer->serialize($currentImages, 'json', ['groups' => RaImage::LIST]);
+
+        // La liste complète (nécessaire côté front pour la navigation dans la lightbox) n'est
+        // envoyée qu'à la première page : la renvoyer en entier à chaque page de scroll infini
+        // forçait Doctrine à hydrater et sérialiser toutes les photos de la rando à chaque requête,
+        // pour un contenu identique déjà en mémoire côté client.
+        $allImages = null;
+        if ($page === 1) {
+            $allImages = $serializer->serialize($repository->findVisibleImages($rando, $canSeePrivate), 'json', ['groups' => RaImage::LIST]);
+        }
 
         return $apiResponse->apiJsonResponse([
             'images' => $allImages,
@@ -132,8 +137,7 @@ class ImageController extends AbstractController
                     $image->setType(99);
                 }
 
-                $filenameThumbs = $fileUploader->thumbs($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile);
-                $filenameLightbox = $fileUploader->lightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
+                [$filenameThumbs, $filenameLightbox] = $fileUploader->thumbsAndLightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
 
                 $image
                     ->setThumbs($filenameThumbs)

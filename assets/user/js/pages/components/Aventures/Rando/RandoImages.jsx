@@ -29,6 +29,11 @@ const URL_READ_IMAGE_HD = "intern_api_aventures_images_file_hd_src";
 const URL_FETCH_IMAGES = "intern_api_aventures_images_fetch_images";
 const URL_VISIBILITY_IMAGE = "intern_api_aventures_images_visibility";
 
+// Nombre d'envois simultanés lors d'un upload groupé — voir la même constante dans
+// PhotosGallery.jsx pour le détail des jauges de ressources cPanel (o2switch) ayant justifié ce
+// doublement de 5 à 10.
+const UPLOAD_BATCH_SIZE = 10;
+
 export class RandoImages extends Component {
 	constructor (props) {
 		super(props);
@@ -84,7 +89,7 @@ export class RandoImages extends Component {
 			e.preventDefault();
 
 			const filesArray = Array.from(e.dataTransfer.files);
-			this.handleParallelUpload(filesArray, randoId, 5);
+			this.handleParallelUpload(filesArray, randoId, UPLOAD_BATCH_SIZE);
 
 			if (dropzone) {
 				dropzone.classList.remove('active');
@@ -131,13 +136,18 @@ export class RandoImages extends Component {
 			data: {}
 		})
 			.then((response) => {
+				// Le serveur ne renvoie la liste complète (nécessaire à la navigation dans la
+				// lightbox) qu'à la première page ; sur les pages suivantes on garde celle déjà
+				// en mémoire, identique, plutôt que d'écraser avec `null`.
 				let allData = JSON.parse(response.data.images);
 				let currentData = JSON.parse(response.data.currentImages);
 
-				let i = 1;
-				allData.forEach(item => {
-					item.rankPhoto = i++;
-				});
+				if (allData) {
+					let i = 1;
+					allData.forEach(item => {
+						item.rankPhoto = i++;
+					});
+				}
 
 				let j = this.state.rankPhoto;
 				currentData.forEach(item => {
@@ -145,7 +155,7 @@ export class RandoImages extends Component {
 				});
 
 				this.setState(prevState => ({
-					allImages: allData,
+					allImages: allData || prevState.allImages,
 					currentImages: [...prevState.currentImages, ...currentData],
 					rankPhoto: prevState.rankPhoto + currentData.length,
 					hasMore: response.data.hasMore,
@@ -211,7 +221,7 @@ export class RandoImages extends Component {
 		e.target.value = '';
 
 		if (files.length > 0) {
-			this.handleParallelUpload(files, this.props.randoId, 5);
+			this.handleParallelUpload(files, this.props.randoId, UPLOAD_BATCH_SIZE);
 		}
 	}
 
@@ -1023,18 +1033,23 @@ class LightboxContent extends Component {
 					<ChevronLeft size={28} className="text-gray-400 group-hover:text-white" />
 				</div>
 				<div ref={this.gallery} className="relative flex justify-center items-center w-full h-full cursor-grab">
-					{images.map(image => {
-						if(image.type === 1){
-							return <video key={image.id} className="max-h-dvh" controls>
-								<source src={Routing.generate(URL_GET_FILE_SRC, { id: elem.id })} />
-							</video>
-						}else{
-							return <div key={image.id} className={`${elem.id === image.id ? "opacity-100" : "opacity-0"} transition-opacity absolute top-0 left-0 w-full h-full`}>
-								<img src={Routing.generate(URL_READ_IMAGE_HD, { id: elem.id })} alt={`Photo ${elem.file || image.id}`}
+					{/* images contient toutes les photos visibles de la rando : ne monter que la
+						photo courante et ses voisines immédiates évite de déclencher un
+						téléchargement HD pour chacune dès l'ouverture de la lightbox. */}
+					{images.filter(image => Math.abs(image.rankPhoto - actualRank) <= 1).map(image => {
+						const isCurrent = elem.id === image.id;
+
+						return <div key={image.id} className={`${isCurrent ? "opacity-100" : "opacity-0 pointer-events-none"} transition-opacity absolute top-0 left-0 w-full h-full flex items-center justify-center`}>
+							{image.type === 1 ? (
+								<video className="max-h-dvh" preload="metadata" controls={isCurrent}>
+									<source src={Routing.generate(URL_GET_FILE_SRC, { id: image.id })} />
+								</video>
+							) : (
+								<img src={Routing.generate(URL_READ_IMAGE_HD, { id: image.id })} alt={`Photo ${image.file || image.id}`}
 									 className="max-w-[1024px] mx-auto w-full h-full pointer-events-none object-contain select-none outline-none transition-transform"
 									 style={{ transform: `translateX(${currentTranslate}px)` }} />
-							</div>
-						}
+							)}
+						</div>
 					})}
 				</div>
 				<div className="cursor-pointer fixed group top-0 h-[calc(100%-65px)] md:top-[97px] md:h-full right-0 flex items-center justify-center p-4 md:p-8 z-20 text-white"
