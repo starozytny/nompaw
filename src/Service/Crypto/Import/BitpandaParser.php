@@ -38,7 +38,8 @@ class BitpandaParser implements CryptoImportParserInterface
                 continue;
             }
 
-            $type = strtolower($row[2]);
+            $rawType = $row[2];
+            $type = strtolower($rawType);
             $tradeAt = new \DateTimeImmutable($row[1]);
             $amountFiat = $this->toFloat($row[4]);
             $fiat = $row[5];
@@ -76,6 +77,12 @@ class BitpandaParser implements CryptoImportParserInterface
                     }
                     break;
                 default:
+                    // Any other Bitpanda type isn't dropped — kept as ACategoriser (best-effort coin:
+                    // prefer the asset side, fall back to fiat) with Bitpanda's own type string so the
+                    // user can see and reclassify it instead of it silently vanishing from the import.
+                    $coin = ($asset !== '' && $asset !== '-') ? $asset : $fiat;
+                    $qty = $coin === $asset ? $amountAsset : $amountFiat;
+                    $trades[] = $this->buildSingleCoinTrade($row[0], $tradeAt, TypeType::ACategoriser, $coin, $qty, $rawType);
                     break;
             }
         }
@@ -118,7 +125,7 @@ class BitpandaParser implements CryptoImportParserInterface
         ];
     }
 
-    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty): ?array
+    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty, ?string $rawCategory = null): ?array
     {
         if (abs($qty) < 0.00000001) {
             return null;
@@ -136,6 +143,7 @@ class BitpandaParser implements CryptoImportParserInterface
             'costCoin' => $coin === 'EUR' ? 'EUR' : $coin,
             'totalReal' => $coin === 'EUR' ? $qty : 0.0,
             'total' => $coin === 'EUR' ? $qty : 0.0,
+            'rawCategory' => $rawCategory,
         ];
     }
 }

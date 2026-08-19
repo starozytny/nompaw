@@ -17,7 +17,9 @@ use App\Entity\Enum\Crypto\TypeType;
  *
  * Any other Coinbase transaction `type` value not explicitly handled above falls back to
  * TypeType::ACategoriser with `rawCategory` set to Coinbase's own type string, so the user can see and
- * manually reclassify it instead of it being silently dropped.
+ * manually reclassify it instead of it being silently dropped. A buy/sell whose 'detail' sub-resource
+ * fetch failed (CoinbaseApiClient::fetchBuySellDetail logs why) gets the same ACategoriser fallback
+ * instead of vanishing from the import.
  */
 class CoinbaseApiTransactionMapper
 {
@@ -73,11 +75,11 @@ class CoinbaseApiTransactionMapper
         $quantity = abs((float) ($transaction['amount']['amount'] ?? 0));
 
         if ($type === 'buy') {
-            return $this->buildBuy($id, $tradeAt, $asset, $transaction['detail'] ?? null);
+            return $this->buildBuy($id, $tradeAt, $asset, $quantity, $transaction['detail'] ?? null);
         }
 
         if ($type === 'sell') {
-            return $this->buildSell($id, $tradeAt, $asset, $transaction['detail'] ?? null);
+            return $this->buildSell($id, $tradeAt, $asset, $quantity, $transaction['detail'] ?? null);
         }
 
         if ($type === 'send') {
@@ -105,10 +107,13 @@ class CoinbaseApiTransactionMapper
         return $this->buildSingleCoinTrade($id, $tradeAt, TypeType::ACategoriser, $asset, $quantity, $type);
     }
 
-    private function buildBuy(string $id, \DateTimeImmutable $tradeAt, string $asset, ?array $detail): ?array
+    private function buildBuy(string $id, \DateTimeImmutable $tradeAt, string $asset, float $fallbackQuantity, ?array $detail): ?array
     {
         if ($detail === null) {
-            return null;
+            // The sub-resource fetch failed (CoinbaseApiClient logs why) — rather than dropping the
+            // trade entirely, keep a best-effort single-coin entry so the user notices it's missing its
+            // EUR/fee breakdown instead of the trade silently vanishing from the import.
+            return $this->buildSingleCoinTrade($id, $tradeAt, TypeType::ACategoriser, $asset, $fallbackQuantity, 'buy (détail indisponible)');
         }
 
         [$quantity, $subtotal, $total, $fee, $fiatCurrency] = $this->extractBuySellAmounts($detail);
@@ -128,10 +133,11 @@ class CoinbaseApiTransactionMapper
         ];
     }
 
-    private function buildSell(string $id, \DateTimeImmutable $tradeAt, string $asset, ?array $detail): ?array
+    private function buildSell(string $id, \DateTimeImmutable $tradeAt, string $asset, float $fallbackQuantity, ?array $detail): ?array
     {
         if ($detail === null) {
-            return null;
+            // Same fallback as buildBuy() — see comment there.
+            return $this->buildSingleCoinTrade($id, $tradeAt, TypeType::ACategoriser, $asset, $fallbackQuantity, 'sell (détail indisponible)');
         }
 
         [$quantity, $subtotal, $total, $fee, $fiatCurrency] = $this->extractBuySellAmounts($detail);

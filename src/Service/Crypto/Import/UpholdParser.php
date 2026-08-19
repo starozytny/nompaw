@@ -41,7 +41,8 @@ class UpholdParser implements CryptoImportParserInterface
             $destCoin = $row[3];
             $originAmount = (float) $row[8];
             $originCoin = $row[9];
-            $type = strtolower($row[11]);
+            $rawType = $row[11];
+            $type = strtolower($rawType);
 
             switch ($type) {
                 case 'in':
@@ -72,6 +73,9 @@ class UpholdParser implements CryptoImportParserInterface
                     $trades[] = $this->buildSingleCoinTrade($id, $tradeAt, TypeType::Retrait, $originCoin, $originAmount);
                     break;
                 default:
+                    // Any Uphold type besides in/transfer/out (e.g. a card top-up) isn't dropped —
+                    // kept as ACategoriser with Uphold's own type string so the user can reclassify it.
+                    $trades[] = $this->buildSingleCoinTrade($id, $tradeAt, TypeType::ACategoriser, $originCoin, $originAmount, $rawType);
                     break;
             }
         }
@@ -79,7 +83,7 @@ class UpholdParser implements CryptoImportParserInterface
         return array_values(array_filter($trades));
     }
 
-    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty): ?array
+    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty, ?string $rawCategory = null): ?array
     {
         if (abs($qty) < 0.00000001) {
             return null;
@@ -97,6 +101,7 @@ class UpholdParser implements CryptoImportParserInterface
             'costCoin' => $coin,
             'totalReal' => 0.0,
             'total' => 0.0,
+            'rawCategory' => $rawCategory,
         ];
     }
 }

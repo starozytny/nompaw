@@ -63,6 +63,11 @@ class KrakenParser implements CryptoImportParserInterface
                 $trades[] = $this->buildSingleCoinTrade($row[0], $tradeAt, TypeType::Retrait, $asset, $qty);
             } elseif ($type === 'transfer') {
                 $trades[] = $this->buildSingleCoinTrade($row[0], $tradeAt, TypeType::Recuperation, $asset, abs($amount));
+            } else {
+                // Any other ledger type (e.g. "staking", "adjustment") isn't dropped — kept as
+                // ACategoriser with Kraken's own type string so the user can see and reclassify it
+                // instead of it silently vanishing from the import.
+                $trades[] = $this->buildSingleCoinTrade($row[0], $tradeAt, TypeType::ACategoriser, $asset, abs($amount), $type);
             }
         }
 
@@ -152,7 +157,7 @@ class KrakenParser implements CryptoImportParserInterface
         ];
     }
 
-    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty): ?array
+    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty, ?string $rawCategory = null): ?array
     {
         if (abs($qty) < 0.00000001) {
             return null;
@@ -170,6 +175,7 @@ class KrakenParser implements CryptoImportParserInterface
             'costCoin' => $coin,
             'totalReal' => $coin === 'EUR' ? $qty : 0.0,
             'total' => $coin === 'EUR' ? $qty : 0.0,
+            'rawCategory' => $rawCategory,
         ];
     }
 }

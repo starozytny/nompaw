@@ -105,6 +105,10 @@ class CoinbaseParser implements CryptoImportParserInterface
                     $trades[] = $this->buildSingleCoinTrade($id, $tradeAt, TypeType::Retrait, $asset, $quantity);
                     break;
                 default:
+                    // Any other Coinbase transaction type (e.g. "Convert", "Learning Reward") isn't
+                    // dropped — kept as ACategoriser with Coinbase's own type string so the user can see
+                    // and reclassify it instead of it silently vanishing from the import.
+                    $trades[] = $this->buildSingleCoinTrade($id, $tradeAt, TypeType::ACategoriser, $asset, $quantity, $type);
                     break;
             }
         }
@@ -123,7 +127,7 @@ class CoinbaseParser implements CryptoImportParserInterface
         return null;
     }
 
-    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty): ?array
+    private function buildSingleCoinTrade(string $id, \DateTimeImmutable $tradeAt, int $type, string $coin, float $qty, ?string $rawCategory = null): ?array
     {
         if (abs($qty) < 0.00000001) {
             return null;
@@ -141,6 +145,7 @@ class CoinbaseParser implements CryptoImportParserInterface
             'costCoin' => $coin,
             'totalReal' => $coin === 'EUR' ? $qty : 0.0,
             'total' => $coin === 'EUR' ? $qty : 0.0,
+            'rawCategory' => $rawCategory,
         ];
     }
 }

@@ -25,7 +25,9 @@ use App\Entity\Enum\Crypto\TypeType;
  * still best-effort guesses at plausible values; any other `operation_type` (or a trade leg whose
  * `transaction_type` isn't 'buy'/'sell') falls back to TypeType::ACategoriser with `rawCategory` set to
  * Bitpanda's own type string, so the user can see and manually reclassify it instead of it being
- * silently dropped.
+ * silently dropped. A group of legs sharing a trade_id that can't be paired into a single buy/sell (see
+ * mapUnpairedTradeLegs()) gets the same ACategoriser treatment, one entry per leg, instead of the whole
+ * group vanishing from the import.
  */
 class BitpandaApiTransactionMapper
 {
@@ -75,32 +77,32 @@ class BitpandaApiTransactionMapper
         }
 
         foreach ($tradeLegsByTradeId as $tradeId => $legs) {
-            $mapped = $this->buildTradeFromPair((string) $tradeId, $legs, $symbolMap);
-            if ($mapped !== null) {
-                $trades[] = $mapped;
-            }
+            $trades = array_merge($trades, $this->buildTradeFromPair((string) $tradeId, $legs, $symbolMap));
         }
 
         return $trades;
     }
 
-    private function buildTradeFromPair(string $tradeId, array $legs, array $symbolMap): ?array
+    /**
+     * @return list<array> 0, 1 (a matched trade) or up to count($legs) entries (see mapUnpairedTradeLegs())
+     */
+    private function buildTradeFromPair(string $tradeId, array $legs, array $symbolMap): array
     {
         if (count($legs) !== 2) {
-            return null;
+            return $this->mapUnpairedTradeLegs($tradeId, $legs, $symbolMap);
         }
 
         $fiatLeg = isset($legs[0]['currency_id']) ? $legs[0] : (isset($legs[1]['currency_id']) ? $legs[1] : null);
         $cryptoLeg = $fiatLeg === $legs[0] ? $legs[1] : $legs[0];
 
         if ($fiatLeg === null || !isset($cryptoLeg['asset_id'])) {
-            return null;
+            return $this->mapUnpairedTradeLegs($tradeId, $legs, $symbolMap);
         }
 
         $type = $fiatLeg['transaction_type'] ?? null;
         $tradeAt = $this->parseDate($fiatLeg['credited_at'] ?? $cryptoLeg['credited_at'] ?? null);
         if ($tradeAt === null) {
-            return null;
+            return $this->mapUnpairedTradeLegs($tradeId, $legs, $symbolMap);
         }
 
         $fiatSymbol = $this->resolveSymbol($fiatLeg['currency_id'], $symbolMap);
@@ -110,7 +112,7 @@ class BitpandaApiTransactionMapper
         $fee = (float) ($fiatLeg['trade']['fee']['value'] ?? $cryptoLeg['trade']['fee']['value'] ?? 0);
 
         if ($type === 'buy') {
-            return [
+            return [[
                 'importedId' => $tradeId,
                 'tradeAt' => $tradeAt,
                 'type' => TypeType::Achat,
@@ -122,11 +124,11 @@ class BitpandaApiTransactionMapper
                 'costCoin' => $fiatSymbol,
                 'totalReal' => $fiatAmount,
                 'total' => $fiatAmount,
-            ];
+            ]];
         }
 
         if ($type === 'sell') {
-            return [
+            return [[
                 'importedId' => $tradeId,
                 'tradeAt' => $tradeAt,
                 'type' => TypeType::Vente,
@@ -138,10 +140,10 @@ class BitpandaApiTransactionMapper
                 'costCoin' => $fiatSymbol,
                 'totalReal' => $fiatAmount,
                 'total' => $fiatAmount,
-            ];
+            ]];
         }
 
-        return [
+        return [[
             'importedId' => $tradeId,
             'tradeAt' => $tradeAt,
             'type' => TypeType::ACategoriser,
@@ -154,7 +156,48 @@ class BitpandaApiTransactionMapper
             'totalReal' => $fiatAmount,
             'total' => $fiatAmount,
             'rawCategory' => $type,
-        ];
+        ]];
+    }
+
+    /**
+     * Fallback when a group of legs sharing a trade_id can't be paired into a single buy/sell (wrong leg
+     * count, no fiat leg, or an unparseable date) — emits one best-effort ACategoriser entry per leg
+     * instead of dropping the whole group, mirroring KrakenParser's handling of an unpaired ledger group.
+     *
+     * @return list<array>
+     */
+    private function mapUnpairedTradeLegs(string $tradeId, array $legs, array $symbolMap): array
+    {
+        $trades = [];
+
+        foreach ($legs as $index => $leg) {
+            $tradeAt = $this->parseDate($leg['credited_at'] ?? null);
+            $assetOrCurrencyId = $leg['asset_id'] ?? $leg['currency_id'] ?? null;
+            $qty = (float) ($leg['asset_amount']['value'] ?? 0);
+
+            if ($tradeAt === null || $assetOrCurrencyId === null || abs($qty) < 0.00000001) {
+                continue;
+            }
+
+            $coin = $this->resolveSymbol($assetOrCurrencyId, $symbolMap);
+
+            $trades[] = [
+                'importedId' => $tradeId . '-' . $index,
+                'tradeAt' => $tradeAt,
+                'type' => TypeType::ACategoriser,
+                'fromCoin' => $coin,
+                'fromNbToken' => $qty,
+                'toCoin' => $coin,
+                'toNbToken' => $qty,
+                'costPrice' => 0.0,
+                'costCoin' => $coin,
+                'totalReal' => $coin === 'EUR' ? $qty : 0.0,
+                'total' => $coin === 'EUR' ? $qty : 0.0,
+                'rawCategory' => $leg['transaction_type'] ?? 'trade (non apparié)',
+            ];
+        }
+
+        return $trades;
     }
 
     private function mapNonTradeLeg(array $leg, ?string $operationType, array $symbolMap): ?array
