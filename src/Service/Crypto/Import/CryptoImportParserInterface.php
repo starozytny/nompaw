@@ -34,6 +34,7 @@ interface CryptoImportParserInterface
      *     costCoin: string,
      *     totalReal: float,
      *     total: float,
+     *     rawCategory?: string,
      * }>
      */
     public function parse(array $rows): array;

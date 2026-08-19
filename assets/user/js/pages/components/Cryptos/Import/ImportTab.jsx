@@ -9,6 +9,10 @@ import Toastr from "@tailwindFunctions/toastr";
 import { Card, CardContent } from "@shadcnComponents/ui/card";
 import { InputFile } from "@tailwindComponents/Elements/Fields";
 
+import { CoinbaseConnect } from "@userPages/Cryptos/Import/CoinbaseConnect";
+import { KrakenConnect } from "@userPages/Cryptos/Import/KrakenConnect";
+import { BitpandaConnect } from "@userPages/Cryptos/Import/BitpandaConnect";
+
 const URL_IMPORT = "intern_api_cryptos_import_index";
 
 export function ImportTab () {
@@ -38,6 +42,10 @@ export function ImportTab () {
 	}
 
 	return <div className="flex flex-col gap-4">
+		<CoinbaseConnect />
+		<KrakenConnect />
+		<BitpandaConnect />
+
 		<Card>
 			<CardContent className="flex flex-col gap-3 p-4">
 				<div>

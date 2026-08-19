@@ -24,6 +24,7 @@ const TYPE_ITEMS = [
 	{ value: 4, label: 'Récupération' },
 	{ value: 5, label: 'Stacking' },
 	{ value: 6, label: 'Transfert' },
+	{ value: 7, label: 'À catégoriser' },
 ];
 
 export function TradesFormulaire ({ context, element, open, onOpenChange, onUpdateList }) {
