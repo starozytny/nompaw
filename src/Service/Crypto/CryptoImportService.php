@@ -45,14 +45,15 @@ class CryptoImportService
 
     public function import(User $user, UploadedFile $file): array
     {
-        $imported = 0;
-        $duplicates = 0;
         $errors = [];
         $skippedFiles = [];
 
         $extractedDir = null;
         $csvPaths = $this->extractCsvPaths($file, $errors, $extractedDir);
         $existingIdsBySource = [];
+
+        $imported = 0;
+        $duplicates = 0;
 
         foreach ($csvPaths as [$path, $label]) {
             $rows = $this->readRows($path);
@@ -71,44 +72,10 @@ class CryptoImportService
                 $existingIdsBySource[$source] = $this->loadExistingImportedIds($user, $source);
             }
 
-            foreach ($parser->parse($rows) as $data) {
-                if (isset($existingIdsBySource[$source][$data['importedId']])) {
-                    $duplicates++;
-                    continue;
-                }
-
-                $trade = (new CrTrade())
-                    ->setIsImported(true)
-                    ->setImportedFrom($source)
-                    ->setImportedId($data['importedId'])
-                    ->setTradeAt($data['tradeAt'])
-                    ->setType($data['type'])
-                    ->setFromCoin($data['fromCoin'])
-                    ->setFromNbToken($data['fromNbToken'])
-                    ->setFromPrice(0)
-                    ->setToCoin($data['toCoin'])
-                    ->setToNbToken($data['toNbToken'])
-                    ->setCostPrice($data['costPrice'])
-                    ->setCostCoin($data['costCoin'])
-                    ->setTotalReal($data['totalReal'])
-                    ->setTotal($data['total'])
-                    ->setUser($user)
-                ;
-
-                $validation = $this->validator->validate($trade);
-                if ($validation !== true) {
-                    $errors[] = [
-                        'file' => $label,
-                        'importedId' => $data['importedId'],
-                        'message' => implode(', ', array_map(fn ($e) => $e['message'], $validation)),
-                    ];
-                    continue;
-                }
-
-                $this->tradeRepository->save($trade);
-                $existingIdsBySource[$source][$data['importedId']] = true;
-                $imported++;
-            }
+            $result = $this->persistParsedTrades($user, $source, $parser->parse($rows), $existingIdsBySource[$source], $label);
+            $imported += $result['imported'];
+            $duplicates += $result['duplicates'];
+            $errors = array_merge($errors, $result['errors']);
         }
 
         $this->entityManager->flush();
@@ -123,6 +90,82 @@ class CryptoImportService
             'errors' => $errors,
             'skippedFiles' => $skippedFiles,
         ];
+    }
+
+    /**
+     * Same shape/behavior as import() (dedup by importedFrom/importedId, validation, single flush) but for
+     * trades already parsed from an external API instead of an uploaded file — used by
+     * CoinbaseController::sync().
+     *
+     * @param list<array{importedId: string, tradeAt: \DateTimeInterface, type: int, fromCoin: string, fromNbToken: float, toCoin: string, toNbToken: ?float, costPrice: float, costCoin: string, totalReal: float, total: float}> $parsedTrades
+     */
+    public function importFromApi(User $user, string $source, array $parsedTrades): array
+    {
+        $existingIds = $this->loadExistingImportedIds($user, $source);
+
+        $result = $this->persistParsedTrades($user, $source, $parsedTrades, $existingIds, $source);
+
+        $this->entityManager->flush();
+
+        return [
+            'imported' => $result['imported'],
+            'duplicates' => $result['duplicates'],
+            'errors' => $result['errors'],
+            'skippedFiles' => [],
+        ];
+    }
+
+    /**
+     * @param array<string, true> $existingIds importedId => true, mutated as new trades are persisted so a
+     *                                          later call in the same request sees them
+     */
+    private function persistParsedTrades(User $user, string $source, iterable $parsedTrades, array &$existingIds, string $errorLabel): array
+    {
+        $imported = 0;
+        $duplicates = 0;
+        $errors = [];
+
+        foreach ($parsedTrades as $data) {
+            if (isset($existingIds[$data['importedId']])) {
+                $duplicates++;
+                continue;
+            }
+
+            $trade = (new CrTrade())
+                ->setIsImported(true)
+                ->setImportedFrom($source)
+                ->setImportedId($data['importedId'])
+                ->setTradeAt($data['tradeAt'])
+                ->setType($data['type'])
+                ->setFromCoin($data['fromCoin'])
+                ->setFromNbToken($data['fromNbToken'])
+                ->setFromPrice(0)
+                ->setToCoin($data['toCoin'])
+                ->setToNbToken($data['toNbToken'])
+                ->setCostPrice($data['costPrice'])
+                ->setCostCoin($data['costCoin'])
+                ->setTotalReal($data['totalReal'])
+                ->setTotal($data['total'])
+                ->setRawCategory($data['rawCategory'] ?? null)
+                ->setUser($user)
+            ;
+
+            $validation = $this->validator->validate($trade);
+            if ($validation !== true) {
+                $errors[] = [
+                    'file' => $errorLabel,
+                    'importedId' => $data['importedId'],
+                    'message' => implode(', ', array_map(fn ($e) => $e['message'], $validation)),
+                ];
+                continue;
+            }
+
+            $this->tradeRepository->save($trade);
+            $existingIds[$data['importedId']] = true;
+            $imported++;
+        }
+
+        return ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $errors];
     }
 
     private function findParser(array $rows): ?CryptoImportParserInterface

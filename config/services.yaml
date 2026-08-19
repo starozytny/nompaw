@@ -9,6 +9,7 @@ parameters:
     config_directory: '%kernel.project_dir%/config/'
     env_file: '%kernel.project_dir%/.env.local'
     env(COINGECKO_API_KEY): ''
+    env(CRYPTO_CREDENTIAL_SECRET): ''
 
 services:
     # default configuration for services in *this* file
@@ -22,6 +23,7 @@ services:
             $envFile: '%env_file%'
             $appEnv: '%env(APP_ENV)%'
             $coingeckoApiKey: '%env(COINGECKO_API_KEY)%'
+            $cryptoCredentialSecret: '%env(CRYPTO_CREDENTIAL_SECRET)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

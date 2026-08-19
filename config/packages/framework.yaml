@@ -28,6 +28,15 @@ framework:
             coingecko.client:
                 base_uri: 'https://api.coingecko.com/api/v3/'
                 timeout: 5
+            coinbase.client:
+                base_uri: 'https://api.coinbase.com/'
+                timeout: 10
+            kraken.client:
+                base_uri: 'https://api.kraken.com/'
+                timeout: 10
+            bitpanda.client:
+                base_uri: 'https://api.public.bitpanda.com/v1/'
+                timeout: 10
 
 when@test:
     framework:

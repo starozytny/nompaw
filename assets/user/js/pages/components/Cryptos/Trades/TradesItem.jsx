@@ -13,11 +13,12 @@ const RETRAIT = 3;
 const RECUP = 4;
 const STAKING = 5;
 const TRANSFERT = 6;
+const A_CATEGORISER = 7;
 
-const TYPE_LABEL = ['Achat', 'Vente', 'Dépôt', 'Retrait', 'Récupération', 'Stacking', 'Transfert'];
-const TYPE_ICON = ['cart', 'receipt', 'download', 'upload', 'refresh1', 'time', 'arrow-swap-horizontal'];
-const TYPE_COLOR = ['var(--cat-crypto)', 'var(--status-good)', 'var(--cat-income)', 'var(--cat-expense)', 'var(--cat-saving)', 'var(--cat-saving)', 'hsl(var(--muted-foreground))'];
-const TYPE_SOFT = ['var(--cat-crypto-soft)', 'var(--status-good-soft)', 'var(--cat-income-soft)', 'var(--cat-expense-soft)', 'var(--cat-saving-soft)', 'var(--cat-saving-soft)', 'hsl(var(--muted))'];
+const TYPE_LABEL = ['Achat', 'Vente', 'Dépôt', 'Retrait', 'Récupération', 'Stacking', 'Transfert', 'À catégoriser'];
+const TYPE_ICON = ['cart', 'receipt', 'download', 'upload', 'refresh1', 'time', 'arrow-swap-horizontal', 'warning1'];
+const TYPE_COLOR = ['var(--cat-crypto)', 'var(--status-good)', 'var(--cat-income)', 'var(--cat-expense)', 'var(--cat-saving)', 'var(--cat-saving)', 'hsl(var(--muted-foreground))', 'var(--status-critical)'];
+const TYPE_SOFT = ['var(--cat-crypto-soft)', 'var(--status-good-soft)', 'var(--cat-income-soft)', 'var(--cat-expense-soft)', 'var(--cat-saving-soft)', 'var(--cat-saving-soft)', 'hsl(var(--muted))', 'var(--status-critical-soft)'];
 
 function formatAmount (qty, coin) {
 	return coin === "EUR" ? Sanitaze.toFormatCurrency(qty) : `${qty} ${coin}`;
@@ -52,9 +53,10 @@ export function TradesItem ({ elem, onModal, onEditElement }) {
 				}
 			</div>
 
-			{(elem.importedFrom || elem.costPrice > 0) && <div className="flex flex-wrap items-center gap-1.5 mt-1">
+			{(elem.importedFrom || elem.costPrice > 0 || elem.rawCategory) && <div className="flex flex-wrap items-center gap-1.5 mt-1">
 				{elem.importedFrom && <Badge variant="muted">Importé · {elem.importedFrom}</Badge>}
 				{elem.costPrice > 0 && <Badge variant="muted">Frais {formatAmount(elem.costPrice, elem.costCoin)}</Badge>}
+				{elem.rawCategory && <Badge variant="outline" style={{ borderColor: 'var(--status-critical)55', color: 'var(--status-critical)' }}>Catégorie d'origine · {elem.rawCategory}</Badge>}
 			</div>}
 		</div>
 
