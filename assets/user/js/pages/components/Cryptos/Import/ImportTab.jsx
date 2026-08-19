@@ -14,12 +14,14 @@ import { KrakenConnect } from "@userPages/Cryptos/Import/KrakenConnect";
 import { BitpandaConnect } from "@userPages/Cryptos/Import/BitpandaConnect";
 import { BinanceConnect } from "@userPages/Cryptos/Import/BinanceConnect";
 import { CryptocomConnect } from "@userPages/Cryptos/Import/CryptocomConnect";
+import { ImportHistory } from "@userPages/Cryptos/Import/ImportHistory";
 
 const URL_IMPORT = "intern_api_cryptos_import_index";
 
 export function ImportTab () {
 	const [uploading, setUploading] = useState(false);
 	const [result, setResult] = useState(null);
+	const [historyKey, setHistoryKey] = useState(0);
 
 	const handleSubmit = (files) => {
 		if (files.length === 0 || uploading) return;
@@ -34,6 +36,7 @@ export function ImportTab () {
 			.then(function (response) {
 				setResult(response.data);
 				setUploading(false);
+				setHistoryKey((key) => key + 1);
 				Toastr.toast('info', "Import terminé.");
 			})
 			.catch(function (error) {
@@ -87,5 +90,7 @@ export function ImportTab () {
 				</div>}
 			</CardContent>
 		</Card>}
+
+		<ImportHistory key={historyKey} />
 	</div>
 }

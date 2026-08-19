@@ -2,8 +2,10 @@
 
 namespace App\Service\Crypto;
 
+use App\Entity\Crypto\CrImportLog;
 use App\Entity\Crypto\CrTrade;
 use App\Entity\Main\User;
+use App\Repository\Crypto\CrImportLogRepository;
 use App\Repository\Crypto\CrTradeRepository;
 use App\Service\Crypto\Import\BitpandaParser;
 use App\Service\Crypto\Import\CoinbaseParser;
@@ -22,6 +24,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * year), auto-detects which exchange format each CSV inside is by matching its header row against
  * each registered parser, and imports the resulting trades with the same isImported/importedFrom/
  * importedId dedup convention already used by the (now superseded) admin:crypto:* CLI commands.
+ *
+ * Every processed file (import()) or API sync call (importFromApi(), used by the Kraken/Coinbase/
+ * Binance/Crypto.com controllers) also writes one CrImportLog row via logImport(), regardless of whether
+ * it added anything new — this is what powers the "Historique des imports" panel per platform.
  */
 class CryptoImportService
 {
@@ -30,6 +36,7 @@ class CryptoImportService
 
     public function __construct(
         private readonly CrTradeRepository $tradeRepository,
+        private readonly CrImportLogRepository $importLogRepository,
         private readonly ValidatorService $validator,
         private readonly EntityManagerInterface $entityManager,
         private readonly string $privateDirectory,
@@ -73,6 +80,8 @@ class CryptoImportService
             }
 
             $result = $this->persistParsedTrades($user, $source, $parser->parse($rows), $existingIdsBySource[$source], $label);
+            $this->logImport($user, $source, 'file', $label, $result);
+
             $imported += $result['imported'];
             $duplicates += $result['duplicates'];
             $errors = array_merge($errors, $result['errors']);
@@ -94,8 +103,8 @@ class CryptoImportService
 
     /**
      * Same shape/behavior as import() (dedup by importedFrom/importedId, validation, single flush) but for
-     * trades already parsed from an external API instead of an uploaded file — used by
-     * CoinbaseController::sync().
+     * trades already parsed from an external API instead of an uploaded file — used by the Kraken/
+     * Coinbase/Binance/Crypto.com controllers' sync() actions.
      *
      * @param list<array{importedId: string, tradeAt: \DateTimeInterface, type: int, fromCoin: string, fromNbToken: float, toCoin: string, toNbToken: ?float, costPrice: float, costCoin: string, totalReal: float, total: float}> $parsedTrades
      */
@@ -104,6 +113,7 @@ class CryptoImportService
         $existingIds = $this->loadExistingImportedIds($user, $source);
 
         $result = $this->persistParsedTrades($user, $source, $parsedTrades, $existingIds, $source);
+        $this->logImport($user, $source, 'api', null, $result);
 
         $this->entityManager->flush();
 
@@ -166,6 +176,26 @@ class CryptoImportService
         }
 
         return ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $errors];
+    }
+
+    /**
+     * @param array{imported: int, duplicates: int, errors: array} $result as returned by persistParsedTrades()
+     */
+    private function logImport(User $user, string $source, string $via, ?string $fileName, array $result): void
+    {
+        $log = (new CrImportLog())
+            ->setUser($user)
+            ->setSource($source)
+            ->setVia($via)
+            ->setFileName($fileName)
+            ->setImportedCount($result['imported'])
+            ->setDuplicatesCount($result['duplicates'])
+            ->setErrorsCount(count($result['errors']))
+            ->setErrors($result['errors'] !== [] ? $result['errors'] : null)
+            ->setCreatedAt(new \DateTimeImmutable())
+        ;
+
+        $this->importLogRepository->save($log);
     }
 
     private function findParser(array $rows): ?CryptoImportParserInterface
