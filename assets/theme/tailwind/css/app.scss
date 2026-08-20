@@ -40,6 +40,14 @@ ul{
   margin-left: 36px;
 }
 
+/* The global `ul` rule above targets prose/blog content; the sidebar's nav lists aren't prose.
+   Matched by attribute (not by #app-shell ancestry) because the mobile Sheet renders its menu
+   lists into a portal outside #app-shell. */
+ul[data-sidebar]{
+  list-style: none;
+  margin-left: 0;
+}
+
 .mail-message{
   a{
     color: #1e87f0;
@@ -118,6 +126,16 @@ input[type=number] {
     --status-good-soft: #e9f7e9;
     --status-critical: #d03b3b;
     --status-critical-soft: #fbeaea;
+
+    /* Espace membre sidebar: always navy (matches the logo mark), regardless of app theme */
+    --sidebar-background: 240 55% 8%;
+    --sidebar-foreground: 231 20% 78%;
+    --sidebar-primary: 156 64% 52%;
+    --sidebar-primary-foreground: 240 55% 8%;
+    --sidebar-accent: 240 40% 16%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 35% 18%;
+    --sidebar-ring: 156 64% 52%;
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -159,6 +177,15 @@ input[type=number] {
     --status-good-soft: #10240f;
     --status-critical: #e66767;
     --status-critical-soft: #2b1414;
+
+    --sidebar-background: 240 55% 8%;
+    --sidebar-foreground: 231 20% 78%;
+    --sidebar-primary: 156 64% 52%;
+    --sidebar-primary-foreground: 240 55% 8%;
+    --sidebar-accent: 240 40% 16%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 35% 18%;
+    --sidebar-ring: 156 64% 52%;
   }
 }
 

@@ -2,6 +2,8 @@
 
 {% block title %}{{ page_title }} | {{ page_prefix }} {% endblock %}
 
+{#{% set html_class = "bg-sidebar" %}#}
+
 {% block stylesheets %}
     {{ parent() }}
     {{ encore_entry_link_tags('user_app') }}
@@ -10,95 +12,46 @@
 {% block body %}
     {% include "layout/components/page-loader.html.twig" %}
 
-    <div class="grid lg:min-h-full lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-        <nav class="bg-gray-800 lg:min-h-full">
-            <div>
-                <div class="relative flex flex-row items-center justify-between gap-4 p-4 lg:flex-col lg:gap-6">
-                    <a href="{{ path('user_homepage') }}" class="flex flex-shrink-0 items-center">
-                        <img class="h-8 sm:h-12 lg:h-24 w-auto rounded-md" src="{{ asset('build/user/images/logo.png') }}" alt="Nompaw">
-                    </a>
-                    <div class="flex flex-row items-center gap-4 lg:flex-col-reverse">
-                        <div class="flex gap-2">
-                            <div class="hidden sm:block">
-                                {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                                    btn_link: path('app_logout'),
-                                    btn_type: 'menu',
-                                    btn_icon: 'logout',
-                                    btn_text: 'Se déconnecter'
-                                } %}
-                            </div>
-                            <div class="sm:hidden">
-                                <a href="{{ path('app_logout') }}"
-                                   class="relative inline-flex justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-gray-800 text-gray-900 hover:bg-gray-700 ring-1 ring-inset ring-gray-700"
-                                >
-                                    <span class="icon-logout text-gray-300"></span>
-                                    <span class="tooltip bg-gray-300 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="width: 98px">Se déconnecter</span>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="relative flex flex-col items-center gap-4 rounded-full text-sm">
-                            {% if app.user.avatarFile %}
-                                <img class="h-8 w-8 rounded-full" src="{{ app.user.avatarFile }}" alt="Avatar utilisateur">
-                            {% else %}
-                                <div class="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold">
-                                    <div>
-                                        {{ app.user.lastname | slice(0, 1) }}{{ app.user.firstname | slice(0,1) }}
-                                    </div>
-                                </div>
-                            {% endif %}
-                            <div class="hidden text-center text-slate-50 lg:block">
-                                <div>{{ app.user.displayName }}</div>
-                                <div>{{ app.user.email }}</div>
-                            </div>
-                        </div>
-                        <button type="button" class="nav-mobile relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 lg:hidden hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                                id="nav-mobile" aria-controls="mobile-menu" aria-expanded="false">
-                            <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
-                            </svg>
-                            <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="nav-content" class="hidden flex-col justify-between pb-4 h-screen max-h-[88vh] sm:flex-row lg:flex lg:flex-col lg:max-h-full lg:pb-0 lg:h-[70vh]">
-                <div class="bg-gray-800 flex flex-col gap-1 w-full px-4 pt-4">
-                    {% for item in menu %}
-                        <a href="{{ item.path }}"
-                           class="{{- app.request.get('_route') in item.matchRoute ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} rounded-md px-3 py-2 font-medium"
-                           aria-current="page"
-                        >
-                            <span class="icon-{{ item.icon }} inline-block translate-y-0.5"></span>
-                            <span class="ml-1">{{ item.name }}</span>
-                        </a>
+    <div id="app-shell"
+         data-menu="{{ menu|json_encode }}"
+         data-menu-secondary="{{ menu_bottom|json_encode }}"
+         data-user="{{ { name: app.user.displayName, email: app.user.email, avatar: app.user.avatarFile, initials: (app.user.lastname|slice(0,1)) ~ (app.user.firstname|slice(0,1)) }|json_encode }}"
+         data-active-route="{{ app.request.get('_route') }}"
+         data-page-title="{{ page_title|default('') }}"
+         data-home-path="{{ path('user_homepage') }}"
+         data-logo-path="{{ asset('build/user/images/logo.png') }}"
+         data-profile-path="{{ path('user_profil_index') }}"
+         data-logout-path="{{ path('app_logout') }}"
+    >
+        <div class="flex min-h-svh w-full" aria-hidden="true">
+            <div class="m-2 hidden w-64 shrink-0 flex-col gap-2 rounded-xl bg-sidebar p-2 md:flex">
+                <div class="h-12 rounded-md bg-sidebar-accent/80 animate-pulse"></div>
+                <div class="mt-2 flex flex-1 flex-col gap-1.5">
+                    {% for i in 1..8 %}
+                        <div class="h-8 rounded-md bg-sidebar-accent/50 animate-pulse"></div>
                     {% endfor %}
                 </div>
-                <div class="bg-gray-800 flex flex-col gap-1 w-full px-4 pt-4">
-                    {% for item in menu_bottom %}
-                        <a href="{{ item.path }}"
-                           class="{{- app.request.get('_route') in item.matchRoute ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} rounded-md px-3 py-2 font-medium"
-                           aria-current="page"
-                        >
-                            <span class="icon-{{ item.icon }} inline-block translate-y-0.5"></span>
-                            <span class="ml-1">{{ item.name }}</span>
-                        </a>
-                    {% endfor %}
+                <div class="h-11 rounded-md bg-sidebar-accent/80 animate-pulse"></div>
+            </div>
+            <div class="flex flex-1 flex-col">
+                <div class="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+                    <div class="h-4 w-32 rounded bg-muted animate-pulse"></div>
                 </div>
             </div>
-        </nav>
-
-        <main class="lg:col-span-3 xl:col-span-4 2xl:col-span-5">
-            {% include "layout/components/user/page_title.html.twig" %}
-
-            <div class="{{ div_class is defined ? div_class : "mx-auto max-w-screen-qhd px-4 py-8 min-h-screen sm:px-6 lg:px-8" }}">
-                {% block main_content %}{% endblock %}
-            </div>
-        </main>
+        </div>
     </div>
 
-    {% block footer %}{% endblock %}
+    <div id="main-content-source" class="hidden bg-red-400">
+        {% include "layout/components/user/page_title.html.twig" %}
+
+        <div class="bg-gray-100 {{ div_class is defined ? div_class : "mx-auto max-w-screen-qhd px-4 py-8 min-h-screen sm:px-6 lg:px-8" }}">
+            {% block main_content %}{% endblock %}
+        </div>
+
+        <div id="app-footer" class="hidden">
+            {% block footer %}{% endblock %}
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
