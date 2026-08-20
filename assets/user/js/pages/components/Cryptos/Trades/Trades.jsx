@@ -7,6 +7,7 @@ import Sort from "@commonFunctions/sort";
 import List from "@commonFunctions/list";
 import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze from "@commonFunctions/sanitaze";
+import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Button } from "@tailwindComponents/Elements/Button";
@@ -40,6 +41,12 @@ export class Trades extends Component {
 
 	componentDidMount = () => {
 		this.handleGetData();
+	}
+
+	componentDidUpdate = (prevProps) => {
+		if (prevProps.refreshSignal !== this.props.refreshSignal) {
+			this.handleGetData();
+		}
 	}
 
     handleGetData = () => {
@@ -91,26 +98,13 @@ export class Trades extends Component {
 			})
 		}
 
+		let holdings = data ? CryptoHoldings.computeHoldingsAndAlerts(data).holdings : [];
+
 		return <>
 			{loadingData
 				? <LoaderElements />
 				: <div className="flex flex-col gap-4">
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						<Card className="overflow-hidden">
-							<CardContent className="flex items-center gap-4 p-4">
-								<div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl"
-									 style={{ background: 'var(--cat-income-soft)', color: 'var(--cat-income)' }}>
-									<span className="icon-download text-lg" />
-								</div>
-								<div>
-									<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Total déposé</div>
-									<span className="text-2xl font-bold tabular-nums" style={{ color: 'var(--cat-income)' }}>
-										{Sanitaze.toFormatCurrency(totalDepot)}
-									</span>
-								</div>
-							</CardContent>
-						</Card>
-
 						<Card className="overflow-hidden">
 							<CardContent className="flex items-center gap-4 p-4">
 								<div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl"
@@ -123,6 +117,24 @@ export class Trades extends Component {
 										{Sanitaze.toFormatCurrency(totalDepot - totalRetrait)}
 									</span>
 									<div className="text-[10px] text-muted-foreground">Dépôts - retraits</div>
+								</div>
+							</CardContent>
+						</Card>
+
+						<Card className="overflow-hidden">
+							<CardContent className="flex items-center gap-4 p-4">
+								<div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl"
+									 style={{ background: 'var(--cat-income-soft)', color: 'var(--cat-income)' }}>
+									<span className="icon-storage text-lg" />
+								</div>
+								<div className="min-w-0">
+									<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Cryptos détenues</div>
+									<span className="text-2xl font-bold tabular-nums" style={{ color: 'var(--cat-income)' }}>
+										{holdings.length}
+									</span>
+									{holdings.length > 0 && <div className="truncate text-[10px] text-muted-foreground">
+										{holdings.map(h => h.coin).join(', ')}
+									</div>}
 								</div>
 							</CardContent>
 						</Card>

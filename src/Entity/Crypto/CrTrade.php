@@ -29,7 +29,7 @@ class CrTrade
     #[ORM\Column]
     #[Groups(['trade_list'])]
     #[Assert\NotNull]
-    #[Assert\Choice(choices: [TypeType::Achat, TypeType::Vente, TypeType::Depot, TypeType::Retrait, TypeType::Recuperation, TypeType::Stacking, TypeType::Transfert])]
+    #[Assert\Choice(choices: [TypeType::Achat, TypeType::Vente, TypeType::Depot, TypeType::Retrait, TypeType::Recuperation, TypeType::Stacking, TypeType::Transfert, TypeType::ACategoriser])]
     private ?int $type = null;
 
     #[ORM\Column(length: 10)]
@@ -107,6 +107,15 @@ class CrTrade
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $importedId = null;
+
+    /**
+     * The platform's own category label for this transaction, kept only when type = ACategoriser (an
+     * import mapper didn't recognize the platform's category and couldn't classify it as one of the
+     * other TypeType values) — lets the user see what to reclassify it as instead of silently dropping it.
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['trade_list'])]
+    private ?string $rawCategory = null;
 
     /**
      * Manual override of the "valeur globale du portefeuille" (CGI art. 150 VH bis) at the moment of
@@ -318,6 +327,18 @@ class CrTrade
     public function setImportedId(?string $importedId): static
     {
         $this->importedId = $importedId;
+
+        return $this;
+    }
+
+    public function getRawCategory(): ?string
+    {
+        return $this->rawCategory;
+    }
+
+    public function setRawCategory(?string $rawCategory): static
+    {
+        $this->rawCategory = $rawCategory;
 
         return $this;
     }

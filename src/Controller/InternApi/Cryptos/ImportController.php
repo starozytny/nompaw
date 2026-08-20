@@ -2,6 +2,8 @@
 
 namespace App\Controller\InternApi\Cryptos;
 
+use App\Entity\Crypto\CrImportLog;
+use App\Repository\Crypto\CrImportLogRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Crypto\CryptoImportService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,5 +25,13 @@ class ImportController extends AbstractController
         $summary = $importService->import($this->getUser(), $file);
 
         return $apiResponse->apiJsonResponseCustom($summary);
+    }
+
+    #[Route('/history', name: 'history', options: ['expose' => true], methods: 'GET')]
+    public function history(CrImportLogRepository $importLogRepository, ApiResponse $apiResponse): Response
+    {
+        $logs = $importLogRepository->findRecentByUser($this->getUser());
+
+        return $apiResponse->apiJsonResponse($logs, CrImportLog::LIST);
     }
 }

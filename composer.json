@@ -20,6 +20,7 @@
         "doctrine/orm": "^2.13",
         "dompdf/dompdf": "^3.1",
         "fakerphp/faker": "^1.21",
+        "firebase/php-jwt": "^6.10",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "google/apiclient": "^2.15",
         "james-heinrich/getid3": "^1.9",
@@ -67,13 +68,19 @@
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.5",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^2.12|^3.0",
+      "ext-sodium": "*"
     },
     "config": {
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
             "symfony/flex": true,
             "symfony/runtime": true
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-y2cr-5h3j-g3ys": "Disputed/low-severity: only affects decode() accepting short HMAC (HS256) keys. This app only uses JWT::encode() with ES256 (EC keys) for Coinbase CDP auth, so it doesn't apply. Bumping past it would require google/apiclient AND google/auth major upgrades, out of scope here."
+            }
         },
         "optimize-autoloader": true,
         "preferred-install": {

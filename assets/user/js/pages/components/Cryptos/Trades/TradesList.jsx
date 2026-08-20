@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from 'prop-types';
 
 import moment from "moment/moment";
 import "moment/locale/fr";
 
+import { cn } from "@shadcnComponents/lib/utils";
 import Sanitaze from "@commonFunctions/sanitaze";
 
-import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
-import { Badge } from "@shadcnComponents/ui/badge";
+import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
+import { TradesItem, TYPE_LABEL } from "@userPages/Cryptos/Trades/TradesItem";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -16,7 +17,17 @@ const RETRAIT = 3;
 const RECUP = 4;
 const STAKING = 5;
 
+const COLUMNS = 6;
+
+const MANUAL_PLATFORM = "__manual__";
+const ALL = "all";
+
 export function TradesList ({ data, onModal, onEdit }) {
+	const [openMonths, setOpenMonths] = useState({});
+	const [selectedYear, setSelectedYear] = useState(null);
+	const [typeFilter, setTypeFilter] = useState(ALL);
+	const [platformFilter, setPlatformFilter] = useState(ALL);
+
 	if (data.length === 0) {
 		return <div className="flex flex-col items-center gap-2 p-8 text-center">
 			<span className="icon-cart text-2xl text-muted-foreground" />
@@ -24,8 +35,50 @@ export function TradesList ({ data, onModal, onEdit }) {
 		</div>
 	}
 
+	const platforms = [...new Set(data.map(item => item.importedFrom).filter(Boolean))].sort();
+	const hasManual = data.some(item => !item.importedFrom);
+
+	const typeItems = [
+		{ identifiant: ALL, value: ALL, label: "Tous les types" },
+		...TYPE_LABEL.map((label, index) => ({ identifiant: String(index), value: String(index), label })),
+	];
+	const platformItems = [
+		{ identifiant: ALL, value: ALL, label: "Toutes les plateformes" },
+		...(hasManual ? [{ identifiant: MANUAL_PLATFORM, value: MANUAL_PLATFORM, label: "Manuel (non importé)" }] : []),
+		...platforms.map(p => ({ identifiant: p, value: p, label: p })),
+	];
+
+	const filteredData = data.filter(item => {
+		if (typeFilter !== ALL && String(item.type) !== typeFilter) return false;
+		if (platformFilter !== ALL) {
+			if (platformFilter === MANUAL_PLATFORM ? !!item.importedFrom : item.importedFrom !== platformFilter) return false;
+		}
+		return true;
+	});
+
+	const filters = <div className="flex flex-wrap items-center gap-2">
+		<div className="w-44">
+			<SelectSimple identifiant="type" valeur={typeFilter} noEmpty items={typeItems} onSelect={(identifiant, value) => setTypeFilter(value)} />
+		</div>
+		{platformItems.length > 1 && <div className="w-52">
+			<SelectSimple identifiant="platform" valeur={platformFilter} noEmpty items={platformItems} onSelect={(identifiant, value) => setPlatformFilter(value)} />
+		</div>}
+	</div>;
+
+	if (filteredData.length === 0) {
+		return <div className="flex flex-col gap-3 p-4">
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				{filters}
+			</div>
+			<div className="flex flex-col items-center gap-2 p-8 text-center">
+				<span className="icon-cart text-2xl text-muted-foreground" />
+				<div className="text-sm text-muted-foreground">Aucune transaction ne correspond à ces filtres.</div>
+			</div>
+		</div>
+	}
+
 	let yData = [];
-	data.forEach(item => {
+	filteredData.forEach(item => {
 		let year = moment(item.tradeAt).year();
 
 		let find = false;
@@ -64,36 +117,27 @@ export function TradesList ({ data, onModal, onEdit }) {
 		nData.push(item);
 	})
 
+	// nData is chronological (oldest year first) — needed so the running "Dispo" balance is correct.
+	const years = nData.map(yItem => yItem.year);
+	const effectiveYear = years.includes(selectedYear) ? selectedYear : years[years.length - 1];
+
 	let total = 0, totalDepot = 0, totalRetrait = 0, totalBonus = 0;
 
-	let items = [];
-	nData.forEach((yItem, index) => {
+	let selectedItemsMonth = [];
+	let yearStats = null;
 
-		let cryptosY = [];
-		let totalYDepot = 0, totalYRetrait = 0;
+	nData.forEach(yItem => {
+		let totalYDepot = 0, totalYRetrait = 0, totalYAchat = 0, totalYVente = 0, totalYBonus = 0, yearTxCount = 0;
 
 		let itemsMonth = [];
 		yItem.items.forEach((mItem, ind) => {
 
 			let itemsTrade = [];
 			mItem.trades.forEach(elem => {
-				let findCryptoY = 2;
-
 				switch (elem.type) {
 					case VENTE:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
-
-						findCryptoY = 0;
-						cryptosY.forEach(cr => {
-							if (cr.name === elem.fromCoin) {
-								cr.total -= elem.fromNbToken;
-								findCryptoY = 1;
-							}
-						})
-
-						if (findCryptoY === 0) {
-							cryptosY.push({ name: elem.fromCoin, total: elem.fromNbToken })
-						}
+						totalYVente = Sanitaze.toRoundTwoDec(totalYVente) + Sanitaze.toRoundTwoDec(elem.total);
 						break;
 					case DEPOT:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
@@ -102,18 +146,7 @@ export function TradesList ({ data, onModal, onEdit }) {
 						break;
 					case ACHAT:
 						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
-
-						findCryptoY = 0;
-						cryptosY.forEach(cr => {
-							if (cr.name === elem.toCoin) {
-								cr.total += elem.toNbToken;
-								findCryptoY = 1;
-							}
-						})
-
-						if (findCryptoY === 0) {
-							cryptosY.push({ name: elem.toCoin, total: elem.toNbToken })
-						}
+						totalYAchat = Sanitaze.toRoundTwoDec(totalYAchat) + Sanitaze.toRoundTwoDec(elem.total);
 						break;
 					case RETRAIT:
 						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
@@ -123,6 +156,7 @@ export function TradesList ({ data, onModal, onEdit }) {
 					case RECUP:
 					case STAKING:
 						totalBonus += Sanitaze.toRoundTwoDec(elem.total);
+						totalYBonus += Sanitaze.toRoundTwoDec(elem.total);
 						break;
 					default: break;
 				}
@@ -130,38 +164,109 @@ export function TradesList ({ data, onModal, onEdit }) {
 				itemsTrade.push(<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} />);
 			})
 
-			itemsMonth.push(<div key={ind}>
-				<div className="flex flex-col">
-					{itemsTrade}
-				</div>
-				<div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 border-b bg-muted/40 px-4 py-2 text-xs">
-					<span className="font-semibold text-foreground">Fin {mItem.month}</span>
-					<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-						<span>Dispo <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(total)}</b></span>
-						<span>Dépôt <b className="tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(totalDepot)}</b></span>
-						<span>Retrait <b className="tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(totalRetrait)}</b></span>
-						<span>Bonus <b className="tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(totalBonus)}</b></span>
-					</div>
-					{cryptosY.length > 0 && <div className="flex flex-wrap gap-1">
-						{cryptosY.map(cr => <Badge key={cr.name} variant="outline" className="tabular-nums">{cr.name} {cr.total}</Badge>)}
-					</div>}
-				</div>
-			</div>)
+			// Running totals above are computed chronologically (oldest to newest, as required for
+			// the cumulative math), but rows within the month are displayed newest first.
+			itemsTrade.reverse();
+
+			yearTxCount += mItem.trades.length;
+
+			const monthKey = `${yItem.year}-${mItem.month}`;
+			const monthOpen = openMonths[monthKey] ?? true;
+
+			itemsMonth.push(<React.Fragment key={ind}>
+				<tr className="border-t bg-muted/40">
+					<td colSpan={COLUMNS} className="p-0">
+						<button type="button"
+								className="flex w-full items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs text-left"
+								onClick={() => setOpenMonths(o => ({ ...o, [monthKey]: !monthOpen }))}>
+							<span className="flex items-center gap-1.5 font-semibold text-foreground capitalize">
+								<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", monthOpen && "rotate-180")} />
+								{mItem.month} <span className="font-normal text-muted-foreground">({mItem.trades.length})</span>
+							</span>
+							<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+								<span>Dispo <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(total)}</b></span>
+								<span>Dépôt <b className="tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(totalDepot)}</b></span>
+								<span>Retrait <b className="tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(totalRetrait)}</b></span>
+								<span>Bonus <b className="tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(totalBonus)}</b></span>
+							</div>
+						</button>
+					</td>
+				</tr>
+				{monthOpen && itemsTrade}
+			</React.Fragment>)
 		})
 
-		items.push(<div key={index}>
-			<div className="flex flex-col">
-				{itemsMonth}
-			</div>
-			<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-xs font-semibold"
-				 style={{ background: 'var(--cat-crypto-soft)', color: 'var(--cat-crypto)' }}>
-				<span>Fin {yItem.year}</span>
-				<span className="font-normal">Dépôt {Sanitaze.toFormatCurrency(totalYDepot)} · Retrait {Sanitaze.toFormatCurrency(totalYRetrait)}</span>
-			</div>
-		</div>)
+		// Months within a year are displayed newest first.
+		itemsMonth.reverse();
+
+		if (yItem.year === effectiveYear) {
+			selectedItemsMonth = itemsMonth;
+			yearStats = {
+				count: yearTxCount,
+				depot: totalYDepot,
+				retrait: totalYRetrait,
+				achat: totalYAchat,
+				vente: totalYVente,
+				bonus: totalYBonus,
+				dispoEnd: total,
+			};
+		}
 	})
 
-	return <div className="flex flex-col">{items}</div>
+	return <div className="flex flex-col gap-3 p-4">
+		<div className="flex flex-wrap items-center justify-between gap-3">
+			<div className="flex flex-wrap items-center gap-2">
+				<div className="w-28">
+					<SelectSimple identifiant="year" valeur={String(effectiveYear)} noEmpty
+						items={[...years].reverse().map(y => ({ identifiant: y, value: String(y), label: String(y) }))}
+						onSelect={(identifiant, value) => setSelectedYear(parseInt(value))} />
+				</div>
+				{filters}
+			</div>
+			<span className="text-xs text-muted-foreground">{yearStats.count} transaction{yearStats.count > 1 ? "s" : ""} en {effectiveYear}</span>
+		</div>
+
+		<div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Dépôts</div>
+				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(yearStats.depot)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Retraits</div>
+				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(yearStats.retrait)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Achats</div>
+				<div className="text-sm font-semibold tabular-nums">{Sanitaze.toFormatCurrency(yearStats.achat)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Ventes</div>
+				<div className="text-sm font-semibold tabular-nums">{Sanitaze.toFormatCurrency(yearStats.vente)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Bonus</div>
+				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(yearStats.bonus)}</div>
+			</div>
+		</div>
+
+		<div className="-mx-4 overflow-x-auto border-t">
+			<table className="w-full min-w-[820px]">
+				<thead>
+					<tr className="border-b bg-[var(--cat-crypto-soft)] text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--cat-crypto)' }}>
+						<th className="py-2.5 pl-4 pr-3">Type de transaction</th>
+						<th className="py-2.5 pr-3">Date</th>
+						<th className="py-2.5 pr-3">Sortie</th>
+						<th className="py-2.5 pr-3">Entrée</th>
+						<th className="py-2.5 pr-3 text-right">Montant</th>
+						<th className="py-2.5 pr-4"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{selectedItemsMonth}
+				</tbody>
+			</table>
+		</div>
+	</div>
 }
 
 TradesList.propTypes = {

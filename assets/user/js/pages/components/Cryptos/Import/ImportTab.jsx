@@ -9,11 +9,19 @@ import Toastr from "@tailwindFunctions/toastr";
 import { Card, CardContent } from "@shadcnComponents/ui/card";
 import { InputFile } from "@tailwindComponents/Elements/Fields";
 
+import { CoinbaseConnect } from "@userPages/Cryptos/Import/CoinbaseConnect";
+import { KrakenConnect } from "@userPages/Cryptos/Import/KrakenConnect";
+import { BitpandaConnect } from "@userPages/Cryptos/Import/BitpandaConnect";
+import { BinanceConnect } from "@userPages/Cryptos/Import/BinanceConnect";
+import { CryptocomConnect } from "@userPages/Cryptos/Import/CryptocomConnect";
+import { ImportHistory } from "@userPages/Cryptos/Import/ImportHistory";
+
 const URL_IMPORT = "intern_api_cryptos_import_index";
 
-export function ImportTab () {
+export function ImportTab ({ onImported }) {
 	const [uploading, setUploading] = useState(false);
 	const [result, setResult] = useState(null);
+	const [historyKey, setHistoryKey] = useState(0);
 
 	const handleSubmit = (files) => {
 		if (files.length === 0 || uploading) return;
@@ -28,7 +36,9 @@ export function ImportTab () {
 			.then(function (response) {
 				setResult(response.data);
 				setUploading(false);
+				setHistoryKey((key) => key + 1);
 				Toastr.toast('info', "Import terminé.");
+				onImported && onImported();
 			})
 			.catch(function (error) {
 				Formulaire.displayErrors(null, error);
@@ -38,17 +48,26 @@ export function ImportTab () {
 	}
 
 	return <div className="flex flex-col gap-4">
+		<CoinbaseConnect onSynced={onImported} />
+		<KrakenConnect onSynced={onImported} />
+		<BitpandaConnect onSynced={onImported} />
+		<BinanceConnect onSynced={onImported} />
+		<CryptocomConnect onSynced={onImported} />
+
 		<Card>
 			<CardContent className="flex flex-col gap-3 p-4">
 				<div>
 					<div className="text-sm font-medium">Importer un export d'exchange</div>
 					<div className="text-xs text-muted-foreground">
-						Dépose le fichier tel que téléchargé (zip ou csv) depuis Coinbase, Coinbase Pro, Kraken, Bitpanda ou Uphold —
-						le format est détecté automatiquement. Les transactions déjà importées sont ignorées, pas dupliquées.
+						Dépose le fichier tel que téléchargé (zip, csv ou xls) depuis Coinbase Pro, Uphold, SwissBorg ou Binance
+						(Historique des dépôts / de retrait / des transactions — les trois fichiers peuvent être déposés
+						séparément) — le format est détecté automatiquement. Pour Coinbase, Kraken et Bitpanda, connecte plutôt
+						ton compte via l'API ci-dessus pour récupérer l'historique complet. Les transactions déjà importées sont
+						ignorées, pas dupliquées.
 					</div>
 				</div>
 
-				<InputFile identifiant="import-file" type="simple" format="file" accept=".csv,.zip"
+				<InputFile identifiant="import-file" type="simple" format="file" accept=".csv,.zip,.xls,.xlsx"
 						   maxSize={20000000} errors={[]} valeur=""
 						   onDirectSubmit={handleSubmit} />
 
@@ -75,5 +94,7 @@ export function ImportTab () {
 				</div>}
 			</CardContent>
 		</Card>}
+
+		<ImportHistory key={historyKey} />
 	</div>
 }
