@@ -9,6 +9,7 @@ use App\Service\Crypto\CoinbaseApiClient;
 use App\Service\Crypto\CredentialEncryptionService;
 use App\Service\Crypto\CryptoImportService;
 use App\Service\Crypto\Import\CoinbaseApiTransactionMapper;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,6 +39,7 @@ class CoinbaseController extends AbstractController
         CoinbaseApiClient $coinbaseApiClient,
         CredentialEncryptionService $encryptionService,
         ApiResponse $apiResponse,
+        LoggerInterface $logger,
     ): Response {
         $payload = json_decode($request->getContent(), true);
         $keyJson = json_decode($payload['keyJson'] ?? '', true);
@@ -49,24 +51,35 @@ class CoinbaseController extends AbstractController
             return $apiResponse->apiJsonResponseBadRequest("Le JSON collé ne contient pas les champs \"name\" et \"privateKey\" attendus.");
         }
 
-        $connectionResult = $coinbaseApiClient->testConnection($keyName, $privateKey);
-        if ($connectionResult !== true) {
-            return $apiResponse->apiJsonResponseBadRequest($connectionResult);
+        try {
+            $connectionResult = $coinbaseApiClient->testConnection($keyName, $privateKey);
+            if ($connectionResult !== true) {
+                return $apiResponse->apiJsonResponseBadRequest($connectionResult);
+            }
+
+            $user = $this->getUser();
+            $credential = $credentialRepository->findOneByUser($user) ?? (new CrCoinbaseCredential())
+                ->setUser($user)
+                ->setConnectedAt(new \DateTimeImmutable())
+            ;
+
+            $credential
+                ->setKeyName($keyName)
+                ->setPrivateKeyEncrypted($encryptionService->encrypt($privateKey))
+                ->setLastSyncError(null)
+            ;
+
+            $credentialRepository->save($credential, true);
+        } catch (\Throwable $e) {
+            $logger->error('Coinbase connect: échec pour l\'utilisateur {userId} : {message}', [
+                'userId' => $this->getUser()?->getId(),
+                'keyName' => $keyName,
+                'exception' => $e,
+                'message' => $e->getMessage(),
+            ]);
+
+            return $apiResponse->apiJsonResponseBadRequest('Impossible de connecter le compte Coinbase : ' . $e->getMessage());
         }
-
-        $user = $this->getUser();
-        $credential = $credentialRepository->findOneByUser($user) ?? (new CrCoinbaseCredential())
-            ->setUser($user)
-            ->setConnectedAt(new \DateTimeImmutable())
-        ;
-
-        $credential
-            ->setKeyName($keyName)
-            ->setPrivateKeyEncrypted($encryptionService->encrypt($privateKey))
-            ->setLastSyncError(null)
-        ;
-
-        $credentialRepository->save($credential, true);
 
         return $apiResponse->apiJsonResponseSuccessful('Compte Coinbase connecté.');
     }
