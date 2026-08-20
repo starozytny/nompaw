@@ -8,6 +8,9 @@ use App\Entity\Main\User;
 use App\Repository\Crypto\CrImportLogRepository;
 use App\Repository\Crypto\CrTradeRepository;
 use App\Service\Crypto\Import\BinanceDepositParser;
+use App\Service\Crypto\Import\BinanceFiatDepositParser;
+use App\Service\Crypto\Import\BinanceFiatPurchaseParser;
+use App\Service\Crypto\Import\BinanceFiatWithdrawalParser;
 use App\Service\Crypto\Import\BinanceHistoryParser;
 use App\Service\Crypto\Import\BinanceWithdrawalParser;
 use App\Service\Crypto\Import\CoinbaseProFillsParser;
@@ -51,6 +54,9 @@ class CryptoImportService
             new SwissBorgParser(),
             new BinanceDepositParser(),
             new BinanceWithdrawalParser(),
+            new BinanceFiatDepositParser(),
+            new BinanceFiatWithdrawalParser(),
+            new BinanceFiatPurchaseParser(),
             new BinanceHistoryParser(),
         ];
     }

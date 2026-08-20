@@ -31,10 +31,10 @@ use App\Entity\Enum\Crypto\TypeType;
  *  - "Small Assets Exchange BNB" (Binance's automatic dust-to-BNB sweep) can bundle many unrelated small
  *    token disposals and several partial BNB credits under one timestamp with no reliable 1:1 pairing —
  *    each row is kept individually as an ACategoriser entry for manual review rather than guessing wrong.
- *  - "Deposit"/"Withdraw" rows are skipped for crypto (already covered, with a real transaction id and
- *    more detail, by BinanceDepositParser/BinanceWithdrawalParser) — only fiat (EUR) deposits are kept
- *    here, since Binance's dedicated deposit export is on-chain/crypto only. "Fiat Withdrawal" is its own
- *    separate operation label and isn't covered by the dedicated withdrawal export, so it's kept too.
+ *  - "Deposit", "Withdraw" and "Fiat Withdrawal" rows are all skipped — every one of them is already
+ *    covered, with a real transaction id and more detail, by a dedicated export/parser: on-chain crypto
+ *    by BinanceDepositParser/BinanceWithdrawalParser, EUR bank transfers by BinanceFiatDepositParser/
+ *    BinanceFiatWithdrawalParser.
  *  - Anything not recognized above is kept as ACategoriser with Binance's own operation label, never
  *    silently dropped.
  *
@@ -68,8 +68,6 @@ class BinanceHistoryParser implements CryptoImportParserInterface
         'ETH 2.0 Staking', 'ETH 2.0 Staking Withdrawals', 'DOT Slot Auction Staking',
         'DOT Slot Auction Redemption', 'Transfer Between Spot and Funding', 'Transfer',
     ];
-
-    private const FIAT_COINS = ['EUR', 'USD', 'GBP', 'CHF'];
 
     /** @var array<string, int> content signature => number of times already seen, for stable dedup ids */
     private array $idOccurrences = [];
@@ -239,11 +237,7 @@ class BinanceHistoryParser implements CryptoImportParserInterface
         }
 
         if ($op === 'Deposit') {
-            if (!in_array($coin, self::FIAT_COINS, true)) {
-                return []; // crypto deposits are covered by BinanceDepositParser
-            }
-
-            return $this->buildSingleLeg($time, $coin, $change, TypeType::Depot);
+            return []; // covered by BinanceDepositParser (crypto) / BinanceFiatDepositParser (EUR)
         }
 
         if ($op === 'Withdraw') {
@@ -251,7 +245,7 @@ class BinanceHistoryParser implements CryptoImportParserInterface
         }
 
         if ($op === 'Fiat Withdrawal') {
-            return $this->buildSingleLeg($time, $coin, $change, TypeType::Retrait);
+            return []; // covered by BinanceFiatWithdrawalParser
         }
 
         if (in_array($op, self::STACKING_OPS, true)) {
