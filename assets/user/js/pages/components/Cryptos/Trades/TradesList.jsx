@@ -8,7 +8,6 @@ import { cn } from "@shadcnComponents/lib/utils";
 import Sanitaze from "@commonFunctions/sanitaze";
 
 import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
-import { Badge } from "@shadcnComponents/ui/badge";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -16,6 +15,8 @@ const DEPOT = 2;
 const RETRAIT = 3;
 const RECUP = 4;
 const STAKING = 5;
+
+const COLUMNS = 6;
 
 export function TradesList ({ data, onModal, onEdit }) {
 	const [openYears, setOpenYears] = useState({});
@@ -78,7 +79,6 @@ export function TradesList ({ data, onModal, onEdit }) {
 		const yearOpen = openYears[yItem.year] ?? isLastYear;
 		const lastMonthIndex = yItem.items.length - 1;
 
-		let cryptosY = [];
 		let totalYDepot = 0, totalYRetrait = 0, yearTxCount = 0;
 
 		let itemsMonth = [];
@@ -86,23 +86,9 @@ export function TradesList ({ data, onModal, onEdit }) {
 
 			let itemsTrade = [];
 			mItem.trades.forEach(elem => {
-				let findCryptoY = 2;
-
 				switch (elem.type) {
 					case VENTE:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
-
-						findCryptoY = 0;
-						cryptosY.forEach(cr => {
-							if (cr.name === elem.fromCoin) {
-								cr.total -= elem.fromNbToken;
-								findCryptoY = 1;
-							}
-						})
-
-						if (findCryptoY === 0) {
-							cryptosY.push({ name: elem.fromCoin, total: elem.fromNbToken })
-						}
 						break;
 					case DEPOT:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
@@ -111,18 +97,6 @@ export function TradesList ({ data, onModal, onEdit }) {
 						break;
 					case ACHAT:
 						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
-
-						findCryptoY = 0;
-						cryptosY.forEach(cr => {
-							if (cr.name === elem.toCoin) {
-								cr.total += elem.toNbToken;
-								findCryptoY = 1;
-							}
-						})
-
-						if (findCryptoY === 0) {
-							cryptosY.push({ name: elem.toCoin, total: elem.toNbToken })
-						}
 						break;
 					case RETRAIT:
 						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
@@ -145,48 +119,65 @@ export function TradesList ({ data, onModal, onEdit }) {
 			const isLastMonth = isLastYear && ind === lastMonthIndex;
 			const monthOpen = yearOpen && (openMonths[monthKey] ?? isLastMonth);
 
-			itemsMonth.push(<div key={ind}>
-				<button type="button"
-						className="flex w-full items-center justify-between gap-x-4 gap-y-1.5 border-b bg-muted/40 px-4 py-2 text-xs text-left"
-						onClick={() => setOpenMonths(o => ({ ...o, [monthKey]: !monthOpen }))}>
-					<span className="flex items-center gap-1.5 font-semibold text-foreground capitalize">
-						<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", monthOpen && "rotate-180")} />
-						{mItem.month} <span className="font-normal text-muted-foreground">({mItem.trades.length})</span>
-					</span>
-					<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-						<span>Dispo <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(total)}</b></span>
-						<span>Dépôt <b className="tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(totalDepot)}</b></span>
-						<span>Retrait <b className="tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(totalRetrait)}</b></span>
-						<span>Bonus <b className="tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(totalBonus)}</b></span>
-					</div>
-					{cryptosY.length > 0 && <div className="flex flex-wrap gap-1">
-						{cryptosY.map(cr => <Badge key={cr.name} variant="outline" className="tabular-nums">{cr.name} {cr.total}</Badge>)}
-					</div>}
-				</button>
-				{monthOpen && <div className="flex flex-col">
-					{itemsTrade}
-				</div>}
-			</div>)
+			itemsMonth.push(<React.Fragment key={ind}>
+				<tr className="border-t bg-muted/40">
+					<td colSpan={COLUMNS} className="p-0">
+						<button type="button"
+								className="flex w-full items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs text-left"
+								onClick={() => setOpenMonths(o => ({ ...o, [monthKey]: !monthOpen }))}>
+							<span className="flex items-center gap-1.5 font-semibold text-foreground capitalize">
+								<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", monthOpen && "rotate-180")} />
+								{mItem.month} <span className="font-normal text-muted-foreground">({mItem.trades.length})</span>
+							</span>
+							<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+								<span>Dispo <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(total)}</b></span>
+								<span>Dépôt <b className="tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(totalDepot)}</b></span>
+								<span>Retrait <b className="tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(totalRetrait)}</b></span>
+								<span>Bonus <b className="tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(totalBonus)}</b></span>
+							</div>
+						</button>
+					</td>
+				</tr>
+				{monthOpen && itemsTrade}
+			</React.Fragment>)
 		})
 
-		items.push(<div key={index}>
-			<button type="button"
-					className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-xs font-semibold text-left"
-					style={{ background: 'var(--cat-crypto-soft)', color: 'var(--cat-crypto)' }}
-					onClick={() => setOpenYears(o => ({ ...o, [yItem.year]: !yearOpen }))}>
-				<span className="flex items-center gap-1.5">
-					<span className={cn("icon-down-chevron text-[9px] transition-transform", yearOpen && "rotate-180")} />
-					{yItem.year} <span className="font-normal opacity-80">({yearTxCount})</span>
-				</span>
-				<span className="font-normal">Dépôt {Sanitaze.toFormatCurrency(totalYDepot)} · Retrait {Sanitaze.toFormatCurrency(totalYRetrait)}</span>
-			</button>
-			{yearOpen && <div className="flex flex-col">
-				{itemsMonth}
-			</div>}
-		</div>)
+		items.push(<React.Fragment key={index}>
+			<tr>
+				<td colSpan={COLUMNS} className="p-0">
+					<button type="button"
+							className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-xs font-semibold text-left"
+							style={{ background: 'var(--cat-crypto-soft)', color: 'var(--cat-crypto)' }}
+							onClick={() => setOpenYears(o => ({ ...o, [yItem.year]: !yearOpen }))}>
+						<span className="flex items-center gap-1.5">
+							<span className={cn("icon-down-chevron text-[9px] transition-transform", yearOpen && "rotate-180")} />
+							{yItem.year} <span className="font-normal opacity-80">({yearTxCount})</span>
+						</span>
+						<span className="font-normal">Dépôt {Sanitaze.toFormatCurrency(totalYDepot)} · Retrait {Sanitaze.toFormatCurrency(totalYRetrait)}</span>
+					</button>
+				</td>
+			</tr>
+			{yearOpen && itemsMonth}
+		</React.Fragment>)
 	})
 
-	return <div className="flex flex-col">{items}</div>
+	return <div className="overflow-x-auto">
+		<table className="w-full min-w-[820px]">
+			<thead>
+				<tr className="border-b bg-[var(--cat-crypto-soft)] text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--cat-crypto)' }}>
+					<th className="py-2.5 pl-4 pr-3">Type de transaction</th>
+					<th className="py-2.5 pr-3">Date</th>
+					<th className="py-2.5 pr-3">Sortie</th>
+					<th className="py-2.5 pr-3">Entrée</th>
+					<th className="py-2.5 pr-3 text-right">Montant</th>
+					<th className="py-2.5 pr-4"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{items}
+			</tbody>
+		</table>
+	</div>
 }
 
 TradesList.propTypes = {
