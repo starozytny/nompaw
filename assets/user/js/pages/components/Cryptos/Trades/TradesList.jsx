@@ -8,7 +8,7 @@ import { cn } from "@shadcnComponents/lib/utils";
 import Sanitaze from "@commonFunctions/sanitaze";
 
 import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
-import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
+import { TradesItem, TYPE_LABEL } from "@userPages/Cryptos/Trades/TradesItem";
 
 const ACHAT = 0;
 const VENTE = 1;
@@ -19,9 +19,14 @@ const STAKING = 5;
 
 const COLUMNS = 6;
 
+const MANUAL_PLATFORM = "__manual__";
+const ALL = "all";
+
 export function TradesList ({ data, onModal, onEdit }) {
 	const [openMonths, setOpenMonths] = useState({});
 	const [selectedYear, setSelectedYear] = useState(null);
+	const [typeFilter, setTypeFilter] = useState(ALL);
+	const [platformFilter, setPlatformFilter] = useState(ALL);
 
 	if (data.length === 0) {
 		return <div className="flex flex-col items-center gap-2 p-8 text-center">
@@ -30,8 +35,50 @@ export function TradesList ({ data, onModal, onEdit }) {
 		</div>
 	}
 
+	const platforms = [...new Set(data.map(item => item.importedFrom).filter(Boolean))].sort();
+	const hasManual = data.some(item => !item.importedFrom);
+
+	const typeItems = [
+		{ identifiant: ALL, value: ALL, label: "Tous les types" },
+		...TYPE_LABEL.map((label, index) => ({ identifiant: String(index), value: String(index), label })),
+	];
+	const platformItems = [
+		{ identifiant: ALL, value: ALL, label: "Toutes les plateformes" },
+		...(hasManual ? [{ identifiant: MANUAL_PLATFORM, value: MANUAL_PLATFORM, label: "Manuel (non importé)" }] : []),
+		...platforms.map(p => ({ identifiant: p, value: p, label: p })),
+	];
+
+	const filteredData = data.filter(item => {
+		if (typeFilter !== ALL && String(item.type) !== typeFilter) return false;
+		if (platformFilter !== ALL) {
+			if (platformFilter === MANUAL_PLATFORM ? !!item.importedFrom : item.importedFrom !== platformFilter) return false;
+		}
+		return true;
+	});
+
+	const filters = <div className="flex flex-wrap items-center gap-2">
+		<div className="w-44">
+			<SelectSimple identifiant="type" valeur={typeFilter} noEmpty items={typeItems} onSelect={(identifiant, value) => setTypeFilter(value)} />
+		</div>
+		{platformItems.length > 1 && <div className="w-52">
+			<SelectSimple identifiant="platform" valeur={platformFilter} noEmpty items={platformItems} onSelect={(identifiant, value) => setPlatformFilter(value)} />
+		</div>}
+	</div>;
+
+	if (filteredData.length === 0) {
+		return <div className="flex flex-col gap-3 p-4">
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				{filters}
+			</div>
+			<div className="flex flex-col items-center gap-2 p-8 text-center">
+				<span className="icon-cart text-2xl text-muted-foreground" />
+				<div className="text-sm text-muted-foreground">Aucune transaction ne correspond à ces filtres.</div>
+			</div>
+		</div>
+	}
+
 	let yData = [];
-	data.forEach(item => {
+	filteredData.forEach(item => {
 		let year = moment(item.tradeAt).year();
 
 		let find = false;
@@ -168,10 +215,13 @@ export function TradesList ({ data, onModal, onEdit }) {
 
 	return <div className="flex flex-col gap-3 p-4">
 		<div className="flex flex-wrap items-center justify-between gap-3">
-			<div className="w-28">
-				<SelectSimple identifiant="year" valeur={String(effectiveYear)} noEmpty
-					items={[...years].reverse().map(y => ({ identifiant: y, value: String(y), label: String(y) }))}
-					onSelect={(identifiant, value) => setSelectedYear(parseInt(value))} />
+			<div className="flex flex-wrap items-center gap-2">
+				<div className="w-28">
+					<SelectSimple identifiant="year" valeur={String(effectiveYear)} noEmpty
+						items={[...years].reverse().map(y => ({ identifiant: y, value: String(y), label: String(y) }))}
+						onSelect={(identifiant, value) => setSelectedYear(parseInt(value))} />
+				</div>
+				{filters}
 			</div>
 			<span className="text-xs text-muted-foreground">{yearStats.count} transaction{yearStats.count > 1 ? "s" : ""} en {effectiveYear}</span>
 		</div>
