@@ -46,16 +46,16 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[Groups([
         'user_list', 'user_form', 'com_read', 'user_select',
         'pr_date_list', 'pr_house_list', 'pr_act_list',
-        'ra_img_list', 'rando_form', 'bi_present_list'
+        'ra_img_list', 'ph_media_list', 'ph_album_list', 'rando_form', 'bi_present_list'
     ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     private ?string $username = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'bi_present_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list', 'bi_present_list'])]
     private ?string $displayName = null;
 
     #[ORM\Column]
@@ -73,11 +73,11 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -105,7 +105,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
     #[ORM\Column(length: 40)]
     #[Groups(['user_list'])]
-    private ?string $manager = "default";
+    private ?string $manager = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
@@ -114,7 +114,7 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
     #[ORM\Column]
     #[Groups(['user_list'])]
-    private ?bool $isBlocked = false;
+    private ?bool $isBlocked = null;
 
     #[ORM\Column(nullable: true)]
     private ?string $googleId = null;
@@ -179,14 +179,37 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Column(nullable: true)]
     private ?int $budgetYear = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getBudgetInit()/setBudgetInit().
+     */
     #[ORM\Column(nullable: true)]
-    private ?float $budgetInit = null;
+    private ?int $budgetInit = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuRecurrent::class)]
     private Collection $buRecurrents;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CrTrade::class)]
     private Collection $crTrades;
+
+    #[ORM\Column]
+    #[Groups(['user_list', 'user_form'])]
+    private bool $photosOnly = false;
+
+    /**
+     * Accès explicite d'un compte complet (ROLE_USER classique) à l'espace photos famille.
+     * Contrairement à photosOnly (comptes lien-magique), ce flag ne restreint rien : il ajoute
+     * juste ROLE_FAMILY_PHOTOS à un compte qui a par ailleurs son accès normal. Nécessaire car
+     * certains comptes ROLE_USER (amis) ne doivent pas voir l'espace photos famille par défaut.
+     */
+    #[ORM\Column]
+    #[Groups(['user_list', 'user_form'])]
+    private bool $photosAccess = false;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: \App\Entity\Photo\PhMedia::class)]
+    private Collection $phMedia;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: \App\Entity\Photo\PhAccessToken::class)]
+    private Collection $phAccessTokens;
 
     /**
      * @throws Exception
@@ -195,6 +218,8 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->token = bin2hex(random_bytes(32));
+        $this->manager = "default";
+        $this->isBlocked = false;
         $this->roLinks = new ArrayCollection();
         $this->roGroupes = new ArrayCollection();
         $this->raRandos = new ArrayCollection();
@@ -212,6 +237,8 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->mails = new ArrayCollection();
         $this->buRecurrents = new ArrayCollection();
         $this->crTrades = new ArrayCollection();
+        $this->phMedia = new ArrayCollection();
+        $this->phAccessTokens = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -257,10 +284,13 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $firstLetter . $etoiles . $domain;
     }
 
-    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list'])]
+    #[Groups(['user_list', 'user_form', 'com_read', 'user_select', 'ra_img_list', 'ph_media_list', 'ph_album_list'])]
     public function getAvatarFile(): ?string
     {
-        return $this->getFileOrDefault($this->avatar, self::FOLDER, null);
+        return $this->getFileOrDefault(
+            $this->avatar,
+            self::FOLDER, "https://ui-avatars.com/api/?bold=true&background=E19F3D&name=" . substr($this->username, 0, 1)
+        );
     }
 
     #[Groups(['user_list'])]
@@ -313,11 +343,29 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
      */
     public function getRoles(): array
     {
+        if ($this->isIsBlocked()) {
+            return ['ROLE_BLOCKED'];
+        }
+
+        // photosOnly accounts (family magic-link guests) are restricted to the photos
+        // space and must never carry ROLE_USER, otherwise they'd pass the generic
+        // espace-membre/intern-api access_control rules meant for full accounts.
+        if ($this->isPhotosOnly()) {
+            return ['ROLE_FAMILY_PHOTOS'];
+        }
+
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        return $this->isIsBlocked() ? ['ROLE_BLOCKED'] : array_unique($roles);
+        // L'espace photos famille n'est plus ouvert à tout ROLE_USER par défaut (des amis ont
+        // parfois un compte complet pour d'autres fonctionnalités) : il faut soit être admin,
+        // soit avoir été explicitement autorisé via photosAccess.
+        if ($this->photosAccess || $this->getIsAdmin()) {
+            $roles[] = 'ROLE_FAMILY_PHOTOS';
+        }
+
+        return array_unique($roles);
     }
 
     public function setRoles(array $roles): self
@@ -1032,12 +1080,12 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
 
     public function getBudgetInit(): ?float
     {
-        return $this->budgetInit;
+        return $this->budgetInit !== null ? $this->budgetInit / 100 : null;
     }
 
     public function setBudgetInit(?float $budgetInit): static
     {
-        $this->budgetInit = $budgetInit;
+        $this->budgetInit = $budgetInit !== null ? (int) round($budgetInit * 100) : null;
 
         return $this;
     }
@@ -1096,6 +1144,88 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($crTrade->getUser() === $this) {
                 $crTrade->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isPhotosOnly(): bool
+    {
+        return $this->photosOnly;
+    }
+
+    public function setPhotosOnly(bool $photosOnly): static
+    {
+        $this->photosOnly = $photosOnly;
+
+        return $this;
+    }
+
+    public function isPhotosAccess(): bool
+    {
+        return $this->photosAccess;
+    }
+
+    public function setPhotosAccess(bool $photosAccess): static
+    {
+        $this->photosAccess = $photosAccess;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, \App\Entity\Photo\PhMedia>
+     */
+    public function getPhMedia(): Collection
+    {
+        return $this->phMedia;
+    }
+
+    public function addPhMedia(\App\Entity\Photo\PhMedia $phMedia): static
+    {
+        if (!$this->phMedia->contains($phMedia)) {
+            $this->phMedia->add($phMedia);
+            $phMedia->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removePhMedia(\App\Entity\Photo\PhMedia $phMedia): static
+    {
+        if ($this->phMedia->removeElement($phMedia)) {
+            if ($phMedia->getAuthor() === $this) {
+                $phMedia->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, \App\Entity\Photo\PhAccessToken>
+     */
+    public function getPhAccessTokens(): Collection
+    {
+        return $this->phAccessTokens;
+    }
+
+    public function addPhAccessToken(\App\Entity\Photo\PhAccessToken $phAccessToken): static
+    {
+        if (!$this->phAccessTokens->contains($phAccessToken)) {
+            $this->phAccessTokens->add($phAccessToken);
+            $phAccessToken->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePhAccessToken(\App\Entity\Photo\PhAccessToken $phAccessToken): static
+    {
+        if ($this->phAccessTokens->removeElement($phAccessToken)) {
+            if ($phAccessToken->getUser() === $this) {
+                $phAccessToken->setUser(null);
             }
         }
 

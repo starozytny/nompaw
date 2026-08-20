@@ -106,6 +106,7 @@ function toFormatCalendar(value, retour = "") {
     return retour;
 }
 
+// TODO : toFormatDate
 function toFormatDate(date, format = 'LLL', retour = "", replaceHours = true, useUtc = false) {
     if(date === null) return retour;
 

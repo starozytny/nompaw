@@ -23,6 +23,27 @@ framework:
     php_errors:
         log: true
 
+    http_client:
+        scoped_clients:
+            coingecko.client:
+                base_uri: 'https://api.coingecko.com/api/v3/'
+                timeout: 5
+            coinbase.client:
+                base_uri: 'https://api.coinbase.com/'
+                timeout: 10
+            kraken.client:
+                base_uri: 'https://api.kraken.com/'
+                timeout: 10
+            bitpanda.client:
+                base_uri: 'https://api.public.bitpanda.com/v1/'
+                timeout: 10
+            binance.client:
+                base_uri: 'https://api.binance.com/'
+                timeout: 10
+            cryptocom.client:
+                base_uri: 'https://api.crypto.com/exchange/v1/'
+                timeout: 10
+
 when@test:
     framework:
         test: true

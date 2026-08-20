@@ -37,11 +37,11 @@ class RaPropalAdventure
     private ?User $author = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['pr_adv_list'])]
+    #[Groups(['pr_adv_list', 'rando_form'])]
     private ?\DateTimeInterface $duration = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['pr_adv_list'])]
+    #[Groups(['pr_adv_list', 'rando_form'])]
     private ?string $url = null;
 
     public function getId(): ?int

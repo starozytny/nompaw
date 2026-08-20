@@ -3,6 +3,7 @@
 namespace App\Repository\Rando;
 
 use App\Entity\Rando\RaImage;
+use App\Entity\Rando\RaRando;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -42,6 +43,50 @@ class RaImageRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function findVisibleImages(RaRando $rando, bool $canSeePrivate): array
+    {
+        return $this->visibleImagesQueryBuilder($rando, $canSeePrivate)->getQuery()->getResult();
+    }
+
+    public function findVisibleImagesPage(RaRando $rando, bool $canSeePrivate, int $offset, int $limit): array
+    {
+        return $this->visibleImagesQueryBuilder($rando, $canSeePrivate)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function countVisibleImages(RaRando $rando, bool $canSeePrivate): int
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->where('i.rando = :rando')
+            ->setParameter('rando', $rando)
+        ;
+
+        if (!$canSeePrivate) {
+            $qb->andWhere('i.visibility = 0 OR i.visibility IS NULL');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function visibleImagesQueryBuilder(RaRando $rando, bool $canSeePrivate)
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->where('i.rando = :rando')
+            ->setParameter('rando', $rando)
+            ->orderBy('i.takenAt', 'ASC');
+
+        if (!$canSeePrivate) {
+            $qb->andWhere('i.visibility = 0 OR i.visibility IS NULL');
+        }
+
+        return $qb;
     }
 
 //    /**

@@ -29,6 +29,10 @@ class CategoriesController extends AbstractController
     public function submitForm($type, BuCategoryRepository $repository, BuCategory $obj, Request $request, ApiResponse $apiResponse,
                                ValidatorService $validator, DataBudget $dataEntity): JsonResponse
     {
+        if ($type == "update" && $obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
@@ -63,6 +67,10 @@ class CategoriesController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(BuCategory $obj, BuCategoryRepository $repository, ApiResponse $apiResponse, BuItemRepository $itemRepository): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $items = $itemRepository->findBy(['user' => $this->getUser(), 'category' => $obj->getId()]);
         foreach($items as $item){
             $item->setCategory(null);
@@ -78,6 +86,11 @@ class CategoriesController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        if ($obj->getUser() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
@@ -111,6 +124,23 @@ class CategoriesController extends AbstractController
         }
 
         $repository->save($obj, true);
+
+        if (!empty($data->addAsIncome)) {
+            $income = $dataEntity->setDataIncomeFromSaving(new BuItem(), $obj->getCategory(), $data);
+            $income->setUser($user);
+            $income->setLinkedItemId($obj->getId());
+
+            $noErrorsIncome = $validator->validate($income);
+            if ($noErrorsIncome !== true) {
+                return $apiResponse->apiJsonResponseValidationFailed($noErrorsIncome);
+            }
+
+            $repository->save($income, true);
+
+            $obj->setLinkedItemId($income->getId());
+            $repository->save($obj, true);
+        }
+
         return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
     }
 }

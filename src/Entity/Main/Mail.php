@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: MailRepository::class)]
 class Mail extends DataEntity
 {
+    const FOLDER_EDITOR = "images/editor/mails";
     const FOLDER_FILES = "emails";
 
     const LIST = ['mail_list'];
@@ -51,7 +52,7 @@ class Mail extends DataEntity
 
     #[ORM\Column]
     #[Groups(['mail_list'])]
-    private ?bool $isTrash = false;
+    private ?bool $isTrash = null;
 
     #[ORM\Column]
     #[Groups(['mail_list'])]
@@ -67,6 +68,7 @@ class Mail extends DataEntity
 
     public function __construct()
     {
+        $this->isTrash = false;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -75,12 +77,20 @@ class Mail extends DataEntity
         return $this->id;
     }
 
+    #[Groups(['mail_list'])]
+    public function getThemeString(): string
+    {
+        $values = ["simple"];
+
+        return $values[$this->theme];
+    }
+
     public function getExpeditor(): ?string
     {
         return $this->expeditor;
     }
 
-    public function setExpeditor(string $expeditor): static
+    public function setExpeditor(string $expeditor): self
     {
         $this->expeditor = $expeditor;
 
@@ -92,7 +102,7 @@ class Mail extends DataEntity
         return $this->subject;
     }
 
-    public function setSubject(string $subject): static
+    public function setSubject(string $subject): self
     {
         $this->subject = $subject;
 
@@ -104,7 +114,7 @@ class Mail extends DataEntity
         return $this->destinators;
     }
 
-    public function setDestinators(array $destinators): static
+    public function setDestinators(array $destinators): self
     {
         $this->destinators = $destinators;
 
@@ -116,7 +126,7 @@ class Mail extends DataEntity
         return $this->cc;
     }
 
-    public function setCc(array $cc): static
+    public function setCc(array $cc): self
     {
         $this->cc = $cc;
 
@@ -128,7 +138,7 @@ class Mail extends DataEntity
         return $this->bcc;
     }
 
-    public function setBcc(array $bcc): static
+    public function setBcc(array $bcc): self
     {
         $this->bcc = $bcc;
 
@@ -140,7 +150,7 @@ class Mail extends DataEntity
         return $this->files;
     }
 
-    public function setFiles(array $files): static
+    public function setFiles(array $files): self
     {
         $this->files = $files;
 
@@ -152,19 +162,11 @@ class Mail extends DataEntity
         return $this->theme;
     }
 
-    public function setTheme(int $theme): static
+    public function setTheme(int $theme): self
     {
         $this->theme = $theme;
 
         return $this;
-    }
-
-    #[Groups(['mail_list'])]
-    public function getThemeString(): string
-    {
-        $values = ["simple"];
-
-        return $values[$this->theme];
     }
 
     public function isIsTrash(): ?bool
@@ -172,7 +174,7 @@ class Mail extends DataEntity
         return $this->isTrash;
     }
 
-    public function setIsTrash(bool $isTrash): static
+    public function setIsTrash(bool $isTrash): self
     {
         $this->isTrash = $isTrash;
 
@@ -184,7 +186,7 @@ class Mail extends DataEntity
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -196,7 +198,7 @@ class Mail extends DataEntity
         return $this->message;
     }
 
-    public function setMessage(string $message): static
+    public function setMessage(string $message): self
     {
         $this->message = $message;
 
@@ -208,7 +210,7 @@ class Mail extends DataEntity
         return $this->user;
     }
 
-    public function setUser(?User $user): static
+    public function setUser(?User $user): self
     {
         $this->user = $user;
 

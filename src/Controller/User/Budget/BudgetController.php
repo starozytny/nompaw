@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/espace-membre/planificateur', name: 'user_budget_')]
 class BudgetController extends AbstractController
 {
-    #[Route('/planning/{year}', name: 'index', options: ['expose' => true])]
+    #[Route('/planning/{year}', name: 'index', options: ['expose' => true], methods: ['GET'])]
     public function list($year, BuItemRepository $repository, BuRecurrentRepository $recurrentRepository,
                          BuCategoryRepository $categoryRepository, SerializerInterface $serializer,
                          BudgetService $budgetService): Response
@@ -26,28 +26,29 @@ class BudgetController extends AbstractController
             return $this->redirectToRoute('user_budget_index', ['year' => $user->getBudgetYear()]);
         }
 
-        [
-            $data,
-            $categories,
-            $savings,
-            $savingsItems,
-            $savingsUsed,
-            $recurrences,
-            $totalInit
-        ] = $budgetService->getData($serializer, $user, $year, $repository, $recurrentRepository, $categoryRepository);
+        $currentYear = (int) date('Y');
+        $maxYear = $currentYear + 3;
+        if ($year > $maxYear) {
+            return $this->redirectToRoute('user_budget_index', ['year' => $currentYear]);
+        }
+
+        $budget = $budgetService->getData($serializer, $user, $year, $repository, $recurrentRepository, $categoryRepository);
 
         $today = new \DateTime();
 
         return $this->render('user/pages/budget/index.html.twig', [
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
-            'donnees' => $data,
-            'categories' => $categories,
-            'savings' => $savings,
-            'savingsItems' => $savingsItems,
-            'savingsUsed' => $savingsUsed,
-            'recurrences' => $recurrences,
-            'initTotal' => $totalInit,
+            'donnees' => $budget['donnees'],
+            'categories' => $budget['categories'],
+            'savings' => $budget['savings'],
+            'savingsItems' => $budget['savingsItems'],
+            'savingsUsed' => $budget['savingsUsed'],
+            'recurrences' => $budget['recurrences'],
+            'initTotal' => $budget['initTotal'],
+            'monthlyBalances' => json_encode($budget['monthlyBalances']),
+            'monthlySummaries' => json_encode($budget['monthlySummaries']),
+            'savingsSummaries' => json_encode($budget['savingsSummaries']),
         ]);
     }
 }

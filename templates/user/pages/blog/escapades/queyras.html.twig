@@ -1,285 +1,285 @@
 {% extends 'user/pages/blog/template.html.twig' %}
 
 {% set page_title %}Les Queyras en automne{% endset %}
-{% set page_subtitle %}Du 14 au 15 Octobre 2023{% endset %}
+{% set page_subtitle %}Groupe d'aventures : Escapades{% endset %}
 
 {% block main_content %}
-
+    {% import 'user/pages/blog/_macros.html.twig' as b %}
     {% set groupe = "escapades" %}
     {% set aventure = "queyras" %}
 
-    <style>
-        p{
-            color: #FFFFFF;
-        }
-    </style>
-    <div id="mapSrc" data-map="escapades/queyras/map.svg"></div>
-    <div id="article-loader">
-        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-    </div>
-    <div class="main-content main-content-transparent" id="article" style="opacity: 0">
-        <div class="article">
-            <div class="content">
-                <div class="main">
-                    <div class="container"></div>
-                    <div class="text">
-                        <section class="js-section" data-zoom-start="1">
-                            <h2><span class="title-up">Queyras</span><span class="title-down">Les Queyras en automne</span></h2>
-                            <p class="text-intro">L'espoir de voir les douces couleurs d'automne</p>
+    {# Chaque lieu n'est défini qu'une fois ici : les data-lat/data-lng des sections
+       et le tracé de la carte (map_path) en dérivent tous les deux. #}
+    {% set places = {
+        depart: {lat: 44.653799984985554, lng: 6.788429883134797},
+        miroir: {lat: 44.635127929572285, lng: 6.791846809097042},
+        anne: {lat: 44.619656977862796, lng: 6.812137385609668},
+        refuge: {lat: 44.64413181240172, lng: 6.803011191371445},
+        clausis: {lat: 44.63989208258412, lng: 6.866432338492334},
+        retour: {lat: 44.617942846319984, lng: 6.335359200585647},
+    } %}
+    {% set path_order = ['depart', 'miroir', 'anne', 'refuge', 'clausis', 'retour'] %}
+    {% set map_path = [] %}
+    {% for key in path_order %}
+        {% set map_path = map_path|merge([[places[key].lat, places[key].lng]]) %}
+    {% endfor %}
 
-                            <p>
-                                On démarre notre randonnée dans le froid depuis le parking au pied de la Cascade de la Pisse.
-                            </p>
+    <div class="main-content main-content-transparent">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <div class="grid lg:grid-cols-3 gap-8">
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v1.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v2.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '2.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '3.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v3.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v4.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                </div>
-                            </figure>
+                <!-- Contenu principal -->
+                <article class="max-w-2xl lg:col-span-2">
+                    <header class="mb-8">
+                        <h2 class="text-4xl font-bold text-gray-900 mb-4">
+                            <span>Les Queyras en automne</span>
+                        </h2>
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                            <span>📍 Queyras, France</span>
+                            <span>•</span>
+                            <span>👥 Groupe de 3-4 personnes </span>
+                            <span>•</span>
+                            <span>📅 14 au 15 Octobre 2023</span>
+                        </div>
+                    </header>
 
-                            <p>
-                                Début de la randonnée avec quelques montées bien relous !
-                            </p>
+                    <!-- Départ -->
+                    <section class="mb-8" data-section="depart" data-lat="{{ places.depart.lat }}" data-lng="{{ places.depart.lng }}">
+                        {{ b.day_header('Jour 1', 'Cascade de la Pisse') }}
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '5.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '6.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v5.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v6.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                </div>
-                            </figure>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            On démarre notre randonnée dans le froid depuis le parking au pied de la Cascade de la Pisse.
+                            L'espoir de voir les douces couleurs d'automne nous guide à travers cette belle région.
+                        </p>
 
-                            <p>
-                                Les couleurs des mélèzes donnent un mélange de couleur incroyable tout le long du chemin.
-                            </p>
+                        {{ b.gallery([
+                            {file: 'v1.mp4', video: true},
+                            {file: 'v2.mp4', video: true},
+                            {file: '2.jpg'},
+                            {file: '3.jpg'},
+                            {file: 'v3.mp4', video: true},
+                            {file: 'v4.mp4', video: true},
+                        ], groupe, aventure, 2, "Départ matinal sous le froid vivifiant.") }}
+                    </section>
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '9.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '10.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v7.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v8.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '15.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '16.jpg'}) }}" loading="lazy" />
-                                </div>
-                                <figcaption>La forêt aux différentes couleurs.</figcaption>
-                            </figure>
+                    <!-- Montée -->
+                    <section class="mb-8">
+                        {{ b.day_header('Montée', 'Début de la randonnée') }}
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v9.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v10.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '17.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '18.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v11.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v12.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                </div>
-                                <figcaption>Le chemin de randonnée longeant le haut de la cascade de la Pisse.</figcaption>
-                            </figure>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Début de la randonnée avec quelques montées bien raides !
+                        </p>
 
-                            <p>
-                                A quelques minutes de la récompense !
-                            </p>
+                        {{ b.gallery([
+                            {file: '5.jpg', aspect: true},
+                            {file: '6.jpg', aspect: true},
+                            {file: 'v5.mp4', video: true},
+                            {file: 'v6.mp4', video: true},
+                        ], groupe, aventure, 2) }}
+                    </section>
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v13.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v14.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '19.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '20.jpg'}) }}" loading="lazy" />
-                                </div>
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="1">
-                            <h2><span class="title-up">Lac miroir</span><span class="title-down">Le reflet de la forêt</span></h2>
+                    <!-- Forêt -->
+                    <section class="mb-8">
+                        {{ b.day_header('Forêt', "Les couleurs d'automne") }}
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '21.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '22.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v15.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v16.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '23.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '24.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v17.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v18.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '25.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '26.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '27.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '28.jpg'}) }}" loading="lazy" />
-                                </div>
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="1">
-                            <h2><span class="title-up">Lac Sainte-Anne</span><span class="title-down">Niché au pied d'une montagne</span></h2>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Les couleurs des mélèzes donnent un mélange de couleur incroyable tout le long du chemin.
+                        </p>
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '29.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '30.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v19.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v20.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '31.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '32.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v21.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v22.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '33.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '34.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '35.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '36.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '37.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '38.jpg'}) }}" loading="lazy" />
-                                </div>
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="1">
-                            <h2><span class="title-up">Refuge</span><span class="title-down">Refuge de la Cime</span></h2>
+                        {{ b.gallery([
+                            {file: '9.jpg'},
+                            {file: '10.jpg'},
+                            {file: 'v7.mp4', video: true},
+                            {file: 'v8.mp4', video: true},
+                            {file: '15.jpg'},
+                            {file: '16.jpg'},
+                        ], groupe, aventure, 2, "La forêt aux différentes couleurs.") }}
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '39.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '40.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v23.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v24.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v25.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v26.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                </div>
-                            </figure>
-                        </section>
-                        <section class="js-section" data-zoom-start="0.8">
-                            <h2><span class="title-up">Lac de Clausis</span><span class="title-down">Superbe lac</span></h2>
+                        {{ b.gallery([
+                            {file: 'v9.mp4', video: true},
+                            {file: 'v10.mp4', video: true},
+                            {file: '17.jpg'},
+                            {file: '18.jpg'},
+                            {file: '19.jpg'},
+                            {file: '20.jpg'},
+                            {file: 'v11.mp4', video: true},
+                            {file: 'v12.mp4', video: true},
+                        ], groupe, aventure, 2, "Le chemin de randonnée longeant le haut de la cascade de la Pisse.") }}
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '45.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '46.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '41.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '42.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '44.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '43.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v30.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v27.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '47.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '48.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '49.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '50.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v28.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v29.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '51.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '52.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '53.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '54.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '55.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '56.jpg'}) }}" loading="lazy" />
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v31.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v32.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '57.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '58.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '59.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '60.jpg'}) }}" loading="lazy" />
-                                </div>
-                            </figure>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            A quelques minutes de la récompense !
+                        </p>
 
-                            <blockquote>
-                                Fin des randonnées, direction la civilisation et quelques petites surprises !
-                            </blockquote>
+                        {{ b.gallery([
+                            {file: 'v13.mp4', video: true},
+                            {file: 'v14.mp4', video: true},
+                            {file: '19.jpg', lazy: true},
+                            {file: '20.jpg', lazy: true},
+                        ], groupe, aventure, 2) }}
+                    </section>
 
-                            <figure>
-                                <div class="gallery-2">
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v33.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <video controls>
-                                        <source src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: 'v34.mp4'}) }}" type="video/mp4" />
-                                    </video>
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '62.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '63.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '64.jpg'}) }}" loading="lazy" />
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '65.jpg'}) }}" loading="lazy" />
-                                </div>
-                                <div class="js-gallery-content">
-                                    <img src="{{ path('intern_api_storytelling_images_file_src', {groupe: groupe, aventure: aventure, filename: '61.jpg'}) }}" loading="lazy" />
-                                </div>
-                            </figure>
+                    <section class="mb-8" data-section="miroir" data-lat="{{ places.miroir.lat }}" data-lng="{{ places.miroir.lng }}">
+                        {{ b.day_header('Lac miroir', 'Le reflet de la forêt et des montagnes') }}
 
-                            <blockquote>
-                                😎 !
-                            </blockquote>
-                        </section>
-                        <section class="js-section" data-stay="true" data-zoom-start="0.8"></section>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            On arrive enfin à la première récompense de la randonnée avec le fameux reflet de la nature sur le lac miroir.
+                        </p>
+
+                        {{ b.gallery([
+                            {file: '21.jpg', lazy: true},
+                            {file: '22.jpg', lazy: true},
+                        ], groupe, aventure, 2) }}
+
+                        {{ b.gallery([
+                            {file: 'v15.mp4', video: true},
+                            {file: 'v16.mp4', video: true},
+                            {file: '23.jpg', lazy: true},
+                            {file: '24.jpg', lazy: true},
+                            {file: 'v17.mp4', video: true},
+                            {file: 'v18.mp4', video: true},
+                        ], groupe, aventure, 2) }}
+
+                        {{ b.gallery([
+                            {file: '25.jpg'},
+                            {file: '26.jpg'},
+                            {file: '27.jpg'},
+                            {file: '28.jpg'},
+                        ], groupe, aventure, 2) }}
+                    </section>
+
+                    <section class="mb-8" data-section="anne" data-lat="{{ places.anne.lat }}" data-lng="{{ places.anne.lng }}">
+                        {{ b.day_header('Lac Sainte-Anne', "Niché au pied d'une montagne") }}
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Un dernier petit effort pour apprécier la seconde récompense !
+                        </p>
+
+                        {{ b.gallery([
+                            {file: '29.jpg'},
+                            {file: '30.jpg'},
+                            {file: 'v19.mp4', video: true},
+                            {file: 'v20.mp4', video: true},
+                            {file: '31.jpg'},
+                            {file: '32.jpg'},
+                            {file: 'v21.mp4', video: true},
+                            {file: 'v22.mp4', video: true},
+                        ], groupe, aventure, 2) }}
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            On quitte le lac Sainte-Anne pour aller au refuge en continuant la boucle !
+                        </p>
+
+                        {{ b.gallery([
+                            {file: '33.jpg'},
+                            {file: '34.jpg'},
+                            {file: '35.jpg'},
+                            {file: '36.jpg'},
+                            {file: '37.jpg', aspect: true},
+                            {file: '38.jpg', aspect: true},
+                        ], groupe, aventure, 2) }}
+                    </section>
+
+                    <section class="mb-8" data-section="refuge" data-lat="{{ places.refuge.lat }}" data-lng="{{ places.refuge.lng }}">
+                        {{ b.day_header('Refuge', 'Refuge de la Cime') }}
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            On finit cette journée au refuge près du premier parking. Très bon accueil, on a la chance
+                            de ne pas être beaucoup à manger sur place.
+                        </p>
+
+                        {{ b.gallery([
+                            {file: '39.jpg'},
+                            {file: '40.jpg'},
+                            {file: 'v23.mp4', video: true},
+                            {file: 'v24.mp4', video: true},
+                            {file: 'v25.mp4', video: true},
+                            {file: 'v26.mp4', video: true},
+                        ], groupe, aventure, 2) }}
+                    </section>
+
+                    <section class="mb-8" data-section="clausis" data-lat="{{ places.clausis.lat }}" data-lng="{{ places.clausis.lng }}">
+                        {{ b.day_header('Lac de Clausis', 'Un beau petit lac') }}
+
+                        {{ b.gallery([
+                            {file: '45.jpg'},
+                            {file: '46.jpg'},
+                            {file: '41.jpg'},
+                            {file: '42.jpg'},
+                            {file: '44.jpg'},
+                            {file: '43.jpg'},
+                            {file: 'v30.mp4', video: true},
+                            {file: 'v27.mp4', video: true},
+                        ], groupe, aventure, 2) }}
+
+                        {{ b.gallery([
+                            {file: '47.jpg'},
+                            {file: '48.jpg'},
+                            {file: '49.jpg'},
+                            {file: '50.jpg'},
+                            {file: 'v28.mp4', video: true},
+                            {file: 'v29.mp4', video: true},
+                        ], groupe, aventure, 2) }}
+
+                        {{ b.gallery([
+                            {file: '51.jpg'},
+                            {file: '52.jpg'},
+                            {file: '53.jpg'},
+                            {file: '54.jpg'},
+                            {file: '55.jpg'},
+                            {file: '56.jpg'},
+                            {file: 'v31.mp4', video: true},
+                            {file: 'v32.mp4', video: true},
+                        ], groupe, aventure, 2) }}
+
+                        {{ b.gallery([
+                            {file: '57.jpg'},
+                            {file: '58.jpg'},
+                            {file: '59.jpg'},
+                            {file: '60.jpg'},
+                        ], groupe, aventure, 2) }}
+                    </section>
+
+                    <section class="mb-8" data-section="retour" data-lat="{{ places.retour.lat }}" data-lng="{{ places.retour.lng }}">
+                        {{ b.day_header('Retour', "Fin de l'aventure") }}
+
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Fin des randonnées, direction la civilisation et quelques petites surprises !
+                        </p>
+
+                        {{ b.gallery([
+                            {file: 'v33.mp4', video: true},
+                            {file: 'v34.mp4', video: true},
+                            {file: '62.jpg'},
+                            {file: '63.jpg'},
+                            {file: '64.jpg'},
+                            {file: '65.jpg'},
+                        ], groupe, aventure, 2) }}
+
+                        {{ b.gallery([{file: '61.jpg'}], groupe, aventure, 1, "😎 !") }}
+
+                        {{ b.callout('green', "Fin de l'escapade !") }}
+                    </section>
+                </article>
+
+                <!-- Carte sticky -->
+                <aside class="lg:col-span-1">
+                    <div class="sidebar-sticky">
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h3 class="font-bold text-gray-900 mb-3">📍 Parcours de l'aventure</h3>
+                            <div id="map" class="map-container"></div>
+                            <div class="mt-3 text-xs text-gray-600">
+                                <p>La carte suit votre lecture</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </aside>
             </div>
         </div>
     </div>
+
+    {% include 'user/pages/blog/_map_script.html.twig' with {
+        map_center: places.depart,
+        map_zoom: 13,
+        map_path: map_path,
+    } %}
 {% endblock %}

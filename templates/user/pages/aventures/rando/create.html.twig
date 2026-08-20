@@ -23,6 +23,7 @@
 {% block main_content %}
     <div id="randos_create"
          data-users="{{ users }}"
+         data-is-admin="{{ app.user.isAdmin }}"
          data-user-id="{{ app.user.id }}"
          data-groupe-id="{{ groupe.id }}"
     >

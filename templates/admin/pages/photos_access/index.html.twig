@@ -1,0 +1,10 @@
+{% extends 'admin/pages/photos_access/template.html.twig' %}
+
+{% set page_title %}Accès photos famille{% endset %}
+{% set page_subtitle %}Créez des liens d'accès sans mot de passe à l'espace photos pour les membres de la famille.{% endset %}
+
+{% block main_content %}
+    <div id="photos_access_list">
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+{% endblock %}

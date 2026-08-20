@@ -1,24 +1,31 @@
-import React, { useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState } from 'react';
 
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import List from "@commonFunctions/list";
 import Sort from "@commonFunctions/sort";
 import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Modal } from "@tailwindComponents/Elements/Modal";
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button } from "@tailwindComponents/Elements/Button";
+import { Search } from "@tailwindComponents/Elements/Search";
+import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/card";
+import { Progress } from "@shadcnComponents/ui/progress";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shadcnComponents/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
+import { cn } from "@shadcnComponents/lib/utils";
 
 import { BudgetFormulaire } from "@userPages/Budget/BudgetForm";
 import { BudgetList } from "@userPages/Budget/BudgetList";
 import { SavingForm } from "@userPages/Budget/SavingForm";
+import { BudgetTrendChart } from "@userPages/Budget/BudgetTrendChart";
+import { RecurrencesTab } from "@userPages/Budget/Reccurences/RecurrencesTab";
+import { CategoriesTab } from "@userPages/Budget/Categories/CategoriesTab";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
 const URL_INDEX_PAGE = "user_budget_index"
+const URL_PLANNING = "intern_api_budget_planning_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
 const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
@@ -26,78 +33,103 @@ const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 const URL_USE_SAVING = "intern_api_budget_categories_use";
 
-export function Budget ({ donnees, categories, savings, savingsItems, savingsUsed, y, m, yearMin, initTotal, recurrences }) {
-	const deleteRef = useRef(null)
-	const trashRef = useRef(null)
-	const savingRef = useRef(null)
+const MONTHS_SHORT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+const TODAY = new Date();
+
+export default function Budget (props) {
+	const [activeTab, setActiveTab] = useState('planning');
+
+	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-1">
+		<TabsList className="self-start">
+			<TabsTrigger value="planning">Planning</TabsTrigger>
+			<TabsTrigger value="recurrences">Récurrences</TabsTrigger>
+			<TabsTrigger value="categories">Catégories</TabsTrigger>
+		</TabsList>
+
+		<TabsContent value="planning" forceMount className={activeTab === 'planning' ? '' : 'hidden'}>
+			<PlanningTab {...props} />
+		</TabsContent>
+		<TabsContent value="recurrences">
+			<RecurrencesTab />
+		</TabsContent>
+		<TabsContent value="categories">
+			<CategoriesTab />
+		</TabsContent>
+	</Tabs>
+}
+
+function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin, monthlyBalances, monthlySummaries, savingsSummaries }) {
 	const [year, setYear] = useState(parseInt(y))
 	const [month, setMonth] = useState(parseInt(m))
 	const [data, setData] = useState(JSON.parse(donnees))
-	const [nSavingsItems, setNSavingsItems] = useState(JSON.parse(savingsItems))
-	const [nSavingsUsed, setNSavingsUsed] = useState(JSON.parse(savingsUsed))
+	const [nRecurrencesData, setNRecurrencesData] = useState(JSON.parse(recurrences))
+	const [nSavings, setNSavings] = useState(JSON.parse(savings))
+	const [balances, setBalances] = useState(JSON.parse(monthlyBalances))
+	const [summaries, setSummaries] = useState(JSON.parse(monthlySummaries))
+	const [savingsSummariesData, setSavingsSummariesData] = useState(JSON.parse(savingsSummaries))
+	const [savingsOpen, setSavingsOpen] = useState(() => window.matchMedia('(min-width: 768px)').matches)
 	const [element, setElement] = useState(null)
+	const [sheetOpen, setSheetOpen] = useState(false)
 	const [elementToDelete, setElementToDelete] = useState(null)
+	const [deleteOpen, setDeleteOpen] = useState(false)
+	const [trashOpen, setTrashOpen] = useState(false)
 	const [saving, setSaving] = useState(null)
+	const [savingOpen, setSavingOpen] = useState(false)
 	const [load, setLoad] = useState(false)
-	const [openSaving, setOpenSaving] = useState(false)
+	const [search, setSearch] = useState("")
+	const [detailOpen, setDetailOpen] = useState(false)
 
-	let handleUpdateList = (elem, context) => {
-		setData(List.updateDataMuta(elem, context, data, SORTER));
-		if (elem.type === 2) { // saving type
-			setNSavingsItems(List.updateDataMuta(elem, context, nSavingsItems, SORTER));
-		}
-		setElement(null);
+	let refetchPlanning = (targetYear) => {
+		return axios({ method: "GET", url: Routing.generate(URL_PLANNING, { year: targetYear }) })
+			.then(function (response) {
+				let d = response.data;
+				setData(d.donnees);
+				setNRecurrencesData(d.recurrences);
+				setNSavings(d.savings);
+				setBalances(d.monthlyBalances);
+				setSummaries(d.monthlySummaries);
+				setSavingsSummariesData(d.savingsSummaries);
+			})
+		;
 	}
 
-	let handleCancelEdit = () => {
-		setElement(null)
+	let handleUpdateList = () => {
+		refetchPlanning(year).then(() => setElement(null));
+	}
+
+	let handleOpenCreate = () => {
+		setElement(null);
+		setSheetOpen(true);
 	}
 
 	let handleEdit = (elem) => {
 		setElement(elem);
+		setSheetOpen(true);
+	}
+
+	let handleSheetOpenChange = (open) => {
+		setSheetOpen(open);
+		if (!open) setElement(null);
 	}
 
 	let handleModal = (identifiant, elem) => {
-		let ref;
-		switch (identifiant) {
-			case 'deleteRef':
-				ref = deleteRef;
-				setElementToDelete(elem);
-				deleteRef.current.handleUpdateFooter(<Button type="red" onClick={() => handleDelete(elem)}>Confirmer la suppression</Button>)
-				break;
-			case 'trashRef':
-				ref = trashRef;
-				setElementToDelete(elem);
-				trashRef.current.handleUpdateFooter(<Button type="red" onClick={() => handleDeleteRecurrence(elem)}>Confirmer la suppression</Button>)
-				break;
-			case 'savingRef':
-				ref = savingRef;
-				setSaving(elem);
-				break;
-			default:
-				break;
-		}
-		if (ref) {
-			ref.current.handleClick();
-		}
+		setElementToDelete(elem);
+		if (identifiant === 'deleteRef') setDeleteOpen(true);
+		if (identifiant === 'trashRef') setTrashOpen(true);
+		if (identifiant === 'savingRef') { setSaving(elem); setSavingOpen(true); }
 	}
 
-	let handleDelete = (elem) => {
-		if (!load) {
+	let handleDelete = () => {
+		if (!load && elementToDelete) {
 			setLoad(true)
-			deleteRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
-			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { id: elem.id }), data: {} })
-				.then(function (response) {
-					if (elem.recurrenceId) {
-						handleUpdateList(response.data, "update")
-					} else {
-						handleUpdateList(elem, "delete")
-						setNSavingsUsed(List.updateDataMuta(elem, "delete", nSavingsUsed, SORTER));
-					}
-
+			axios({ method: "DELETE", url: Routing.generate(URL_DELETE_ELEMENT, { id: elementToDelete.id }), data: {} })
+				.then(function () {
+					return refetchPlanning(year);
+				})
+				.then(function () {
 					setElementToDelete(null);
-					deleteRef.current.handleClose();
+					setDeleteOpen(false);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -114,8 +146,8 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			setLoad(true)
 
 			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_ELEMENT, { id: elem.id }), data: {} })
-				.then(function (response) {
-					handleUpdateList(response.data, "update")
+				.then(function () {
+					return refetchPlanning(year);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -132,8 +164,8 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			setLoad(true)
 
 			axios({ method: "PUT", url: Routing.generate(URL_ACTIVE_RECURRENCE, { id: elem.id }), data: { year: year, month: month } })
-				.then(function (response) {
-					handleUpdateList(response.data, "create")
+				.then(function () {
+					return refetchPlanning(year);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -145,16 +177,17 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		}
 	}
 
-	let handleDeleteRecurrence = (elem) => {
-		if (!load) {
+	let handleDeleteRecurrence = () => {
+		if (!load && elementToDelete) {
 			setLoad(true)
-			trashRef.current.handleUpdateFooter(<Button type="red" iconLeft="chart-3">Confirmer la suppression</Button>)
 
-			axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, { id: elem.id }), data: { year: year, month: month } })
-				.then(function (response) {
-					handleUpdateList(response.data, "create")
+			axios({ method: "DELETE", url: Routing.generate(URL_TRASH_RECURRENCE, { id: elementToDelete.id }), data: { year: year, month: month } })
+				.then(function () {
+					return refetchPlanning(year);
+				})
+				.then(function () {
 					setElementToDelete(null);
-					trashRef.current.handleClose();
+					setTrashOpen(false);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -171,8 +204,8 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 			setLoad(true)
 
 			axios({ method: "PUT", url: Routing.generate(URL_CANCEL_ELEMENT, { id: elem.id }), data: {} })
-				.then(function (response) {
-					handleUpdateList(response.data, "update")
+				.then(function () {
+					return refetchPlanning(year);
 				})
 				.catch(function (error) {
 					Formulaire.displayErrors(null, error);
@@ -184,21 +217,21 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		}
 	}
 
-	let handleUseSaving = (sa, total) => {
+	let handleUseSaving = (sa, total, addAsIncome) => {
 		if (!load) {
 			setLoad(true)
 			Formulaire.loader(true)
 
-			let self = this;
-			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total } })
-				.then(function (response) {
-					handleUpdateList(response.data, "create")
-					setNSavingsUsed(List.updateDataMuta(response.data, "create", nSavingsUsed, SORTER));
+			axios({ method: "PUT", url: Routing.generate(URL_USE_SAVING, { id: sa.id }), data: { year: year, month: month, total: total, addAsIncome: addAsIncome } })
+				.then(function () {
+					return refetchPlanning(year);
+				})
+				.then(function () {
 					setSaving(null);
-					savingRef.current.handleClose();
+					setSavingOpen(false);
 				})
 				.catch(function (error) {
-					Formulaire.displayErrors(self, error);
+					Formulaire.displayErrors(null, error);
 				})
 				.then(function () {
 					setLoad(false);
@@ -208,369 +241,320 @@ export function Budget ({ donnees, categories, savings, savingsItems, savingsUse
 		}
 	}
 
-	let recurrencesData = JSON.parse(recurrences);
-	let nSavings = JSON.parse(savings);
-	let totauxExpense = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	let totauxIncome = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let currentSummary = summaries[month - 1];
 
-	let totalExpense = 0, totalIncome = 0, totalSaving = 0;
-	let nData = [], nRecurrencesData = [];
+	let nData = data.filter(d => d.month === month).sort(SORTER);
+	let visibleRecurrences = nRecurrencesData.filter(r => {
+		let eligible = (year > r.initYear || (r.initYear === year && month >= r.initMonth)) && r.months.includes(month);
+		if (!eligible) return false;
 
-	// set totaux with recurrences
-	for (let i = 0 ; i < 12 ; i++) {
-		recurrencesData.forEach(d => {
-			if (year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth)) {
-				if (d.months.includes(i + 1)) {
+		// A real item for this month already represents this recurrence (activated or cancelled).
+		return !nData.some(d => d.recurrenceId === r.id);
+	});
 
-					let notDeleted = true;
-					data.forEach(realD => {
-						if(realD.recurrenceId === d.id && realD.month === i + 1 && realD.type === 3){
-							notDeleted = false;
-						}
-					})
+	let itemsSavings = nSavings.map(sa => {
+		let summary = savingsSummariesData.find(s => s.id === sa.id);
+		let total = summary ? summary.totalByMonth[month - 1] : 0;
+		let used = summary ? summary.usedByMonth[month - 1] : 0;
 
-					if(notDeleted){
-						switch (d.type) {
-							case 0:
-							case 2:
-								totauxExpense[i] += d.price;
-								break;
-							case 1:
-								totauxIncome[i] += d.price;
-								break;
-							default:
-								break;
-						}
-					}
-				}
-			}
-		})
-
-		if (i + 1 === month) {
-			recurrencesData.forEach(d => {
-				if (year > d.initYear || (d.initYear === year && i + 1 >= d.initMonth)) {
-					if (d.months.includes(i + 1)) {
-
-						let notDeleted = true;
-						data.forEach(realD => {
-							if(realD.recurrenceId === d.id && realD.month === i + 1 && realD.type === 3){
-								notDeleted = false;
-							}
-						})
-
-						if(notDeleted){
-							switch (d.type) {
-								case 0:
-									totalExpense += d.price;
-									break;
-								case 1:
-									totalIncome += d.price;
-									break;
-								case 2:
-									totalSaving += d.price;
-									break;
-								default:
-									break;
-							}
-						}
-					}
-				}
-			})
-		}
-	}
-
-	// add only recurrences eligible
-	recurrencesData.forEach(r => {
-		if (year > r.initYear || (r.initYear === year && month >= r.initMonth)) {
-			if (r.months.includes(month)) {
-				nRecurrencesData.push(r);
-			}
-		}
-	})
-
-	// update totaux with items and update with itemRecurrence
-	let totalExpenseReal = 0, totalIncomeReal = 0, totalSavingReal = 0;
-	data.forEach(d => {
-		if (d.month === month) {
-			switch (d.type) {
-				case 0:
-					totalExpense += d.price;
-					if(d.isActive){
-						totalExpenseReal += d.price;
-					}
-					break;
-				case 1:
-					totalIncome += d.price;
-					if(d.isActive){
-						totalIncomeReal += d.price;
-					}
-					break;
-				case 2:
-					totalSaving += d.price;
-					if(d.isActive){
-						totalSavingReal += d.price;
-					}
-					break;
-				default:
-					break;
-			}
-
-			nData.push(d);
-			if (d.recurrenceId) {
-				nRecurrencesData = nRecurrencesData.filter(r => r.id !== d.recurrenceId);
-				switch (d.type) {
-					case 0:
-						totalExpense -= d.recurrencePrice;
-						if(!d.isActive){
-							totalExpenseReal -= d.recurrencePrice;
-						}
-						break;
-					case 1:
-						totalIncome -= d.recurrencePrice;
-						if(!d.isActive){
-							totalIncomeReal -= d.recurrencePrice;
-						}
-						break;
-					case 2:
-						totalSaving -= d.recurrencePrice;
-						if(!d.isActive){
-							totalSavingReal -= d.recurrencePrice;
-						}
-						break;
-					default:
-						break;
-				}
-			}
-		}
-
-		switch (d.type) {
-			case 0:
-			case 2:
-				totauxExpense[d.month - 1] += d.price;
-				break;
-			case 1:
-				totauxIncome[d.month - 1] += d.price;
-				break;
-			default:
-				break;
-		}
-
-		if (d.recurrenceId) {
-			switch (d.type) {
-				case 0:
-				case 2:
-					totauxExpense[d.month - 1] -= d.recurrencePrice;
-					break;
-				case 1:
-					totauxIncome[d.month - 1] -= d.recurrencePrice;
-					break;
-				default:
-					break;
-			}
-		}
-	})
-
-	//totaux eco through months years
-	let totSavingAll = 0, totSavingAllUsed = 0, itemsSavings = [];
-	nSavings.forEach(sa => {
-
-		let total = 0, used = 0;
-		nSavingsItems.forEach(s => {
-			if (s.category && s.category.id === sa.id) {
-				if (s.year <= year) {
-					if (s.year < year || (s.year === year && s.month <= month)) {
-						total += s.price;
-						totSavingAll += s.price;
-					}
-				}
-			}
-		})
-		nSavingsUsed.forEach(s => {
-			if (s.category && s.category.id === sa.id) {
-				if (s.year <= year) {
-					if (s.year < year || (s.year === year && s.month <= month)) {
-						used += s.price;
-						totSavingAllUsed += s.price;
-					}
-				}
-			}
-		})
-
-		sa.total = total;
-		sa.used = used;
-		itemsSavings.push(sa);
-	})
-
-	let totaux = [];
-	for (let i = 0 ; i < 12 ; i++) {
-		let tmpDispo = (i === 0 ? parseFloat(initTotal) : 0) + totauxIncome[i] - totauxExpense[i];
-		totaux.push(i <= 0 ? tmpDispo : totaux[i - 1] + tmpDispo);
-	}
-
-	let initial = month !== 1 ? totaux[month - 2] : parseFloat(initTotal);
-	let totalDispo = initial + totalIncome - (totalExpense + totalSaving);
-	let totalDispoNow = initial + totalIncomeReal - (totalExpenseReal + totalSavingReal);
+		return { ...sa, total, used };
+	});
+	let totSavingAll = itemsSavings.reduce((acc, sa) => acc + sa.total, 0);
+	let totSavingAllUsed = itemsSavings.reduce((acc, sa) => acc + sa.used, 0);
 
 	let cards = [
-		{ value: 0, name: "Budget disponible", total: totalDispo, total2: totalDispoNow, initial: initial, icon: "cart", classCustom: 'text-green-500 bg-green-200' },
-		{ value: 1, name: "Dépenses", total: totalExpense, total2: totalExpenseReal, initial: null, icon: "minus", classCustom: 'text-red-500 bg-red-100' },
-		{ value: 2, name: "Revenus", total: totalIncome, total2: totalIncomeReal, initial: null, icon: "add", classCustom: 'text-blue-700 bg-blue-100' },
-		{ value: 3, name: "Économies", total: totalSaving, total2: totalSavingReal, initial: null, icon: "time", classCustom: 'text-yellow-600 bg-yellow-100' },
+		{ value: 1, name: "Dépenses", total: currentSummary.totalExpense, total2: currentSummary.totalExpenseReal, icon: "minus", cat: "expense" },
+		{ value: 2, name: "Revenus", total: currentSummary.totalIncome, total2: currentSummary.totalIncomeReal, icon: "add", cat: "income" },
+		{ value: 3, name: "Économies", total: currentSummary.totalSaving, total2: currentSummary.totalSavingReal, icon: "time", cat: "saving" },
 	]
 
-	nData.sort(SORTER);
+	const CAT_TYPE_COLOR = ['var(--cat-expense)', 'var(--cat-income)', 'var(--cat-saving)'];
+	let categoryBreakdown = (() => {
+		let byCategory = new Map();
+		nData.forEach(elem => {
+			if (elem.type === 1 || elem.type === 3 || elem.type === 4) return;
+			let key = elem.category ? elem.category.id : 'none';
+			let row = byCategory.get(key);
+			if (!row) {
+				row = {
+					key,
+					name: elem.category ? elem.category.name : 'Sans catégorie',
+					color: elem.category ? CAT_TYPE_COLOR[elem.category.type] : 'hsl(var(--muted-foreground))',
+					total: 0,
+				};
+				byCategory.set(key, row);
+			}
+			row.total += elem.price;
+		});
 
-	return <div className="flex flex-col gap-6">
-		<div className="flex flex-col items-center justify-center gap-4 w-full lg:mx-auto">
-			<div className="px-4 sm:px-6 lg:px-8">
-				<Year year={year} yearMin={parseInt(yearMin)} />
+		return Array.from(byCategory.values()).sort((a, b) => b.total - a.total).slice(0, 6);
+	})();
+
+	const DONUT_R = 15.5;
+	const DONUT_C = 2 * Math.PI * DONUT_R;
+	let donutTotal = categoryBreakdown.reduce((acc, r) => acc + r.total, 0) || 1;
+	let donutAcc = 0;
+	let donutSegments = categoryBreakdown.map(r => {
+		let frac = r.total / donutTotal;
+		let seg = { key: r.key, color: r.color, frac, offset: donutAcc };
+		donutAcc += frac;
+		return seg;
+	});
+
+	let searchLower = search.trim().toLowerCase();
+	let filteredData = searchLower ? nData.filter(d => d.name.toLowerCase().includes(searchLower)) : nData;
+	let filteredRecurrences = searchLower ? visibleRecurrences.filter(r => r.name.toLowerCase().includes(searchLower)) : visibleRecurrences;
+
+	return <div className="flex flex-col gap-5">
+		<div className="flex flex-wrap items-end justify-between gap-3">
+			<div>
+				<div className="text-sm text-muted-foreground">Année {year}</div>
+				<div className="text-xs text-muted-foreground">
+					Solde initial <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(currentSummary.initial)}</b>
+				</div>
 			</div>
-			<div className="overflow-hidden w-screen lg:w-full lg:px-8">
-				<Months year={year} active={month} onSelect={setMonth} totaux={totaux} />
+			<div className="flex items-center gap-1 rounded-lg bg-muted p-1">
+				{year - 1 >= yearMin
+					? <a className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-card" href={Routing.generate(URL_INDEX_PAGE, { year: year - 1 })}>
+						<span className="icon-left-arrow text-sm" />
+					</a>
+					: <div className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/40">
+						<span className="icon-left-arrow text-sm" />
+					</div>
+				}
+				<span className="px-2 text-sm font-semibold tabular-nums">{year}</span>
+				<a className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-card" href={Routing.generate(URL_INDEX_PAGE, { year: year + 1 })}>
+					<span className="icon-right-arrow text-sm" />
+				</a>
 			</div>
 		</div>
 
-		<div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:px-8 2xl:grid-cols-6">
-			<div className="flex flex-col gap-6 2xl:flex-row 2xl:col-span-3">
-				<div className="overflow-hidden w-screen lg:w-full 2xl:min-w-52 2xl:max-w-72">
-					<div className="flex gap-4 overflow-auto px-4 sm:px-6 lg:px-0 lg:flex-col">
-						{cards.map(item => {
-							return <div className={`p-4 rounded-md border flex gap-4 min-w-52 ${item.value === 0 ? (item.total > 0 ? "bg-white" : "bg-red-50 border-red-500") : "bg-white"}`} key={item.value}>
-								<div className={`w-20 h-20 rounded flex items-center justify-center ${item.classCustom}`}>
-									<span className={`icon-${item.icon} text-xl`}></span>
+		<div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-1.5">
+			{MONTHS_SHORT.map((label, i) => {
+				const isActive = i + 1 === month;
+				const isToday = year === TODAY.getFullYear() && i + 1 === TODAY.getMonth() + 1;
+				const isNeg = balances[i] < 0;
+				return <button key={i} type="button" onClick={() => setMonth(i + 1)}
+					title={isToday ? "Mois actuel" : undefined}
+					className={cn(
+						"flex flex-col items-center gap-0.5 rounded-lg border px-1 py-2 text-center transition-colors",
+						isActive ? "border-foreground bg-foreground text-background" : "bg-gray-50 hover:bg-whiter hover:border-foreground/30",
+						isToday && !isActive && "ring-1 ring-inset ring-foreground/35"
+					)}
+				>
+					<span className={cn("flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide", isActive ? "text-background/70" : "text-muted-foreground")}>
+						{label}
+						{isToday && <span className={cn("h-1 w-1 rounded-full", isActive ? "bg-background/70" : "bg-foreground/60")} />}
+					</span>
+					<span className={cn("text-xs font-semibold tabular-nums", isActive ? (isNeg ? "text-red-300" : "text-background") : (isNeg ? "text-[var(--status-critical)]" : ""))}>
+						{Sanitaze.toFormatCurrency(balances[i], true)}
+					</span>
+				</button>
+			})}
+		</div>
+
+		<div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+			<div className="xl:col-span-5 flex flex-col gap-5">
+				<Card
+					className={cn(currentSummary.totalDispo < 0 && "border-[var(--status-critical)]")}
+					style={currentSummary.totalDispo < 0 ? { background: 'var(--status-critical-soft)' } : undefined}
+				>
+					<CardContent className="p-4">
+						<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Solde disponible · tendance sur l'année</div>
+						<BudgetTrendChart balances={balances} activeMonth={month} onSelectMonth={setMonth} todayValue={currentSummary.totalDispoNow} />
+					</CardContent>
+				</Card>
+
+				<div className="grid grid-cols-2 gap-3">
+					{cards.map(card => {
+						const catColor = `var(--cat-${card.cat})`;
+						const catSoft = `var(--cat-${card.cat}-soft)`;
+						return <Card key={card.value}>
+							<CardContent className="p-4 flex flex-col gap-2">
+								<div className="flex items-start justify-between gap-2">
+									<div>
+										<div className="text-xs text-muted-foreground">{card.name}</div>
+										<div className="text-lg font-bold tabular-nums">
+											{Sanitaze.toFormatCurrency(card.total)}
+										</div>
+									</div>
+									<div
+										className="flex h-7 w-7 flex-none items-center justify-center rounded-lg"
+										style={{ background: catSoft, color: catColor }}
+									>
+										<span className={`icon-${card.icon} text-sm`}></span>
+									</div>
 								</div>
+								{card.total2 !== 0 && (
+									<div className="flex items-center justify-between text-xs">
+										<span className="text-muted-foreground">Aujourd'hui</span>
+										<span className="font-semibold tabular-nums">{Sanitaze.toFormatCurrency(card.total2)}</span>
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					})}
+
+					{categoryBreakdown.length !== 0 && <Card>
+						<CardContent className="p-4 flex flex-col gap-2">
+							<div className="flex items-start justify-between gap-2">
 								<div>
-									<div className="font-semibold text-gray-700">{item.name}</div>
-									<div className="font-bold text-xl">{Sanitaze.toFormatCurrency(item.total)}</div>
-									{item.total2 !== 0 && <div className="text-gray-600 text-sm">Aujourd'hui : {Sanitaze.toFormatCurrency(item.total2)}</div>}
-									{item.initial !== null && <div className="text-gray-600 text-sm">Initial : {Sanitaze.toFormatCurrency(item.initial)}</div>}
+									<div className="text-xs text-muted-foreground">Répartition</div>
+									<div className="text-lg font-bold tabular-nums">{categoryBreakdown.length} catégorie{categoryBreakdown.length > 1 ? "s" : ""}</div>
+								</div>
+								<svg viewBox="0 0 36 36" className="h-7 w-7 flex-none -rotate-90 overflow-visible">
+									<circle cx="18" cy="18" r={DONUT_R} fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
+									{donutSegments.map(seg => (
+										<circle
+											key={seg.key} cx="18" cy="18" r={DONUT_R} fill="none" stroke={seg.color} strokeWidth="5"
+											strokeDasharray={`${seg.frac * DONUT_C} ${DONUT_C - seg.frac * DONUT_C}`}
+											strokeDashoffset={-seg.offset * DONUT_C}
+										/>
+									))}
+								</svg>
+							</div>
+							<div className="flex flex-col gap-1 text-xs">
+								{categoryBreakdown.slice(0, 2).map(row => (
+									<div key={row.key} className="flex items-center justify-between gap-2">
+										<span className="flex min-w-0 items-center gap-1.5 truncate text-muted-foreground">
+											<span className="h-1.5 w-1.5 flex-none rounded-full" style={{ background: row.color }} />
+											<span className="truncate">{row.name}</span>
+										</span>
+										<span className="flex-none font-semibold tabular-nums">{Sanitaze.toFormatCurrency(row.total)}</span>
+									</div>
+								))}
+							</div>
+							<button
+								type="button"
+								onClick={() => setDetailOpen(o => !o)}
+								className="flex items-center gap-1 self-start text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+							>
+								{detailOpen ? "Réduire" : "Voir le détail"}
+								<span className={`icon-${detailOpen ? "up-chevron" : "down-chevron"} text-[9px]`}></span>
+							</button>
+						</CardContent>
+					</Card>}
+				</div>
+
+				{detailOpen && categoryBreakdown.length !== 0 && <Card>
+					<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
+						<CardTitle className="text-sm">Détail par catégorie</CardTitle>
+						<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{categoryBreakdown.length} catégorie{categoryBreakdown.length > 1 ? "s" : ""}</span>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-3 p-4">
+						{categoryBreakdown.map(row => {
+							let maxTotal = categoryBreakdown[0].total || 1;
+							let pct = Math.max((row.total / maxTotal) * 100, 3);
+							return <div key={row.key} className="flex flex-col gap-1">
+								<div className="flex items-center justify-between gap-2">
+									<span className="flex items-center gap-1.5 text-xs font-medium">
+										<span className="h-2 w-2 flex-none rounded-full" style={{ background: row.color }} />
+										{row.name}
+									</span>
+									<span className="text-xs font-semibold tabular-nums">{Sanitaze.toFormatCurrency(row.total)}</span>
+								</div>
+								<div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+									<div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: row.color }} />
 								</div>
 							</div>
 						})}
-					</div>
-				</div>
+					</CardContent>
+				</Card>}
 
-				<div className="w-full flex flex-col gap-6 px-4 sm:px-6 lg:px-0">
-					<div className="bg-white border p-4 rounded-md">
-						<BudgetFormulaire context={element ? "update" : "create"} categories={JSON.parse(categories)}
-										  element={element} year={year} month={month}
-										  onCancel={handleCancelEdit} onUpdateList={handleUpdateList}
-										  key={month + "-" + (element ? element.id : 0)} />
-					</div>
-					{itemsSavings.length !== 0 && <div className="bg-gray-50 rounded-md border">
-						<div className="cursor-pointer p-4 flex justify-between hover:opacity-80" onClick={() => setOpenSaving(!openSaving)}>
-							<h3 className="font-semibold">Utilisation des économies</h3>
-							<div className="lg:hidden">
-								<span className={`icon-${openSaving ? "minus" : "add"}`}></span>
-							</div>
+				{itemsSavings.length !== 0 && <Card>
+					<button type="button" className="flex w-full items-center justify-between gap-3 p-4 text-left" onClick={() => setSavingsOpen(o => !o)}>
+						<CardTitle className="text-sm">Utilisation des économies</CardTitle>
+						<div className="flex items-center gap-2">
+							<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{itemsSavings.length} catégorie{itemsSavings.length > 1 ? "s" : ""}</span>
+							<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", savingsOpen && "rotate-180")} />
 						</div>
-						<div className={`flex flex-col gap-4 border-t bg-white rounded-b-md ${openSaving ? "opacity-100 h-auto p-4" : "h-0 opacity-0 lg:h-auto lg:opacity-100 lg:p-4"}`}>
-							{itemsSavings.map(sa => {
-
-								let total = sa.total, used = sa.used;
-
-								return <div className="saving-item flex items-start justify-between gap-2" key={sa.id}>
-									<div className="col-1 font-medium text-sm">{sa.name}</div>
-									<div className="col-2">
-										<div className="font-medium text-sm">{Sanitaze.toFormatCurrency(total - used)} / {Sanitaze.toFormatCurrency(sa.goal)}</div>
-										<div className="text-xs text-gray-600">Utilisée : {Sanitaze.toFormatCurrency(used)}</div>
-									</div>
-									<div className="col-3">
-										<ButtonIcon type="default" icon="credit-card" onClick={() => handleModal('savingRef', sa)}>Utiliser</ButtonIcon>
+					</button>
+					{savingsOpen && <CardContent className="flex flex-col gap-4 border-t pt-4">
+						{itemsSavings.map(sa => {
+							let available = sa.total - sa.used;
+							let progress = sa.goal ? (available / sa.goal) * 100 : 0;
+							return <div key={sa.id} className="flex flex-col gap-1.5">
+								<div className="flex items-baseline justify-between gap-2">
+									<span className="text-sm font-medium">{sa.name}</span>
+									<span className="text-xs text-muted-foreground">{progress.toFixed(0)}%</span>
+								</div>
+								<Progress value={progress} indicatorStyle={{ background: 'var(--cat-saving-gradient)' }} />
+								<div className="flex items-center justify-between text-xs text-muted-foreground">
+									<span>Disponible <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(available)}</b></span>
+									<div className="flex items-center gap-2">
+										<span>Objectif {Sanitaze.toFormatCurrency(sa.goal)}</span>
+										<button type="button" className="text-xs font-semibold text-[var(--cat-saving)] hover:underline" onClick={() => handleModal('savingRef', sa)}>Utiliser</button>
 									</div>
 								</div>
-							})}
+							</div>
+						})}
+						<div className="flex items-center justify-between border-t pt-3">
+							<span className="text-xs text-muted-foreground">Total économies disponibles</span>
+							<span className="font-bold tabular-nums">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</span>
 						</div>
-						<div className="px-4 py-2 border-t flex flex-col items-center justify-center gap-2">
-							<div className="font-semibold">{Sanitaze.toFormatCurrency(totSavingAll - totSavingAllUsed)}</div>
-							<div className="text-sm text-gray-600">{Sanitaze.toFormatCurrency(totSavingAllUsed)} utilisé</div>
-						</div>
-					</div>}
-				</div>
+					</CardContent>}
+				</Card>}
 			</div>
-			<div className="flex flex-col gap-6 px-4 sm:px-6 lg:px-0 xl:col-span-2 2xl:col-span-3">
-				<BudgetList data={nData} recurrencesData={nRecurrencesData}
-							onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
-							onActiveRecurrence={handleActiveRecurrence} key={month} />
+
+			<div className="xl:col-span-7">
+				<Card className="overflow-hidden">
+					<CardHeader className="flex flex-col gap-3 space-y-0 border-b p-4">
+						<div className="flex items-center justify-between gap-3">
+							<CardTitle className="text-sm">
+								Opérations du mois <span className="font-normal text-muted-foreground">({filteredData.length + filteredRecurrences.length})</span>
+							</CardTitle>
+							<Button type="blue" onClick={handleOpenCreate}>
+								<span className="icon-add mr-1"></span>Ajouter
+							</Button>
+						</div>
+						<Search placeholder="Rechercher une opération..." onSearch={setSearch} />
+					</CardHeader>
+					<CardContent className="p-0">
+						<BudgetList data={filteredData} recurrencesData={filteredRecurrences}
+									onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
+									onActiveRecurrence={handleActiveRecurrence}
+									emptyMessage={searchLower ? "Aucune opération ne correspond à la recherche." : "Aucune opération pour ce mois."} />
+					</CardContent>
+				</Card>
 			</div>
 		</div>
 
-		{createPortal(
-			<Modal ref={deleteRef} identifiant="deleteItem" maxWidth={568} title="Supprimer un élément"
-				   content={<p>Souhaitez-vous supprimer définitivement : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
-				   footer={null}
-			/>
-			, document.body)
-		}
+		<BudgetFormulaire context={element ? "update" : "create"}
+						  categories={JSON.parse(categories)}
+						  element={element} year={year} month={month}
+						  open={sheetOpen} onOpenChange={handleSheetOpenChange}
+						  onUpdateList={handleUpdateList} />
 
-		{createPortal(
-			<Modal ref={trashRef} identifiant="trashRecurrence" maxWidth={568} title="Supprimer un élément"
-				   content={<p>Souhaitez-vous supprimer cet élément récurrent : <b>{elementToDelete ? elementToDelete.name : ""}</b> ?</p>}
-				   footer={null}
-			/>
-			, document.body)
-		}
+		<SavingForm open={savingOpen} onOpenChange={setSavingOpen} saving={saving} onUseSaving={handleUseSaving} />
 
-		{createPortal(
-			<Modal ref={savingRef} identifiant="useSaving" maxWidth={568} title="Utiliser vos économies" isForm={true}
-				   content={<SavingForm saving={saving} onUseSaving={handleUseSaving} />}
-				   footer={null}
-			/>
-			, document.body)
-		}
-	</div>
-}
+		<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Supprimer un élément</DialogTitle>
+					<DialogDescription>
+						Souhaitez-vous supprimer définitivement <b>{elementToDelete ? elementToDelete.name : ""}</b> ?
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<Button type="default" onClick={() => setDeleteOpen(false)}>Annuler</Button>
+					<Button type="red" onClick={handleDelete} iconLeft={load ? "chart-3" : ""}>Confirmer la suppression</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 
-function Year ({ year, yearMin }) {
-	return <div className="flex items-center gap-4">
-		{year - 1 >= yearMin
-			? <a className="cursor-pointer flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
-				 href={Routing.generate(URL_INDEX_PAGE, { year: year - 1 })}>
-				<span className="icon-left-arrow" />
-			</a>
-			: <div className="cursor-not-allowed flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-gray-100 text-gray-400 hover:bg-gray-50 ring-1 ring-inset ring-gray-300">
-				<span className="icon-left-arrow" />
-			</div>
-		}
-		<div className="p-2 font-medium text-lg text-blue-600">{year}</div>
-		<a className="cursor-pointer flex items-center justify-center rounded-md text-lg px-2 py-2 shadow-sm bg-white text-gray-900 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
-		   href={Routing.generate(URL_INDEX_PAGE, { year: year + 1 })}>
-			<span className="icon-right-arrow" />
-		</a>
-	</div>
-}
-
-function Months ({ year, active, onSelect, totaux }) {
-	let data = [
-		{ id: 1, name: 'Janvier', shortName: 'Jan.' },
-		{ id: 2, name: 'Février', shortName: 'Fev.' },
-		{ id: 3, name: 'Mars', shortName: 'Mar.' },
-		{ id: 4, name: 'Avril', shortName: 'Avr.' },
-		{ id: 5, name: 'Mai', shortName: 'Mai.' },
-		{ id: 6, name: 'Juin', shortName: 'Jui.' },
-		{ id: 7, name: 'Juillet', shortName: 'Jui.' },
-		{ id: 8, name: 'Août', shortName: 'Aoû.' },
-		{ id: 9, name: 'Septembre', shortName: 'Sep.' },
-		{ id: 10, name: 'Octobre', shortName: 'Oct.' },
-		{ id: 11, name: 'Novembre', shortName: 'Nov.' },
-		{ id: 12, name: 'Décembre', shortName: 'Dèc.' },
-	];
-
-	let today = new Date();
-
-	return <div className="flex items-center gap-4 overflow-auto border-y py-4 px-4 sm:px-6 lg:px-0 lg:flex-wrap lg:justify-center">
-		{data.map(elem => {
-			let todayMonth = (elem.id === today.getMonth() + 1 && year === today.getFullYear());
-			let activeMonth = elem.id === active;
-			let statutMonth = totaux[elem.id - 1] < 0;
-			return <div className={`cursor-pointer rounded-md p-2 font-medium text-center min-w-20 ${todayMonth ? "bg-white" : "hover:bg-gray-50"} ${activeMonth ? (statutMonth ? "!bg-red-300" : "!bg-blue-300") : ""}`}
-						onClick={() => onSelect(elem.id)}
-						key={elem.id}>
-				<div className="text-sm">
-					{elem.name}
-				</div>
-				<div className="text-xs text-gray-600">{Sanitaze.toFormatCurrency(totaux[elem.id - 1])}</div>
-			</div>
-		})}
+		<Dialog open={trashOpen} onOpenChange={setTrashOpen}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Supprimer un élément récurrent</DialogTitle>
+					<DialogDescription>
+						Souhaitez-vous supprimer cet élément récurrent <b>{elementToDelete ? elementToDelete.name : ""}</b> pour ce mois ?
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<Button type="default" onClick={() => setTrashOpen(false)}>Annuler</Button>
+					<Button type="red" onClick={handleDeleteRecurrence} iconLeft={load ? "chart-3" : ""}>Confirmer la suppression</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	</div>
 }

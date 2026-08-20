@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: ChangelogRepository::class)]
 class Changelog extends DataEntity
 {
-    const FOLDER = "images/editor/changelogs";
+    const FOLDER_EDITOR = "images/editor/changelogs";
 
     const LIST = ['changelog_list'];
     const FORM = ['changelog_form'];
@@ -32,7 +32,7 @@ class Changelog extends DataEntity
 
     #[ORM\Column]
     #[Groups(['changelog_list'])]
-    private ?bool $isPublished = false;
+    private ?bool $isPublished = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['changelog_list', 'changelog_form'])]
@@ -48,6 +48,7 @@ class Changelog extends DataEntity
 
     public function __construct()
     {
+        $this->isPublished = false;
         $this->createdAt = new \DateTimeImmutable();
     }
 

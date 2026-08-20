@@ -5,12 +5,14 @@ import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Toastr from "@tailwindFunctions/toastr";
+import Inputs from "@commonFunctions/inputs";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { TinyMCE } from "@tailwindComponents/Elements/TinyMCE";
-import { Input, InputView, Radiobox, SelectCombobox } from "@tailwindComponents/Elements/Fields";
+import { Input, Radiobox, SelectCombobox, SelectComboboxMultiple } from "@tailwindComponents/Elements/Fields";
+import { Alert } from "@tailwindComponents/Elements/Alert";
 
 const URL_INDEX_PAGE = "user_aventures_randos_read";
 const URL_CREATE_ELEMENT = "intern_api_aventures_randos_create";
@@ -18,17 +20,35 @@ const URL_UPDATE_ELEMENT = "intern_api_aventures_randos_update";
 const TEXT_CREATE = "Ajouter la randonnée";
 const TEXT_UPDATE = "Enregistrer les modifications";
 
-export function RandoFormulaire ({ context, element, groupeId, users, userId }) {
+export function RandoFormulaire ({ context, element, isAdmin, groupeId, users, userId }) {
 	let url = Routing.generate(URL_CREATE_ELEMENT, { groupe: groupeId });
 
 	if (context === "update") {
 		url = Routing.generate(URL_UPDATE_ELEMENT, { groupe: groupeId, id: element.id });
 	}
 
+	let usersItems = [];
+	let participants = [];
+	users.forEach(us => {
+		usersItems.push({ value: us.id, label: us.displayName })
+
+		if(element) {
+			let participantsIds = Formulaire.setValue(element.participants, []);
+
+			if(participantsIds.includes(us.id)) {
+				participants.push({ value: us.id, label: us.displayName })
+			}
+		}
+	})
+
 	return <Form
         context={context}
         url={url}
+
+		isAdmin={isAdmin}
+
         name={element ? Formulaire.setValue(element.name) : ""}
+		typeRando={element ? Formulaire.setValue(element.typeRando) : 0}
         description={element ? Formulaire.setValue(element.description) : ""}
         status={element ? Formulaire.setValue(element.status) : 0}
         localisation={element ? Formulaire.setValue(element.localisation) : ""}
@@ -36,18 +56,25 @@ export function RandoFormulaire ({ context, element, groupeId, users, userId }) 
         altitude={element ? Formulaire.setValue(element.altitude) : ""}
         devPlus={element ? Formulaire.setValue(element.devPlus) : ""}
         distance={element ? Formulaire.setValue(element.distance) : ""}
-        adventure={element ? element.adventure : null}
         referent={element ? Formulaire.setValue(element.author.id) : userId}
         story={element ? Formulaire.setValue(element.story) : ""}
+        participants={participants}
 
-        users={users}
+		adventureId={element && element.adventure ? Formulaire.setValue(element.adventure.id) : ""}
+		adventureName={element && element.adventure ? Formulaire.setValue(element.adventure.name) : ""}
+		adventureDuration={element && element.adventure ? Formulaire.setValueTime(element.adventure.duration) : ""}
+		adventureUrl={element && element.adventure ? Formulaire.setValue(element.adventure.url) : "https://"}
+
+		adventureDateId={element && element.adventureDate ? Formulaire.setValue(element.adventureDate.id) : ""}
+		adventureDateAt={element && element.adventureDate ? Formulaire.setValueDate(element.adventureDate.dateAt) : ""}
+
+		usersItems={usersItems}
     />
 }
 
 RandoFormulaire.propTypes = {
 	context: PropTypes.string.isRequired,
 	groupeId: PropTypes.number.isRequired,
-	users: PropTypes.array.isRequired,
 	element: PropTypes.object,
 }
 
@@ -57,10 +84,9 @@ class Form extends Component {
 
 		let description = props.description ? props.description : "";
 
-		console.log("in")
-
 		this.state = {
 			name: props.name,
+			typeRando: props.typeRando,
 			description: { value: description, html: description },
 			localisation: props.localisation,
 			level: props.level,
@@ -69,6 +95,16 @@ class Form extends Component {
 			distance: props.distance,
 			referent: props.referent,
 			story: props.story,
+			participants: props.participants,
+
+			adventureId: props.adventureId,
+			adventureName: props.adventureName,
+			adventureDuration: props.adventureDuration,
+			adventureUrl: props.adventureUrl,
+
+			adventureDateId: props.adventureDateId,
+			adventureDateAt: props.adventureDateAt,
+
 			errors: [],
 		}
 	}
@@ -81,6 +117,11 @@ class Form extends Component {
 		this.setState({ [identifiant]: value })
 	}
 
+	handleSelectMultiple = (name, item) => {
+		const newValues = Inputs.functionSelect(this, name, item);
+		this.setState({ [name]: newValues });
+	}
+
 	handleChangeTinyMCE = (name, html) => {
 		this.setState({ [name]: { value: this.state[name].value, html: html } })
 	}
@@ -89,19 +130,30 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { context, url } = this.props;
-		const { name } = this.state;
+		const { referent, name, typeRando, localisation } = this.state;
 
 		this.setState({ errors: [] });
 
-		let paramsToValidate = [{ type: "text", id: 'name', value: name }];
+		let paramsToValidate = [
+			{ type: "text", id: 'referent', value: referent },
+			{ type: "text", id: 'name', value: name },
+			{ type: "text", id: 'typeRando', value: typeRando },
+			{ type: "text", id: 'localisation', value: localisation }
+		];
 
 		let validate = Validateur.validateur(paramsToValidate)
 		if (!validate.code) {
 			Formulaire.showErrors(this, validate);
 		} else {
-			Formulaire.loader(true);
 			let self = this;
-			axios({ method: context === "create" ? "POST" : "PUT", url: url, data: this.state })
+			Formulaire.loader(true);
+
+			let nState = {
+				...this.state,
+				participants: this.state.participants.map(item => item.value)
+			}
+
+			axios({ method: context === "create" ? "POST" : "PUT", url: url, data: nState })
 				.then(function (response) {
 					Toastr.toast('info', "Données enregistrées.");
 					location.href = Routing.generate(URL_INDEX_PAGE, { 'slug': response.data.slug });
@@ -115,11 +167,15 @@ class Form extends Component {
 	}
 
 	render () {
-        const { context, status, adventure, users } = this.props;
-        const { errors, name, description, localisation, level, altitude, devPlus, distance, referent, story } = this.state;
+        const { context, isAdmin, usersItems } = this.props;
+        const {
+			errors, name, typeRando, description, localisation, level, altitude, devPlus, distance, referent, story, participants,
+			adventureName, adventureDuration, adventureUrl, adventureDateAt
+		} = this.state;
 
         let params0 = { errors: errors, onChange: this.handleChange };
         let params1 = { errors: errors, onSelect: this.handleSelect };
+        let params2 = { errors: errors, onSelect: this.handleSelectMultiple };
 
         let levelItems = [
             { value: 0, label: 'Aucun', identifiant: 'level-0' },
@@ -130,10 +186,11 @@ class Form extends Component {
             { value: 5, label: 'Extrême', identifiant: 'level-5' },
         ]
 
-        let referentsItem = [];
-        users.forEach(us => {
-            referentsItem.push({ value: us.id, label: us.displayName })
-        })
+        let typeItems = [
+            { value: 0, label: 'Randonnée', identifiant: 'type-0' },
+            { value: 1, label: 'Voyage', identifiant: 'type-1' },
+            { value: 2, label: 'Urbex', identifiant: 'type-2' },
+        ]
 
         return <form onSubmit={this.handleSubmit}>
             <div className="flex flex-col gap-4 xl:gap-6">
@@ -141,66 +198,149 @@ class Form extends Component {
                     <div>
                         <div className="font-medium text-lg">Informations générales</div>
                         <div className="text-gray-600 text-sm">
-                            La personnalisation se fera après avoir enregistrée cette étape.
+                            Commencez par les informations essentielles de l'aventure.
                         </div>
                     </div>
                     <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
                         <div className="flex gap-4">
                             <div className="w-full">
-								<SelectCombobox identifiant="referent" valeur={referent} items={referentsItem} {...params1} noEmpty={true}>
-									Référent
+								<SelectCombobox identifiant="referent" valeur={referent} items={usersItems} {...params1} noEmpty={true}>
+									Référent *
 								</SelectCombobox>
                             </div>
-                            <div className="w-full">
-                                <Input identifiant="name" valeur={name} {...params0}>Nom de l'aventure *</Input>
-                            </div>
+							<div className="w-full">
+								<Radiobox items={typeItems} identifiant="typeRando" valeur={typeRando} {...params0}
+										  classItems="flex gap-2" styleType="fat">
+									Type d'aventure *
+								</Radiobox>
+							</div>
                         </div>
+						<div className="flex gap-4">
+							<div className="w-full">
+								<Input identifiant="name" valeur={name} {...params0}>Nom de l'aventure *</Input>
+							</div>
+							<div className="w-full">
+								<Input identifiant="localisation" valeur={localisation} {...params0}>Localisation *</Input>
+							</div>
+						</div>
                         <div>
                             <TinyMCE type={7} identifiant='description' valeur={description.value}
                                      errors={errors} onUpdateData={this.handleChangeTinyMCE}>
-                                Petite description
+                                Description
                             </TinyMCE>
                         </div>
-						<div>
-							<Input identifiant="localisation" valeur={localisation} {...params0}>Localisation</Input>
-						</div>
                     </div>
                 </div>
-                {status !== 0 &&
-                    <div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
-                        <div>
-                            <div className="font-medium text-lg">Informations complémentaire</div>
-                            <div className="text-gray-600 text-sm">
-                                Ajouter des informations complémentaires à propos de l'aventure sélectionnée.
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
-                            <div>
-                                <InputView valeur={adventure.name}>Nom de l'aventure sélectionnée</InputView>
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="w-full">
-                                    <Input type="number" identifiant="distance" valeur={distance} {...params0}>Distance</Input>
-                                </div>
-                                <div className="w-full">
-                                    <Input type="number" identifiant="devPlus" valeur={devPlus} {...params0}>Dénivelé +</Input>
-                                </div>
-                                <div className="w-full">
-                                    <Input type="number" identifiant="altitude" valeur={altitude} {...params0}>Altitude</Input>
-                                </div>
-                            </div>
-                            <div>
-                                <Radiobox items={levelItems} identifiant="level" valeur={level} {...params0}
-                                          classItems="flex gap-2 flex-wrap" styleType="fat">
-                                    Niveau *
-                                </Radiobox>
-                            </div>
-							<div>
-								<Input identifiant="story" valeur={story} {...params0}>Nom de la route du storytelling</Input>
+
+				<div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
+					<div>
+						<div className="font-medium text-lg">Quand partir ? <span className="text-xs text-gray-500">(optionnel)</span></div>
+						<div className="text-gray-600 text-sm">
+							Proposition de date pour cette aventure.
+						</div>
+					</div>
+					<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
+						{context === "create"
+							? <div className="text-sm">
+								<Alert type="blue" icon="question">
+									Vous pouvez également proposer plusieurs dates après la création, ou laisser ce champ vide pour l'instant.
+								</Alert>
 							</div>
-                        </div>
-                    </div>
-                }
+							: null
+						}
+						<div>
+							<Input identifiant="adventureDateAt" valeur={adventureDateAt} {...params0} type="date">Date proposée</Input>
+						</div>
+					</div>
+				</div>
+
+				<div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
+					<div>
+						<div className="font-medium text-lg">Quelle activité faire ? <span className="text-xs text-gray-500">(optionnel)</span></div>
+						<div className="text-gray-600 text-sm">
+							Proposition d'une activité spécifique pour cette aventure.
+						</div>
+					</div>
+					<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
+						{context === "create"
+							? <div className="text-sm">
+								<Alert type="blue" icon="question">
+									Vous pouvez également proposer plusieurs activités après la création, ou laisser ce champ vide pour l'instant.
+								</Alert>
+							</div>
+							: null
+						}
+
+						<div className="flex gap-4">
+							<div className="w-full">
+								<Input identifiant="adventureName" valeur={adventureName} {...params0}>Nom de l'activité sélectionnée</Input>
+							</div>
+							<div className="w-full">
+								<Input identifiant="adventureDuration" valeur={adventureDuration} {...params0} type="time">Durée</Input>
+							</div>
+							<div className="w-full">
+								<Input identifiant="adventureUrl" valeur={adventureUrl} {...params0}>Lien du topo</Input>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
+					<div>
+						<div className="font-medium text-lg">Informations complémentaire de l'activité</div>
+						<div className="text-gray-600 text-sm">
+							Ajouter des informations complémentaires à propos de l'activité sélectionnée.
+						</div>
+					</div>
+					<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-gray-200 xl:col-span-2">
+						<div>
+							<SelectComboboxMultiple identifiant="participants" valeur={participants} items={usersItems}
+													{...params2} toSort={true}>
+								Participants
+							</SelectComboboxMultiple>
+						</div>
+
+						{parseInt(typeRando) === 0
+							? <>
+								<div className="flex gap-4">
+									<div className="w-full">
+										<Input type="number" identifiant="distance" valeur={distance} {...params0}>Distance</Input>
+									</div>
+									<div className="w-full">
+										<Input type="number" identifiant="devPlus" valeur={devPlus} {...params0}>Dénivelé +</Input>
+									</div>
+									<div className="w-full">
+										<Input type="number" identifiant="altitude" valeur={altitude} {...params0}>Altitude</Input>
+									</div>
+								</div>
+								<div>
+									<Radiobox items={levelItems} identifiant="level" valeur={level} {...params0}
+											  classItems="flex gap-2 flex-wrap" styleType="fat">
+										Niveau *
+									</Radiobox>
+								</div>
+							</>
+							: null
+						}
+					</div>
+				</div>
+
+				{isAdmin
+					? <div className="grid gap-2 xl:grid-cols-3 xl:gap-6">
+						<div>
+							<div className="font-medium text-lg"><span class="icon-book-1 text-indigo-500"></span> Storytelling</div>
+							<div className="text-gray-600 text-sm">
+								Nom url de la route du storytelling.
+							</div>
+						</div>
+						<div className="flex flex-col gap-4 bg-white p-4 rounded-md ring-1 ring-inset ring-blue-400 xl:col-span-2">
+							<div>
+								<Input identifiant="story" valeur={story} {...params0} placeholder="escapade-chamonix">Suite url</Input>
+							</div>
+						</div>
+					</div>
+					: null
+				}
             </div>
             <div className="mt-4 flex justify-end gap-2">
                 <Button type="blue" isSubmit={true}>{context === "create" ? TEXT_CREATE : TEXT_UPDATE}</Button>

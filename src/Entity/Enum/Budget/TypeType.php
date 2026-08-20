@@ -4,9 +4,9 @@ namespace App\Entity\Enum\Budget;
 
 enum TypeType: int
 {
-    const Expense = 0;
-    const Income = 1;
-    const Saving = 2;
-    const Deleted = 3;
-    const Used = 4;
+    case Expense = 0;
+    case Income = 1;
+    case Saving = 2;
+    case Deleted = 3;
+    case Used = 4;
 }

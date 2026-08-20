@@ -1,0 +1,10 @@
+{% extends 'admin/layout/layout.html.twig' %}
+
+{% set breadcrumbs = [
+    { icon: 'camera', text: "Accès photos famille"  }
+] %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('admin_photos_access') }}
+{% endblock %}

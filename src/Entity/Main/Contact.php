@@ -23,7 +23,7 @@ class Contact extends DataEntity
     #[Groups(['contact_list'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['contact_list'])]
     private ?string $email = null;
 
@@ -41,10 +41,11 @@ class Contact extends DataEntity
 
     #[ORM\Column]
     #[Groups(['contact_list'])]
-    private ?bool $seen = false;
+    private ?bool $seen = null;
 
     public function __construct()
     {
+        $this->seen = false;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -70,7 +71,7 @@ class Contact extends DataEntity
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 

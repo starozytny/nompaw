@@ -16,11 +16,11 @@ class RaPropalDate
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['pr_date_list'])]
+    #[Groups(['pr_date_list', 'rando_form'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['pr_date_list'])]
+    #[Groups(['pr_date_list', 'rando_form'])]
     private ?\DateTimeInterface $dateAt = null;
 
     #[ORM\Column(type: Types::ARRAY)]

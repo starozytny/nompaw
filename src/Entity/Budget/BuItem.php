@@ -3,14 +3,18 @@
 namespace App\Entity\Budget;
 
 use App\Entity\DataEntity;
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuItemRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BuItemRepository::class)]
+#[ORM\Index(columns: ['user_id', 'year'], name: 'idx_bu_item_user_year')]
+#[ORM\Index(columns: ['user_id', 'type'], name: 'idx_bu_item_user_type')]
 class BuItem extends DataEntity
 {
     const LIST = ['buitem_list'];
@@ -23,22 +27,31 @@ class BuItem extends DataEntity
 
     #[ORM\Column]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
     private ?int $year = null;
 
     #[ORM\Column]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
+    #[Assert\Range(min: 1, max: 12)]
     private ?int $month = null;
 
-    #[ORM\Column]
+    #[ORM\Column(enumType: TypeType::class)]
     #[Groups(['buitem_list'])]
-    private ?int $type = null;
+    #[Assert\NotNull]
+    private ?TypeType $type = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getPrice()/setPrice().
+     */
     #[ORM\Column]
     #[Groups(['buitem_list'])]
-    private ?float $price = null;
+    #[Assert\NotNull]
+    private ?int $price = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['buitem_list'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -47,6 +60,7 @@ class BuItem extends DataEntity
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['buitem_list'])]
+    #[Assert\NotNull]
     private ?\DateTimeInterface $dateAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'buItems')]
@@ -67,12 +81,24 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     private ?int $recurrenceId = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getRecurrencePrice()/setRecurrencePrice().
+     */
     #[ORM\Column(nullable: true)]
     #[Groups(['buitem_list'])]
-    private ?float $recurrencePrice = null;
+    private ?int $recurrencePrice = null;
 
-    #[ORM\Column]
-    private ?int $lastType = null;
+    #[ORM\Column(enumType: TypeType::class)]
+    private ?TypeType $lastType = null;
+
+    /**
+     * Id of the counterpart BuItem this one was generated from/for (e.g. the Income item created
+     * when a saving is used, and vice versa) — a plain id reference, following the same convention
+     * as $recurrenceId, not a Doctrine association.
+     */
+    #[ORM\Column(nullable: true)]
+    #[Groups(['buitem_list'])]
+    private ?int $linkedItemId = null;
 
     public function __construct()
     {
@@ -108,12 +134,12 @@ class BuItem extends DataEntity
         return $this;
     }
 
-    public function getType(): ?int
+    public function getType(): ?TypeType
     {
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(?TypeType $type): static
     {
         $this->type = $type;
 
@@ -123,19 +149,24 @@ class BuItem extends DataEntity
     #[Groups(['buitem_list'])]
     public function getTypeIcon(): ?string
     {
-        $values = ['minus', 'add', 'time', '', ''];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'minus',
+            TypeType::Income => 'add',
+            TypeType::Saving => 'time',
+            TypeType::Deleted => 'close',
+            TypeType::Used => 'arrow-swap-horizontal',
+            default => null,
+        };
     }
 
     public function getPrice(): ?float
     {
-        return $this->price;
+        return $this->price !== null ? $this->price / 100 : null;
     }
 
     public function setPrice(float $price): static
     {
-        $this->price = $price;
+        $this->price = (int) round($price * 100);
 
         return $this;
     }
@@ -238,24 +269,36 @@ class BuItem extends DataEntity
 
     public function getRecurrencePrice(): ?float
     {
-        return $this->recurrencePrice;
+        return $this->recurrencePrice !== null ? $this->recurrencePrice / 100 : null;
     }
 
     public function setRecurrencePrice(?float $recurrencePrice): static
     {
-        $this->recurrencePrice = $recurrencePrice;
+        $this->recurrencePrice = $recurrencePrice !== null ? (int) round($recurrencePrice * 100) : null;
 
         return $this;
     }
 
-    public function getLastType(): ?int
+    public function getLastType(): ?TypeType
     {
         return $this->lastType;
     }
 
-    public function setLastType(int $lastType): static
+    public function setLastType(?TypeType $lastType): static
     {
         $this->lastType = $lastType;
+
+        return $this;
+    }
+
+    public function getLinkedItemId(): ?int
+    {
+        return $this->linkedItemId;
+    }
+
+    public function setLinkedItemId(?int $linkedItemId): static
+    {
+        $this->linkedItemId = $linkedItemId;
 
         return $this;
     }

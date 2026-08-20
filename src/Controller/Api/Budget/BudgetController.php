@@ -27,15 +27,7 @@ class BudgetController extends AbstractController
             $year = $user->getBudgetYear();
         }
 
-        [
-            $data,
-            $categories,
-            $savings,
-            $savingsItems,
-            $savingsUsed,
-            $recurrences,
-            $totalInit
-        ] = $budgetService->getData($serializer, $user, $year, $repository, $recurrentRepository, $categoryRepository);
+        $budget = $budgetService->getData($serializer, $user, $year, $repository, $recurrentRepository, $categoryRepository);
 
         $today = new \DateTime();
 
@@ -43,13 +35,16 @@ class BudgetController extends AbstractController
             'userBudgetYear' => $user->getBudgetYear(),
             'year' => $year,
             'month' => $year != $today->format('Y') ? 1 : $today->format('m'),
-            'donnees' => json_decode($data),
-            'categories' => json_decode($categories),
-            'savings' => json_decode($savings),
-            'savingsItems' => json_decode($savingsItems),
-            'savingsUsed' => json_decode($savingsUsed),
-            'recurrences' => json_decode($recurrences),
-            'initTotal' => $totalInit,
+            'donnees' => json_decode($budget['donnees']),
+            'categories' => json_decode($budget['categories']),
+            'savings' => json_decode($budget['savings']),
+            'savingsItems' => json_decode($budget['savingsItems']),
+            'savingsUsed' => json_decode($budget['savingsUsed']),
+            'recurrences' => json_decode($budget['recurrences']),
+            'initTotal' => $budget['initTotal'],
+            'monthlyBalances' => $budget['monthlyBalances'],
+            'monthlySummaries' => $budget['monthlySummaries'],
+            'savingsSummaries' => $budget['savingsSummaries'],
         ]);
     }
 }

@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 
 import Inputs from "@commonFunctions/inputs";
+import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 
-import { Input } from "@tailwindComponents/Elements/Fields";
+import { Input, Switcher } from "@tailwindComponents/Elements/Fields";
 import { Button } from "@tailwindComponents/Elements/Button";
-import { CloseModalBtn } from "@tailwindComponents/Elements/Modal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 export class SavingForm extends Component {
 	constructor (props) {
@@ -14,31 +15,9 @@ export class SavingForm extends Component {
 
 		this.state = {
 			total: '',
+			addAsIncome: [1],
 			errors: [],
 		}
-	}
-
-	componentDidMount = () => {
-		if (!!this.props.saving) {
-			let body = document.querySelector("body");
-			let modal = document.getElementById(this.props.identifiant);
-			let btns = document.querySelectorAll(".close-modal");
-
-			btns.forEach(btn => {
-				btn.addEventListener('click', () => {
-					body.style.overflow = "auto";
-					modal.style.display = "none";
-				})
-			})
-		}
-	}
-
-	handleCloseModal = () => {
-		let body = document.querySelector("body");
-		let modal = document.getElementById(this.props.identifiant);
-
-		body.style.overflow = "auto";
-		modal.style.display = "none";
 	}
 
 	handleChange = (e) => {
@@ -47,6 +26,10 @@ export class SavingForm extends Component {
 
 		if (name === "total") {
 			value = Inputs.textMoneyMinusInput(value, this.state.total);
+		}
+
+		if (name === "addAsIncome") {
+			value = (e.currentTarget.checked) ? [1] : [0];
 		}
 
 		this.setState({ [name]: value })
@@ -64,27 +47,84 @@ export class SavingForm extends Component {
 		if (!validate.code) {
 			Formulaire.showErrors(this, validate);
 		} else {
-			this.props.onUseSaving(saving, total)
+			const available = saving.total - saving.used;
+			if (parseFloat(total) > available) {
+				Formulaire.showErrors(this, {
+					code: false,
+					errors: [{ name: "total", message: `Le montant ne peut pas dépasser ${Sanitaze.toFormatCurrency(available)}` }]
+				});
+				return;
+			}
+
+			this.props.onUseSaving(saving, total, this.state.addAsIncome[0] === 1)
 		}
 	}
 
 	render () {
-		const { identifiant, saving } = this.props;
-		const { errors, total } = this.state;
+		const { open, onOpenChange, saving } = this.props;
+		const { errors, total, addAsIncome } = this.state;
 
-		let params = { errors: errors, onChange: this.handleChange };
+		const available = saving ? saving.total - saving.used : 0;
 
-		return <>
-			<div className="px-4 pb-4 pt-5 sm:px-6 sm:pb-4">
-				<p className="mb-4">Combien souhaitez-vous utiliser depuis les économies de : <b>{saving ? saving.name : ""}</b> ?</p>
-				<form onSubmit={this.handleSubmit}>
-					<Input identifiant="total" valeur={total} {...params}>Solde à utiliser</Input>
-				</form>
-			</div>
-			<div className="bg-gray-50 px-4 py-3 flex flex-row justify-end gap-2 sm:px-6 border-t">
-				<CloseModalBtn identifiant={identifiant} />
-				<Button type="blue" onClick={this.handleSubmit}>Confirmer</Button>
-			</div>
-		</>
+		return <Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent>
+				{saving && <>
+					<DialogHeader>
+						<DialogTitle>Utiliser vos économies</DialogTitle>
+					</DialogHeader>
+
+					<div className="p-4 bg-[var(--cat-saving-soft)] rounded-lg border border-[var(--cat-saving)]/30">
+						<div className="flex items-start justify-between">
+							<div>
+								<h4 className="font-semibold mb-1">{saving.name}</h4>
+								<p className="text-sm text-muted-foreground">Objectif : {Sanitaze.toFormatCurrency(saving.goal)}</p>
+							</div>
+							<div className="text-right">
+								<div className="text-2xl font-bold text-[var(--cat-saving)] tabular-nums">
+									{Sanitaze.toFormatCurrency(available)}
+								</div>
+								<div className="text-xs text-muted-foreground">disponible</div>
+							</div>
+						</div>
+					</div>
+
+					<form onSubmit={this.handleSubmit} className="flex flex-col gap-3">
+						<p className="text-sm text-muted-foreground">
+							Combien souhaitez-vous utiliser de cette économie&nbsp;: <b>{saving.name}</b> ?
+						</p>
+
+						<Input identifiant="total" valeur={total} errors={errors} onChange={this.handleChange} placeholder={`max : ${Sanitaze.toFormatCurrency(available)}`}>
+							Solde à utiliser (€)
+						</Input>
+
+						<div className="flex flex-wrap gap-2">
+							{[0.25, 0.5, 0.75, 1].map(pct => (
+								<button
+									key={pct}
+									type="button"
+									className="text-xs px-3 py-1 bg-muted hover:bg-accent rounded-md transition-colors"
+									onClick={() => this.setState({ total: (available * pct).toFixed(2) })}
+								>
+									{pct === 1 ? 'Tout' : `${pct * 100}%`}
+								</button>
+							))}
+						</div>
+
+						<div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2.5">
+							<div className="min-w-0">
+								<div className="text-sm font-medium">Ajouter aussi en revenu</div>
+								<div className="text-xs text-muted-foreground">Crée une opération "Revenu" liée, pour garder les totaux cohérents.</div>
+							</div>
+							<Switcher valeur={addAsIncome} identifiant="addAsIncome" items={[{ value: 1, identifiant: 'ai-1' }]} errors={errors} onChange={this.handleChange} />
+						</div>
+					</form>
+
+					<DialogFooter>
+						<Button type="default" onClick={() => onOpenChange(false)}>Annuler</Button>
+						<Button type="blue" onClick={this.handleSubmit}>Confirmer l'utilisation</Button>
+					</DialogFooter>
+				</>}
+			</DialogContent>
+		</Dialog>
 	}
 }

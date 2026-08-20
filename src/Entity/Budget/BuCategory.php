@@ -2,12 +2,14 @@
 
 namespace App\Entity\Budget;
 
+use App\Entity\Enum\Budget\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Budget\BuCategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BuCategoryRepository::class)]
 class BuCategory
@@ -22,17 +24,23 @@ class BuCategory
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(enumType: TypeType::class)]
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
-    private ?int $type = null;
+    #[Assert\NotNull]
+    #[Assert\Choice(choices: [TypeType::Expense, TypeType::Income, TypeType::Saving])]
+    private ?TypeType $type = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['bucat_select', 'bucat_list', 'bucat_form', 'buitem_list', 'burecu_list', 'burecu_form'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
+    /**
+     * Stored in cents to avoid float rounding drift; exposed as euros via getGoal()/setGoal().
+     */
     #[ORM\Column(nullable: true)]
     #[Groups(['bucat_list', 'bucat_form'])]
-    private ?float $goal = null;
+    private ?int $goal = null;
 
     #[ORM\ManyToOne(inversedBy: 'buCategories')]
     #[ORM\JoinColumn(nullable: false)]
@@ -67,12 +75,12 @@ class BuCategory
         return $this;
     }
 
-    public function getType(): ?int
+    public function getType(): ?TypeType
     {
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(?TypeType $type): static
     {
         $this->type = $type;
 
@@ -82,19 +90,22 @@ class BuCategory
     #[Groups(['bucat_list'])]
     public function getTypeString(): ?string
     {
-        $values = ['Dépense', 'Revenu', 'Economie'];
-
-        return $values[$this->type];
+        return match ($this->type) {
+            TypeType::Expense => 'Dépense',
+            TypeType::Income => 'Revenu',
+            TypeType::Saving => 'Economie',
+            default => null,
+        };
     }
 
     public function getGoal(): ?float
     {
-        return $this->goal;
+        return $this->goal !== null ? $this->goal / 100 : null;
     }
 
     public function setGoal(?float $goal): static
     {
-        $this->goal = $goal;
+        $this->goal = $goal !== null ? (int) round($goal * 100) : null;
 
         return $this;
     }

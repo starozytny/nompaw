@@ -1,32 +1,13 @@
 {% extends 'user/pages/budget/template.html.twig' %}
 
 {% set page_title %}Planificateur de budget{% endset %}
-{% set page_subtitle %}Planifie ton budget au cours de l'année{% endset %}
-
-{% set page_actions %}
-    {% if app.user.budgetInit != null %}
-        <div class="flex items-start justify-end flex-wrap gap-1">
-            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                btn_link: path('user_budget_recurrences_index'),
-                btn_type: 'default',
-                btn_icon: '',
-                btn_text: 'Voir les récurrences'
-            } %}
-            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                btn_link: path('user_budget_categories_index'),
-                btn_type: 'default',
-                btn_icon: '',
-                btn_text: 'Voir les catégories'
-            } %}
-        </div>
-    {% endif %}
-{% endset %}
+{% set page_subtitle %}Planifie ton budget, tes récurrences et tes catégories au même endroit{% endset %}
 
 {% set div_class = "mx-auto max-w-screen-qhd py-8 min-h-screen" %}
 
 {% block main_content %}
     {% if app.user.budgetInit != null %}
-        <div id="budget"
+        <div id="budget" class="px-4 sm:px-6 lg:px-8"
              data-donnees="{{ donnees }}"
              data-categories="{{ categories }}"
              data-savings="{{ savings }}"
@@ -37,10 +18,11 @@
              data-m="{{ month }}"
              data-year-min="{{ app.user.budgetYear }}"
              data-init-total="{{ initTotal }}"
+             data-monthly-balances="{{ monthlyBalances }}"
+             data-monthly-summaries="{{ monthlySummaries }}"
+             data-savings-summaries="{{ savingsSummaries }}"
         >
-            <div class="px-4 py-8 sm:px-6 lg:px-8">
-                {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-            </div>
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
         </div>
     {% else %}
         <div class="px-4 sm:px-6 lg:px-8">

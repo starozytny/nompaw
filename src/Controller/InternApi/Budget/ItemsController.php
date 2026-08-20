@@ -21,6 +21,10 @@ class ItemsController extends AbstractController
     public function submitForm($type, BuItemRepository $repository, BuItem $obj, Request $request, ApiResponse $apiResponse,
                                ValidatorService $validator, DataBudget $dataEntity, BuCategoryRepository $categoryRepository): JsonResponse
     {
+        if ($type == "update" && $obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $data = json_decode($request->getContent());
         if ($data === null) {
             return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
@@ -29,7 +33,7 @@ class ItemsController extends AbstractController
         $obj = $dataEntity->setDataItem($obj, $data);
         $obj->setUser($this->getUser());
 
-        $category = $categoryRepository->findOneBy(['id' => $data->category]);
+        $category = $categoryRepository->findOneBy(['id' => $data->category, 'user' => $this->getUser()]);
         $obj->setCategory($category);
 
         if($type == "update") {
@@ -62,6 +66,10 @@ class ItemsController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
     public function delete(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         if($obj->getRecurrenceId()){
             $obj->setType(TypeType::Deleted);
             $repository->save($obj, true);
@@ -76,7 +84,12 @@ class ItemsController extends AbstractController
     #[Route('/active/{id}', name: 'active', options: ['expose' => true], methods: 'PUT')]
     public function active(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
         $obj->setIsActive(true);
+        $obj->setUpdatedAt(new \DateTime());
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
@@ -85,12 +98,19 @@ class ItemsController extends AbstractController
     #[Route('/cancel/{id}', name: 'cancel', options: ['expose' => true], methods: 'PUT')]
     public function cancel(BuItem $obj, BuItemRepository $repository, ApiResponse $apiResponse): Response
     {
-        if($obj->getRecurrenceId()){
-            $obj->setType($obj->getLastType());
-            $obj->setDateAt(new \DateTime());
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
         }
 
-        $repository->save($obj, true);
-        return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
+        if($obj->getRecurrenceId() && $obj->getType() === TypeType::Deleted){
+            $obj->setType($obj->getLastType());
+            $obj->setDateAt(new \DateTime());
+            $obj->setUpdatedAt(new \DateTime());
+
+            $repository->save($obj, true);
+            return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
+        }
+
+        return $apiResponse->apiJsonResponseBadRequest('Cette opération ne peut pas être annulée.');
     }
 }

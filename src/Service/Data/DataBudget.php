@@ -22,11 +22,13 @@ class DataBudget
             $dateAt = $this->sanitizeData->createDateTime($data->dateAt . " " . $data->dateTime);
         }
 
+        $type = TypeType::tryFrom((int) $data->type);
+
         return ($obj)
             ->setYear($this->sanitizeData->setIntValue($data->year))
             ->setMonth($this->sanitizeData->setIntValue($data->month))
-            ->setType((int) $data->type)
-            ->setLastType((int) $data->type)
+            ->setType($type)
+            ->setLastType($type)
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
             ->setName($this->sanitizeData->trimData($data->name))
             ->setIsActive((int) $data->isActive[0])
@@ -66,6 +68,20 @@ class DataBudget
         ;
     }
 
+    public function setDataIncomeFromSaving(BuItem $obj, BuCategory $category, $data): BuItem
+    {
+        return ($obj)
+            ->setYear($this->sanitizeData->setIntValue($data->year))
+            ->setMonth($this->sanitizeData->setIntValue($data->month))
+            ->setType(TypeType::Income)
+            ->setLastType(TypeType::Income)
+            ->setPrice($this->sanitizeData->setFloatValue($data->total))
+            ->setName('Utilisation économie : ' . $category->getName())
+            ->setIsActive(true)
+            ->setDateAt(new \DateTime())
+        ;
+    }
+
     public function setDataInit(User $obj, $data): User
     {
         return ($obj)
@@ -77,7 +93,7 @@ class DataBudget
     public function setDataRecurrent(BuRecurrent $obj, $data): BuRecurrent
     {
         return ($obj)
-            ->setType((int) $data->type)
+            ->setType(TypeType::tryFrom((int) $data->type))
             ->setPrice($this->sanitizeData->setFloatValue($data->price))
             ->setName($this->sanitizeData->trimData($data->name))
             ->setMonths($data->months)
@@ -89,7 +105,7 @@ class DataBudget
     public function setDataCategory(BuCategory $obj, $data): BuCategory
     {
         return ($obj)
-            ->setType((int) $data->type)
+            ->setType(TypeType::tryFrom((int) $data->type))
             ->setName($this->sanitizeData->trimData($data->name))
             ->setGoal($this->sanitizeData->setFloatValue($data->goal))
         ;
