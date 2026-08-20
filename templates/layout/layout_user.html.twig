@@ -41,10 +41,10 @@
         </div>
     </div>
 
-    <div id="main-content-source" class="hidden bg-red-400">
+    <div id="main-content-source" class="hidden bg-sidebar">
         {% include "layout/components/user/page_title.html.twig" %}
 
-        <div class="bg-gray-100 {{ div_class is defined ? div_class : "mx-auto max-w-screen-qhd px-4 py-8 min-h-screen sm:px-6 lg:px-8" }}">
+        <div class="bg-gray-100 rounded-b-xl {{ div_class is defined ? div_class : "mx-auto max-w-screen-qhd px-4 py-8 min-h-screen sm:px-6 lg:px-8" }}">
             {% block main_content %}{% endblock %}
         </div>
 
