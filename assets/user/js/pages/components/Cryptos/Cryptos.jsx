@@ -9,6 +9,11 @@ import { ImportTab } from "@userPages/Cryptos/Import/ImportTab";
 
 export default function Cryptos (props) {
 	const [activeTab, setActiveTab] = useState('trades');
+	// Bumped after a successful import/sync so the other tabs (kept mounted via forceMount, and each
+	// fetching only on mount) remount and refetch instead of showing stale data until a page reload.
+	const [dataVersion, setDataVersion] = useState(0);
+
+	const handleDataChanged = () => setDataVersion(v => v + 1);
 
 	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-1">
 		<TabsList className="self-start">
@@ -19,16 +24,16 @@ export default function Cryptos (props) {
 		</TabsList>
 
 		<TabsContent value="trades" forceMount className={activeTab === 'trades' ? '' : 'hidden'}>
-			<Trades {...props} />
+			<Trades key={dataVersion} {...props} />
 		</TabsContent>
 		<TabsContent value="holdings" forceMount className={activeTab === 'holdings' ? '' : 'hidden'}>
-			<HoldingsTab />
+			<HoldingsTab key={dataVersion} />
 		</TabsContent>
 		<TabsContent value="tax-report" forceMount className={activeTab === 'tax-report' ? '' : 'hidden'}>
-			<TaxReportTab />
+			<TaxReportTab key={dataVersion} />
 		</TabsContent>
 		<TabsContent value="import" forceMount className={activeTab === 'import' ? '' : 'hidden'}>
-			<ImportTab />
+			<ImportTab onImported={handleDataChanged} />
 		</TabsContent>
 	</Tabs>
 }

@@ -51,8 +51,7 @@ class CoinbaseApiClient
     /**
      * Fetches every transaction across every Coinbase account/wallet for this key. Buy/sell transactions
      * are enriched with their linked sub-resource ('detail': subtotal/fee/total), which
-     * CoinbaseApiTransactionMapper needs to build a CrTrade the same way CoinbaseParser does from the CSV
-     * export.
+     * CoinbaseApiTransactionMapper needs to build a CrTrade.
      *
      * @return list<array<string, mixed>>
      *

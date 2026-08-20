@@ -18,7 +18,7 @@ const URL_DISCONNECT = "intern_api_cryptos_cryptocom_disconnect";
 
 const inputClassName = "block w-full rounded-md border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-gray-500 font-mono";
 
-export function CryptocomConnect () {
+export function CryptocomConnect ({ onSynced }) {
 	const [status, setStatus] = useState(null);
 	const [apiKey, setApiKey] = useState("");
 	const [apiSecret, setApiSecret] = useState("");
@@ -64,6 +64,7 @@ export function CryptocomConnect () {
 				setSyncResult(response.data);
 				Toastr.toast('info', "Synchronisation Crypto.com Exchange terminée.");
 				fetchStatus();
+				onSynced && onSynced();
 			})
 			.catch((error) => Formulaire.displayErrors(null, error))
 			.then(() => setSyncing(false))

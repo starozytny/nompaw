@@ -16,7 +16,7 @@ const URL_CONNECT = "intern_api_cryptos_coinbase_connect";
 const URL_SYNC = "intern_api_cryptos_coinbase_sync";
 const URL_DISCONNECT = "intern_api_cryptos_coinbase_disconnect";
 
-export function CoinbaseConnect () {
+export function CoinbaseConnect ({ onSynced }) {
 	const [status, setStatus] = useState(null);
 	const [keyJson, setKeyJson] = useState("");
 	const [connecting, setConnecting] = useState(false);
@@ -62,6 +62,7 @@ export function CoinbaseConnect () {
 				setSyncResult(response.data);
 				Toastr.toast('info', "Synchronisation Coinbase terminée.");
 				fetchStatus();
+				onSynced && onSynced();
 			})
 			.catch((error) => Formulaire.displayErrors(null, error))
 			.then(() => setSyncing(false))
