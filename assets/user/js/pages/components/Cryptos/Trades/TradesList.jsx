@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from 'prop-types';
 
 import moment from "moment/moment";
 import "moment/locale/fr";
 
+import { cn } from "@shadcnComponents/lib/utils";
 import Sanitaze from "@commonFunctions/sanitaze";
 
 import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
@@ -17,6 +18,9 @@ const RECUP = 4;
 const STAKING = 5;
 
 export function TradesList ({ data, onModal, onEdit }) {
+	const [openYears, setOpenYears] = useState({});
+	const [openMonths, setOpenMonths] = useState({});
+
 	if (data.length === 0) {
 		return <div className="flex flex-col items-center gap-2 p-8 text-center">
 			<span className="icon-cart text-2xl text-muted-foreground" />
@@ -64,13 +68,18 @@ export function TradesList ({ data, onModal, onEdit }) {
 		nData.push(item);
 	})
 
+	const lastYearIndex = nData.length - 1;
+
 	let total = 0, totalDepot = 0, totalRetrait = 0, totalBonus = 0;
 
 	let items = [];
 	nData.forEach((yItem, index) => {
+		const isLastYear = index === lastYearIndex;
+		const yearOpen = openYears[yItem.year] ?? isLastYear;
+		const lastMonthIndex = yItem.items.length - 1;
 
 		let cryptosY = [];
-		let totalYDepot = 0, totalYRetrait = 0;
+		let totalYDepot = 0, totalYRetrait = 0, yearTxCount = 0;
 
 		let itemsMonth = [];
 		yItem.items.forEach((mItem, ind) => {
@@ -130,12 +139,20 @@ export function TradesList ({ data, onModal, onEdit }) {
 				itemsTrade.push(<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} />);
 			})
 
+			yearTxCount += mItem.trades.length;
+
+			const monthKey = `${yItem.year}-${mItem.month}`;
+			const isLastMonth = isLastYear && ind === lastMonthIndex;
+			const monthOpen = yearOpen && (openMonths[monthKey] ?? isLastMonth);
+
 			itemsMonth.push(<div key={ind}>
-				<div className="flex flex-col">
-					{itemsTrade}
-				</div>
-				<div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 border-b bg-muted/40 px-4 py-2 text-xs">
-					<span className="font-semibold text-foreground">Fin {mItem.month}</span>
+				<button type="button"
+						className="flex w-full items-center justify-between gap-x-4 gap-y-1.5 border-b bg-muted/40 px-4 py-2 text-xs text-left"
+						onClick={() => setOpenMonths(o => ({ ...o, [monthKey]: !monthOpen }))}>
+					<span className="flex items-center gap-1.5 font-semibold text-foreground capitalize">
+						<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", monthOpen && "rotate-180")} />
+						{mItem.month} <span className="font-normal text-muted-foreground">({mItem.trades.length})</span>
+					</span>
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
 						<span>Dispo <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(total)}</b></span>
 						<span>Dépôt <b className="tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(totalDepot)}</b></span>
@@ -145,19 +162,27 @@ export function TradesList ({ data, onModal, onEdit }) {
 					{cryptosY.length > 0 && <div className="flex flex-wrap gap-1">
 						{cryptosY.map(cr => <Badge key={cr.name} variant="outline" className="tabular-nums">{cr.name} {cr.total}</Badge>)}
 					</div>}
-				</div>
+				</button>
+				{monthOpen && <div className="flex flex-col">
+					{itemsTrade}
+				</div>}
 			</div>)
 		})
 
 		items.push(<div key={index}>
-			<div className="flex flex-col">
-				{itemsMonth}
-			</div>
-			<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-xs font-semibold"
-				 style={{ background: 'var(--cat-crypto-soft)', color: 'var(--cat-crypto)' }}>
-				<span>Fin {yItem.year}</span>
+			<button type="button"
+					className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-xs font-semibold text-left"
+					style={{ background: 'var(--cat-crypto-soft)', color: 'var(--cat-crypto)' }}
+					onClick={() => setOpenYears(o => ({ ...o, [yItem.year]: !yearOpen }))}>
+				<span className="flex items-center gap-1.5">
+					<span className={cn("icon-down-chevron text-[9px] transition-transform", yearOpen && "rotate-180")} />
+					{yItem.year} <span className="font-normal opacity-80">({yearTxCount})</span>
+				</span>
 				<span className="font-normal">Dépôt {Sanitaze.toFormatCurrency(totalYDepot)} · Retrait {Sanitaze.toFormatCurrency(totalYRetrait)}</span>
-			</div>
+			</button>
+			{yearOpen && <div className="flex flex-col">
+				{itemsMonth}
+			</div>}
 		</div>)
 	})
 
