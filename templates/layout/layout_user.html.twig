@@ -23,8 +23,8 @@
          data-profile-path="{{ path('user_profil_index') }}"
          data-logout-path="{{ path('app_logout') }}"
     >
-        <div class="flex min-h-svh w-full" aria-hidden="true">
-            <div class="m-2 hidden w-64 shrink-0 flex-col gap-2 rounded-xl bg-sidebar p-2 md:flex">
+        <div class="flex min-h-svh w-full bg-sidebar" aria-hidden="true">
+            <div class="hidden w-64 shrink-0 flex-col gap-2 p-3 md:flex">
                 <div class="h-12 rounded-md bg-sidebar-accent/80 animate-pulse"></div>
                 <div class="mt-2 flex flex-1 flex-col gap-1.5">
                     {% for i in 1..8 %}
@@ -33,7 +33,7 @@
                 </div>
                 <div class="h-11 rounded-md bg-sidebar-accent/80 animate-pulse"></div>
             </div>
-            <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col bg-background md:m-2 md:ml-0 md:rounded-xl md:shadow">
                 <div class="flex h-14 shrink-0 items-center gap-2 border-b px-4">
                     <div class="h-4 w-32 rounded bg-muted animate-pulse"></div>
                 </div>
