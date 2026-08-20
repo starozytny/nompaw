@@ -10,7 +10,9 @@ import { ImportTab } from "@userPages/Cryptos/Import/ImportTab";
 export default function Cryptos (props) {
 	const [activeTab, setActiveTab] = useState('trades');
 	// Bumped after a successful import/sync so the other tabs (kept mounted via forceMount, and each
-	// fetching only on mount) remount and refetch instead of showing stale data until a page reload.
+	// fetching only on mount) refetch instead of showing stale data until a page reload. Passed as a
+	// prop (not a `key`) so the tabs refetch in place rather than remount — remounting would also reset
+	// TradesList's accordion open/closed state.
 	const [dataVersion, setDataVersion] = useState(0);
 
 	const handleDataChanged = () => setDataVersion(v => v + 1);
@@ -24,13 +26,13 @@ export default function Cryptos (props) {
 		</TabsList>
 
 		<TabsContent value="trades" forceMount className={activeTab === 'trades' ? '' : 'hidden'}>
-			<Trades key={dataVersion} {...props} />
+			<Trades refreshSignal={dataVersion} {...props} />
 		</TabsContent>
 		<TabsContent value="holdings" forceMount className={activeTab === 'holdings' ? '' : 'hidden'}>
-			<HoldingsTab key={dataVersion} />
+			<HoldingsTab refreshSignal={dataVersion} />
 		</TabsContent>
 		<TabsContent value="tax-report" forceMount className={activeTab === 'tax-report' ? '' : 'hidden'}>
-			<TaxReportTab key={dataVersion} />
+			<TaxReportTab refreshSignal={dataVersion} />
 		</TabsContent>
 		<TabsContent value="import" forceMount className={activeTab === 'import' ? '' : 'hidden'}>
 			<ImportTab onImported={handleDataChanged} />

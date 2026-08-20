@@ -12,7 +12,7 @@ import { Card } from "@shadcnComponents/ui/card";
 
 const URL_GET_DATA = "intern_api_cryptos_trades_list";
 
-export function HoldingsTab () {
+export function HoldingsTab ({ refreshSignal }) {
 	const [holdings, setHoldings] = useState([]);
 	const [alerts, setAlerts] = useState([]);
 	const [loadingData, setLoadingData] = useState(true);
@@ -30,7 +30,8 @@ export function HoldingsTab () {
 				setLoadingData(false);
 			})
 		;
-	}, []);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [refreshSignal]);
 
 	if (loadingData) {
 		return <LoaderElements />

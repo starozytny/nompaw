@@ -18,7 +18,7 @@ const URL_EXPORT = "intern_api_cryptos_tax_report_export";
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 10 }, (_, i) => CURRENT_YEAR - i);
 
-export function TaxReportTab () {
+export function TaxReportTab ({ refreshSignal }) {
 	const [year, setYear] = useState(CURRENT_YEAR);
 	const [report, setReport] = useState(null);
 	const [loadingData, setLoadingData] = useState(true);
@@ -37,7 +37,8 @@ export function TaxReportTab () {
 				setLoadingData(false);
 			})
 		;
-	}, [year]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [year, refreshSignal]);
 
 	const handleLineUpdate = (updatedLine) => {
 		setReport(function (prev) {

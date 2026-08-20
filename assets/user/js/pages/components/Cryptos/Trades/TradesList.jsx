@@ -7,6 +7,7 @@ import "moment/locale/fr";
 import { cn } from "@shadcnComponents/lib/utils";
 import Sanitaze from "@commonFunctions/sanitaze";
 
+import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
 import { TradesItem } from "@userPages/Cryptos/Trades/TradesItem";
 
 const ACHAT = 0;
@@ -19,8 +20,8 @@ const STAKING = 5;
 const COLUMNS = 6;
 
 export function TradesList ({ data, onModal, onEdit }) {
-	const [openYears, setOpenYears] = useState({});
 	const [openMonths, setOpenMonths] = useState({});
+	const [selectedYear, setSelectedYear] = useState(null);
 
 	if (data.length === 0) {
 		return <div className="flex flex-col items-center gap-2 p-8 text-center">
@@ -69,17 +70,17 @@ export function TradesList ({ data, onModal, onEdit }) {
 		nData.push(item);
 	})
 
-	const lastYearIndex = nData.length - 1;
+	// nData is chronological (oldest year first) — needed so the running "Dispo" balance is correct.
+	const years = nData.map(yItem => yItem.year);
+	const effectiveYear = years.includes(selectedYear) ? selectedYear : years[years.length - 1];
 
 	let total = 0, totalDepot = 0, totalRetrait = 0, totalBonus = 0;
 
-	let items = [];
-	nData.forEach((yItem, index) => {
-		const isLastYear = index === lastYearIndex;
-		const yearOpen = openYears[yItem.year] ?? isLastYear;
-		const lastMonthIndex = yItem.items.length - 1;
+	let selectedItemsMonth = [];
+	let yearStats = null;
 
-		let totalYDepot = 0, totalYRetrait = 0, yearTxCount = 0;
+	nData.forEach(yItem => {
+		let totalYDepot = 0, totalYRetrait = 0, totalYAchat = 0, totalYVente = 0, totalYBonus = 0, yearTxCount = 0;
 
 		let itemsMonth = [];
 		yItem.items.forEach((mItem, ind) => {
@@ -89,6 +90,7 @@ export function TradesList ({ data, onModal, onEdit }) {
 				switch (elem.type) {
 					case VENTE:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
+						totalYVente = Sanitaze.toRoundTwoDec(totalYVente) + Sanitaze.toRoundTwoDec(elem.total);
 						break;
 					case DEPOT:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
@@ -97,6 +99,7 @@ export function TradesList ({ data, onModal, onEdit }) {
 						break;
 					case ACHAT:
 						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
+						totalYAchat = Sanitaze.toRoundTwoDec(totalYAchat) + Sanitaze.toRoundTwoDec(elem.total);
 						break;
 					case RETRAIT:
 						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
@@ -106,6 +109,7 @@ export function TradesList ({ data, onModal, onEdit }) {
 					case RECUP:
 					case STAKING:
 						totalBonus += Sanitaze.toRoundTwoDec(elem.total);
+						totalYBonus += Sanitaze.toRoundTwoDec(elem.total);
 						break;
 					default: break;
 				}
@@ -113,11 +117,14 @@ export function TradesList ({ data, onModal, onEdit }) {
 				itemsTrade.push(<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} />);
 			})
 
+			// Running totals above are computed chronologically (oldest to newest, as required for
+			// the cumulative math), but rows within the month are displayed newest first.
+			itemsTrade.reverse();
+
 			yearTxCount += mItem.trades.length;
 
 			const monthKey = `${yItem.year}-${mItem.month}`;
-			const isLastMonth = isLastYear && ind === lastMonthIndex;
-			const monthOpen = yearOpen && (openMonths[monthKey] ?? isLastMonth);
+			const monthOpen = openMonths[monthKey] ?? true;
 
 			itemsMonth.push(<React.Fragment key={ind}>
 				<tr className="border-t bg-muted/40">
@@ -142,41 +149,73 @@ export function TradesList ({ data, onModal, onEdit }) {
 			</React.Fragment>)
 		})
 
-		items.push(<React.Fragment key={index}>
-			<tr>
-				<td colSpan={COLUMNS} className="p-0">
-					<button type="button"
-							className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-xs font-semibold text-left"
-							style={{ background: 'var(--cat-crypto-soft)', color: 'var(--cat-crypto)' }}
-							onClick={() => setOpenYears(o => ({ ...o, [yItem.year]: !yearOpen }))}>
-						<span className="flex items-center gap-1.5">
-							<span className={cn("icon-down-chevron text-[9px] transition-transform", yearOpen && "rotate-180")} />
-							{yItem.year} <span className="font-normal opacity-80">({yearTxCount})</span>
-						</span>
-						<span className="font-normal">Dépôt {Sanitaze.toFormatCurrency(totalYDepot)} · Retrait {Sanitaze.toFormatCurrency(totalYRetrait)}</span>
-					</button>
-				</td>
-			</tr>
-			{yearOpen && itemsMonth}
-		</React.Fragment>)
+		// Months within a year are displayed newest first.
+		itemsMonth.reverse();
+
+		if (yItem.year === effectiveYear) {
+			selectedItemsMonth = itemsMonth;
+			yearStats = {
+				count: yearTxCount,
+				depot: totalYDepot,
+				retrait: totalYRetrait,
+				achat: totalYAchat,
+				vente: totalYVente,
+				bonus: totalYBonus,
+				dispoEnd: total,
+			};
+		}
 	})
 
-	return <div className="overflow-x-auto">
-		<table className="w-full min-w-[820px]">
-			<thead>
-				<tr className="border-b bg-[var(--cat-crypto-soft)] text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--cat-crypto)' }}>
-					<th className="py-2.5 pl-4 pr-3">Type de transaction</th>
-					<th className="py-2.5 pr-3">Date</th>
-					<th className="py-2.5 pr-3">Sortie</th>
-					<th className="py-2.5 pr-3">Entrée</th>
-					<th className="py-2.5 pr-3 text-right">Montant</th>
-					<th className="py-2.5 pr-4"></th>
-				</tr>
-			</thead>
-			<tbody>
-				{items}
-			</tbody>
-		</table>
+	return <div className="flex flex-col gap-3 p-4">
+		<div className="flex flex-wrap items-center justify-between gap-3">
+			<div className="w-28">
+				<SelectSimple identifiant="year" valeur={String(effectiveYear)} noEmpty
+					items={[...years].reverse().map(y => ({ identifiant: y, value: String(y), label: String(y) }))}
+					onSelect={(identifiant, value) => setSelectedYear(parseInt(value))} />
+			</div>
+			<span className="text-xs text-muted-foreground">{yearStats.count} transaction{yearStats.count > 1 ? "s" : ""} en {effectiveYear}</span>
+		</div>
+
+		<div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Dépôts</div>
+				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(yearStats.depot)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Retraits</div>
+				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(yearStats.retrait)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Achats</div>
+				<div className="text-sm font-semibold tabular-nums">{Sanitaze.toFormatCurrency(yearStats.achat)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Ventes</div>
+				<div className="text-sm font-semibold tabular-nums">{Sanitaze.toFormatCurrency(yearStats.vente)}</div>
+			</div>
+			<div className="rounded-lg border p-2.5">
+				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Bonus</div>
+				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(yearStats.bonus)}</div>
+			</div>
+		</div>
+
+		<div className="-mx-4 overflow-x-auto border-t">
+			<table className="w-full min-w-[820px]">
+				<thead>
+					<tr className="border-b bg-[var(--cat-crypto-soft)] text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--cat-crypto)' }}>
+						<th className="py-2.5 pl-4 pr-3">Type de transaction</th>
+						<th className="py-2.5 pr-3">Date</th>
+						<th className="py-2.5 pr-3">Sortie</th>
+						<th className="py-2.5 pr-3">Entrée</th>
+						<th className="py-2.5 pr-3 text-right">Montant</th>
+						<th className="py-2.5 pr-4"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{selectedItemsMonth}
+				</tbody>
+			</table>
+		</div>
 	</div>
 }
 
