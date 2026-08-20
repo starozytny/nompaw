@@ -45,7 +45,9 @@ export function CoinbaseConnect () {
 				setKeyJson("");
 				fetchStatus();
 			})
-			.catch((error) => Formulaire.displayErrors(null, error))
+			.catch((error) => {
+				console.log(error); Formulaire.displayErrors(null, error)
+			})
 			.then(() => setConnecting(false))
 		;
 	}
