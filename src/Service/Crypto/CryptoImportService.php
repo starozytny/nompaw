@@ -7,6 +7,9 @@ use App\Entity\Crypto\CrTrade;
 use App\Entity\Main\User;
 use App\Repository\Crypto\CrImportLogRepository;
 use App\Repository\Crypto\CrTradeRepository;
+use App\Service\Crypto\Import\BinanceDepositParser;
+use App\Service\Crypto\Import\BinanceHistoryParser;
+use App\Service\Crypto\Import\BinanceWithdrawalParser;
 use App\Service\Crypto\Import\CoinbaseProFillsParser;
 use App\Service\Crypto\Import\CryptoImportParserInterface;
 use App\Service\Crypto\Import\SwissBorgParser;
@@ -46,6 +49,9 @@ class CryptoImportService
             new UpholdParser(),
             new CoinbaseProFillsParser(),
             new SwissBorgParser(),
+            new BinanceDepositParser(),
+            new BinanceWithdrawalParser(),
+            new BinanceHistoryParser(),
         ];
     }
 

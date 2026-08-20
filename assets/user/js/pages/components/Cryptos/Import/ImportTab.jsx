@@ -59,9 +59,11 @@ export function ImportTab ({ onImported }) {
 				<div>
 					<div className="text-sm font-medium">Importer un export d'exchange</div>
 					<div className="text-xs text-muted-foreground">
-						Dépose le fichier tel que téléchargé (zip, csv ou xls) depuis Coinbase Pro, Uphold ou SwissBorg — le format
-						est détecté automatiquement. Pour Coinbase, Kraken et Bitpanda, connecte plutôt ton compte via l'API
-						ci-dessus pour récupérer l'historique complet. Les transactions déjà importées sont ignorées, pas dupliquées.
+						Dépose le fichier tel que téléchargé (zip, csv ou xls) depuis Coinbase Pro, Uphold, SwissBorg ou Binance
+						(Historique des dépôts / de retrait / des transactions — les trois fichiers peuvent être déposés
+						séparément) — le format est détecté automatiquement. Pour Coinbase, Kraken et Bitpanda, connecte plutôt
+						ton compte via l'API ci-dessus pour récupérer l'historique complet. Les transactions déjà importées sont
+						ignorées, pas dupliquées.
 					</div>
 				</div>
 
