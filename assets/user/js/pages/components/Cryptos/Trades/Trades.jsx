@@ -43,6 +43,12 @@ export class Trades extends Component {
 		this.handleGetData();
 	}
 
+	componentDidUpdate = (prevProps) => {
+		if (prevProps.refreshSignal !== this.props.refreshSignal) {
+			this.handleGetData();
+		}
+	}
+
     handleGetData = () => {
 		const self = this;
 		axios({ method: "GET", url: Routing.generate(URL_GET_DATA), data: {} })

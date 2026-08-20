@@ -6,11 +6,10 @@ use App\Entity\Enum\Crypto\TypeType;
 
 /**
  * Maps Kraken's private /0/private/Ledgers API entries (as fetched by KrakenApiClient::fetchLedgerEntries,
- * each carrying the same fields as a row of the Kraken "ledgers" CSV export plus an added 'txid') into the
- * same array shape as CryptoImportParserInterface::parse(), reusing exactly the same trade-pairing and
- * field-mapping logic as KrakenParser (a single real trade produces two ledger rows sharing 'refid' — one
- * negative leg given up, one positive leg received — which must be paired before building a CrTrade) so
- * trades imported via the API behave identically to ones imported via CSV once persisted.
+ * each carrying the same fields as a row of the Kraken "ledgers" export plus an added 'txid') into the
+ * same array shape as CryptoImportParserInterface::parse() (a single real trade produces two ledger rows
+ * sharing 'refid' — one negative leg given up, one positive leg received — which must be paired before
+ * building a CrTrade).
  *
  * Unlike the CSV export, the private API returns Kraken's legacy internal asset codes (e.g. 'XXBT',
  * 'ZEUR') instead of plain tickers, plus an Earn/staking product suffix on some assets (e.g. 'DOT.S' for

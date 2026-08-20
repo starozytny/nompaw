@@ -7,8 +7,8 @@ use App\Entity\Enum\Crypto\TypeType;
 /**
  * Maps Coinbase v2 API transaction objects (as fetched by CoinbaseApiClient::fetchTransactions, which
  * enriches buy/sell entries with their linked sub-resource under 'detail') into the same array shape as
- * CryptoImportParserInterface::parse(), reproducing CoinbaseParser's CSV-export mapping so trades imported
- * via the API behave identically to ones imported via CSV once persisted as CrTrade.
+ * CryptoImportParserInterface::parse(), so trades imported via the API behave identically to ones imported
+ * via CSV once persisted as CrTrade.
  *
  * transfer/exchange_deposit/exchange_withdrawal/pro_deposit/pro_withdrawal/vault_withdrawal don't appear in
  * the CSV export at all (they come from Coinbase Exchange/Pro/Vault, only visible via the API) but are

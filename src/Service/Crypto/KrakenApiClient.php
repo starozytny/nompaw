@@ -46,7 +46,7 @@ class KrakenApiClient
      * Fetches every ledger entry (trades, deposits, withdrawals, transfers, staking...) for this key,
      * paginated via 'ofs'. Each entry gets a 'txid' key added (the ledger id, which is the dict key in
      * Kraken's raw response) so it lines up with the shape KrakenApiTransactionMapper expects — the same
-     * refid/type/subtype/asset/amount/fee columns as the Kraken "ledgers" CSV export KrakenParser reads.
+     * refid/type/subtype/asset/amount/fee columns as Kraken's "ledgers" export.
      *
      * @return list<array<string, mixed>>
      *

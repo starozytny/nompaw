@@ -11,8 +11,8 @@ use App\Entity\Enum\Crypto\TypeType;
  * Confirmed from a real logged response (see BitpandaApiClient's docblock): a single real trade produces
  * two legs sharing the same `trade.trade_id` — one with a `currency_id` (fiat) and one with an `asset_id`
  * (crypto) — regardless of which `operation_type` groups them (a "swap" chains two such trades: sell one
- * asset for EUR, then buy another with that EUR). Legs are paired by trade_id the same way KrakenParser /
- * KrakenApiTransactionMapper pair Kraken ledger rows by refid.
+ * asset for EUR, then buy another with that EUR). Legs are paired by trade_id the same way
+ * KrakenApiTransactionMapper pairs Kraken ledger rows by refid.
  *
  * Bitpanda charges its trade fee via a worse exchange rate (rate vs rate_with_fee) rather than as a
  * separate debit, so unlike Coinbase/Kraken this mapper does NOT add/subtract `trade.fee` to/from the
@@ -162,7 +162,7 @@ class BitpandaApiTransactionMapper
     /**
      * Fallback when a group of legs sharing a trade_id can't be paired into a single buy/sell (wrong leg
      * count, no fiat leg, or an unparseable date) — emits one best-effort ACategoriser entry per leg
-     * instead of dropping the whole group, mirroring KrakenParser's handling of an unpaired ledger group.
+     * instead of dropping the whole group.
      *
      * @return list<array>
      */

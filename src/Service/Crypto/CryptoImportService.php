@@ -7,21 +7,26 @@ use App\Entity\Crypto\CrTrade;
 use App\Entity\Main\User;
 use App\Repository\Crypto\CrImportLogRepository;
 use App\Repository\Crypto\CrTradeRepository;
-use App\Service\Crypto\Import\BitpandaParser;
-use App\Service\Crypto\Import\CoinbaseParser;
+use App\Service\Crypto\Import\BinanceDepositParser;
+use App\Service\Crypto\Import\BinanceFiatDepositParser;
+use App\Service\Crypto\Import\BinanceFiatPurchaseParser;
+use App\Service\Crypto\Import\BinanceFiatWithdrawalParser;
+use App\Service\Crypto\Import\BinanceHistoryParser;
+use App\Service\Crypto\Import\BinanceWithdrawalParser;
 use App\Service\Crypto\Import\CoinbaseProFillsParser;
 use App\Service\Crypto\Import\CryptoImportParserInterface;
-use App\Service\Crypto\Import\KrakenParser;
+use App\Service\Crypto\Import\SwissBorgParser;
 use App\Service\Crypto\Import\UpholdParser;
 use App\Service\ValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use League\Csv\Reader;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
- * Accepts a single uploaded file (a raw CSV export, or a zip containing one or more of them — e.g.
+ * Accepts a single uploaded file (a raw CSV/XLSX export, or a zip containing one or more of them — e.g.
  * Coinbase's export bundles the main history CSV alongside a "Coinbase Pro/Fills/{year}.csv" per
- * year), auto-detects which exchange format each CSV inside is by matching its header row against
+ * year), auto-detects which exchange format each file inside is by matching its header row against
  * each registered parser, and imports the resulting trades with the same isImported/importedFrom/
  * importedId dedup convention already used by the (now superseded) admin:crypto:* CLI commands.
  *
@@ -31,6 +36,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 class CryptoImportService
 {
+    private const SUPPORTED_EXTENSIONS = ['csv', 'xlsx', 'xls'];
+
     /** @var CryptoImportParserInterface[] */
     private array $parsers;
 
@@ -42,11 +49,15 @@ class CryptoImportService
         private readonly string $privateDirectory,
     ) {
         $this->parsers = [
-            new BitpandaParser(),
             new UpholdParser(),
-            new KrakenParser(),
-            new CoinbaseParser(),
             new CoinbaseProFillsParser(),
+            new SwissBorgParser(),
+            new BinanceDepositParser(),
+            new BinanceWithdrawalParser(),
+            new BinanceFiatDepositParser(),
+            new BinanceFiatWithdrawalParser(),
+            new BinanceFiatPurchaseParser(),
+            new BinanceHistoryParser(),
         ];
     }
 
@@ -63,7 +74,7 @@ class CryptoImportService
         $duplicates = 0;
 
         foreach ($csvPaths as [$path, $label]) {
-            $rows = $this->readRows($path);
+            $rows = $this->readRows($path, $label);
             if (empty($rows)) {
                 continue;
             }
@@ -212,7 +223,7 @@ class CryptoImportService
     /**
      * @param string|null $extractedDir set to the temp extraction directory when the upload was a
      *                                  zip, so the caller can clean it up once import() is done
-     * @return list<array{0: string, 1: string}> [absolute path, display label] for every .csv found
+     * @return list<array{0: string, 1: string}> [absolute path, display label] for every supported file found
      */
     private function extractCsvPaths(UploadedFile $file, array &$errors, ?string &$extractedDir): array
     {
@@ -239,7 +250,7 @@ class CryptoImportService
         $csvPaths = [];
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($extractDir, \FilesystemIterator::SKIP_DOTS));
         foreach ($iterator as $fileInfo) {
-            if (strtolower($fileInfo->getExtension()) === 'csv') {
+            if (in_array(strtolower($fileInfo->getExtension()), self::SUPPORTED_EXTENSIONS, true)) {
                 $csvPaths[] = [$fileInfo->getPathname(), $fileInfo->getFilename()];
             }
         }
@@ -257,14 +268,43 @@ class CryptoImportService
     }
 
     /**
+     * $label (the original/display filename, not $path) decides the format — for a direct, non-zipped
+     * upload, $path is a temp path with no meaningful extension of its own (UploadedFile::getPathname()
+     * points at PHP's upload tmp file, not something named "export.xls").
+     *
      * @return list<list<string>>
      */
-    private function readRows(string $path): array
+    private function readRows(string $path, string $label): array
     {
+        $extension = strtolower(pathinfo($label, PATHINFO_EXTENSION));
+
+        if (in_array($extension, ['xlsx', 'xls'], true)) {
+            return $this->readSpreadsheetRows($path);
+        }
+
         $csv = Reader::createFromPath($path, 'r');
         $csv->setDelimiter(',');
 
         return iterator_to_array($csv->getRecords(), false);
+    }
+
+    /**
+     * Reads a spreadsheet export the same way readRows() reads a CSV. PhpSpreadsheet's IOFactory::load()
+     * sniffs the actual file content rather than trusting the extension, which matters here — SwissBorg's
+     * export is a real XLSX (OOXML zip) despite carrying a ".xls" extension.
+     *
+     * @return list<list<string>>
+     */
+    private function readSpreadsheetRows(string $path): array
+    {
+        $sheet = IOFactory::load($path)->getActiveSheet();
+
+        $rows = [];
+        foreach ($sheet->toArray(null, false, false, false) as $row) {
+            $rows[] = array_map(static fn ($value) => $value === null ? '' : (string) $value, $row);
+        }
+
+        return $rows;
     }
 
     /**
