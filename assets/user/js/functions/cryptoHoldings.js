@@ -97,6 +97,68 @@ function computeHoldingsAndAlerts (data, options = {}) {
 	return { holdings, alerts };
 }
 
+/**
+ * Flags transactions that couldn't physically have happened given what was actually available right
+ * before them — e.g. an Achat spending EUR you hadn't deposited yet, or a Vente of more BTC than you
+ * held at that moment. Deliberately a SEPARATE replay from computeHoldingsAndAlerts() above rather than
+ * an extension of it: that function's Achat/Depot/Retrait rules (documented in its own docblock) are
+ * tailored to portfolio *valuation* — EUR is intentionally left untracked there, and Achat intentionally
+ * never debits fromCoin — because several other features (the tax report, TradesForm's "solde à cette
+ * date", the Holdings tab's crypto-only list) depend on exactly that behavior. This function tracks EVERY
+ * coin including EUR, and DOES debit fromCoin on an Achat, because here the question is different: not
+ * "what crypto do I hold for valuation", but "could this transaction really have happened".
+ *
+ * Per-type rule: Achat/Vente/Retrait debit fromCoin (checked against the running balance); Achat/Vente/
+ * Depot credit toCoin; Recuperation/Stacking credit fromCoin (a reward, never a deficit). Transfert and
+ * ACategoriser are left alone, same as computeHoldingsAndAlerts.
+ *
+ * @return {Object<number, {coin: string, deficit: number, action: string}>} invalid transaction id => why
+ */
+function computeTransactionValidity (data) {
+	let sorted = [...data].sort((a, b) => new Date(a.tradeAt) - new Date(b.tradeAt));
+	let balances = {};
+	let invalid = {};
+
+	let add = (coin, qty) => {
+		if (!coin || qty === null) return;
+		balances[coin] = (balances[coin] || 0) + qty;
+	}
+
+	let debit = (elem, coin, qty, action) => {
+		add(coin, -qty);
+		if (balances[coin] < -0.00000001) {
+			invalid[elem.id] = { coin: coin, deficit: -balances[coin], action: action };
+		}
+	}
+
+	sorted.forEach(elem => {
+		switch (elem.type) {
+			case ACHAT:
+				debit(elem, elem.fromCoin, elem.fromNbToken, 'achat');
+				add(elem.toCoin, elem.toNbToken);
+				break;
+			case VENTE:
+				debit(elem, elem.fromCoin, elem.fromNbToken, 'vente');
+				add(elem.toCoin, elem.toNbToken);
+				break;
+			case DEPOT:
+				add(elem.toCoin, elem.toNbToken);
+				break;
+			case RETRAIT:
+				debit(elem, elem.fromCoin, elem.fromNbToken, 'retrait');
+				break;
+			case RECUP:
+			case STAKING:
+				add(elem.fromCoin, elem.fromNbToken);
+				break;
+			default: break;
+		}
+	})
+
+	return invalid;
+}
+
 module.exports = {
-	computeHoldingsAndAlerts
+	computeHoldingsAndAlerts,
+	computeTransactionValidity,
 }

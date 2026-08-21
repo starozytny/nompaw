@@ -18,7 +18,15 @@ use App\Repository\Crypto\CrTradeRepository;
  * place that needs to change — the formula and its inputs are deliberately kept in one place.
  *
  * Business rules confirmed with the app's owner (not to be re-derived from tax code alone):
- * - Only TypeType::Vente trades are taxable disposals included in the report.
+ * - Only TypeType::Vente trades whose toCoin is EUR are taxable disposals included in the report. A
+ *   crypto-to-crypto Vente (fromCoin sold for another crypto, not EUR) isn't a taxable event under CGI
+ *   art. 150 VH bis II — only a conversion to legal tender, or a crypto payment for goods/services, is —
+ *   so it's excluded from the report entirely: no line, no contribution to totalPlusValue/
+ *   totalCessionPrice, and no minoration of the acquisition cost basis (that fraction hasn't actually been
+ *   "cashed out", so it must stay available for whichever later disposal really is one). This can only
+ *   happen with a manually-entered trade: every import parser already only ever produces a Vente when the
+ *   destination is EUR (crypto-to-crypto is always recorded as Achat instead, by convention), but the
+ *   manual trade form doesn't enforce that.
  * - "Prix de cession" (2086 l.218) = CrTrade::getTotalReal() (net EUR received), not getTotal().
  * - Only TypeType::Achat trades count as acquisitions for "prix total d'acquisition" (2086 l.220); using
  *   getTotal() (totalReal + EUR fee) rather than getTotalReal(), since acquisition fees are added to
@@ -86,8 +94,9 @@ class CrTaxReportService
 
         foreach ($trades as $trade) {
             $isVente = $trade->getType() === TypeType::Vente;
+            $isFiatDisposal = $isVente && $trade->getToCoin() === 'EUR';
 
-            if ($isVente) {
+            if ($isFiatDisposal) {
                 [$line, $fractionConsumed] = $this->computeDisposalLine($trade, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings);
                 $tradeYear = (int) $trade->getTradeAt()->format('Y');
 
@@ -228,11 +237,14 @@ class CrTaxReportService
 
             $isVente = $trade->getType() === TypeType::Vente;
 
-            if ($isVente) {
+            if ($isVente && $trade->getToCoin() === 'EUR') {
                 [, $fractionConsumed] = $this->computeDisposalLine($trade, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings);
                 if ($fractionConsumed !== null) {
                     $acquisitionFractionsConsumed += $fractionConsumed;
                 }
+            }
+
+            if ($isVente) {
                 $holdings[$trade->getFromCoin()] = ($holdings[$trade->getFromCoin()] ?? 0.0) - $trade->getFromNbToken();
             }
 
