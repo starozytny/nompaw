@@ -11,6 +11,7 @@ import CryptoHoldings from "@userFunctions/cryptoHoldings";
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Input, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@shadcnComponents/ui/sheet";
+import { CurrencyConverter } from "@userPages/Cryptos/Trades/CurrencyConverter";
 
 const DEPOT = 2;
 
@@ -196,8 +197,9 @@ function Form ({ context, element, onClose, onUpdateList, data }) {
 			<Input identifiant="costCoin" valeur={costCoin} {...params} placeholder="EUR">Devise des frais</Input>
 		</div>
 
-		<div>
+		<div className="flex flex-col gap-2">
 			<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€)</Input>
+			<CurrencyConverter date={tradeAt} />
 		</div>
 
 		<div className="flex justify-end gap-2">

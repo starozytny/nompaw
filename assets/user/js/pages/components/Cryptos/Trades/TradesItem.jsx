@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 
 import Sanitaze from "@commonFunctions/sanitaze";
+import { cn } from "@shadcnComponents/lib/utils";
 
 import { ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Badge } from "@shadcnComponents/ui/badge";
@@ -30,14 +31,14 @@ function formatAmount (qty, coin) {
 	return coin === "EUR" ? Sanitaze.toFormatCurrency(qty) : `${qty} ${coin}`;
 }
 
-export function TradesItem ({ elem, onModal, onEditElement }) {
+export function TradesItem ({ elem, onModal, onEditElement, invalid }) {
 	const color = TYPE_COLOR[elem.type];
 	const soft = TYPE_SOFT[elem.type];
 
 	const showSortie = SHOWS_SORTIE[elem.type];
 	const showEntree = SHOWS_ENTREE[elem.type];
 
-	return <tr className="border-t hover:bg-muted/40">
+	return <tr className={cn("border-t hover:bg-muted/40", invalid && "bg-[var(--status-critical-soft)] hover:bg-[var(--status-critical-soft)]")}>
 		<td className="py-2.5 pl-4 pr-3 text-sm align-top">
 			<div className="flex items-center gap-2">
 				<div className="hidden sm:flex w-7 h-7 rounded-lg items-center justify-center flex-shrink-0" style={{ background: soft, color: color }}>
@@ -45,7 +46,11 @@ export function TradesItem ({ elem, onModal, onEditElement }) {
 				</div>
 				<span className="font-medium whitespace-nowrap" style={{ color: color }}>{TYPE_LABEL[elem.type]}</span>
 			</div>
-			{(elem.importedFrom || elem.costPrice > 0 || elem.rawCategory) && <div className="flex flex-wrap items-center gap-1.5 mt-1 sm:pl-9">
+			{(elem.importedFrom || elem.costPrice > 0 || elem.rawCategory || invalid) && <div className="flex flex-wrap items-center gap-1.5 mt-1 sm:pl-9">
+				{invalid && <Badge variant="outline" style={{ borderColor: 'var(--status-critical)55', color: 'var(--status-critical)' }}
+									title={`Manque ${formatAmount(invalid.deficit, invalid.coin)} à cette date`}>
+					<span className="icon-warning1 mr-1" />Incohérent · manque {formatAmount(invalid.deficit, invalid.coin)}
+				</Badge>}
 				{elem.importedFrom && <Badge variant="muted">Importé · {elem.importedFrom}</Badge>}
 				{elem.costPrice > 0 && <Badge variant="muted">Frais {formatAmount(elem.costPrice, elem.costCoin)}</Badge>}
 				{elem.rawCategory && <Badge variant="outline" style={{ borderColor: 'var(--status-critical)55', color: 'var(--status-critical)' }}>Catégorie d'origine · {elem.rawCategory}</Badge>}
@@ -94,4 +99,9 @@ export function TradesItem ({ elem, onModal, onEditElement }) {
 
 TradesItem.propTypes = {
 	elem: PropTypes.object.isRequired,
+	invalid: PropTypes.shape({
+		coin: PropTypes.string,
+		deficit: PropTypes.number,
+		action: PropTypes.string,
+	}),
 }
