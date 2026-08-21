@@ -5,15 +5,22 @@
     <style>
         body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1a1a1a; }
         h1 { font-size: 16px; margin: 0 0 4px; color: #4a3aa7; }
+        h2 { font-size: 12px; margin: 18px 0 6px; color: #4a3aa7; }
         .subtitle { font-size: 11px; color: #555; margin: 0 0 12px; }
         .disclaimer { background: #fdf6e3; border: 1px solid #e0c98f; padding: 8px 10px; margin-bottom: 14px; font-size: 9px; color: #6b5320; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 5px 6px; text-align: left; }
-        th { background: #efecfb; color: #4a3aa7; font-size: 9px; text-transform: uppercase; }
-        td { font-size: 10px; }
+        th { background: #efecfb; color: #4a3aa7; font-size: 8px; text-transform: uppercase; }
+        td { font-size: 9px; }
         .num { text-align: right; }
         .missing { color: #b91c1c; font-weight: bold; }
         tfoot td { font-weight: bold; border-top: 2px solid #4a3aa7; }
+        .lineref { display: block; font-weight: normal; text-transform: none; color: #7a6fc4; font-size: 7px; }
+        .recap { width: auto; margin-top: 6px; }
+        .recap td { border: none; padding: 3px 6px; font-size: 10px; }
+        .recap td:first-child { color: #555; }
+        .recap td:last-child { font-weight: bold; text-align: right; }
+        .exempt { color: #15803d; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -22,20 +29,23 @@
 
     <div class="disclaimer">
         Ce rapport applique l'art. 150 VH bis du CGI selon une compréhension non vérifiée par un professionnel.
-        À faire valider avant toute déclaration réelle.
+        À faire valider avant toute déclaration réelle. Les numéros de ligne entre parenthèses renvoient au
+        formulaire Cerfa 2086 (déclarant 1) pour faciliter la transcription.
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Coin cédé</th>
+                <th>Date<span class="lineref">l.211</span></th>
+                <th>Cédé</th>
                 <th>Quantité</th>
-                <th class="num">Prix de cession (€)</th>
-                <th class="num">Coût d'acquisition cumulé (€)</th>
-                <th class="num">Valeur portefeuille (€)</th>
+                <th class="num">Prix de cession €<span class="lineref">l.213/218</span></th>
+                <th class="num">Acquis. brut €<span class="lineref">l.220</span></th>
+                <th class="num">Fractions consommées €<span class="lineref">l.221</span></th>
+                <th class="num">Acquis. net €<span class="lineref">l.223</span></th>
+                <th class="num">Portefeuille €<span class="lineref">l.212</span></th>
                 <th>Source</th>
-                <th class="num">Plus-value (€)</th>
+                <th class="num">Plus-value €</th>
             </tr>
         </thead>
         <tbody>
@@ -45,7 +55,9 @@
                     <td>{{ line.fromCoin }}</td>
                     <td>{{ line.fromNbToken }}</td>
                     <td class="num">{{ line.cessionPrice|number_format(2, ',', ' ') }}</td>
-                    <td class="num">{{ line.cumulativeAcquisitionCost|number_format(2, ',', ' ') }}</td>
+                    <td class="num">{{ line.grossAcquisitionCost|number_format(2, ',', ' ') }}</td>
+                    <td class="num">{{ line.acquisitionFractionsConsumed|number_format(2, ',', ' ') }}</td>
+                    <td class="num">{{ line.netAcquisitionCost|number_format(2, ',', ' ') }}</td>
                     <td class="num">
                         {% if line.portfolioValue is null %}
                             <span class="missing">manquant ({{ line.missingCoins|join(', ') }})</span>
@@ -66,10 +78,48 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="7">Total plus-value {{ year }}</td>
-                <td class="num">{{ totalPlusValue|number_format(2, ',', ' ') }}</td>
+                <td colspan="9">Total plus-value {{ year }} <span class="lineref">l.52, foyer fiscal</span></td>
+                <td class="num">{{ report.totalPlusValue|number_format(2, ',', ' ') }}</td>
             </tr>
         </tfoot>
     </table>
+
+    <h2>Récapitulatif au niveau du foyer fiscal (formulaire 2086, section 5)</h2>
+    <table class="recap">
+        <tr>
+            <td>Total des prix de cession de l'année (l.51)</td>
+            <td>{{ report.totalCessionPrice|number_format(2, ',', ' ') }} €</td>
+        </tr>
+        <tr>
+            <td>Seuil d'exonération</td>
+            <td>{{ report.exemptionThreshold|number_format(0, ',', ' ') }} €</td>
+        </tr>
+        <tr>
+            <td>Statut</td>
+            <td>
+                {% if report.isExempt %}
+                    <span class="exempt">Exonéré — total des cessions inférieur ou égal au seuil</span>
+                {% else %}
+                    Imposable dès le 1er euro de plus-value
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Ligne à reporter sur la 2042 C (l.52)</td>
+            <td>{{ report.declarationLine }}</td>
+        </tr>
+        <tr>
+            <td>Impôt flat tax estimé ({{ (report.flatTaxRate * 100)|number_format(1, ',', ' ') }} %, hors option barème progressif — case 3CN)</td>
+            <td>{{ report.estimatedFlatTax|number_format(2, ',', ' ') }} €</td>
+        </tr>
+    </table>
+
+    {% if report.hasMissingValues %}
+        <div class="disclaimer" style="margin-top: 14px;">
+            <span class="missing">Attention :</span> certaines cessions (de cette année ou d'une année précédente)
+            n'ont pas de valeur de portefeuille connue. Le coût d'acquisition net et les montants ci-dessus peuvent
+            être incomplets tant qu'une valeur manuelle n'est pas renseignée pour ces cessions.
+        </div>
+    {% endif %}
 </body>
 </html>

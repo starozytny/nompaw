@@ -21,9 +21,21 @@ const STAKING = 5;
  * Replays trades in chronological order (not just a final sum) so a Vente that spends more of a coin
  * than was held at that point in time is caught and surfaced as an inconsistency, rather than silently
  * netting out against a later purchase.
+ *
+ * @param {{asOf?: string|Date, excludeId?: number}} [options] asOf stops the replay at that date instead
+ *        of running through the full history — e.g. TradesForm shows "what did I actually hold right
+ *        before this transaction", which is meaningless as a *current* total for a transaction backdated
+ *        years ago. excludeId leaves one trade (typically the one being edited) out of the replay entirely,
+ *        so its own effect doesn't count towards "what was available before it".
  */
-function computeHoldingsAndAlerts (data) {
-	let sorted = [...data].sort((a, b) => new Date(a.tradeAt) - new Date(b.tradeAt));
+function computeHoldingsAndAlerts (data, options = {}) {
+	let { asOf, excludeId } = options;
+	let scoped = data.filter(elem => {
+		if (excludeId !== undefined && excludeId !== null && elem.id === excludeId) return false;
+		if (asOf && new Date(elem.tradeAt) > new Date(asOf)) return false;
+		return true;
+	});
+	let sorted = [...scoped].sort((a, b) => new Date(a.tradeAt) - new Date(b.tradeAt));
 	let balances = {};
 	let alerts = [];
 

@@ -48,7 +48,60 @@ class TaxReportController extends AbstractController
         $obj->setPortfolioValueSource('manual');
         $repository->save($obj, true);
 
-        return $apiResponse->apiJsonResponseCustom($reportService->computeSingleLine($obj));
+        // Filling in a missing portfolio value can shift the acquisition cost basis (see
+        // CrTaxReportService's minoration rule) for every later disposal, possibly in other years too —
+        // not just this one line — so the caller re-fetches the whole report for THIS disposal's year
+        // rather than patching a single row in place.
+        $year = (int) $obj->getTradeAt()->format('Y');
+
+        return $apiResponse->apiJsonResponseCustom($reportService->computeReport($this->getUser(), $year));
+    }
+
+    #[Route('/holdings/{id}', name: 'holdings', options: ['expose' => true], methods: 'GET')]
+    public function holdings(CrTrade $obj, CrTaxReportService $reportService, ApiResponse $apiResponse): Response
+    {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
+        if ($obj->getType() !== TypeType::Vente) {
+            return $apiResponse->apiJsonResponseBadRequest('Seule une vente a un portefeuille à valoriser.');
+        }
+
+        return $apiResponse->apiJsonResponseCustom(['coins' => $reportService->computeHoldingsSnapshot($obj)]);
+    }
+
+    #[Route('/prices/{id}', name: 'prices', options: ['expose' => true], methods: 'PUT')]
+    public function prices(CrTrade $obj, Request $request, CrTaxReportService $reportService, ApiResponse $apiResponse): Response
+    {
+        if ($obj->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden('Accès non autorisé.');
+        }
+
+        if ($obj->getType() !== TypeType::Vente) {
+            return $apiResponse->apiJsonResponseBadRequest('Seule une vente a un portefeuille à valoriser.');
+        }
+
+        $data = json_decode($request->getContent());
+        if ($data === null || !isset($data->prices) || !is_object($data->prices)) {
+            return $apiResponse->apiJsonResponseBadRequest('Prix invalides.');
+        }
+
+        $pricesByCoin = [];
+        foreach ($data->prices as $coin => $price) {
+            if (!is_numeric($price) || (float) $price <= 0) {
+                return $apiResponse->apiJsonResponseBadRequest("Prix invalide pour {$coin}.");
+            }
+            $pricesByCoin[$coin] = (float) $price;
+        }
+
+        $reportService->saveManualPrices($obj, $pricesByCoin);
+
+        // Same reasoning as override() above: a coin/date price fix can ripple into the acquisition cost
+        // basis of every later disposal, so the caller re-fetches the whole report for this disposal's year.
+        $year = (int) $obj->getTradeAt()->format('Y');
+
+        return $apiResponse->apiJsonResponseCustom($reportService->computeReport($this->getUser(), $year));
     }
 
     #[Route('/export/{year}/{format}', name: 'export', requirements: ['year' => '\d{4}', 'format' => 'excel|pdf'], options: ['expose' => true], methods: 'GET')]
@@ -66,7 +119,16 @@ class TaxReportController extends AbstractController
         $report = $reportService->computeReport($this->getUser(), $year);
 
         if ($format === 'excel') {
-            $header = [['Date', 'Coin cédé', 'Quantité', 'Prix de cession (€)', "Coût d'acquisition cumulé (€)", 'Valeur portefeuille (€)', 'Source valeur portefeuille', 'Plus-value (€)']];
+            $header = [[
+                'Date (2086 l.211)', 'Coin cédé', 'Quantité',
+                'Prix de cession (€) (l.213/218)',
+                "Prix total acquisition brut (€) (l.220)",
+                'Fractions capital initial consommées (€) (l.221)',
+                'Prix total acquisition net (€) (l.223)',
+                'Valeur portefeuille (€) (l.212)',
+                'Source valeur portefeuille',
+                'Plus-value (€)',
+            ]];
             $data = [];
             foreach ($report['lines'] as $line) {
                 $data[] = [
@@ -74,20 +136,28 @@ class TaxReportController extends AbstractController
                     $line['fromCoin'],
                     $line['fromNbToken'],
                     $line['cessionPrice'],
-                    $line['cumulativeAcquisitionCost'],
+                    $line['grossAcquisitionCost'],
+                    $line['acquisitionFractionsConsumed'],
+                    $line['netAcquisitionCost'],
                     $line['portfolioValue'],
                     $line['portfolioValueSource'] ?? 'manquant',
                     $line['plusValue'],
                 ];
             }
-            $data[] = ['', '', '', '', '', '', 'Total', $report['totalPlusValue']];
+            $pad = fn (array $row) => array_pad($row, 10, '');
+            $data[] = $pad(['', '', '', '', '', '', '', '', 'Total (2086 l.52)', $report['totalPlusValue']]);
+            $data[] = $pad([]);
+            $data[] = $pad(['Total des prix de cession (2086 l.51)', $report['totalCessionPrice']]);
+            $data[] = $pad(['Exonéré (seuil ' . $report['exemptionThreshold'] . ' €)', $report['isExempt'] ? 'Oui' : 'Non']);
+            $data[] = $pad(['Ligne 2042 C à reporter', $report['declarationLine']]);
+            $data[] = $pad(['Impôt flat tax estimé (' . ($report['flatTaxRate'] * 100) . ' %)', $report['estimatedFlatTax']]);
 
-            $export->createFile('excel', "Rapport fiscal $year", $fileName, $header, $data, 8, $nameFolder);
+            $export->createFile('excel', "Rapport fiscal $year", $fileName, $header, $data, 10, $nameFolder);
         } else {
             $html = $this->renderView('user/pdf/cryptos/tax_report.html.twig', [
                 'year' => $year,
                 'lines' => $report['lines'],
-                'totalPlusValue' => $report['totalPlusValue'],
+                'report' => $report,
                 'user' => $this->getUser(),
             ]);
 
