@@ -14,6 +14,8 @@ use App\Service\Crypto\Import\BinanceFiatWithdrawalParser;
 use App\Service\Crypto\Import\BinanceHistoryParser;
 use App\Service\Crypto\Import\BinanceWithdrawalParser;
 use App\Service\Crypto\Import\CoinbaseProFillsParser;
+use App\Service\Crypto\Import\CryptocomAppHistoryParser;
+use App\Service\Crypto\Import\CryptocomDepositWithdrawalParser;
 use App\Service\Crypto\Import\CryptoImportParserInterface;
 use App\Service\Crypto\Import\SwissBorgParser;
 use App\Service\Crypto\Import\UpholdParser;
@@ -58,6 +60,8 @@ class CryptoImportService
             new BinanceFiatWithdrawalParser(),
             new BinanceFiatPurchaseParser(),
             new BinanceHistoryParser(),
+            new CryptocomDepositWithdrawalParser(),
+            new CryptocomAppHistoryParser(),
         ];
     }
 
@@ -282,7 +286,12 @@ class CryptoImportService
             return $this->readSpreadsheetRows($path);
         }
 
-        $csv = Reader::createFromPath($path, 'r');
+        // Reader::createFromPath() reads line-by-line via fgets(), which never splits on a bare "\r" —
+        // Crypto.com's export uses old Mac-style CR-only line endings, so without this normalization the
+        // whole file is read back as a single row. Reading from a normalized string instead is harmless
+        // for every other export, which already uses CRLF or LF.
+        $content = str_replace(["\r\n", "\r"], "\n", file_get_contents($path));
+        $csv = Reader::createFromString($content);
         $csv->setDelimiter(',');
 
         return iterator_to_array($csv->getRecords(), false);
