@@ -158,7 +158,7 @@ export class Trades extends Component {
 
 			<TradesFormulaire context={editElement ? "update" : "create"} element={editElement}
 							  open={sheetOpen} onOpenChange={this.handleSheetOpenChange}
-							  onUpdateList={this.handleUpdateList} />
+							  onUpdateList={this.handleUpdateList} data={data} />
 
 			<ModalDelete refModal={this.delete} element={deleteElement} routeName={URL_DELETE_ELEMENT}
 						 title="Supprimer cette transaction" msgSuccess="Transaction supprimée."
