@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Card } from "@shadcnComponents/ui/card";
 import { TaxReportRow } from "@userPages/Cryptos/TaxReport/TaxReportRow";
 
-export function TaxReportTable ({ lines, onLineUpdate }) {
+export function TaxReportTable ({ lines, onReportUpdate }) {
 	if (lines.length === 0) {
 		return <Card className="flex flex-col items-center gap-2 border-dashed p-8 text-center">
 			<span className="icon-receipt text-2xl text-muted-foreground" />
@@ -13,21 +13,25 @@ export function TaxReportTable ({ lines, onLineUpdate }) {
 		</Card>
 	}
 
+	const LineRef = ({ children }) => <span className="block text-[9px] font-normal normal-case tracking-normal text-muted-foreground/70">{children}</span>
+
 	return <Card className="overflow-hidden">
 		<div className="overflow-x-auto">
-			<table className="w-full min-w-[680px]">
+			<table className="w-full min-w-[900px]">
 				<thead>
 					<tr className="border-b bg-[var(--cat-crypto-soft)] text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--cat-crypto)' }}>
-						<th className="py-2.5 pl-4 pr-3">Date</th>
+						<th className="py-2.5 pl-4 pr-3">Date<LineRef>2086 l.211</LineRef></th>
 						<th className="py-2.5 pr-3">Cédé</th>
-						<th className="py-2.5 pr-3">Prix de cession</th>
-						<th className="py-2.5 pr-3">Coût acquis. cumulé</th>
-						<th className="py-2.5 pr-3">Valeur portefeuille</th>
+						<th className="py-2.5 pr-3">Prix de cession<LineRef>l.213/218</LineRef></th>
+						<th className="py-2.5 pr-3">Acquis. brut<LineRef>l.220</LineRef></th>
+						<th className="py-2.5 pr-3">Fractions conso.<LineRef>l.221</LineRef></th>
+						<th className="py-2.5 pr-3">Acquis. net<LineRef>l.223</LineRef></th>
+						<th className="py-2.5 pr-3">Valeur portefeuille<LineRef>l.212</LineRef></th>
 						<th className="py-2.5 pr-4">Plus-value</th>
 					</tr>
 				</thead>
 				<tbody>
-					{lines.map(line => <TaxReportRow key={line.id} line={line} onLineUpdate={onLineUpdate} />)}
+					{lines.map(line => <TaxReportRow key={line.id} line={line} onReportUpdate={onReportUpdate} />)}
 				</tbody>
 			</table>
 		</div>
@@ -36,5 +40,5 @@ export function TaxReportTable ({ lines, onLineUpdate }) {
 
 TaxReportTable.propTypes = {
 	lines: PropTypes.array.isRequired,
-	onLineUpdate: PropTypes.func.isRequired,
+	onReportUpdate: PropTypes.func.isRequired,
 }

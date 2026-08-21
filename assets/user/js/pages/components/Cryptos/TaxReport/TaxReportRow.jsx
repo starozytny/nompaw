@@ -1,38 +1,15 @@
 import React, { useState } from "react";
 import PropTypes from 'prop-types';
 
-import axios from "axios";
-import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
-
-import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze from "@commonFunctions/sanitaze";
-import { Input } from "@tailwindComponents/Elements/Fields";
+import { Button } from "@tailwindComponents/Elements/Button";
 import { Badge } from "@tailwindComponents/Elements/Badge";
+import { TaxReportPriceDialog } from "@userPages/Cryptos/TaxReport/TaxReportPriceDialog";
 
-const URL_OVERRIDE = "intern_api_cryptos_tax_report_override";
-
-export function TaxReportRow ({ line, onLineUpdate }) {
-	const [value, setValue] = useState("");
-	const [saving, setSaving] = useState(false);
+export function TaxReportRow ({ line, onReportUpdate }) {
+	const [dialogOpen, setDialogOpen] = useState(false);
 
 	let missing = line.portfolioValue === null;
-
-	const handleSave = () => {
-		if (value === "" || saving) return;
-
-		setSaving(true);
-		axios({ method: "PUT", url: Routing.generate(URL_OVERRIDE, { id: line.id }), data: { portfolioValueTotal: parseFloat(value) } })
-			.then(function (response) {
-				onLineUpdate(response.data);
-				setSaving(false);
-				setValue("");
-			})
-			.catch(function (error) {
-				Formulaire.displayErrors(null, error);
-				setSaving(false);
-			})
-		;
-	}
 
 	return <tr className="border-t hover:bg-muted/40">
 		<td className="py-2.5 pl-4 pr-3 text-sm">{Sanitaze.toFormatDate(line.tradeAt, 'L')}</td>
@@ -41,23 +18,19 @@ export function TaxReportRow ({ line, onLineUpdate }) {
 			<Badge type="indigo">{line.fromCoin}</Badge>
 		</td>
 		<td className="py-2.5 pr-3 text-sm tabular-nums">{Sanitaze.toFormatCurrency(line.cessionPrice)}</td>
-		<td className="py-2.5 pr-3 text-sm tabular-nums text-muted-foreground">{Sanitaze.toFormatCurrency(line.cumulativeAcquisitionCost)}</td>
+		<td className="py-2.5 pr-3 text-sm tabular-nums text-muted-foreground">{Sanitaze.toFormatCurrency(line.grossAcquisitionCost)}</td>
+		<td className="py-2.5 pr-3 text-sm tabular-nums text-muted-foreground">{Sanitaze.toFormatCurrency(line.acquisitionFractionsConsumed)}</td>
+		<td className="py-2.5 pr-3 text-sm tabular-nums">{Sanitaze.toFormatCurrency(line.netAcquisitionCost)}</td>
 		<td className="py-2.5 pr-3 text-sm tabular-nums">
 			{missing
-				? <div className="flex items-center gap-1.5">
-					<div className="w-28">
-						<Input type="number" identifiant={`portfolio-value-${line.id}`} valeur={value}
-							   placeholder="Valeur €" disabled={saving}
-							   onChange={(e) => setValue(e.target.value)}
-							   onBlur={handleSave} />
-					</div>
-					<span className="text-[10px] font-medium text-[var(--status-critical)]">({line.missingCoins.join(', ')})</span>
-				</div>
+				? <Button type="yellow" pa="py-1 px-2.5" onClick={() => setDialogOpen(true)}>Renseigner les prix</Button>
 				: <div className="flex items-center gap-1.5">
 					<span>{Sanitaze.toFormatCurrency(line.portfolioValue)}</span>
 					<Badge type={line.portfolioValueSource === 'manual' ? 'gray' : 'indigo'}>
 						{line.portfolioValueSource === 'manual' ? 'manuel' : 'auto'}
 					</Badge>
+					<button type="button" className="icon-pencil text-xs text-muted-foreground hover:text-foreground"
+							title="Corriger les prix par actif" onClick={() => setDialogOpen(true)} />
 				</div>
 			}
 		</td>
@@ -73,10 +46,12 @@ export function TaxReportRow ({ line, onLineUpdate }) {
 				</span>
 			}
 		</td>
+
+		<TaxReportPriceDialog open={dialogOpen} onOpenChange={setDialogOpen} line={line} onReportUpdate={onReportUpdate} />
 	</tr>
 }
 
 TaxReportRow.propTypes = {
 	line: PropTypes.object.isRequired,
-	onLineUpdate: PropTypes.func.isRequired,
+	onReportUpdate: PropTypes.func.isRequired,
 }
