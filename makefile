@@ -82,3 +82,15 @@ logs-php: ## Affiche les logs PHP
 
 logs-nginx: ## Affiche les logs Nginx
 	docker-compose logs -f nginx
+
+deploy: ## Build les assets et les envoie sur la prod
+	bash bin/deploy.sh
+
+deploy-no-build: ## Déploie sans rebuild des assets (git pull/migrations/cache uniquement)
+	bash bin/deploy.sh --no-build
+
+deploy-composer: ## Déploie avec composer install en plus
+	bash bin/deploy.sh --composer
+
+deploy-no-build-composer: ## Déploie sans rebuild mais avec composer install
+	bash bin/deploy.sh --no-build --composer

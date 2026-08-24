@@ -6,6 +6,7 @@ import "moment/locale/fr";
 
 import { cn } from "@shadcnComponents/lib/utils";
 import Sanitaze from "@commonFunctions/sanitaze";
+import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
 import { TradesItem, TYPE_LABEL } from "@userPages/Cryptos/Trades/TradesItem";
@@ -34,6 +35,10 @@ export function TradesList ({ data, onModal, onEdit }) {
 			<div className="text-sm text-muted-foreground">Aucune transaction pour le moment.</div>
 		</div>
 	}
+
+	// Computed from the full, unfiltered data — the chronological balance replay would be wrong if some
+	// transactions were excluded by the type/platform filters below.
+	const invalidById = CryptoHoldings.computeTransactionValidity(data);
 
 	const platforms = [...new Set(data.map(item => item.importedFrom).filter(Boolean))].sort();
 	const hasManual = data.some(item => !item.importedFrom);
@@ -136,8 +141,10 @@ export function TradesList ({ data, onModal, onEdit }) {
 			mItem.trades.forEach(elem => {
 				switch (elem.type) {
 					case VENTE:
-						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
-						totalYVente = Sanitaze.toRoundTwoDec(totalYVente) + Sanitaze.toRoundTwoDec(elem.total);
+						// elem.totalReal is the net EUR actually received (fees already deducted by the
+						// exchange); elem.total adds the fee back on top and would overstate the Dispo.
+						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.totalReal);
+						totalYVente = Sanitaze.toRoundTwoDec(totalYVente) + Sanitaze.toRoundTwoDec(elem.totalReal);
 						break;
 					case DEPOT:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
@@ -161,7 +168,7 @@ export function TradesList ({ data, onModal, onEdit }) {
 					default: break;
 				}
 
-				itemsTrade.push(<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} />);
+				itemsTrade.push(<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} invalid={invalidById[elem.id]} />);
 			})
 
 			// Running totals above are computed chronologically (oldest to newest, as required for

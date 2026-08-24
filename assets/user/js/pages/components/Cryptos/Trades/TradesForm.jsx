@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
@@ -6,10 +6,12 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Toastr from "@tailwindFunctions/toastr";
+import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Input, SelectCombobox } from "@tailwindComponents/Elements/Fields";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@shadcnComponents/ui/sheet";
+import { CurrencyConverter } from "@userPages/Cryptos/Trades/CurrencyConverter";
 
 const DEPOT = 2;
 
@@ -27,7 +29,7 @@ const TYPE_ITEMS = [
 	{ value: 7, label: 'À catégoriser' },
 ];
 
-export function TradesFormulaire ({ context, element, open, onOpenChange, onUpdateList }) {
+export function TradesFormulaire ({ context, element, open, onOpenChange, onUpdateList, data = [] }) {
 	return <Sheet open={open} onOpenChange={onOpenChange}>
 		<SheetContent className="flex flex-col p-0 sm:max-w-lg [&_label]:mb-1.5 [&_label]:mt-0">
 			<SheetHeader>
@@ -41,13 +43,14 @@ export function TradesFormulaire ({ context, element, open, onOpenChange, onUpda
 					element={element}
 					onClose={() => onOpenChange(false)}
 					onUpdateList={onUpdateList}
+					data={data}
 				/>
 			</div>
 		</SheetContent>
 	</Sheet>;
 }
 
-function Form ({ context, element, onClose, onUpdateList }) {
+function Form ({ context, element, onClose, onUpdateList, data }) {
 	const [state, setState] = useState({
 		tradeAt: element ? Formulaire.setValueDateTime(element.tradeAt) : Formulaire.setValueDateTime(new Date()),
 		type: element ? Formulaire.setValue(element.type) : 0,
@@ -138,6 +141,23 @@ function Form ({ context, element, onClose, onUpdateList }) {
 	const isDepot = parseInt(type) === DEPOT;
 	const params = { errors: errors, onChange: handleChange };
 
+	// Balance as it stood right before this specific transaction — not a *current* total, which would be
+	// meaningless for a transaction backdated years ago (e.g. re-entering something from 2019). Excludes
+	// the transaction being edited itself, so its own effect doesn't count towards "what was available
+	// before it". Memoized on the date (not on every fromCoin keystroke) since replaying the full history
+	// is the expensive part.
+	const holdingsAsOfDate = useMemo(
+		() => CryptoHoldings.computeHoldingsAndAlerts(data, { asOf: tradeAt, excludeId: element ? element.id : null }).holdings,
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[data, tradeAt]
+	);
+
+	let currentBalance = null;
+	if (fromCoin) {
+		let held = holdingsAsOfDate.find(h => h.coin === fromCoin.toUpperCase());
+		currentBalance = held ? held.quantity : 0;
+	}
+
 	return <div className="flex flex-col gap-5">
 		<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 			<SelectCombobox identifiant="type" valeur={type} items={TYPE_ITEMS} noEmpty={true} errors={errors} onSelect={handleSelect}>
@@ -147,7 +167,12 @@ function Form ({ context, element, onClose, onUpdateList }) {
 		</div>
 
 		{!isDepot && <div className="rounded-lg border p-3">
-			<div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Token cédé</div>
+			<div className="mb-2 flex items-center justify-between gap-2">
+				<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Token cédé</div>
+				{currentBalance !== null && <div className="text-[11px] text-muted-foreground">
+					Solde à cette date : <span className="font-semibold tabular-nums">{currentBalance}</span> {fromCoin.toUpperCase()}
+				</div>}
+			</div>
 			<div className="grid grid-cols-2 gap-2">
 				<Input type="number" identifiant="fromNbToken" valeur={fromNbToken} {...params} placeholder="0.00">Quantité</Input>
 				<Input identifiant="fromCoin" valeur={fromCoin} {...params} placeholder="BTC">Token</Input>
@@ -172,7 +197,10 @@ function Form ({ context, element, onClose, onUpdateList }) {
 			<Input identifiant="costCoin" valeur={costCoin} {...params} placeholder="EUR">Devise des frais</Input>
 		</div>
 
-		<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€)</Input>
+		<div className="flex flex-col gap-2">
+			<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€)</Input>
+			<CurrencyConverter date={tradeAt} />
+		</div>
 
 		<div className="flex justify-end gap-2">
 			{context === "update" && <Button type="default" onClick={onClose}>Annuler</Button>}

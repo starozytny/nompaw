@@ -55,8 +55,8 @@ class BinanceFiatWithdrawalParser implements CryptoImportParserInterface
                 'toNbToken' => $qty,
                 'costPrice' => $fee,
                 'costCoin' => $coin,
-                'totalReal' => 0.0,
-                'total' => 0.0,
+                'totalReal' => $coin === 'EUR' ? $qty : 0.0,
+                'total' => $coin === 'EUR' ? $qty : 0.0,
             ];
         }
 

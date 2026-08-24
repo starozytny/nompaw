@@ -40,14 +40,12 @@ export function TaxReportTab ({ refreshSignal }) {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [year, refreshSignal]);
 
-	const handleLineUpdate = (updatedLine) => {
-		setReport(function (prev) {
-			let lines = prev.lines.map(l => l.id === updatedLine.id ? updatedLine : l);
-			let totalPlusValue = lines.reduce((sum, l) => sum + (l.plusValue !== null ? l.plusValue : 0), 0);
-			let hasMissingValues = lines.some(l => l.plusValue === null);
-
-			return { ...prev, lines: lines, totalPlusValue: Math.round(totalPlusValue * 100) / 100, hasMissingValues: hasMissingValues };
-		});
+	// Filling in one missing portfolio value can shift the acquisition cost basis (2086 "fractions de
+	// capital initial") for every later disposal, not just the row that was edited — so the backend
+	// returns the whole recomputed report for that disposal's year, and this just swaps the local state
+	// wholesale rather than patching a single line in place.
+	const handleReportUpdate = (updatedReport) => {
+		setReport(updatedReport);
 	}
 
 	const handleExport = (format) => (e) => {
@@ -97,14 +95,21 @@ export function TaxReportTab ({ refreshSignal }) {
 		{loadingData
 			? <LoaderElements />
 			: <>
-				<TaxReportSummary year={year} totalPlusValue={report ? report.totalPlusValue : 0} />
+				<TaxReportSummary year={year}
+					totalPlusValue={report ? report.totalPlusValue : 0}
+					totalCessionPrice={report ? report.totalCessionPrice : 0}
+					isExempt={report ? report.isExempt : false}
+					exemptionThreshold={report ? report.exemptionThreshold : 305}
+					declarationLine={report ? report.declarationLine : '3AN'}
+					flatTaxRate={report ? report.flatTaxRate : 0.314}
+					estimatedFlatTax={report ? report.estimatedFlatTax : 0} />
 
 				{report && report.hasMissingValues && <div className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-xs text-red-800">
 					<span className="icon-warning1 text-sm flex-none" />
-					Certaines lignes n'ont pas de valeur de portefeuille disponible automatiquement — elles ne sont pas incluses dans le total tant qu'une valeur manuelle n'est pas renseignée ci-dessous.
+					Certaines lignes (de cette année ou d'une année précédente) n'ont pas de valeur de portefeuille disponible automatiquement — le coût d'acquisition net et le total ne sont pas fiables tant qu'une valeur manuelle n'est pas renseignée ci-dessous.
 				</div>}
 
-				<TaxReportTable lines={report ? report.lines : []} onLineUpdate={handleLineUpdate} />
+				<TaxReportTable lines={report ? report.lines : []} onReportUpdate={handleReportUpdate} />
 			</>
 		}
 	</div>
