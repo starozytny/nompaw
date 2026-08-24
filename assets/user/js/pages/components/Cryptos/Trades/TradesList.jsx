@@ -141,8 +141,10 @@ export function TradesList ({ data, onModal, onEdit }) {
 			mItem.trades.forEach(elem => {
 				switch (elem.type) {
 					case VENTE:
-						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
-						totalYVente = Sanitaze.toRoundTwoDec(totalYVente) + Sanitaze.toRoundTwoDec(elem.total);
+						// elem.totalReal is the net EUR actually received (fees already deducted by the
+						// exchange); elem.total adds the fee back on top and would overstate the Dispo.
+						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.totalReal);
+						totalYVente = Sanitaze.toRoundTwoDec(totalYVente) + Sanitaze.toRoundTwoDec(elem.totalReal);
 						break;
 					case DEPOT:
 						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
