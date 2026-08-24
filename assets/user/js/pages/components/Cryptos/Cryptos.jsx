@@ -19,7 +19,7 @@ export default function Cryptos (props) {
 
 	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-1">
 		<TabsList className="self-start">
-			<TabsTrigger value="trades">Transactions</TabsTrigger>
+			<TabsTrigger value="trades">Transactions a</TabsTrigger>
 			<TabsTrigger value="holdings">Cryptos restantes</TabsTrigger>
 			<TabsTrigger value="tax-report">Rapport fiscal</TabsTrigger>
 			<TabsTrigger value="import">Importer</TabsTrigger>
