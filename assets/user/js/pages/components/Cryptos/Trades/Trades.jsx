@@ -3,11 +3,8 @@ import React, { Component } from "react";
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import Sort from "@commonFunctions/sort";
-import List from "@commonFunctions/list";
 import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze from "@commonFunctions/sanitaze";
-import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Button } from "@tailwindComponents/Elements/Button";
@@ -17,10 +14,9 @@ import { TradesList } from "@userPages/Cryptos/Trades/TradesList";
 import { TradesFormulaire } from "@userPages/Cryptos/Trades/TradesForm";
 import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
 
-const DEPOT = 2;
-const RETRAIT = 3;
-
 const URL_GET_DATA = "intern_api_cryptos_trades_list";
+const URL_GET_HOLDINGS = "intern_api_cryptos_trades_holdings";
+const URL_GET_FILTERS = "intern_api_cryptos_trades_filters";
 const URL_DELETE_ELEMENT = "intern_api_cryptos_trades_delete";
 
 export class Trades extends Component {
@@ -30,44 +26,106 @@ export class Trades extends Component {
 		this.state = {
 			loadingData: true,
 			errors: [],
-			sorter: Sort.compareTradeAt,
 			deleteElement: null,
 			editElement: null,
 			sheetOpen: false,
+			selectedYear: null,
+			years: [],
+			yearStats: null,
+			holdings: [],
+			netInvested: { depot: 0, retrait: 0 },
+			filterOptions: { platforms: [], tokens: [], hasManual: false },
 		}
+
+		// One year's trades per key, so switching back to an already-visited year is instant instead of
+		// refetching — the trade-off for moving the replay server-side and no longer holding the full
+		// history in the browser. Cleared on any mutation/refresh so a stale year is never shown again.
+		this.yearCache = {};
 
 		this.delete = React.createRef();
 	}
 
 	componentDidMount = () => {
-		this.handleGetData();
+		this.handleGetYearData(null);
+		this.handleGetHoldings();
+		this.handleGetFilters();
 	}
 
 	componentDidUpdate = (prevProps) => {
 		if (prevProps.refreshSignal !== this.props.refreshSignal) {
-			this.handleGetData();
+			this.yearCache = {};
+			this.handleGetYearData(this.state.selectedYear);
+			this.handleGetHoldings();
+			this.handleGetFilters();
 		}
 	}
 
-    handleGetData = () => {
+	// `year: null` asks the server for the most recent year with data (only used on first load, before
+	// any year is known).
+	handleGetYearData = (year) => {
 		const self = this;
-		axios({ method: "GET", url: Routing.generate(URL_GET_DATA), data: {} })
-			.then(function (response) {
-				let data = response.data;
 
-				self.setState({ data: data, loadingData: false })
+		if (year !== null && this.yearCache[year]) {
+			const cached = this.yearCache[year];
+			this.setState({ data: cached.trades, selectedYear: year, years: cached.years, yearStats: cached.yearStats, loadingData: false });
+			return;
+		}
+
+		this.setState({ loadingData: true });
+
+		axios({ method: "GET", url: Routing.generate(URL_GET_DATA), params: year !== null ? { year } : {} })
+			.then(function (response) {
+				const { trades, years, yearStats, year: resolvedYear } = response.data;
+
+				if (resolvedYear !== null) {
+					self.yearCache[resolvedYear] = { trades, years, yearStats };
+				}
+
+				self.setState({ data: trades, years, yearStats, selectedYear: resolvedYear, loadingData: false })
+			})
+			.catch(function (error) {
+				Formulaire.displayErrors(self, error);
+				self.setState({ loadingData: false })
+			})
+		;
+	}
+
+	handleGetHoldings = () => {
+		const self = this;
+		axios({ method: "GET", url: Routing.generate(URL_GET_HOLDINGS) })
+			.then(function (response) {
+				self.setState({ holdings: response.data.holdings, netInvested: response.data.netInvested })
 			})
 			.catch(function (error) {
 				Formulaire.displayErrors(self, error);
 			})
 		;
-    }
+	}
 
-	handleUpdateList = (element, context) => {
-		const { data, sorter } = this.state;
-		let nData = List.updateData(element, context, data, sorter);
+	handleGetFilters = () => {
+		const self = this;
+		axios({ method: "GET", url: Routing.generate(URL_GET_FILTERS) })
+			.then(function (response) {
+				self.setState({ filterOptions: response.data })
+			})
+			.catch(function (error) {
+				Formulaire.displayErrors(self, error);
+			})
+		;
+	}
 
-		this.setState({ data: nData })
+	handleYearChange = (year) => {
+		this.handleGetYearData(year);
+	}
+
+	// A create/update/delete can shift the running "Dispo" balance and holdings for any year from the
+	// mutated trade's date onward (not just the currently displayed one), so the safe, simple choice is
+	// to drop the whole cache and refetch rather than try to patch state locally.
+	handleUpdateList = () => {
+		this.yearCache = {};
+		this.handleGetYearData(this.state.selectedYear);
+		this.handleGetHoldings();
+		this.handleGetFilters();
 	}
 
 	handleModal = (identifiant, elem) => {
@@ -87,31 +145,8 @@ export class Trades extends Component {
 		this.setState(prev => ({ sheetOpen: open, editElement: open ? prev.editElement : null }))
 	}
 
-	// Cached on `data` identity: render() re-runs on every state change (opening the sheet, the delete
-	// modal, etc.), but computeHoldingsAndAlerts() does a full O(n log n) sort + replay of the trade
-	// list — no need to redo that unless the trade data itself actually changed.
-	getHoldings = (data) => {
-		if (!data) return [];
-		if (this.holdingsCache && this.holdingsCache.data === data) {
-			return this.holdingsCache.holdings;
-		}
-		let holdings = CryptoHoldings.computeHoldingsAndAlerts(data).holdings;
-		this.holdingsCache = { data, holdings };
-		return holdings;
-	}
-
 	render () {
-		const { data, loadingData, deleteElement, editElement, sheetOpen } = this.state;
-
-		let totalDepot = 0, totalRetrait = 0;
-		if (data) {
-			data.forEach(elem => {
-				if (elem.type === DEPOT) totalDepot += elem.total;
-				if (elem.type === RETRAIT) totalRetrait += elem.totalReal;
-			})
-		}
-
-		let holdings = this.getHoldings(data);
+		const { data, loadingData, deleteElement, editElement, sheetOpen, years, selectedYear, yearStats, holdings, netInvested, filterOptions } = this.state;
 
 		return <>
 			{loadingData
@@ -127,7 +162,7 @@ export class Trades extends Component {
 								<div>
 									<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Net investi</div>
 									<span className="text-2xl font-bold tabular-nums" style={{ color: 'var(--cat-crypto)' }}>
-										{Sanitaze.toFormatCurrency(totalDepot - totalRetrait)}
+										{Sanitaze.toFormatCurrency(netInvested.depot - netInvested.retrait)}
 									</span>
 									<div className="text-[10px] text-muted-foreground">Dépôts - retraits</div>
 								</div>
@@ -155,15 +190,15 @@ export class Trades extends Component {
 
 					<Card className="overflow-hidden">
 						<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
-							<CardTitle className="text-sm">
-								Transactions <span className="font-normal text-muted-foreground">({data.length})</span>
-							</CardTitle>
+							<CardTitle className="text-sm">Transactions</CardTitle>
 							<Button type="blue" onClick={this.handleOpenCreate}>
 								<span className="icon-add mr-1"></span>Ajouter
 							</Button>
 						</CardHeader>
 						<CardContent className="p-0">
-							<TradesList data={data} onModal={this.handleModal} onEdit={this.handleEdit} />
+							<TradesList data={data} years={years} selectedYear={selectedYear} yearStats={yearStats}
+										filterOptions={filterOptions} onYearChange={this.handleYearChange}
+										onModal={this.handleModal} onEdit={this.handleEdit} />
 						</CardContent>
 					</Card>
 				</div>
@@ -171,7 +206,7 @@ export class Trades extends Component {
 
 			<TradesFormulaire context={editElement ? "update" : "create"} element={editElement}
 							  open={sheetOpen} onOpenChange={this.handleSheetOpenChange}
-							  onUpdateList={this.handleUpdateList} data={data} />
+							  onUpdateList={this.handleUpdateList} />
 
 			<ModalDelete refModal={this.delete} element={deleteElement} routeName={URL_DELETE_ELEMENT}
 						 title="Supprimer cette transaction" msgSuccess="Transaction supprimée."

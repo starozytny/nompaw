@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: CrTradeRepository::class)]
+#[ORM\Index(columns: ['user_id', 'trade_at'], name: 'idx_cr_trade_user_trade_at')]
 class CrTrade
 {
     const LIST = ["trade_list"];

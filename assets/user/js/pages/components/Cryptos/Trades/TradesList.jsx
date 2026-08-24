@@ -6,18 +6,10 @@ import "moment/locale/fr";
 
 import { cn } from "@shadcnComponents/lib/utils";
 import Sanitaze from "@commonFunctions/sanitaze";
-import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
 import { ComboboxMultiple } from "@shadcnComponents/elements/Combobox/Combobox";
 import { TradesItem, TYPE_LABEL } from "@userPages/Cryptos/Trades/TradesItem";
-
-const ACHAT = 0;
-const VENTE = 1;
-const DEPOT = 2;
-const RETRAIT = 3;
-const RECUP = 4;
-const STAKING = 5;
 
 const COLUMNS = 6;
 
@@ -30,13 +22,14 @@ function toggleFilterValue (setter) {
 	}
 }
 
-// Memoized: `data`/`onModal`/`onEdit` stay referentially stable across parent (Trades) re-renders
-// caused by unrelated state (opening/closing the add/edit sheet, the delete modal, etc.) — without
-// this, every such re-render would redo the full O(n log n) balance-validity replay and year/month
-// regrouping below for no reason.
-export const TradesList = React.memo(function TradesList ({ data, onModal, onEdit }) {
+/**
+ * Renders one year's worth of trades (already fetched, sorted chronologically, and annotated with
+ * dispoAfter/depotAfter/retraitAfter/bonusAfter/invalid by CrTradeReplayService — see Trades.jsx). This
+ * component only does light client-side work now: grouping into months and applying the type/platform/
+ * token filters, both cheap over a single year's worth of data.
+ */
+export const TradesList = React.memo(function TradesList ({ data, years, selectedYear, yearStats, filterOptions, onYearChange, onModal, onEdit }) {
 	const [openMonths, setOpenMonths] = useState({});
-	const [selectedYear, setSelectedYear] = useState(null);
 	const [typeFilter, setTypeFilter] = useState([]);
 	const [platformFilter, setPlatformFilter] = useState([]);
 	const [tokenFilter, setTokenFilter] = useState([]);
@@ -48,20 +41,12 @@ export const TradesList = React.memo(function TradesList ({ data, onModal, onEdi
 		</div>
 	}
 
-	// Computed from the full, unfiltered data — the chronological balance replay would be wrong if some
-	// transactions were excluded by the type/platform filters below.
-	const invalidById = CryptoHoldings.computeTransactionValidity(data);
-
-	const platforms = [...new Set(data.map(item => item.importedFrom).filter(Boolean))].sort();
-	const hasManual = data.some(item => !item.importedFrom);
-	const tokens = [...new Set(data.flatMap(item => [item.fromCoin, item.toCoin]).filter(Boolean))].sort();
-
 	const typeItems = TYPE_LABEL.map((label, index) => ({ value: String(index), label }));
 	const platformItems = [
-		...(hasManual ? [{ value: MANUAL_PLATFORM, label: "Manuel (non importé)" }] : []),
-		...platforms.map(p => ({ value: p, label: p })),
+		...(filterOptions.hasManual ? [{ value: MANUAL_PLATFORM, label: "Manuel (non importé)" }] : []),
+		...filterOptions.platforms.map(p => ({ value: p, label: p })),
 	];
-	const tokenItems = tokens.map(t => ({ value: t, label: t }));
+	const tokenItems = filterOptions.tokens.map(t => ({ value: t, label: t }));
 
 	const filteredData = data.filter(item => {
 		if (typeFilter.length > 0 && !typeFilter.some(f => f.value === String(item.type))) return false;
@@ -82,10 +67,19 @@ export const TradesList = React.memo(function TradesList ({ data, onModal, onEdi
 		</div>}
 	</div>;
 
+	const yearSelect = <div className="w-28">
+		<SelectSimple identifiant="year" valeur={String(selectedYear)} noEmpty
+			items={years.map(y => ({ identifiant: y, value: String(y), label: String(y) }))}
+			onSelect={(identifiant, value) => onYearChange(parseInt(value))} />
+	</div>;
+
 	if (filteredData.length === 0) {
 		return <div className="flex flex-col gap-3 p-4">
 			<div className="flex flex-wrap items-center justify-between gap-3">
-				{filters}
+				<div className="flex flex-wrap items-center gap-2">
+					{yearSelect}
+					{filters}
+				</div>
 			</div>
 			<div className="flex flex-col items-center gap-2 p-8 text-center">
 				<span className="icon-cart text-2xl text-muted-foreground" />
@@ -94,155 +88,65 @@ export const TradesList = React.memo(function TradesList ({ data, onModal, onEdi
 		</div>
 	}
 
-	let yData = [];
+	// data (and therefore filteredData) is already chronological ascending — grouping preserves that
+	// order, which is required since each trade's dispoAfter/depotAfter/retraitAfter/bonusAfter is a
+	// running total computed server-side; the month header just reads the LAST trade's values.
+	let monthsData = [];
 	filteredData.forEach(item => {
-		let year = moment(item.tradeAt).year();
-
-		let find = false;
-		yData.forEach(yItem => {
-			if (yItem.year === year) {
-				find = true;
-				yItem.items.push(item);
-			}
-		})
-
-		if (!find) {
-			yData.push({ year: year, items: [item] })
+		const month = moment(item.tradeAt).format('MMMM');
+		let bucket = monthsData.find(m => m.month === month);
+		if (!bucket) {
+			bucket = { month, trades: [] };
+			monthsData.push(bucket);
 		}
-	})
+		bucket.trades.push(item);
+	});
 
-	let nData = [];
-	yData.forEach(item => {
-		let nItems = [];
-		item.items.forEach(mItem => {
-			let month = moment(mItem.tradeAt).format('MMMM');
+	let itemsMonth = monthsData.map((mItem, ind) => {
+		let itemsTrade = mItem.trades.map(elem => (
+			<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} invalid={elem.invalid} />
+		));
+		// Trades within the month are chronological ascending (needed above for the "last = cumulative
+		// as of this month" read), but displayed newest first.
+		itemsTrade.reverse();
 
-			let find = false;
-			nItems.forEach(nItem => {
-				if (nItem.month === month) {
-					find = true;
-					nItem.trades.push(mItem);
-				}
-			})
+		const last = mItem.trades[mItem.trades.length - 1];
+		const monthKey = `${selectedYear}-${mItem.month}`;
+		const monthOpen = openMonths[monthKey] ?? true;
 
-			if (!find) {
-				nItems.push({ month: month, trades: [mItem] })
-			}
-		})
+		return <React.Fragment key={ind}>
+			<tr className="border-t bg-muted/40">
+				<td colSpan={COLUMNS} className="p-0">
+					<button type="button"
+							className="flex w-full items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs text-left"
+							onClick={() => setOpenMonths(o => ({ ...o, [monthKey]: !monthOpen }))}>
+						<span className="flex items-center gap-1.5 font-semibold text-foreground capitalize">
+							<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", monthOpen && "rotate-180")} />
+							{mItem.month} <span className="font-normal text-muted-foreground">({mItem.trades.length})</span>
+						</span>
+						<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+							<span>Dispo <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(last.dispoAfter)}</b></span>
+							<span>Dépôt <b className="tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(last.depotAfter)}</b></span>
+							<span>Retrait <b className="tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(last.retraitAfter)}</b></span>
+							<span>Bonus <b className="tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(last.bonusAfter)}</b></span>
+						</div>
+					</button>
+				</td>
+			</tr>
+			{monthOpen && itemsTrade}
+		</React.Fragment>
+	});
 
-		item.items = nItems;
-		nData.push(item);
-	})
-
-	// nData is chronological (oldest year first) — needed so the running "Dispo" balance is correct.
-	const years = nData.map(yItem => yItem.year);
-	const effectiveYear = years.includes(selectedYear) ? selectedYear : years[years.length - 1];
-
-	let total = 0, totalDepot = 0, totalRetrait = 0, totalBonus = 0;
-
-	let selectedItemsMonth = [];
-	let yearStats = null;
-
-	nData.forEach(yItem => {
-		let totalYDepot = 0, totalYRetrait = 0, totalYAchat = 0, totalYVente = 0, totalYBonus = 0, yearTxCount = 0;
-
-		let itemsMonth = [];
-		yItem.items.forEach((mItem, ind) => {
-
-			let itemsTrade = [];
-			mItem.trades.forEach(elem => {
-				switch (elem.type) {
-					case VENTE:
-						// elem.totalReal is the net EUR actually received (fees already deducted by the
-						// exchange); elem.total adds the fee back on top and would overstate the Dispo.
-						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.totalReal);
-						totalYVente = Sanitaze.toRoundTwoDec(totalYVente) + Sanitaze.toRoundTwoDec(elem.totalReal);
-						break;
-					case DEPOT:
-						total = Sanitaze.toRoundTwoDec(total) + Sanitaze.toRoundTwoDec(elem.total);
-						totalDepot = Sanitaze.toRoundTwoDec(totalDepot) + Sanitaze.toRoundTwoDec(elem.total);
-						totalYDepot = Sanitaze.toRoundTwoDec(totalYDepot) + Sanitaze.toRoundTwoDec(elem.total);
-						break;
-					case ACHAT:
-						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
-						totalYAchat = Sanitaze.toRoundTwoDec(totalYAchat) + Sanitaze.toRoundTwoDec(elem.total);
-						break;
-					case RETRAIT:
-						total = Sanitaze.toRoundTwoDec(total) - Sanitaze.toRoundTwoDec(elem.total);
-						totalRetrait = Sanitaze.toRoundTwoDec(totalRetrait) + Sanitaze.toRoundTwoDec(elem.totalReal);
-						totalYRetrait = Sanitaze.toRoundTwoDec(totalYRetrait) + Sanitaze.toRoundTwoDec(elem.totalReal);
-						break;
-					case RECUP:
-					case STAKING:
-						totalBonus += Sanitaze.toRoundTwoDec(elem.total);
-						totalYBonus += Sanitaze.toRoundTwoDec(elem.total);
-						break;
-					default: break;
-				}
-
-				itemsTrade.push(<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} invalid={invalidById[elem.id]} />);
-			})
-
-			// Running totals above are computed chronologically (oldest to newest, as required for
-			// the cumulative math), but rows within the month are displayed newest first.
-			itemsTrade.reverse();
-
-			yearTxCount += mItem.trades.length;
-
-			const monthKey = `${yItem.year}-${mItem.month}`;
-			const monthOpen = openMonths[monthKey] ?? true;
-
-			itemsMonth.push(<React.Fragment key={ind}>
-				<tr className="border-t bg-muted/40">
-					<td colSpan={COLUMNS} className="p-0">
-						<button type="button"
-								className="flex w-full items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs text-left"
-								onClick={() => setOpenMonths(o => ({ ...o, [monthKey]: !monthOpen }))}>
-							<span className="flex items-center gap-1.5 font-semibold text-foreground capitalize">
-								<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", monthOpen && "rotate-180")} />
-								{mItem.month} <span className="font-normal text-muted-foreground">({mItem.trades.length})</span>
-							</span>
-							<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
-								<span>Dispo <b className="text-foreground tabular-nums">{Sanitaze.toFormatCurrency(total)}</b></span>
-								<span>Dépôt <b className="tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(totalDepot)}</b></span>
-								<span>Retrait <b className="tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(totalRetrait)}</b></span>
-								<span>Bonus <b className="tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(totalBonus)}</b></span>
-							</div>
-						</button>
-					</td>
-				</tr>
-				{monthOpen && itemsTrade}
-			</React.Fragment>)
-		})
-
-		// Months within a year are displayed newest first.
-		itemsMonth.reverse();
-
-		if (yItem.year === effectiveYear) {
-			selectedItemsMonth = itemsMonth;
-			yearStats = {
-				count: yearTxCount,
-				depot: totalYDepot,
-				retrait: totalYRetrait,
-				achat: totalYAchat,
-				vente: totalYVente,
-				bonus: totalYBonus,
-				dispoEnd: total,
-			};
-		}
-	})
+	// Months are displayed newest first.
+	itemsMonth.reverse();
 
 	return <div className="flex flex-col gap-3 p-4">
 		<div className="flex flex-wrap items-center justify-between gap-3">
 			<div className="flex flex-wrap items-center gap-2">
-				<div className="w-28">
-					<SelectSimple identifiant="year" valeur={String(effectiveYear)} noEmpty
-						items={[...years].reverse().map(y => ({ identifiant: y, value: String(y), label: String(y) }))}
-						onSelect={(identifiant, value) => setSelectedYear(parseInt(value))} />
-				</div>
+				{yearSelect}
 				{filters}
 			</div>
-			<span className="text-xs text-muted-foreground">{yearStats.count} transaction{yearStats.count > 1 ? "s" : ""} en {effectiveYear}</span>
+			<span className="text-xs text-muted-foreground">{yearStats.count} transaction{yearStats.count > 1 ? "s" : ""} en {selectedYear}</span>
 		</div>
 
 		<div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -281,7 +185,7 @@ export const TradesList = React.memo(function TradesList ({ data, onModal, onEdi
 					</tr>
 				</thead>
 				<tbody>
-					{selectedItemsMonth}
+					{itemsMonth}
 				</tbody>
 			</table>
 		</div>
@@ -290,6 +194,15 @@ export const TradesList = React.memo(function TradesList ({ data, onModal, onEdi
 
 TradesList.propTypes = {
 	data: PropTypes.array.isRequired,
+	years: PropTypes.array.isRequired,
+	selectedYear: PropTypes.number,
+	yearStats: PropTypes.object,
+	filterOptions: PropTypes.shape({
+		platforms: PropTypes.array,
+		tokens: PropTypes.array,
+		hasManual: PropTypes.bool,
+	}).isRequired,
+	onYearChange: PropTypes.func.isRequired,
 	onModal: PropTypes.func.isRequired,
 	onEdit: PropTypes.func.isRequired,
 }
