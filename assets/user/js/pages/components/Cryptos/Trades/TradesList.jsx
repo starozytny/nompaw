@@ -30,7 +30,11 @@ function toggleFilterValue (setter) {
 	}
 }
 
-export function TradesList ({ data, onModal, onEdit }) {
+// Memoized: `data`/`onModal`/`onEdit` stay referentially stable across parent (Trades) re-renders
+// caused by unrelated state (opening/closing the add/edit sheet, the delete modal, etc.) — without
+// this, every such re-render would redo the full O(n log n) balance-validity replay and year/month
+// regrouping below for no reason.
+export const TradesList = React.memo(function TradesList ({ data, onModal, onEdit }) {
 	const [openMonths, setOpenMonths] = useState({});
 	const [selectedYear, setSelectedYear] = useState(null);
 	const [typeFilter, setTypeFilter] = useState([]);
@@ -282,7 +286,7 @@ export function TradesList ({ data, onModal, onEdit }) {
 			</table>
 		</div>
 	</div>
-}
+})
 
 TradesList.propTypes = {
 	data: PropTypes.array.isRequired,

@@ -87,6 +87,19 @@ export class Trades extends Component {
 		this.setState(prev => ({ sheetOpen: open, editElement: open ? prev.editElement : null }))
 	}
 
+	// Cached on `data` identity: render() re-runs on every state change (opening the sheet, the delete
+	// modal, etc.), but computeHoldingsAndAlerts() does a full O(n log n) sort + replay of the trade
+	// list — no need to redo that unless the trade data itself actually changed.
+	getHoldings = (data) => {
+		if (!data) return [];
+		if (this.holdingsCache && this.holdingsCache.data === data) {
+			return this.holdingsCache.holdings;
+		}
+		let holdings = CryptoHoldings.computeHoldingsAndAlerts(data).holdings;
+		this.holdingsCache = { data, holdings };
+		return holdings;
+	}
+
 	render () {
 		const { data, loadingData, deleteElement, editElement, sheetOpen } = this.state;
 
@@ -98,7 +111,7 @@ export class Trades extends Component {
 			})
 		}
 
-		let holdings = data ? CryptoHoldings.computeHoldingsAndAlerts(data).holdings : [];
+		let holdings = this.getHoldings(data);
 
 		return <>
 			{loadingData

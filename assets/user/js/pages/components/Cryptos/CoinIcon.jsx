@@ -26,7 +26,7 @@ export function CoinIcon ({ coin, size = 18 }) {
 		</span>
 	}
 
-	return <img src={`${CDN_BASE}/${ticker.toLowerCase()}.svg`} alt="" width={size} height={size}
+	return <img src={`${CDN_BASE}/${ticker.toLowerCase()}.svg`} alt="" width={size} height={size} loading="lazy"
 				className="inline-block flex-shrink-0" onError={() => setFailed(true)} />;
 }
 

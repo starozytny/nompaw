@@ -35,7 +35,12 @@ function computeHoldingsAndAlerts (data, options = {}) {
 		if (asOf && new Date(elem.tradeAt) > new Date(asOf)) return false;
 		return true;
 	});
-	let sorted = [...scoped].sort((a, b) => new Date(a.tradeAt) - new Date(b.tradeAt));
+	// Parse each tradeAt into a timestamp once instead of re-parsing it on every comparison inside
+	// the sort (which would be O(n log n) Date allocations instead of O(n)).
+	let sorted = scoped
+		.map(elem => ({ elem, t: new Date(elem.tradeAt).getTime() }))
+		.sort((a, b) => a.t - b.t)
+		.map(x => x.elem);
 	let balances = {};
 	let alerts = [];
 
@@ -115,7 +120,10 @@ function computeHoldingsAndAlerts (data, options = {}) {
  * @return {Object<number, {coin: string, deficit: number, action: string}>} invalid transaction id => why
  */
 function computeTransactionValidity (data) {
-	let sorted = [...data].sort((a, b) => new Date(a.tradeAt) - new Date(b.tradeAt));
+	let sorted = data
+		.map(elem => ({ elem, t: new Date(elem.tradeAt).getTime() }))
+		.sort((a, b) => a.t - b.t)
+		.map(x => x.elem);
 	let balances = {};
 	let invalid = {};
 
