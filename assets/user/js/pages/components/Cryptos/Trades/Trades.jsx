@@ -61,8 +61,10 @@ export class Trades extends Component {
 	}
 
 	// `year: null` asks the server for the most recent year with data (only used on first load, before
-	// any year is known).
-	handleGetYearData = (year) => {
+	// any year is known). `silent: true` (used after a create/update/delete) skips the loadingData flip so
+	// the Transactions card/TradesList stays mounted and its accordion/filter state survives the refetch,
+	// instead of being blanked out by LoaderElements for a mutation the user just triggered themselves.
+	handleGetYearData = (year, { silent = false } = {}) => {
 		const self = this;
 
 		if (year !== null && this.yearCache[year]) {
@@ -71,7 +73,9 @@ export class Trades extends Component {
 			return;
 		}
 
-		this.setState({ loadingData: true });
+		if (!silent) {
+			this.setState({ loadingData: true });
+		}
 
 		axios({ method: "GET", url: Routing.generate(URL_GET_DATA), params: year !== null ? { year } : {} })
 			.then(function (response) {
@@ -123,7 +127,7 @@ export class Trades extends Component {
 	// to drop the whole cache and refetch rather than try to patch state locally.
 	handleUpdateList = () => {
 		this.yearCache = {};
-		this.handleGetYearData(this.state.selectedYear);
+		this.handleGetYearData(this.state.selectedYear, { silent: true });
 		this.handleGetHoldings();
 		this.handleGetFilters();
 	}
