@@ -9,6 +9,7 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
+import { ComboboxMultiple } from "@shadcnComponents/elements/Combobox/Combobox";
 import { TradesItem, TYPE_LABEL } from "@userPages/Cryptos/Trades/TradesItem";
 
 const ACHAT = 0;
@@ -21,13 +22,20 @@ const STAKING = 5;
 const COLUMNS = 6;
 
 const MANUAL_PLATFORM = "__manual__";
-const ALL = "all";
+
+// Toggles `item` ({value, label}) in/out of a multi-select filter's selection array.
+function toggleFilterValue (setter) {
+	return (identifiant, item) => {
+		setter(prev => prev.some(v => v.value === item.value) ? prev.filter(v => v.value !== item.value) : [...prev, item]);
+	}
+}
 
 export function TradesList ({ data, onModal, onEdit }) {
 	const [openMonths, setOpenMonths] = useState({});
 	const [selectedYear, setSelectedYear] = useState(null);
-	const [typeFilter, setTypeFilter] = useState(ALL);
-	const [platformFilter, setPlatformFilter] = useState(ALL);
+	const [typeFilter, setTypeFilter] = useState([]);
+	const [platformFilter, setPlatformFilter] = useState([]);
+	const [tokenFilter, setTokenFilter] = useState([]);
 
 	if (data.length === 0) {
 		return <div className="flex flex-col items-center gap-2 p-8 text-center">
@@ -42,31 +50,31 @@ export function TradesList ({ data, onModal, onEdit }) {
 
 	const platforms = [...new Set(data.map(item => item.importedFrom).filter(Boolean))].sort();
 	const hasManual = data.some(item => !item.importedFrom);
+	const tokens = [...new Set(data.flatMap(item => [item.fromCoin, item.toCoin]).filter(Boolean))].sort();
 
-	const typeItems = [
-		{ identifiant: ALL, value: ALL, label: "Tous les types" },
-		...TYPE_LABEL.map((label, index) => ({ identifiant: String(index), value: String(index), label })),
-	];
+	const typeItems = TYPE_LABEL.map((label, index) => ({ value: String(index), label }));
 	const platformItems = [
-		{ identifiant: ALL, value: ALL, label: "Toutes les plateformes" },
-		...(hasManual ? [{ identifiant: MANUAL_PLATFORM, value: MANUAL_PLATFORM, label: "Manuel (non importé)" }] : []),
-		...platforms.map(p => ({ identifiant: p, value: p, label: p })),
+		...(hasManual ? [{ value: MANUAL_PLATFORM, label: "Manuel (non importé)" }] : []),
+		...platforms.map(p => ({ value: p, label: p })),
 	];
+	const tokenItems = tokens.map(t => ({ value: t, label: t }));
 
 	const filteredData = data.filter(item => {
-		if (typeFilter !== ALL && String(item.type) !== typeFilter) return false;
-		if (platformFilter !== ALL) {
-			if (platformFilter === MANUAL_PLATFORM ? !!item.importedFrom : item.importedFrom !== platformFilter) return false;
-		}
+		if (typeFilter.length > 0 && !typeFilter.some(f => f.value === String(item.type))) return false;
+		if (platformFilter.length > 0 && !platformFilter.some(f => f.value === MANUAL_PLATFORM ? !item.importedFrom : f.value === item.importedFrom)) return false;
+		if (tokenFilter.length > 0 && !tokenFilter.some(f => f.value === item.fromCoin || f.value === item.toCoin)) return false;
 		return true;
 	});
 
 	const filters = <div className="flex flex-wrap items-center gap-2">
-		<div className="w-44">
-			<SelectSimple identifiant="type" valeur={typeFilter} noEmpty items={typeItems} onSelect={(identifiant, value) => setTypeFilter(value)} />
+		<div className="w-52">
+			<ComboboxMultiple identifiant="type" valeurs={typeFilter} items={typeItems} withItems placeholder="Tous les types" onSelect={toggleFilterValue(setTypeFilter)} />
 		</div>
-		{platformItems.length > 1 && <div className="w-52">
-			<SelectSimple identifiant="platform" valeur={platformFilter} noEmpty items={platformItems} onSelect={(identifiant, value) => setPlatformFilter(value)} />
+		{platformItems.length > 0 && <div className="w-52">
+			<ComboboxMultiple identifiant="platform" valeurs={platformFilter} items={platformItems} withItems placeholder="Toutes les plateformes" onSelect={toggleFilterValue(setPlatformFilter)} />
+		</div>}
+		{tokenItems.length > 0 && <div className="w-52">
+			<ComboboxMultiple identifiant="token" valeurs={tokenFilter} items={tokenItems} withItems placeholder="Tous les tokens" onSelect={toggleFilterValue(setTokenFilter)} />
 		</div>}
 	</div>;
 

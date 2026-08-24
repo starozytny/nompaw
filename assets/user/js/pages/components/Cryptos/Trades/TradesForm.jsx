@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@shadcnComponents/
 import { CurrencyConverter } from "@userPages/Cryptos/Trades/CurrencyConverter";
 
 const DEPOT = 2;
+const TRANSFERT = 6;
 
 const URL_CREATE_ELEMENT = "intern_api_cryptos_trades_create";
 const URL_UPDATE_ELEMENT = "intern_api_cryptos_trades_update";
@@ -97,8 +98,11 @@ function Form ({ context, element, onClose, onUpdateList, data }) {
 			{ type: "text", id: 'toNbToken', value: toNbToken },
 			{ type: "text", id: 'costPrice', value: costPrice },
 			{ type: "text", id: 'costCoin', value: costCoin },
-			{ type: "text", id: 'totalReal', value: totalReal },
 		];
+
+		if (parseInt(type) !== TRANSFERT) {
+			paramsToValidate = [...paramsToValidate, { type: "text", id: 'totalReal', value: totalReal }];
+		}
 
 		if (parseInt(type) !== DEPOT) {
 			paramsToValidate = [...paramsToValidate, ...[
@@ -139,6 +143,7 @@ function Form ({ context, element, onClose, onUpdateList, data }) {
 
 	const { tradeAt, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, toPrice, fromPrice, totalReal } = state;
 	const isDepot = parseInt(type) === DEPOT;
+	const isTransfert = parseInt(type) === TRANSFERT;
 	const params = { errors: errors, onChange: handleChange };
 
 	// Balance as it stood right before this specific transaction — not a *current* total, which would be
@@ -198,7 +203,7 @@ function Form ({ context, element, onClose, onUpdateList, data }) {
 		</div>
 
 		<div className="flex flex-col gap-2">
-			<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€)</Input>
+			<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€){isTransfert ? " (optionnel)" : ""}</Input>
 			<CurrencyConverter date={tradeAt} />
 		</div>
 

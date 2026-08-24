@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: CrTradeRepository::class)]
 class CrTrade
@@ -80,18 +81,19 @@ class CrTrade
 
     /**
      * Stored in cents to avoid float rounding drift; exposed as euros via getTotalReal()/setTotalReal().
+     * Nullable in DB despite no `nullable: true` intent: required for every type except Transfert (a
+     * wallet-to-wallet move has no EUR amount), enforced conditionally by validateAmounts() below.
      */
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(['trade_list'])]
-    #[Assert\NotNull]
     private ?int $totalReal = null;
 
     /**
      * Stored in cents to avoid float rounding drift; exposed as euros via getTotal()/setTotal().
+     * Same Transfert exception as totalReal above.
      */
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     #[Groups(['trade_list'])]
-    #[Assert\NotNull]
     private ?int $total = null;
 
     #[ORM\ManyToOne(inversedBy: 'crTrades')]
@@ -264,9 +266,9 @@ class CrTrade
         return $this->totalReal !== null ? $this->totalReal / 100 : null;
     }
 
-    public function setTotalReal(float $totalReal): static
+    public function setTotalReal(?float $totalReal): static
     {
-        $this->totalReal = (int) round($totalReal * 100);
+        $this->totalReal = $totalReal !== null ? (int) round($totalReal * 100) : null;
 
         return $this;
     }
@@ -276,9 +278,9 @@ class CrTrade
         return $this->total !== null ? $this->total / 100 : null;
     }
 
-    public function setTotal(float $total): static
+    public function setTotal(?float $total): static
     {
-        $this->total = (int) round($total * 100);
+        $this->total = $total !== null ? (int) round($total * 100) : null;
 
         return $this;
     }
@@ -365,5 +367,29 @@ class CrTrade
         $this->portfolioValueSource = $portfolioValueSource;
 
         return $this;
+    }
+
+    /**
+     * totalReal/total ("montant") are required for every type except Transfert: a transfer between
+     * the user's own wallets has no EUR amount to record.
+     */
+    #[Assert\Callback]
+    public function validateAmounts(ExecutionContextInterface $context): void
+    {
+        if ($this->type === TypeType::Transfert) {
+            return;
+        }
+
+        if ($this->totalReal === null) {
+            $context->buildViolation('Cette valeur ne doit pas être nulle.')
+                ->atPath('totalReal')
+                ->addViolation();
+        }
+
+        if ($this->total === null) {
+            $context->buildViolation('Cette valeur ne doit pas être nulle.')
+                ->atPath('total')
+                ->addViolation();
+        }
     }
 }
