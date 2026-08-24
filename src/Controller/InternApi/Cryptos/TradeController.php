@@ -5,7 +5,9 @@ namespace App\Controller\InternApi\Cryptos;
 use App\Entity\Crypto\CrTrade;
 use App\Repository\Crypto\CrTradeRepository;
 use App\Service\Api\ApiResponse;
+use App\Service\Crypto\CrTradeReplayService;
 use App\Service\Data\DataCrypto;
+use App\Service\SanitizeData;
 use App\Service\ValidatorService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,10 +19,46 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/intern/api/cryptos/trades', name: 'intern_api_cryptos_trades_')]
 class TradeController extends AbstractController
 {
+    /**
+     * One year's trades (each annotated server-side with the running "Dispo" balance and an "invalid"
+     * deficit flag), plus the list of years with data and that year's aggregate stats — replaces returning
+     * the user's entire trade history on every load, see CrTradeReplayService.
+     */
     #[Route('/list', name: 'list', options: ['expose' => true], methods: 'GET')]
-    public function cover(ApiResponse $apiResponse, CrTradeRepository $repository): Response
+    public function cover(Request $request, ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
     {
-        return $apiResponse->apiJsonResponse($repository->findBy(['user' => $this->getUser()], ['tradeAt' => 'ASC']), CrTrade::LIST);
+        $year = $request->query->get('year');
+
+        return $apiResponse->apiJsonResponseCustom(
+            $replayService->computeYearData($this->getUser(), $year !== null ? (int) $year : null)
+        );
+    }
+
+    #[Route('/holdings', name: 'holdings', options: ['expose' => true], methods: 'GET')]
+    public function holdings(ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
+    {
+        return $apiResponse->apiJsonResponseCustom($replayService->computeHoldings($this->getUser()));
+    }
+
+    #[Route('/holdings-as-of', name: 'holdings_as_of', options: ['expose' => true], methods: 'GET')]
+    public function holdingsAsOf(Request $request, ApiResponse $apiResponse, CrTradeReplayService $replayService, SanitizeData $sanitizeData): Response
+    {
+        $date = $sanitizeData->createDateTime($request->query->get('date'));
+        if ($date === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Date manquante ou invalide.');
+        }
+
+        $excludeId = $request->query->get('excludeId');
+
+        return $apiResponse->apiJsonResponseCustom(
+            $replayService->computeHoldingsAsOf($this->getUser(), $date, $excludeId !== null ? (int) $excludeId : null)
+        );
+    }
+
+    #[Route('/filters', name: 'filters', options: ['expose' => true], methods: 'GET')]
+    public function filters(ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
+    {
+        return $apiResponse->apiJsonResponseCustom($replayService->getFilterOptions($this->getUser()));
     }
 
     /**

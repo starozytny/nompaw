@@ -5,12 +5,11 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
 import Sanitaze from "@commonFunctions/sanitaze";
-import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Card } from "@shadcnComponents/ui/card";
 
-const URL_GET_DATA = "intern_api_cryptos_trades_list";
+const URL_GET_DATA = "intern_api_cryptos_trades_holdings";
 
 export function HoldingsTab ({ refreshSignal }) {
 	const [holdings, setHoldings] = useState([]);
@@ -20,9 +19,8 @@ export function HoldingsTab ({ refreshSignal }) {
 	useEffect(() => {
 		axios({ method: "GET", url: Routing.generate(URL_GET_DATA), data: {} })
 			.then(function (response) {
-				let result = CryptoHoldings.computeHoldingsAndAlerts(response.data);
-				setHoldings(result.holdings);
-				setAlerts(result.alerts);
+				setHoldings(response.data.holdings);
+				setAlerts(response.data.alerts);
 				setLoadingData(false);
 			})
 			.catch(function (error) {
