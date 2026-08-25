@@ -200,6 +200,60 @@ class CrTradeReplayService
     }
 
     /**
+     * Powers TradesList's "Cryptos" stat card/modal: per coin, the quantity still held on 31/12 of $year
+     * (same replayHoldings() snapshot as computeHoldingsAsOf(), asOf = year-end) alongside how much was
+     * bought/sold IN $year specifically (getTotal(), same convention as computeYearData()'s
+     * statsByYear.achat/vente, so per-coin totals sum back to those cards). A coin can appear with
+     * achat/venteTotal > 0 but quantity 0 (fully bought and sold within the year) or the reverse (held
+     * from a prior year, untouched this year) — both are kept rather than only coins matching one side.
+     */
+    public function computeYearCryptoBreakdown(User $user, int $year): array
+    {
+        $trades = $this->tradeRepository->findBy(['user' => $user], ['tradeAt' => 'ASC', 'id' => 'ASC']);
+        $yearEnd = new \DateTimeImmutable("{$year}-12-31 23:59:59");
+
+        $tradesUpToYearEnd = array_values(array_filter($trades, fn (CrTrade $t) => $t->getTradeAt() <= $yearEnd));
+        $holdings = $this->replayHoldings($tradesUpToYearEnd)['holdings'];
+        $quantityByCoin = array_column($holdings, 'quantity', 'coin');
+
+        $stats = [];
+        foreach ($trades as $trade) {
+            if ((int) $trade->getTradeAt()->format('Y') !== $year) {
+                continue;
+            }
+
+            if ($trade->getType() === TypeType::Achat && $trade->getToCoin() !== 'EUR') {
+                $coin = $trade->getToCoin();
+                $stats[$coin]['achatTotal'] = ($stats[$coin]['achatTotal'] ?? 0.0) + $trade->getTotal();
+                $stats[$coin]['achatQty'] = ($stats[$coin]['achatQty'] ?? 0.0) + $trade->getToNbToken();
+                $stats[$coin]['achatCount'] = ($stats[$coin]['achatCount'] ?? 0) + 1;
+            } elseif ($trade->getType() === TypeType::Vente && $trade->getFromCoin() !== 'EUR') {
+                $coin = $trade->getFromCoin();
+                $stats[$coin]['venteTotal'] = ($stats[$coin]['venteTotal'] ?? 0.0) + $trade->getTotal();
+                $stats[$coin]['venteQty'] = ($stats[$coin]['venteQty'] ?? 0.0) + $trade->getFromNbToken();
+                $stats[$coin]['venteCount'] = ($stats[$coin]['venteCount'] ?? 0) + 1;
+            }
+        }
+
+        $coins = array_unique(array_merge(array_keys($quantityByCoin), array_keys($stats)));
+
+        $result = array_map(fn (string $coin) => [
+            'coin' => $coin,
+            'quantity' => $quantityByCoin[$coin] ?? 0.0,
+            'achatTotal' => round($stats[$coin]['achatTotal'] ?? 0.0, 2),
+            'achatQty' => $stats[$coin]['achatQty'] ?? 0.0,
+            'achatCount' => $stats[$coin]['achatCount'] ?? 0,
+            'venteTotal' => round($stats[$coin]['venteTotal'] ?? 0.0, 2),
+            'venteQty' => $stats[$coin]['venteQty'] ?? 0.0,
+            'venteCount' => $stats[$coin]['venteCount'] ?? 0,
+        ], $coins);
+
+        usort($result, fn (array $a, array $b) => ($b['achatTotal'] + $b['venteTotal'] + abs($b['quantity'])) <=> ($a['achatTotal'] + $a['venteTotal'] + abs($a['quantity'])));
+
+        return ['holdings' => $result];
+    }
+
+    /**
      * Filter option lists for the Transactions table (platform/token multi-selects) — from cheap DISTINCT
      * queries, independent of how much trade history the user has.
      */
