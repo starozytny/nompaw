@@ -89,6 +89,11 @@ export function TradesItem ({ elem, onModal, onEditElement, invalid }) {
 				? <span className="text-muted-foreground">—</span>
 				: <>{elem.type === RETRAIT ? "-" : ""}{Sanitaze.toFormatCurrency(elem.totalReal)}</>
 			}
+			{elem.type === VENTE && elem.total !== null && elem.total !== elem.totalReal &&
+				<div className="text-xs font-normal text-muted-foreground">
+					{Sanitaze.toFormatCurrency(elem.total)} avec frais
+				</div>
+			}
 		</td>
 
 		<td className="py-2.5 pr-4 text-right align-top whitespace-nowrap">
