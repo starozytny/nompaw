@@ -52,11 +52,9 @@ class CrTradeReplayService
         // dispo/cumDepot/cumRetrait/cumBonus are ALL-TIME running totals (since account inception, not
         // year-scoped) — TradesList.jsx's per-month header shows these four cumulative figures (as of
         // the end of that month), separate from $statsByYear below which is scoped to a single year for
-        // the stat cards. Vente/Depot/Achat/Retrait's dispo effect all use getTotal() (fee-inclusive)
-        // for consistency. Note: Retrait's dispo effect uses getTotal() while its own cumulative/year
-        // stat uses getTotalReal() (net received) — an intentional asymmetry already present in
-        // TradesList.jsx (fee still leaves the platform balance, but was never actually received in
-        // hand), mirrored here exactly rather than "corrected".
+        // the stat cards. Vente/Depot/Achat's dispo effect uses getTotalReal() (the real, fee-affected
+        // amount actually received/credited/paid); Retrait's dispo effect is the one exception and uses
+        // getTotal() (the fee-free reference) instead — a deliberate asymmetry, not a bug.
         $dispo = 0.0;
         $cumDepot = 0.0;
         $cumRetrait = 0.0;
@@ -77,16 +75,16 @@ class CrTradeReplayService
 
             switch ($trade->getType()) {
                 case TypeType::Vente:
-                    $dispo += $trade->getTotal();
+                    $dispo += $trade->getTotalReal();
                     $statsByYear[$tradeYear]['vente'] += $trade->getTotal();
                     break;
                 case TypeType::Depot:
-                    $dispo += $trade->getTotal();
+                    $dispo += $trade->getTotalReal();
                     $cumDepot += $trade->getTotal();
                     $statsByYear[$tradeYear]['depot'] += $trade->getTotal();
                     break;
                 case TypeType::Achat:
-                    $dispo -= $trade->getTotal();
+                    $dispo -= $trade->getTotalReal();
                     $statsByYear[$tradeYear]['achat'] += $trade->getTotal();
                     break;
                 case TypeType::Retrait:
