@@ -223,7 +223,9 @@ function Form ({ context, element, onClose, onUpdateList }) {
 		</div>
 
 		<div className="flex flex-col gap-2">
-			<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€){isTransfert ? " (optionnel)" : ""}</Input>
+			<div>
+				<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€){isTransfert ? " (optionnel)" : ""}</Input>
+			</div>
 			<CurrencyConverter date={tradeAt} />
 		</div>
 

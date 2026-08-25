@@ -13,6 +13,7 @@ import { TaxReportTable } from "@userPages/Cryptos/TaxReport/TaxReportTable";
 import { TaxReportSummary } from "@userPages/Cryptos/TaxReport/TaxReportSummary";
 
 const URL_GET_REPORT = "intern_api_cryptos_tax_report_index";
+const URL_REFRESH = "intern_api_cryptos_tax_report_refresh";
 const URL_EXPORT = "intern_api_cryptos_tax_report_export";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -23,6 +24,7 @@ export function TaxReportTab ({ refreshSignal }) {
 	const [report, setReport] = useState(null);
 	const [loadingData, setLoadingData] = useState(true);
 	const [exporting, setExporting] = useState(false);
+	const [refreshingPrices, setRefreshingPrices] = useState(false);
 
 	useEffect(() => {
 		setLoadingData(true);
@@ -46,6 +48,26 @@ export function TaxReportTab ({ refreshSignal }) {
 	// wholesale rather than patching a single line in place.
 	const handleReportUpdate = (updatedReport) => {
 		setReport(updatedReport);
+	}
+
+	// Live CoinGecko lookups only ever happen here, on demand — see CrTaxReportService::computeReport()'s
+	// $liveFetch param — since the normal GET above (and switching years) deliberately stays cache-only
+	// so the page doesn't hang waiting on the free-tier rate limit every time it's opened.
+	const handleRefreshPrices = (e) => {
+		e.preventDefault();
+		if (refreshingPrices) return;
+
+		setRefreshingPrices(true);
+		axios({ method: "POST", url: Routing.generate(URL_REFRESH, { year: year }), data: {} })
+			.then(function (response) {
+				setReport(response.data);
+				setRefreshingPrices(false);
+			})
+			.catch(function (error) {
+				Formulaire.displayErrors(null, error);
+				setRefreshingPrices(false);
+			})
+		;
 	}
 
 	const handleExport = (format) => (e) => {
@@ -87,6 +109,9 @@ export function TaxReportTab ({ refreshSignal }) {
 						items={YEARS.map(y => ({ identifiant: y, value: String(y), label: String(y) }))}
 						onSelect={(identifiant, value) => setYear(parseInt(value))} />
 				</div>
+				<Button type="default" iconLeft="refresh" onClick={handleRefreshPrices}>
+					{refreshingPrices ? "Actualisation..." : "Actualiser (CoinGecko)"}
+				</Button>
 				<Button type="default" iconLeft="download" onClick={handleExport('excel')}>Excel</Button>
 				<Button type="default" iconLeft="download" onClick={handleExport('pdf')}>PDF</Button>
 			</div>
@@ -106,7 +131,7 @@ export function TaxReportTab ({ refreshSignal }) {
 
 				{report && report.hasMissingValues && <div className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-xs text-red-800">
 					<span className="icon-warning1 text-sm flex-none" />
-					Certaines lignes (de cette année ou d'une année précédente) n'ont pas de valeur de portefeuille disponible automatiquement — le coût d'acquisition net et le total ne sont pas fiables tant qu'une valeur manuelle n'est pas renseignée ci-dessous.
+					Certaines lignes (de cette année ou d'une année précédente) n'ont pas de valeur de portefeuille disponible — clique sur « Actualiser (CoinGecko) » pour tenter de les résoudre, ou renseigne une valeur manuelle ci-dessous si ça ne suffit pas.
 				</div>}
 
 				<TaxReportTable lines={report ? report.lines : []} onReportUpdate={handleReportUpdate} />

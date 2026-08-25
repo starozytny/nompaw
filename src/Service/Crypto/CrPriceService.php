@@ -40,7 +40,14 @@ class CrPriceService
         private readonly string $coingeckoApiKey = '',
     ) {}
 
-    public function getPriceEur(string $coin, \DateTimeInterface $date): ?float
+    /**
+     * $liveFetch = false restricts this to whatever is already in the persistent cache (a plain DB read,
+     * no network call at all) — used by CrTaxReportService's normal report view so opening/switching years
+     * on the "Rapport fiscal" page stays fast even when dozens of coin/date pairs have never been resolved
+     * yet; the user then hits "Actualiser" (liveFetch: true) to deliberately pay for the CoinGecko round
+     * trips (and the free tier's rate limit) when they actually want fresh/missing prices filled in.
+     */
+    public function getPriceEur(string $coin, \DateTimeInterface $date, bool $liveFetch = true): ?float
     {
         $coin = strtoupper($coin);
 
@@ -53,6 +60,10 @@ class CrPriceService
         $cached = $this->priceHistoryRepository->findOneByCoinAndDate($coin, $day);
         if ($cached !== null && $cached->getSource() !== 'failed') {
             return $cached->getPriceEur();
+        }
+
+        if (!$liveFetch) {
+            return null;
         }
 
         if ($cached !== null && $cached->getSource() === 'failed') {

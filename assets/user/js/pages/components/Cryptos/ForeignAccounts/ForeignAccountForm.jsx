@@ -94,16 +94,27 @@ function Form ({ context, element, onClose, onSaved }) {
 	const params = { errors: errors, onChange: handleChange };
 
 	return <div className="flex flex-col gap-5">
-		<Input identifiant="platform" valeur={platform} {...params} placeholder="Binance">Plateforme</Input>
-		<Input identifiant="accountIdentifier" valeur={accountIdentifier} {...params} placeholder="Pseudo, email ou n° de compte">Identifiant de compte (optionnel)</Input>
-		<TextArea identifiant="address" valeur={address} {...params} height="60px" placeholder="Adresse du prestataire (à renseigner toi-même)">Adresse (optionnel)</TextArea>
-
+		<div>
+			<Input identifiant="platform" valeur={platform} {...params} placeholder="Binance">Plateforme</Input>
+		</div>
+		<div>
+			<Input identifiant="accountIdentifier" valeur={accountIdentifier} {...params} placeholder="Pseudo, email ou n° de compte">Identifiant de compte (optionnel)</Input>
+		</div>
+		<div>
+			<TextArea identifiant="address" valeur={address} {...params} height="60px" placeholder="Adresse du prestataire (à renseigner toi-même)">Adresse (optionnel)</TextArea>
+		</div>
 		<div className="grid grid-cols-2 gap-4">
-			<Input type="date" identifiant="openedAt" valeur={openedAt} {...params}>Date d'ouverture</Input>
-			<Input type="date" identifiant="closedAt" valeur={closedAt} {...params}>Date de clôture (optionnel)</Input>
+			<div>
+				<Input type="date" identifiant="openedAt" valeur={openedAt} {...params}>Date d'ouverture</Input>
+			</div>
+			<div>
+				<Input type="date" identifiant="closedAt" valeur={closedAt} {...params}>Date de clôture (optionnel)</Input>
+			</div>
 		</div>
 
-		<TextArea identifiant="notes" valeur={notes} {...params} height="80px">Notes (optionnel)</TextArea>
+		<div>
+			<TextArea identifiant="notes" valeur={notes} {...params} height="80px">Notes (optionnel)</TextArea>
+		</div>
 
 		<div className="flex justify-end gap-2">
 			{context === "update" && <Button type="default" onClick={onClose}>Annuler</Button>}

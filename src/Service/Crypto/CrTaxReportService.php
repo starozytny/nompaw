@@ -80,7 +80,14 @@ class CrTaxReportService
         private readonly CrPriceService $priceService,
     ) {}
 
-    public function computeReport(User $user, int $year): array
+    /**
+     * $liveFetch = false (the default, used by TaxReportController::index() for a normal page view) only
+     * ever reads CrPriceService's persistent cache — no CoinGecko call, so switching years stays instant
+     * even with dozens of never-resolved coin/date pairs, at the cost of showing more lines as "missing"
+     * than there might really be. Pass true (the "Actualiser" button, and export()) to actually pay for
+     * the CoinGecko round trips and fill in whatever can be resolved.
+     */
+    public function computeReport(User $user, int $year, bool $liveFetch = false): array
     {
         $trades = $this->tradeRepository->findBy(['user' => $user], ['tradeAt' => 'ASC', 'id' => 'ASC']);
 
@@ -97,7 +104,7 @@ class CrTaxReportService
             $isFiatDisposal = $isVente && $trade->getToCoin() === 'EUR';
 
             if ($isFiatDisposal) {
-                [$line, $fractionConsumed] = $this->computeDisposalLine($trade, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings);
+                [$line, $fractionConsumed] = $this->computeDisposalLine($trade, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings, $liveFetch);
                 $tradeYear = (int) $trade->getTradeAt()->format('Y');
 
                 if ($tradeYear === $year) {
@@ -150,13 +157,15 @@ class CrTaxReportService
 
     /**
      * Recomputes a single disposal line, e.g. right after a manual portfolio-value override so the
-     * caller doesn't need to regenerate the whole report just to refresh one row.
+     * caller doesn't need to regenerate the whole report just to refresh one row. Always resolves prices
+     * live (unlike computeReport()'s default) — this only ever runs as a direct reaction to the user
+     * editing one disposal, not on every report view, so paying for the CoinGecko round trip here is fine.
      */
     public function computeSingleLine(CrTrade $disposal): array
     {
         [$grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings] = $this->replayBefore($disposal);
 
-        [$line] = $this->computeDisposalLine($disposal, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings);
+        [$line] = $this->computeDisposalLine($disposal, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings, true);
 
         return $line;
     }
@@ -238,7 +247,7 @@ class CrTaxReportService
             $isVente = $trade->getType() === TypeType::Vente;
 
             if ($isVente && $trade->getToCoin() === 'EUR') {
-                [, $fractionConsumed] = $this->computeDisposalLine($trade, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings);
+                [, $fractionConsumed] = $this->computeDisposalLine($trade, $grossAcquisitionCost, $acquisitionFractionsConsumed, $holdings, true);
                 if ($fractionConsumed !== null) {
                     $acquisitionFractionsConsumed += $fractionConsumed;
                 }
@@ -266,10 +275,10 @@ class CrTaxReportService
      *         (the cost basis for every later disposal is left stale/overstated until this one is fixed,
      *         surfaced via hasMissingValues).
      */
-    private function computeDisposalLine(CrTrade $trade, float $grossAcquisitionCost, float $acquisitionFractionsConsumed, array $holdingsBeforeDisposal): array
+    private function computeDisposalLine(CrTrade $trade, float $grossAcquisitionCost, float $acquisitionFractionsConsumed, array $holdingsBeforeDisposal, bool $liveFetch): array
     {
         $netAcquisitionCost = $grossAcquisitionCost - $acquisitionFractionsConsumed;
-        [$portfolioValue, $source, $missingCoins] = $this->resolvePortfolioValue($trade, $holdingsBeforeDisposal);
+        [$portfolioValue, $source, $missingCoins] = $this->resolvePortfolioValue($trade, $holdingsBeforeDisposal, $liveFetch);
 
         $cessionPrice = $trade->getTotalReal();
         $plusValue = null;
@@ -285,6 +294,7 @@ class CrTaxReportService
             // app doesn't separately track disposal fees or exchange soultes.
             'id' => $trade->getId(),
             'tradeAt' => $trade->getTradeAt()->format('Y-m-d'), // l.211
+            'tradeTime' => $trade->getTradeAt()->format('H:i'), // display-only, not part of the 2086 form
             'fromCoin' => $trade->getFromCoin(),
             'fromNbToken' => $trade->getFromNbToken(),
             'cessionPrice' => $cessionPrice, // l.213 = l.218 (no fee/soulte tracked)
@@ -304,7 +314,7 @@ class CrTaxReportService
      * @param array<string, float> $holdingsBeforeDisposal
      * @return array{0: ?float, 1: ?string, 2: string[]} [value, source ('manual'|'api'|null), missingCoins]
      */
-    private function resolvePortfolioValue(CrTrade $trade, array $holdingsBeforeDisposal): array
+    private function resolvePortfolioValue(CrTrade $trade, array $holdingsBeforeDisposal, bool $liveFetch): array
     {
         if ($trade->getManualPortfolioValueTotal() !== null) {
             return [$trade->getManualPortfolioValueTotal(), 'manual', []];
@@ -318,7 +328,7 @@ class CrTaxReportService
                 continue;
             }
 
-            $price = $this->priceService->getPriceEur($coin, $trade->getTradeAt());
+            $price = $this->priceService->getPriceEur($coin, $trade->getTradeAt(), $liveFetch);
             if ($price === null) {
                 $missingCoins[] = $coin;
                 continue;
