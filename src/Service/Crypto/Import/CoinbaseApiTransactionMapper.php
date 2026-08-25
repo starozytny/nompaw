@@ -6,20 +6,23 @@ use App\Entity\Enum\Crypto\TypeType;
 
 /**
  * Maps Coinbase v2 API transaction objects (as fetched by CoinbaseApiClient::fetchTransactions, which
- * enriches buy/sell entries with their linked sub-resource under 'detail') into the same array shape as
- * CryptoImportParserInterface::parse(), so trades imported via the API behave identically to ones imported
- * via CSV once persisted as CrTrade.
+ * enriches buy/sell/fiat_deposit/fiat_withdrawal entries with their linked sub-resource under 'detail')
+ * into the same array shape as CryptoImportParserInterface::parse(), so trades imported via the API behave
+ * identically to ones imported via CSV once persisted as CrTrade.
  *
  * transfer/exchange_deposit/exchange_withdrawal/pro_deposit/pro_withdrawal/vault_withdrawal don't appear in
  * the CSV export at all (they come from Coinbase Exchange/Pro/Vault, only visible via the API) but are
  * genuine movements between the user's own accounts, not disposals — mapped to TypeType::Transfert (defined
  * in the enum but never produced by the CSV parser) rather than dropped, so they stay visible for review.
+ * (Not to be confused with fiat_deposit/fiat_withdrawal below, which ARE real external money movements.)
  *
  * Any other Coinbase transaction `type` value not explicitly handled above falls back to
  * TypeType::ACategoriser with `rawCategory` set to Coinbase's own type string, so the user can see and
  * manually reclassify it instead of it being silently dropped. A buy/sell whose 'detail' sub-resource
- * fetch failed (CoinbaseApiClient::fetchBuySellDetail logs why) gets the same ACategoriser fallback
- * instead of vanishing from the import.
+ * fetch failed (CoinbaseApiClient::fetchDetail logs why) gets the same ACategoriser fallback instead of
+ * vanishing from the import; a fiat_deposit/fiat_withdrawal with a failed 'detail' fetch instead falls back
+ * to costPrice 0 (buildDeposit/buildWithdrawal below) since, unlike buy/sell, the top-level amount alone is
+ * still enough to build a meaningful (if fee-less) trade.
  */
 class CoinbaseApiTransactionMapper
 {
@@ -93,11 +96,11 @@ class CoinbaseApiTransactionMapper
         }
 
         if ($type === 'fiat_deposit') {
-            return $this->buildSingleCoinTrade($id, $tradeAt, TypeType::Depot, $asset, $quantity);
+            return $this->buildDeposit($id, $tradeAt, $asset, $quantity, $transaction['detail'] ?? null);
         }
 
         if ($type === 'fiat_withdrawal') {
-            return $this->buildSingleCoinTrade($id, $tradeAt, TypeType::Retrait, $asset, $quantity);
+            return $this->buildWithdrawal($id, $tradeAt, $asset, $quantity, $transaction['detail'] ?? null);
         }
 
         if (in_array($type, self::TRANSFER_TYPES, true)) {
@@ -168,6 +171,65 @@ class CoinbaseApiTransactionMapper
             abs((float) ($detail['total']['amount'] ?? 0)),
             abs((float) ($detail['fee']['amount'] ?? 0)),
             $detail['subtotal']['currency'] ?? $detail['total']['currency'] ?? 'EUR',
+        ];
+    }
+
+    /**
+     * Coinbase can charge a SEPA/card fee on a fiat deposit, deducted from what actually gets credited:
+     * $quantity (transaction.amount) is that net credited amount — the real figure — so totalReal maps
+     * straight onto it. total is the fee-free reference (what was sent from the bank before the fee),
+     * reconstructed by adding the fee back — same convention as CoinbaseProFillsParser for Vente.
+     */
+    private function buildDeposit(string $id, \DateTimeImmutable $tradeAt, string $asset, float $quantity, ?array $detail): ?array
+    {
+        if (abs($quantity) < 0.00000001) {
+            return null;
+        }
+
+        $fee = $detail !== null ? abs((float) ($detail['fee']['amount'] ?? 0)) : 0.0;
+
+        return [
+            'importedId' => $id,
+            'tradeAt' => $tradeAt,
+            'type' => TypeType::Depot,
+            'fromCoin' => $asset,
+            'fromNbToken' => $quantity,
+            'toCoin' => $asset,
+            'toNbToken' => $quantity,
+            'costPrice' => $fee,
+            'costCoin' => $asset,
+            'totalReal' => $asset === 'EUR' ? $quantity : 0.0,
+            'total' => $asset === 'EUR' ? $quantity + $fee : 0.0,
+        ];
+    }
+
+    /**
+     * Coinbase can charge a SEPA/card fee on a fiat withdrawal, added on top of what's debited: $quantity
+     * (transaction.amount) is that gross debit — the real figure — so totalReal maps straight onto it.
+     * total is the fee-free reference (what actually reaches the bank), reconstructed by removing the fee
+     * — same convention as CoinbaseProFillsParser for Achat, and what CrTradeReplayService's dispo calc
+     * for Retrait relies on (it deliberately uses getTotal(), not getTotalReal()).
+     */
+    private function buildWithdrawal(string $id, \DateTimeImmutable $tradeAt, string $asset, float $quantity, ?array $detail): ?array
+    {
+        if (abs($quantity) < 0.00000001) {
+            return null;
+        }
+
+        $fee = $detail !== null ? abs((float) ($detail['fee']['amount'] ?? 0)) : 0.0;
+
+        return [
+            'importedId' => $id,
+            'tradeAt' => $tradeAt,
+            'type' => TypeType::Retrait,
+            'fromCoin' => $asset,
+            'fromNbToken' => $quantity,
+            'toCoin' => $asset,
+            'toNbToken' => $quantity,
+            'costPrice' => $fee,
+            'costCoin' => $asset,
+            'totalReal' => $asset === 'EUR' ? $quantity : 0.0,
+            'total' => $asset === 'EUR' ? $quantity - $fee : 0.0,
         ];
     }
 

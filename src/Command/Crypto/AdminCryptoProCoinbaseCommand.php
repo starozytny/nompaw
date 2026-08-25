@@ -97,13 +97,13 @@ class AdminCryptoProCoinbaseCommand extends Command
                     $fromCoin = $type == TypeType::Achat ? $item[10] : $item[6];
                     $toCoin = $type == TypeType::Achat ? $item[6] : $item[10];
 
-                    // Coinbase Pro's own "Total" column is already the real fee-inclusive cash movement
+                    // Coinbase Pro's own "Total" column is already the real fee-affected cash movement
                     // (Size*Price + Fee for a buy, Size*Price - Fee for a sell) — see CoinbaseProFillsParser
                     // (same import, newer entry point) for the full rationale.
                     $rawTotal = abs((float) $item[9]);
                     $fee = round($item[8], 2);
-                    $totalReal = $type == TypeType::Achat ? $rawTotal - $fee : $rawTotal;
-                    $totalGross = $type == TypeType::Achat ? $rawTotal : $rawTotal + $fee;
+                    $totalReal = $rawTotal;
+                    $totalGross = $type == TypeType::Achat ? $rawTotal - $fee : $rawTotal + $fee;
 
                     $obj = (new CrTrade())
                         ->setIsImported(true)
