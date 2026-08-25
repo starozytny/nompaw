@@ -77,6 +77,8 @@ if [ "$RUN_COMPOSER" = true ]; then
 fi
 step "Migrations Doctrine"
 php bin/console doctrine:migrations:migrate --no-interaction --env=prod --ansi
+step "Dump des routes JS"
+php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json --env=prod --ansi
 step "Vidage du cache"
 php bin/console cache:clear --env=prod --no-debug --ansi
 step "Réchauffement du cache"
