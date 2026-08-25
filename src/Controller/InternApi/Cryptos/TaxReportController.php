@@ -22,7 +22,18 @@ class TaxReportController extends AbstractController
     #[Route('/{year}', name: 'index', requirements: ['year' => '\d{4}'], options: ['expose' => true], methods: 'GET')]
     public function index(int $year, CrTaxReportService $reportService, ApiResponse $apiResponse): Response
     {
+        // Cache-only (see CrTaxReportService::computeReport()'s $liveFetch default) — a routine page view/
+        // year switch must stay fast even with unresolved coin/date pairs. The "Actualiser" button below
+        // is what actually pays for the CoinGecko round trips.
         $report = $reportService->computeReport($this->getUser(), $year);
+
+        return $apiResponse->apiJsonResponseCustom($report);
+    }
+
+    #[Route('/{year}/refresh', name: 'refresh', requirements: ['year' => '\d{4}'], options: ['expose' => true], methods: 'POST')]
+    public function refresh(int $year, CrTaxReportService $reportService, ApiResponse $apiResponse): Response
+    {
+        $report = $reportService->computeReport($this->getUser(), $year, true);
 
         return $apiResponse->apiJsonResponseCustom($report);
     }
@@ -116,7 +127,9 @@ class TaxReportController extends AbstractController
             return $this->file($this->getParameter('private_directory') . $nameFolder . $fileName);
         }
 
-        $report = $reportService->computeReport($this->getUser(), $year);
+        // Unlike index(), an export is already a deliberate, occasional action — worth resolving whatever
+        // prices CoinGecko can still provide rather than exporting a report full of cache-only gaps.
+        $report = $reportService->computeReport($this->getUser(), $year, true);
 
         if ($format === 'excel') {
             $header = [[

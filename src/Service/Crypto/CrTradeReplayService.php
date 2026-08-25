@@ -68,7 +68,7 @@ class CrTradeReplayService
             $tradeYear = (int) $trade->getTradeAt()->format('Y');
             if (!isset($statsByYear[$tradeYear])) {
                 $years[] = $tradeYear;
-                $statsByYear[$tradeYear] = ['count' => 0, 'depot' => 0.0, 'retrait' => 0.0, 'achat' => 0.0, 'vente' => 0.0, 'bonus' => 0.0];
+                $statsByYear[$tradeYear] = ['count' => 0, 'depot' => 0.0, 'retrait' => 0.0, 'achat' => 0.0, 'vente' => 0.0, 'bonus' => 0.0, 'achatCount' => 0, 'venteCount' => 0];
             }
 
             $invalid = $this->checkValidity($trade, $validityBalances);
@@ -77,6 +77,7 @@ class CrTradeReplayService
                 case TypeType::Vente:
                     $dispo += $trade->getTotalReal();
                     $statsByYear[$tradeYear]['vente'] += $trade->getTotal();
+                    $statsByYear[$tradeYear]['venteCount']++;
                     break;
                 case TypeType::Depot:
                     $dispo += $trade->getTotalReal();
@@ -86,6 +87,7 @@ class CrTradeReplayService
                 case TypeType::Achat:
                     $dispo -= $trade->getTotalReal();
                     $statsByYear[$tradeYear]['achat'] += $trade->getTotal();
+                    $statsByYear[$tradeYear]['achatCount']++;
                     break;
                 case TypeType::Retrait:
                     $dispo -= $trade->getTotal();
@@ -140,6 +142,8 @@ class CrTradeReplayService
             'achat' => round($rawStats['achat'], 2),
             'vente' => round($rawStats['vente'], 2),
             'bonus' => round($rawStats['bonus'], 2),
+            'achatCount' => $rawStats['achatCount'],
+            'venteCount' => $rawStats['venteCount'],
             'dispoEnd' => end($rows)['dispoAfter'],
         ];
 

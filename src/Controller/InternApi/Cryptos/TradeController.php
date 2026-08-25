@@ -40,6 +40,22 @@ class TradeController extends AbstractController
         return $apiResponse->apiJsonResponseCustom($replayService->computeHoldings($this->getUser()));
     }
 
+    /**
+     * Kept as a separate named route (rather than reusing /holdings-as-of directly) so the frontend's
+     * "Cryptos" year stat card has one obviously-year-scoped endpoint to call, even though it delegates to
+     * the exact same computeHoldingsAsOf() replay, snapshotted at 31/12 23:59:59 of $year.
+     */
+    #[Route('/holdings-year/{year}', name: 'holdings_year', requirements: ['year' => '\d{4}'], options: ['expose' => true], methods: 'GET')]
+    public function holdingsYear(int $year, ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
+    {
+        // Same Europe/Paris -> UTC conversion SanitizeData::createDateTime() applies to the manual
+        // /holdings-as-of date, so a trade timestamped right at year-end compares consistently either way.
+        $asOf = (new \DateTimeImmutable("{$year}-12-31 23:59:59", new \DateTimeZone('Europe/Paris')))
+            ->setTimezone(new \DateTimeZone('UTC'));
+
+        return $apiResponse->apiJsonResponseCustom($replayService->computeHoldingsAsOf($this->getUser(), $asOf, null));
+    }
+
     #[Route('/holdings-as-of', name: 'holdings_as_of', options: ['expose' => true], methods: 'GET')]
     public function holdingsAsOf(Request $request, ApiResponse $apiResponse, CrTradeReplayService $replayService, SanitizeData $sanitizeData): Response
     {

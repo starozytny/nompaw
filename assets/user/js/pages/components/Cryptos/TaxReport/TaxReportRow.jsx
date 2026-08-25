@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import Sanitaze from "@commonFunctions/sanitaze";
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Badge } from "@tailwindComponents/Elements/Badge";
+import { CoinIcon } from "@userPages/Cryptos/CoinIcon";
 import { TaxReportPriceDialog } from "@userPages/Cryptos/TaxReport/TaxReportPriceDialog";
 
 export function TaxReportRow ({ line, onReportUpdate }) {
@@ -12,10 +13,16 @@ export function TaxReportRow ({ line, onReportUpdate }) {
 	let missing = line.portfolioValue === null;
 
 	return <tr className="border-t hover:bg-muted/40">
-		<td className="py-2.5 pl-4 pr-3 text-sm">{Sanitaze.toFormatDate(line.tradeAt, 'L')}</td>
+		<td className="py-2.5 pl-4 pr-3 text-sm">
+			<div>{Sanitaze.toFormatDate(line.tradeAt, 'L')}</div>
+			<div className="text-xs text-muted-foreground">{Sanitaze.toFormatDate(line.tradeAt + ' ' + line.tradeTime, 'H[h]mm')}</div>
+		</td>
 		<td className="py-2.5 pr-3 text-sm">
-			<span className="tabular-nums">{line.fromNbToken}</span>{' '}
-			<Badge type="indigo">{line.fromCoin}</Badge>
+			<div className="flex items-center gap-1.5">
+				<CoinIcon coin={line.fromCoin} />
+				<span className="tabular-nums">{line.fromNbToken}</span>
+				{/*<Badge type="indigo">{line.fromCoin}</Badge>*/}
+			</div>
 		</td>
 		<td className="py-2.5 pr-3 text-sm tabular-nums">{Sanitaze.toFormatCurrency(line.cessionPrice)}</td>
 		<td className="py-2.5 pr-3 text-sm tabular-nums text-muted-foreground">{Sanitaze.toFormatCurrency(line.grossAcquisitionCost)}</td>

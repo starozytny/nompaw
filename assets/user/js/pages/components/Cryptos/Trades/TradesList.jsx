@@ -10,6 +10,7 @@ import Sanitaze from "@commonFunctions/sanitaze";
 import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
 import { ComboboxMultiple } from "@shadcnComponents/elements/Combobox/Combobox";
 import { TradesItem, TYPE_LABEL } from "@userPages/Cryptos/Trades/TradesItem";
+import { CryptosYearDialog } from "@userPages/Cryptos/Trades/CryptosYearDialog";
 
 const COLUMNS = 6;
 
@@ -28,11 +29,12 @@ function toggleFilterValue (setter) {
  * component only does light client-side work now: grouping into months and applying the type/platform/
  * token filters, both cheap over a single year's worth of data.
  */
-export const TradesList = React.memo(function TradesList ({ data, years, selectedYear, yearStats, filterOptions, onYearChange, onModal, onEdit }) {
+export const TradesList = React.memo(function TradesList ({ data, years, selectedYear, yearStats, yearHoldings, filterOptions, onYearChange, onModal, onEdit }) {
 	const [openMonths, setOpenMonths] = useState({});
 	const [typeFilter, setTypeFilter] = useState([]);
 	const [platformFilter, setPlatformFilter] = useState([]);
 	const [tokenFilter, setTokenFilter] = useState([]);
+	const [cryptosDialogOpen, setCryptosDialogOpen] = useState(false);
 
 	if (data.length === 0) {
 		return <div className="flex flex-col items-center gap-2 p-8 text-center">
@@ -149,28 +151,32 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 			<span className="text-xs text-muted-foreground">{yearStats.count} transaction{yearStats.count > 1 ? "s" : ""} en {selectedYear}</span>
 		</div>
 
-		<div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+		<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
 			<div className="rounded-lg border p-2.5">
-				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Dépôts</div>
-				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-income)' }}>{Sanitaze.toFormatCurrency(yearStats.depot)}</div>
-			</div>
-			<div className="rounded-lg border p-2.5">
-				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Retraits</div>
-				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-expense)' }}>{Sanitaze.toFormatCurrency(yearStats.retrait)}</div>
-			</div>
-			<div className="rounded-lg border p-2.5">
-				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Achats</div>
+				<div className="flex items-center justify-between gap-2">
+					<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Achats</div>
+					<span className="text-[10px] text-muted-foreground">{yearStats.achatCount}</span>
+				</div>
 				<div className="text-sm font-semibold tabular-nums">{Sanitaze.toFormatCurrency(yearStats.achat)}</div>
 			</div>
 			<div className="rounded-lg border p-2.5">
-				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Ventes</div>
+				<div className="flex items-center justify-between gap-2">
+					<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Ventes</div>
+					<span className="text-[10px] text-muted-foreground">{yearStats.venteCount}</span>
+				</div>
 				<div className="text-sm font-semibold tabular-nums">{Sanitaze.toFormatCurrency(yearStats.vente)}</div>
 			</div>
-			<div className="rounded-lg border p-2.5">
-				<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Bonus</div>
-				<div className="text-sm font-semibold tabular-nums" style={{ color: 'var(--cat-saving)' }}>{Sanitaze.toFormatCurrency(yearStats.bonus)}</div>
-			</div>
+			<button type="button" onClick={() => setCryptosDialogOpen(true)}
+					className="rounded-lg border p-2.5 text-left transition-colors hover:bg-muted/40">
+				<div className="flex items-center justify-between gap-2">
+					<div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Cryptos</div>
+					<span className="icon-right-chevron text-[9px] text-muted-foreground" />
+				</div>
+				<div className="text-sm font-semibold tabular-nums">{yearHoldings.length}</div>
+			</button>
 		</div>
+
+		<CryptosYearDialog open={cryptosDialogOpen} onOpenChange={setCryptosDialogOpen} year={selectedYear} holdings={yearHoldings} />
 
 		<div className="-mx-4 overflow-x-auto border-t">
 			<table className="w-full min-w-[820px]">
@@ -197,6 +203,7 @@ TradesList.propTypes = {
 	years: PropTypes.array.isRequired,
 	selectedYear: PropTypes.number,
 	yearStats: PropTypes.object,
+	yearHoldings: PropTypes.array,
 	filterOptions: PropTypes.shape({
 		platforms: PropTypes.array,
 		tokens: PropTypes.array,
