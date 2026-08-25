@@ -63,6 +63,7 @@ db-make-migrate: ## Exécute les migrations
 
 db-migrate: ## Exécute les migrations
 	docker-compose exec php php bin/console doctrine:migrations:migrate --no-interaction
+	$(MAKE) route
 
 cache-clear: ## Vide le cache
 	docker-compose exec php php bin/console cache:clear
