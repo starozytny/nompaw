@@ -24,6 +24,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class CrPriceService
 {
+    /**
+     * A failed lookup (rate-limited, transport error, no price in the response) is cached too — as a
+     * 'failed' row, not just skipped — so a persistently-unresolvable coin/date isn't re-hit on every
+     * single report computation (year switch, opening the price-edit panel: each replays the full trade
+     * history and can ask for the same coin/date dozens of times). Retried after this cooldown so a
+     * transient failure (rate limit) or a later-added COINGECKO_API_KEY eventually recovers on its own.
+     */
+    private const FAILURE_RETRY_COOLDOWN = 'P1D';
+
     public function __construct(
         private readonly HttpClientInterface $coingeckoClient,
         private readonly CrPriceHistoryRepository $priceHistoryRepository,
@@ -42,8 +51,15 @@ class CrPriceService
         $day = \DateTime::createFromInterface($date)->setTime(0, 0);
 
         $cached = $this->priceHistoryRepository->findOneByCoinAndDate($coin, $day);
-        if ($cached !== null) {
+        if ($cached !== null && $cached->getSource() !== 'failed') {
             return $cached->getPriceEur();
+        }
+
+        if ($cached !== null && $cached->getSource() === 'failed') {
+            $retryAfter = (clone $cached->getFetchedAt())->add(new \DateInterval(self::FAILURE_RETRY_COOLDOWN));
+            if (new \DateTimeImmutable() < $retryAfter) {
+                return null;
+            }
         }
 
         $coingeckoId = CoinGeckoIdMap::resolve($coin);
@@ -62,6 +78,7 @@ class CrPriceService
                 'headers' => $this->coingeckoApiKey !== ''
                     ? ['x-cg-demo-api-key' => $this->coingeckoApiKey]
                     : [],
+                'timeout' => 5,
             ]);
 
             $data = $response->toArray();
@@ -73,6 +90,8 @@ class CrPriceService
                 'message' => $e->getMessage(),
             ]);
 
+            $this->rememberFailure($cached, $coin, $day);
+
             return null;
         }
 
@@ -82,20 +101,35 @@ class CrPriceService
                 'date' => $day->format('Y-m-d'),
             ]);
 
+            $this->rememberFailure($cached, $coin, $day);
+
             return null;
         }
 
         $priceEur = (float) $priceEur;
 
-        $history = (new CrPriceHistory())
-            ->setCoin($coin)
-            ->setPriceDate($day)
+        $history = ($cached ?? (new CrPriceHistory())->setCoin($coin)->setPriceDate($day))
             ->setPriceEur($priceEur)
             ->setSource('coingecko')
+            ->setFetchedAt(new \DateTimeImmutable())
         ;
         $this->priceHistoryRepository->save($history, true);
 
         return $priceEur;
+    }
+
+    /**
+     * Upserts a 'failed' marker on the same (coin, date) row a success would have used, so the unique
+     * constraint is never hit and a later successful retry just overwrites it in place.
+     */
+    private function rememberFailure(?CrPriceHistory $existing, string $coin, \DateTimeInterface $day): void
+    {
+        $history = ($existing ?? (new CrPriceHistory())->setCoin($coin)->setPriceDate($day))
+            ->setPriceEur(0.0)
+            ->setSource('failed')
+            ->setFetchedAt(new \DateTimeImmutable())
+        ;
+        $this->priceHistoryRepository->save($history, true);
     }
 
     /**
