@@ -62,6 +62,31 @@ class CrTradeRepository extends ServiceEntityRepository
     }
 
     /**
+     * Distinct import sources with their earliest trade date — the default "date d'ouverture" for a
+     * platform that CrForeignAccountService::sync() hasn't seen yet.
+     *
+     * @return array<string, \DateTimeInterface> platform => earliest tradeAt
+     */
+    public function findDistinctPlatformsWithFirstTradeDate(User $user): array
+    {
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.importedFrom AS platform', 'MIN(c.tradeAt) AS firstTradeAt')
+            ->andWhere('c.user = :user')
+            ->andWhere('c.importedFrom IS NOT NULL')
+            ->setParameter('user', $user)
+            ->groupBy('c.importedFrom')
+            ->getQuery()
+            ->getResult();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row['platform']] = $row['firstTradeAt'];
+        }
+
+        return $result;
+    }
+
+    /**
      * Distinct coin tickers (fromCoin/toCoin) ever used by $user — powers the "token" filter without
      * needing the full trade history client-side.
      *

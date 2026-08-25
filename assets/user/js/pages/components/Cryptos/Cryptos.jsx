@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shadcnComponents/ui/t
 import { Trades } from "@userPages/Cryptos/Trades/Trades";
 import { HoldingsTab } from "@userPages/Cryptos/Holdings/HoldingsTab";
 import { TaxReportTab } from "@userPages/Cryptos/TaxReport/TaxReportTab";
+import { ForeignAccountsTab } from "@userPages/Cryptos/ForeignAccounts/ForeignAccountsTab";
 import { ImportTab } from "@userPages/Cryptos/Import/ImportTab";
 
 export default function Cryptos (props) {
@@ -33,6 +34,7 @@ export default function Cryptos (props) {
 			<TabsTrigger value="trades">Transactions</TabsTrigger>
 			<TabsTrigger value="holdings">Cryptos restantes</TabsTrigger>
 			<TabsTrigger value="tax-report">Rapport fiscal</TabsTrigger>
+			<TabsTrigger value="foreign-accounts">Comptes (3916)</TabsTrigger>
 			<TabsTrigger value="import">Importer</TabsTrigger>
 		</TabsList>
 
@@ -44,6 +46,9 @@ export default function Cryptos (props) {
 		</TabsContent>}
 		{visitedTabs.has('tax-report') && <TabsContent value="tax-report" forceMount className={activeTab === 'tax-report' ? '' : 'hidden'}>
 			<TaxReportTab refreshSignal={dataVersion} />
+		</TabsContent>}
+		{visitedTabs.has('foreign-accounts') && <TabsContent value="foreign-accounts" forceMount className={activeTab === 'foreign-accounts' ? '' : 'hidden'}>
+			<ForeignAccountsTab />
 		</TabsContent>}
 		{visitedTabs.has('import') && <TabsContent value="import" forceMount className={activeTab === 'import' ? '' : 'hidden'}>
 			<ImportTab onImported={handleDataChanged} />
