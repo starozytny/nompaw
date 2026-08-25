@@ -42,6 +42,15 @@ class CoinbaseProFillsParser implements CryptoImportParserInterface
             $total = abs((float) $row[9]);
             $fee = round((float) $row[8], 2);
 
+            // Coinbase Pro's own "Total" column is already the real fee-inclusive cash movement:
+            // Size*Price + Fee for a buy (amount actually paid), Size*Price - Fee for a sell (amount
+            // actually received). So it maps straight onto whichever of totalReal/total our entity
+            // uses to mean "real amount that moved" for that direction — Achat: total (what you paid),
+            // Vente: totalReal (what you received) — the other field is reconstructed by adding/removing
+            // the fee, matching CoinbaseApiTransactionMapper::buildBuy()/buildSell()'s subtotal/total split.
+            $totalReal = $type === TypeType::Achat ? $total - $fee : $total;
+            $totalGross = $type === TypeType::Achat ? $total : $total + $fee;
+
             $trades[] = [
                 'importedId' => $row[1],
                 'tradeAt' => new \DateTimeImmutable($row[4]),
@@ -52,8 +61,8 @@ class CoinbaseProFillsParser implements CryptoImportParserInterface
                 'toNbToken' => $type === TypeType::Achat ? $size : $total,
                 'costPrice' => $fee,
                 'costCoin' => 'EUR',
-                'totalReal' => $total - $fee,
-                'total' => $total,
+                'totalReal' => $totalReal,
+                'total' => $totalGross,
             ];
         }
 
