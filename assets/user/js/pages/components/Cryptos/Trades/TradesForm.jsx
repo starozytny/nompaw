@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
@@ -6,7 +6,6 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 import Formulaire from "@commonFunctions/formulaire";
 import Validateur from "@commonFunctions/validateur";
 import Toastr from "@tailwindFunctions/toastr";
-import CryptoHoldings from "@userFunctions/cryptoHoldings";
 
 import { Button } from "@tailwindComponents/Elements/Button";
 import { Input, SelectCombobox } from "@tailwindComponents/Elements/Fields";
@@ -14,9 +13,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@shadcnComponents/
 import { CurrencyConverter } from "@userPages/Cryptos/Trades/CurrencyConverter";
 
 const DEPOT = 2;
+const TRANSFERT = 6;
 
 const URL_CREATE_ELEMENT = "intern_api_cryptos_trades_create";
 const URL_UPDATE_ELEMENT = "intern_api_cryptos_trades_update";
+const URL_HOLDINGS_AS_OF = "intern_api_cryptos_trades_holdings_as_of";
 
 const TYPE_ITEMS = [
 	{ value: 0, label: 'Achat' },
@@ -29,7 +30,7 @@ const TYPE_ITEMS = [
 	{ value: 7, label: 'À catégoriser' },
 ];
 
-export function TradesFormulaire ({ context, element, open, onOpenChange, onUpdateList, data = [] }) {
+export function TradesFormulaire ({ context, element, open, onOpenChange, onUpdateList }) {
 	return <Sheet open={open} onOpenChange={onOpenChange}>
 		<SheetContent className="flex flex-col p-0 sm:max-w-lg [&_label]:mb-1.5 [&_label]:mt-0">
 			<SheetHeader>
@@ -43,14 +44,13 @@ export function TradesFormulaire ({ context, element, open, onOpenChange, onUpda
 					element={element}
 					onClose={() => onOpenChange(false)}
 					onUpdateList={onUpdateList}
-					data={data}
 				/>
 			</div>
 		</SheetContent>
 	</Sheet>;
 }
 
-function Form ({ context, element, onClose, onUpdateList, data }) {
+function Form ({ context, element, onClose, onUpdateList }) {
 	const [state, setState] = useState({
 		tradeAt: element ? Formulaire.setValueDateTime(element.tradeAt) : Formulaire.setValueDateTime(new Date()),
 		type: element ? Formulaire.setValue(element.type) : 0,
@@ -97,8 +97,11 @@ function Form ({ context, element, onClose, onUpdateList, data }) {
 			{ type: "text", id: 'toNbToken', value: toNbToken },
 			{ type: "text", id: 'costPrice', value: costPrice },
 			{ type: "text", id: 'costCoin', value: costCoin },
-			{ type: "text", id: 'totalReal', value: totalReal },
 		];
+
+		if (parseInt(type) !== TRANSFERT) {
+			paramsToValidate = [...paramsToValidate, { type: "text", id: 'totalReal', value: totalReal }];
+		}
 
 		if (parseInt(type) !== DEPOT) {
 			paramsToValidate = [...paramsToValidate, ...[
@@ -139,18 +142,40 @@ function Form ({ context, element, onClose, onUpdateList, data }) {
 
 	const { tradeAt, type, fromCoin, toCoin, costPrice, costCoin, fromNbToken, toNbToken, toPrice, fromPrice, totalReal } = state;
 	const isDepot = parseInt(type) === DEPOT;
+	const isTransfert = parseInt(type) === TRANSFERT;
 	const params = { errors: errors, onChange: handleChange };
 
 	// Balance as it stood right before this specific transaction — not a *current* total, which would be
 	// meaningless for a transaction backdated years ago (e.g. re-entering something from 2019). Excludes
 	// the transaction being edited itself, so its own effect doesn't count towards "what was available
-	// before it". Memoized on the date (not on every fromCoin keystroke) since replaying the full history
-	// is the expensive part.
-	const holdingsAsOfDate = useMemo(
-		() => CryptoHoldings.computeHoldingsAndAlerts(data, { asOf: tradeAt, excludeId: element ? element.id : null }).holdings,
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[data, tradeAt]
-	);
+	// before it". Computed server-side (CrTradeReplayService::computeHoldingsAsOf, full-history replay)
+	// instead of client-side, and debounced on the date the same way CurrencyConverter debounces its own
+	// lookup, since the full history no longer lives in the browser to replay on every keystroke.
+	const [holdingsAsOfDate, setHoldingsAsOfDate] = useState([]);
+
+	useEffect(() => {
+		if (!tradeAt) {
+			setHoldingsAsOfDate([]);
+			return;
+		}
+
+		let cancelled = false;
+		const timeout = setTimeout(() => {
+			axios({ method: "GET", url: Routing.generate(URL_HOLDINGS_AS_OF), params: { date: tradeAt, excludeId: element ? element.id : undefined } })
+				.then(function (response) {
+					if (cancelled) return;
+					setHoldingsAsOfDate(response.data.holdings);
+				})
+				.catch(function () {
+					if (cancelled) return;
+					setHoldingsAsOfDate([]);
+				})
+			;
+		}, 500);
+
+		return () => { cancelled = true; clearTimeout(timeout); }
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [tradeAt]);
 
 	let currentBalance = null;
 	if (fromCoin) {
@@ -198,7 +223,7 @@ function Form ({ context, element, onClose, onUpdateList, data }) {
 		</div>
 
 		<div className="flex flex-col gap-2">
-			<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€)</Input>
+			<Input type="number" identifiant="totalReal" valeur={totalReal} {...params}>Total réel (€){isTransfert ? " (optionnel)" : ""}</Input>
 			<CurrencyConverter date={tradeAt} />
 		</div>
 
