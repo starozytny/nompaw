@@ -9,11 +9,15 @@ use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Fixes cr_trade.total_real/total for Coinbase Pro-imported Vente (sell) rows. The import formula
- * (still correct for Achat) computed total_real by subtracting cost_price from Coinbase's raw CSV
- * "Total" column — but for a sell, that raw column is already the real fee-inclusive amount received
- * (Size*Price - Fee), so subtracting the fee a second time under-reported total_real by exactly the
- * fee. Since CrTaxReportService::getTotalReal() feeds "Prix de cession", this under-reported capital
- * gains on every affected sale. See CoinbaseProFillsParser.php for the corrected forward-import logic.
+ * computed total_real by subtracting cost_price from Coinbase's raw CSV "Total" column — but for a
+ * sell, that raw column is already the real fee-affected amount received (Size*Price - Fee), so
+ * subtracting the fee a second time under-reported total_real by exactly the fee. Since
+ * CrTaxReportService::getTotalReal() feeds "Prix de cession", this under-reported capital gains on
+ * every affected sale. See CoinbaseProFillsParser.php for the corrected forward-import logic.
+ *
+ * NB: the Achat side of the same formula turned out to have the same bug in the opposite direction
+ * (total_real/total simply swapped relative to the rule established here) — fixed separately by
+ * Version20260825160000, not by this migration.
  *
  *   total_real (old, wrong) = raw_total - fee        total (old) = raw_total
  *   total_real (new)        = raw_total = total (old) total (new) = total_real (new) + fee

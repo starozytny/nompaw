@@ -49,9 +49,21 @@ class CoinbaseApiClient
     }
 
     /**
-     * Fetches every transaction across every Coinbase account/wallet for this key. Buy/sell transactions
-     * are enriched with their linked sub-resource ('detail': subtotal/fee/total), which
-     * CoinbaseApiTransactionMapper needs to build a CrTrade.
+     * type => plural path segment of the sub-resource that carries the subtotal/fee/total breakdown,
+     * for every Coinbase transaction type whose top-level 'amount' alone isn't enough to build a CrTrade.
+     */
+    private const DETAIL_ENDPOINTS = [
+        'buy' => 'buys',
+        'sell' => 'sells',
+        'fiat_deposit' => 'deposits',
+        'fiat_withdrawal' => 'withdrawals',
+    ];
+
+    /**
+     * Fetches every transaction across every Coinbase account/wallet for this key. Buy/sell/fiat_deposit/
+     * fiat_withdrawal transactions are enriched with their linked sub-resource ('detail': subtotal/fee/
+     * total), which CoinbaseApiTransactionMapper needs to build a CrTrade with the SEPA/card fee Coinbase
+     * charges on those, instead of silently reporting costPrice 0.
      *
      * @return list<array<string, mixed>>
      *
@@ -66,8 +78,8 @@ class CoinbaseApiClient
 
             foreach ($this->fetchAllPages("/v2/accounts/{$accountId}/transactions", $keyName, $privateKey) as $transaction) {
                 $type = $transaction['type'] ?? null;
-                if (in_array($type, ['buy', 'sell'], true)) {
-                    $transaction['detail'] = $this->fetchBuySellDetail($accountId, $type, $transaction, $keyName, $privateKey);
+                if (isset(self::DETAIL_ENDPOINTS[$type])) {
+                    $transaction['detail'] = $this->fetchDetail($accountId, $type, $transaction, $keyName, $privateKey);
                 }
 
                 $transactions[] = $transaction;
@@ -77,15 +89,17 @@ class CoinbaseApiClient
         return $transactions;
     }
 
-    private function fetchBuySellDetail(string $accountId, string $type, array $transaction, string $keyName, string $privateKey): ?array
+    private function fetchDetail(string $accountId, string $type, array $transaction, string $keyName, string $privateKey): ?array
     {
         $subResourceId = $transaction[$type]['id'] ?? null;
         if ($subResourceId === null) {
             return null;
         }
 
+        $endpoint = self::DETAIL_ENDPOINTS[$type];
+
         try {
-            $response = $this->request('GET', "/v2/accounts/{$accountId}/{$type}s/{$subResourceId}", $keyName, $privateKey);
+            $response = $this->request('GET', "/v2/accounts/{$accountId}/{$endpoint}/{$subResourceId}", $keyName, $privateKey);
 
             return $response['data'] ?? null;
         } catch (CoinbaseApiException $e) {
