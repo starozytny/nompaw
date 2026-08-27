@@ -17,9 +17,9 @@ const URL_PRICES = "intern_api_cryptos_tax_report_prices";
 
 /**
  * Lets the user fill in a EUR unit price for each coin they actually held right before one disposal,
- * instead of a single opaque portfolio total — saved into CrPriceHistory (source=manual) via the /prices
- * endpoint, so it's reusable for any other line/date that needs that exact coin/date again, and no longer
- * depends on CoinGecko having that historical price.
+ * instead of a single opaque portfolio total — saved onto that disposal (CrTrade.manualCoinPrices) via
+ * the /prices endpoint, scoped to this one cession, so two disposals on the same date are valued from
+ * their own entered prices and no longer depend on CoinGecko having that historical price.
  */
 export function TaxReportPriceDialog ({ open, onOpenChange, line, onReportUpdate }) {
 	const [coins, setCoins] = useState(null);
@@ -87,13 +87,13 @@ export function TaxReportPriceDialog ({ open, onOpenChange, line, onReportUpdate
 		<DialogContent>
 			{line && <>
 				<DialogHeader>
-					<DialogTitle>Prix des actifs détenus au {Sanitaze.toFormatDate(line.tradeAt, 'L')}</DialogTitle>
+					<DialogTitle>Prix des actifs détenus au {Sanitaze.toFormatDate(line.tradeAt, 'L')} <span className="text-xs text-muted-foreground">{Sanitaze.toFormatDate(line.tradeAt + ' ' + line.tradeTime, 'H[h]mm')}</span></DialogTitle>
 				</DialogHeader>
 
 				<p className="text-sm text-muted-foreground">
 					Renseigne le prix unitaire (€) de chaque actif que tu détenais juste avant cette cession.
-					Une fois sauvegardé, ce prix est réutilisé automatiquement pour toute autre cession ayant besoin
-					du même actif à la même date — sans redépendre de CoinGecko.
+					Ces prix sont propres à cette cession : une autre cession à la même date garde ses propres
+					valeurs et n'est pas modifiée.
 				</p>
 
 				<form onSubmit={handleSubmit} className="flex flex-col gap-3">
