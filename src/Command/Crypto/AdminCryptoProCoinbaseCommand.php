@@ -97,6 +97,14 @@ class AdminCryptoProCoinbaseCommand extends Command
                     $fromCoin = $type == TypeType::Achat ? $item[10] : $item[6];
                     $toCoin = $type == TypeType::Achat ? $item[6] : $item[10];
 
+                    // Coinbase Pro's own "Total" column is already the real fee-affected cash movement
+                    // (Size*Price + Fee for a buy, Size*Price - Fee for a sell) — see CoinbaseProFillsParser
+                    // (same import, newer entry point) for the full rationale.
+                    $rawTotal = abs((float) $item[9]);
+                    $fee = round($item[8], 2);
+                    $totalReal = $rawTotal;
+                    $totalGross = $type == TypeType::Achat ? $rawTotal - $fee : $rawTotal + $fee;
+
                     $obj = (new CrTrade())
                         ->setIsImported(true)
                         ->setImportedFrom('Coinbase Pro')
@@ -106,15 +114,15 @@ class AdminCryptoProCoinbaseCommand extends Command
 
                         ->setFromCoin($fromCoin)
                         ->setFromPrice($type == TypeType::Achat ? ($fromCoin === "EUR" ? 1 : null) : $item[7])
-                        ->setFromNbToken($type == TypeType::Achat ? abs((float) $item[9]) : $item[5])
+                        ->setFromNbToken($type == TypeType::Achat ? $rawTotal : $item[5])
 
                         ->setToCoin($toCoin)
                         ->setToPrice($type == TypeType::Achat ? $item[7] : ($toCoin === "EUR" ? 1 : null))
-                        ->setToNbToken($type == TypeType::Achat ? $item[5] : abs((float) $item[9]))
+                        ->setToNbToken($type == TypeType::Achat ? $item[5] : $rawTotal)
 
-                        ->setCostPrice(round($item[8], 2))
-                        ->setTotalReal(abs((float) $item[9]) - $item[8])
-                        ->setTotal(abs($item[9]))
+                        ->setCostPrice($fee)
+                        ->setTotalReal($totalReal)
+                        ->setTotal($totalGross)
                         ->setCostCoin('EUR')
                         ->setUser($user)
                     ;

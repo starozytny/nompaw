@@ -42,6 +42,14 @@ class CoinbaseProFillsParser implements CryptoImportParserInterface
             $total = abs((float) $row[9]);
             $fee = round((float) $row[8], 2);
 
+            // Coinbase Pro's own "Total" column is already the real fee-affected cash movement:
+            // Size*Price + Fee for a buy (amount actually paid), Size*Price - Fee for a sell (amount
+            // actually received) — that raw figure always maps straight onto totalReal. `total` is the
+            // fee-free reference (Size*Price) reconstructed by cancelling the fee's effect: subtracted
+            // back out for a buy (fee inflated it), added back for a sell (fee shrank it).
+            $totalReal = $total;
+            $totalGross = $type === TypeType::Achat ? $total - $fee : $total + $fee;
+
             $trades[] = [
                 'importedId' => $row[1],
                 'tradeAt' => new \DateTimeImmutable($row[4]),
@@ -52,8 +60,8 @@ class CoinbaseProFillsParser implements CryptoImportParserInterface
                 'toNbToken' => $type === TypeType::Achat ? $size : $total,
                 'costPrice' => $fee,
                 'costCoin' => 'EUR',
-                'totalReal' => $total - $fee,
-                'total' => $total,
+                'totalReal' => $totalReal,
+                'total' => $totalGross,
             ];
         }
 

@@ -16,6 +16,7 @@ import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
 
 const URL_GET_DATA = "intern_api_cryptos_trades_list";
 const URL_GET_HOLDINGS = "intern_api_cryptos_trades_holdings";
+const URL_GET_HOLDINGS_YEAR = "intern_api_cryptos_trades_holdings_year";
 const URL_GET_FILTERS = "intern_api_cryptos_trades_filters";
 const URL_DELETE_ELEMENT = "intern_api_cryptos_trades_delete";
 
@@ -32,6 +33,7 @@ export class Trades extends Component {
 			selectedYear: null,
 			years: [],
 			yearStats: null,
+			yearHoldings: [],
 			holdings: [],
 			netInvested: { depot: 0, retrait: 0 },
 			filterOptions: { platforms: [], tokens: [], hasManual: false },
@@ -69,7 +71,7 @@ export class Trades extends Component {
 
 		if (year !== null && this.yearCache[year]) {
 			const cached = this.yearCache[year];
-			this.setState({ data: cached.trades, selectedYear: year, years: cached.years, yearStats: cached.yearStats, loadingData: false });
+			this.setState({ data: cached.trades, selectedYear: year, years: cached.years, yearStats: cached.yearStats, yearHoldings: cached.yearHoldings, loadingData: false });
 			return;
 		}
 
@@ -81,11 +83,23 @@ export class Trades extends Component {
 			.then(function (response) {
 				const { trades, years, yearStats, year: resolvedYear } = response.data;
 
-				if (resolvedYear !== null) {
-					self.yearCache[resolvedYear] = { trades, years, yearStats };
+				if (resolvedYear === null) {
+					self.setState({ data: trades, years, yearStats, yearHoldings: [], selectedYear: resolvedYear, loadingData: false });
+					return;
 				}
 
-				self.setState({ data: trades, years, yearStats, selectedYear: resolvedYear, loadingData: false })
+				axios({ method: "GET", url: Routing.generate(URL_GET_HOLDINGS_YEAR, { year: resolvedYear }) })
+					.then(function (holdingsResponse) {
+						const yearHoldings = holdingsResponse.data.holdings;
+						self.yearCache[resolvedYear] = { trades, years, yearStats, yearHoldings };
+						self.setState({ data: trades, years, yearStats, yearHoldings, selectedYear: resolvedYear, loadingData: false });
+					})
+					.catch(function (error) {
+						Formulaire.displayErrors(self, error);
+						self.yearCache[resolvedYear] = { trades, years, yearStats, yearHoldings: [] };
+						self.setState({ data: trades, years, yearStats, yearHoldings: [], selectedYear: resolvedYear, loadingData: false });
+					})
+				;
 			})
 			.catch(function (error) {
 				Formulaire.displayErrors(self, error);
@@ -150,7 +164,7 @@ export class Trades extends Component {
 	}
 
 	render () {
-		const { data, loadingData, deleteElement, editElement, sheetOpen, years, selectedYear, yearStats, holdings, netInvested, filterOptions } = this.state;
+		const { data, loadingData, deleteElement, editElement, sheetOpen, years, selectedYear, yearStats, yearHoldings, holdings, netInvested, filterOptions } = this.state;
 
 		return <>
 			{loadingData
@@ -201,6 +215,7 @@ export class Trades extends Component {
 						</CardHeader>
 						<CardContent className="p-0">
 							<TradesList data={data} years={years} selectedYear={selectedYear} yearStats={yearStats}
+										yearHoldings={yearHoldings}
 										filterOptions={filterOptions} onYearChange={this.handleYearChange}
 										onModal={this.handleModal} onEdit={this.handleEdit} />
 						</CardContent>

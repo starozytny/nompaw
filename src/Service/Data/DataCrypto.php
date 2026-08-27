@@ -2,6 +2,7 @@
 
 namespace App\Service\Data;
 
+use App\Entity\Crypto\CrForeignAccount;
 use App\Entity\Crypto\CrTrade;
 use App\Entity\Enum\Crypto\TypeType;
 use App\Service\SanitizeData;
@@ -52,6 +53,18 @@ class DataCrypto
             ->setToPrice($toPrice)
             ->setTotalReal($totalReal)
             ->setTotal($total)
+        ;
+    }
+
+    public function setDataForeignAccount(CrForeignAccount $obj, $data): CrForeignAccount
+    {
+        return ($obj)
+            ->setPlatform($this->sanitizeData->trimData($data->platform ?? null, ''))
+            ->setAccountIdentifier($this->sanitizeData->trimData($data->accountIdentifier ?? null))
+            ->setAddress($this->sanitizeData->trimData($data->address ?? null))
+            ->setOpenedAt($this->sanitizeData->createDate($data->openedAt ?? null))
+            ->setClosedAt($this->sanitizeData->createDate($data->closedAt ?? null))
+            ->setNotes($this->sanitizeData->trimData($data->notes ?? null))
         ;
     }
 }

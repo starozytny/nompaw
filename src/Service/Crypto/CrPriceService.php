@@ -12,11 +12,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Resolves a coin's historical EUR price for a given day, via CoinGecko's free history endpoint,
  * with a persistent cache (CrPriceHistory) so the same coin/date is never fetched twice.
  *
- * The same cache can also be filled in by hand (setManualPrice(), used by
- * TaxReportController::updatePrices() when the user fills in a per-coin value for a report line CoinGecko
- * couldn't resolve) — once saved, it's indistinguishable from a CoinGecko-sourced entry to getPriceEur(),
- * so a manually-entered price for a coin/date is never looked up twice either, and benefits every future
- * report line (any user's, any year) that needs that exact coin/date again.
+ * Manual per-coin prices entered on the "Rapport fiscal" page are NOT stored here — they live on the
+ * individual disposal (CrTrade::manualCoinPrices), scoped to that one cession, and CrTaxReportService
+ * prefers them over this cache. This service is CoinGecko-only.
  *
  * Never throws: any failure (unknown ticker, transport error, unexpected payload) is logged and
  * results in a null return, so CrTaxReportService can degrade a single report line to "needs a
@@ -24,6 +22,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class CrPriceService
 {
+    /**
+     * A failed lookup (rate-limited, transport error, no price in the response) is cached too — as a
+     * 'failed' row, not just skipped — so a persistently-unresolvable coin/date isn't re-hit on every
+     * single report computation (year switch, opening the price-edit panel: each replays the full trade
+     * history and can ask for the same coin/date dozens of times). Retried after this cooldown so a
+     * transient failure (rate limit) or a later-added COINGECKO_API_KEY eventually recovers on its own.
+     */
+    private const FAILURE_RETRY_COOLDOWN = 'P1D';
+
     public function __construct(
         private readonly HttpClientInterface $coingeckoClient,
         private readonly CrPriceHistoryRepository $priceHistoryRepository,
@@ -31,7 +38,14 @@ class CrPriceService
         private readonly string $coingeckoApiKey = '',
     ) {}
 
-    public function getPriceEur(string $coin, \DateTimeInterface $date): ?float
+    /**
+     * $liveFetch = false restricts this to whatever is already in the persistent cache (a plain DB read,
+     * no network call at all) — used by CrTaxReportService's normal report view so opening/switching years
+     * on the "Rapport fiscal" page stays fast even when dozens of coin/date pairs have never been resolved
+     * yet; the user then hits "Actualiser" (liveFetch: true) to deliberately pay for the CoinGecko round
+     * trips (and the free tier's rate limit) when they actually want fresh/missing prices filled in.
+     */
+    public function getPriceEur(string $coin, \DateTimeInterface $date, bool $liveFetch = true): ?float
     {
         $coin = strtoupper($coin);
 
@@ -42,8 +56,19 @@ class CrPriceService
         $day = \DateTime::createFromInterface($date)->setTime(0, 0);
 
         $cached = $this->priceHistoryRepository->findOneByCoinAndDate($coin, $day);
-        if ($cached !== null) {
+        if ($cached !== null && $cached->getSource() !== 'failed') {
             return $cached->getPriceEur();
+        }
+
+        if (!$liveFetch) {
+            return null;
+        }
+
+        if ($cached !== null && $cached->getSource() === 'failed') {
+            $retryAfter = (clone $cached->getFetchedAt())->add(new \DateInterval(self::FAILURE_RETRY_COOLDOWN));
+            if (new \DateTimeImmutable() < $retryAfter) {
+                return null;
+            }
         }
 
         $coingeckoId = CoinGeckoIdMap::resolve($coin);
@@ -62,6 +87,7 @@ class CrPriceService
                 'headers' => $this->coingeckoApiKey !== ''
                     ? ['x-cg-demo-api-key' => $this->coingeckoApiKey]
                     : [],
+                'timeout' => 5,
             ]);
 
             $data = $response->toArray();
@@ -73,6 +99,8 @@ class CrPriceService
                 'message' => $e->getMessage(),
             ]);
 
+            $this->rememberFailure($cached, $coin, $day);
+
             return null;
         }
 
@@ -82,16 +110,17 @@ class CrPriceService
                 'date' => $day->format('Y-m-d'),
             ]);
 
+            $this->rememberFailure($cached, $coin, $day);
+
             return null;
         }
 
         $priceEur = (float) $priceEur;
 
-        $history = (new CrPriceHistory())
-            ->setCoin($coin)
-            ->setPriceDate($day)
+        $history = ($cached ?? (new CrPriceHistory())->setCoin($coin)->setPriceDate($day))
             ->setPriceEur($priceEur)
             ->setSource('coingecko')
+            ->setFetchedAt(new \DateTimeImmutable())
         ;
         $this->priceHistoryRepository->save($history, true);
 
@@ -99,21 +128,17 @@ class CrPriceService
     }
 
     /**
-     * Records (or overwrites) a coin's price for one day by hand — see class docblock. Upserts on the
-     * (coin, priceDate) unique constraint so re-editing an already-manual entry doesn't create a
-     * duplicate row.
+     * Upserts a 'failed' marker on the same (coin, date) row a success would have used, so the unique
+     * constraint is never hit and a later successful retry just overwrites it in place.
      */
-    public function setManualPrice(string $coin, \DateTimeInterface $date, float $priceEur): void
+    private function rememberFailure(?CrPriceHistory $existing, string $coin, \DateTimeInterface $day): void
     {
-        $coin = strtoupper($coin);
-        $day = \DateTime::createFromInterface($date)->setTime(0, 0);
-
-        $history = $this->priceHistoryRepository->findOneByCoinAndDate($coin, $day) ?? (new CrPriceHistory())
-            ->setCoin($coin)
-            ->setPriceDate($day)
+        $history = ($existing ?? (new CrPriceHistory())->setCoin($coin)->setPriceDate($day))
+            ->setPriceEur(0.0)
+            ->setSource('failed')
+            ->setFetchedAt(new \DateTimeImmutable())
         ;
-        $history->setPriceEur($priceEur)->setSource('manual');
-
         $this->priceHistoryRepository->save($history, true);
     }
+
 }
