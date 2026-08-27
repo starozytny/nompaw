@@ -19,13 +19,20 @@ export function CryptosYearDialog ({ open, onOpenChange, year, holdings }) {
 
 			{holdings.length === 0
 				? <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-					Aucune crypto détenue à cette date.
+					Aucune activité crypto sur cette année.
 				</div>
 				: <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1">
-					{holdings.map(h => <div key={h.coin} className="flex items-center gap-2 rounded-lg border p-2.5">
-						<CoinIcon coin={h.coin} size={22} />
-						<Badge type="indigo">{h.coin}</Badge>
-						<span className="ml-auto text-sm font-semibold tabular-nums">{h.quantity}</span>
+					{holdings.map(h => <div key={h.coin} className="flex flex-col gap-1.5 rounded-lg border p-2.5">
+						<div className="flex items-center gap-2">
+							<CoinIcon coin={h.coin} size={22} />
+							<Badge type="indigo">{h.coin}</Badge>
+							<span className="ml-auto text-xs text-muted-foreground">Détenu</span>
+							<span className="text-sm font-semibold tabular-nums">{h.quantity}</span>
+						</div>
+						<div className="flex flex-col justify-end gap-y-1 text-right border-t pt-2.5 text-xs text-muted-foreground">
+							<div>Acheté ({h.achatCount}) : <b className="tabular-nums text-foreground">{Sanitaze.toFormatCurrency(h.achatTotal)}</b> / <b className="tabular-nums text-foreground">{h.achatQty}</b></div>
+							<div>Vendu ({h.venteCount}) : <b className="tabular-nums text-foreground">{Sanitaze.toFormatCurrency(h.venteTotal)}</b> / <b className="tabular-nums text-foreground">{h.venteQty}</b></div>
+						</div>
 					</div>)}
 				</div>
 			}
