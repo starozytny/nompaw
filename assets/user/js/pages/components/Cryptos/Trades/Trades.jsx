@@ -102,6 +102,7 @@ export class Trades extends Component {
 				;
 			})
 			.catch(function (error) {
+				console.log(error)
 				Formulaire.displayErrors(self, error);
 				self.setState({ loadingData: false })
 			})
