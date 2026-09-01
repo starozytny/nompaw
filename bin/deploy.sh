@@ -71,6 +71,8 @@ if [ "$SKIP_BUILD" = false ]; then
   tar xzf "$BUILD_ARCHIVE" -C public
   rm -f "$BUILD_ARCHIVE"
 fi
+step "Vidage du cache"
+php bin/console cache:clear --env=prod --no-debug --ansi
 step "git pull"
 git -c color.ui=always pull origin deploy
 if [ "$RUN_COMPOSER" = true ]; then
@@ -81,8 +83,6 @@ if [ "$RUN_YARN" = true ]; then
   step "yarn install"
   yarn install --frozen-lockfile
 fi
-step "Vidage du cache"
-php bin/console cache:clear --env=prod --no-debug --ansi
 step "Migrations Doctrine"
 php bin/console doctrine:migrations:migrate --no-interaction --env=prod --ansi
 step "Dump des routes JS"

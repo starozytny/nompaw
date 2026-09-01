@@ -9,6 +9,7 @@ import { RandoDelete } from "@userPages/Aventures/Rando/RandoDelete";
 import { RandoDate } from "@userPages/Aventures/Rando/RandoDate";
 import { RandoAdventure } from "@userPages/Aventures/Rando/RandoAdventure";
 import { RandoImages } from "@userPages/Aventures/Rando/RandoImages";
+import { RandoDeposit } from "@userPages/Aventures/Rando/RandoDeposit";
 import { RandoEnd } from "@userPages/Aventures/Rando/RandoEnd";
 
 let el = document.getElementById("groupes_update");
@@ -72,6 +73,11 @@ if(randoAdventure){
 let randoImages = document.getElementById("rando_images");
 if(randoImages){
     createRoot(randoImages).render(<RandoImages {...randoImages.dataset} />)
+}
+
+let randoDeposit = document.getElementById("rando_deposit");
+if(randoDeposit){
+    createRoot(randoDeposit).render(<RandoDeposit {...randoDeposit.dataset} />)
 }
 
 let endRandos = document.querySelectorAll('.end-rando');

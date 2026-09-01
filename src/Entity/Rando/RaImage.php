@@ -41,9 +41,13 @@ class RaImage extends DataEntity
     private ?int $type = null;
 
     #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'raImages')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['ra_img_list'])]
     private ?User $author = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['ra_img_list'])]
+    private ?string $guestName = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]
@@ -131,6 +135,30 @@ class RaImage extends DataEntity
         $this->author = $author;
 
         return $this;
+    }
+
+    public function getGuestName(): ?string
+    {
+        return $this->guestName;
+    }
+
+    public function setGuestName(?string $guestName): self
+    {
+        $this->guestName = $guestName;
+
+        return $this;
+    }
+
+    #[Groups(['ra_img_list'])]
+    public function getAuthorName(): ?string
+    {
+        return $this->author ? $this->author->getDisplayName() : $this->guestName;
+    }
+
+    #[Groups(['ra_img_list'])]
+    public function isGuest(): bool
+    {
+        return $this->author === null;
     }
 
     public function getRando(): ?RaRando

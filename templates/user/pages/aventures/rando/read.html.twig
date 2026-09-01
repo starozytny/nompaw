@@ -90,6 +90,14 @@
                 </div>
             </div>
 
+            {% if app.user.id == elem.author.id or app.user.isAdmin %}
+                <div id="rando_deposit"
+                     data-rando-id="{{ elem.id }}"
+                     data-enabled="{{ elem.depositEnabled ? 1 : 0 }}"
+                     data-has-password="{{ elem.depositPassword ? 1 : 0 }}"
+                     data-url="{{ elem.depositToken ? url('app_aventure_album', {token: elem.depositToken}) : '' }}"></div>
+            {% endif %}
+
             <div class="flex flex-col gap-4">
                 <div id="rando_date" class="w-full"
                      data-rando-id="{{ elem.id }}"

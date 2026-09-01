@@ -14,7 +14,7 @@ import { LightBox } from "@tailwindComponents/Elements/LightBox";
 import { Button } from "@tailwindComponents/Elements/Button";
 import {
 	ChevronLeft, ChevronRight, Image, Download, Trash2, Check, Loader2,
-	Share2, X, Eye, Lock, Users,
+	Share2, X, Eye, Lock, Users, CalendarClock,
 } from "lucide-react";
 
 const URL_UPLOAD_IMAGES = "intern_api_aventures_images_upload_images";
@@ -28,6 +28,7 @@ const URL_GET_THUMBS_SRC = "intern_api_aventures_images_thumbs_src";
 const URL_READ_IMAGE_HD = "intern_api_aventures_images_file_hd_src";
 const URL_FETCH_IMAGES = "intern_api_aventures_images_fetch_images";
 const URL_VISIBILITY_IMAGE = "intern_api_aventures_images_visibility";
+const URL_TAKEN_AT_IMAGE = "intern_api_aventures_images_taken_at";
 
 // Nombre d'envois simultanés lors d'un upload groupé — voir la même constante dans
 // PhotosGallery.jsx pour le détail des jauges de ressources cPanel (o2switch) ayant motivé
@@ -54,6 +55,8 @@ export class RandoImages extends Component {
 		this.fileInputRef = React.createRef();
 		this.deleteImage = React.createRef();
 		this.deleteFiles = React.createRef();
+		this.editDate = React.createRef();
+		this.dateInputRef = React.createRef();
 		this.lightbox = React.createRef();
 		this.observer = null;
 		this.sentinelRef = React.createRef();
@@ -269,6 +272,46 @@ export class RandoImages extends Component {
 			allImages: [], currentImages: [], selected: new Set(),
 			page: 1, hasMore: true, rankPhoto: 1, loading: false
 		}, () => this.fetchImages());
+	}
+
+	// Corrige la date de prise de vue quand l'EXIF a été supprimé (la date était alors
+	// retombée sur la date d'upload) : l'album est trié par takenAt, donc c'est ce qui
+	// permet de remettre les photos dans l'ordre chronologique.
+	openEditDate = (image) => {
+		this.setState({ image });
+
+		let initial = image.takenAt ? image.takenAt.slice(0, 16) : "";
+		this.editDate.current.handleUpdateContent(
+			<div className="form">
+				<p className="form-infos mb-2">Date utilisée pour classer cette photo dans l'album.</p>
+				<input type="datetime-local" defaultValue={initial} ref={this.dateInputRef}
+					   className="block w-full rounded-md border-0 py-2 px-3 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600" />
+			</div>
+		);
+		this.editDate.current.handleUpdateFooter(<Button type="blue" onClick={this.handleSaveDate}>Enregistrer</Button>);
+		this.editDate.current.handleClick();
+	}
+
+	handleSaveDate = () => {
+		const { image } = this.state;
+		let value = this.dateInputRef.current ? this.dateInputRef.current.value : "";
+
+		if (!value) {
+			Toastr.toast('warning', "Choisissez une date.");
+			return;
+		}
+
+		let self = this;
+		Formulaire.loader(true);
+		axios({ method: "PUT", url: Routing.generate(URL_TAKEN_AT_IMAGE, { id: image.id }), data: { takenAt: value } })
+			.then(function () {
+				Toastr.toast('info', "Date mise à jour.");
+				self.editDate.current.handleClose();
+				self.refreshAfterUpload();
+			})
+			.catch(function (error) { Formulaire.displayErrors(self, error); })
+			.then(function () { Formulaire.loader(false); })
+		;
 	}
 
 	handleDeleteImage = () => {
@@ -528,7 +571,7 @@ export class RandoImages extends Component {
 					<LazyLoadingGalleryWithPlaceholder currentImages={currentImages}
 													   onModal={this.handleModal} onCover={this.handleCover}
 													   onSelect={this.handleSelect} onLightbox={this.handleLightbox}
-													   onVisibility={this.handleVisibility}
+													   onVisibility={this.handleVisibility} onEditDate={this.openEditDate}
 													   selected={selected} userId={userId} randoAuthor={randoAuthor} />
 				)}
 			</div>
@@ -592,6 +635,11 @@ export class RandoImages extends Component {
 				, document.body
 			)}
 
+			{createPortal(<Modal ref={this.editDate} identifiant='edit-date' maxWidth={414} title="Date de la photo"
+								 content={null} footer={null} closeTxt="Annuler" />
+				, document.body
+			)}
+
 		</div>
 	}
 }
@@ -620,7 +668,7 @@ function GridSkeleton ({ count = 24 }) {
 
 const LONG_PRESS_DURATION = 450;
 
-function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, onVisibility, selected, userId, randoAuthor }) {
+function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, onSelect, onLightbox, onVisibility, onEditDate, selected, userId, randoAuthor }) {
 	const [loaded, setLoaded] = useState(new Set());
 	const [error, setError] = useState(new Set());
 	const [hoveredImage, setHoveredImage] = useState(null);
@@ -761,6 +809,14 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 									<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -bottom-7 right-0 text-xs hidden whitespace-nowrap">Image de couverture</span>
 								</button>
 								<button
+									className="relative w-7 h-7 rounded-full bg-black/60 hover:bg-blue-600 text-white flex items-center justify-center transition-colors"
+									onClick={(e) => { e.stopPropagation(); onEditDate(elem); }}
+									aria-label="Modifier la date"
+								>
+									<CalendarClock size={14} />
+									<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -bottom-7 right-0 text-xs hidden whitespace-nowrap">Modifier la date</span>
+								</button>
+								<button
 									className="relative w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors"
 									onClick={(e) => { e.stopPropagation(); onModal('deleteImage', elem); }}
 									aria-label="Supprimer"
@@ -774,14 +830,20 @@ function LazyLoadingGalleryWithPlaceholder ({ currentImages, onModal, onCover, o
 					<div className={`flex justify-between gap-2 p-2 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
 						<div className="flex items-center gap-2">
 							<div className="w-8 h-8 rounded-full shadow">
-								{elem.author.avatarFile
-									? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`} className="w-8 h-8 object-cover rounded-full" />
+								{elem.author
+									? (elem.author.avatarFile
+										? <img src={elem.author.avatarFile} alt={`avatar de ${elem.author.username}`} className="w-8 h-8 object-cover rounded-full" />
+										: <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
+											{elem.author.lastname.slice(0, 1) + elem.author.firstname.slice(0, 1)}
+										</div>)
 									: <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center font-semibold text-slate-50">
-										{elem.author.lastname.slice(0, 1) + elem.author.firstname.slice(0, 1)}
+										{(elem.authorName || "?").slice(0, 2).toUpperCase()}
 									</div>
 								}
 							</div>
-							<div className="font-medium text-sm text-slate-50">{elem.author.displayName}</div>
+							<div className="font-medium text-sm text-slate-50">
+								{elem.author ? elem.author.displayName : `${elem.authorName || "Invité"} (invité)`}
+							</div>
 						</div>
 					</div>
 				</div>
