@@ -137,6 +137,16 @@ class CrTrade
     #[Groups(['trade_list'])]
     private ?string $portfolioValueSource = null;
 
+    /**
+     * Per-coin EUR unit prices entered by hand for THIS disposal only, keyed by uppercase ticker
+     * (e.g. ['BTC' => 42000.5]). Used by CrTaxReportService to value the portfolio held just before this
+     * disposal when the automatic lookup can't. Unlike CrPriceHistory (a shared coin/date cache), this is
+     * scoped to the single cession, so two disposals on the same date can be valued independently.
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['trade_list'])]
+    private ?array $manualCoinPrices = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -366,6 +376,24 @@ class CrTrade
     public function setPortfolioValueSource(?string $portfolioValueSource): static
     {
         $this->portfolioValueSource = $portfolioValueSource;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, float> uppercase ticker => EUR unit price (empty array when none set)
+     */
+    public function getManualCoinPrices(): array
+    {
+        return $this->manualCoinPrices ?? [];
+    }
+
+    /**
+     * @param array<string, float>|null $manualCoinPrices uppercase ticker => EUR unit price
+     */
+    public function setManualCoinPrices(?array $manualCoinPrices): static
+    {
+        $this->manualCoinPrices = ($manualCoinPrices === null || $manualCoinPrices === []) ? null : $manualCoinPrices;
 
         return $this;
     }

@@ -174,14 +174,16 @@ class CrTaxReportService
      * Per-coin breakdown of the portfolio held strictly before $disposal — powers the price-editing panel
      * (TaxReportController::holdings()/updatePrices()) so the user can fill in a EUR price for each coin
      * they actually held at that moment, instead of a single opaque portfolio total. Includes coins whose
-     * price already resolved (via CoinGecko or an earlier manual entry), not just the missing ones, so
-     * they're visible and correctable too.
+     * price already resolved (a per-cession manual entry on this trade, else the shared CoinGecko cache),
+     * not just the missing ones, so they're visible and correctable too.
      *
      * @return list<array{coin: string, quantity: float, price: ?float}>
      */
     public function computeHoldingsSnapshot(CrTrade $disposal): array
     {
         [, , $holdings] = $this->replayBefore($disposal);
+
+        $manualPrices = $disposal->getManualCoinPrices();
 
         $snapshot = [];
         foreach ($holdings as $coin => $quantity) {
@@ -192,7 +194,9 @@ class CrTaxReportService
             $snapshot[] = [
                 'coin' => $coin,
                 'quantity' => $quantity,
-                'price' => $this->priceService->getPriceEur($coin, $disposal->getTradeAt()),
+                // The per-cession manual price wins over the shared CoinGecko/CrPriceHistory cache, so
+                // reopening the panel shows what was actually entered for THIS disposal.
+                'price' => $manualPrices[strtoupper($coin)] ?? $this->priceService->getPriceEur($coin, $disposal->getTradeAt()),
             ];
         }
 
@@ -202,26 +206,29 @@ class CrTaxReportService
     }
 
     /**
-     * Saves a EUR price for each given coin on $disposal's date — CrPriceService::setManualPrice() writes
-     * into the same shared cache CoinGecko itself uses, so this also silently benefits any other line/year
-     * (this user's or, since the cache isn't per-user, any family member's) that needs that exact coin/
-     * date again, not just $disposal. Clears any pre-existing whole-portfolio manual override on this
-     * disposal (CrTrade::manualPortfolioValueTotal) so the freshly computed per-coin sum takes over —
-     * the two mechanisms would otherwise silently conflict, since resolvePortfolioValue() always prefers
-     * the whole-total override first.
+     * Saves a EUR unit price for each given coin ON $disposal ITSELF (CrTrade::manualCoinPrices), scoped to
+     * this one cession — NOT into the shared CrPriceHistory (coin, date) cache. Two disposals on the same
+     * date are therefore valued from their own entered prices, independently of each other. New prices are
+     * merged into whatever was entered before, so editing one coin doesn't wipe the others. Clears any
+     * pre-existing whole-portfolio manual override on this disposal (CrTrade::manualPortfolioValueTotal) so
+     * the freshly computed per-coin sum takes over — the two mechanisms would otherwise silently conflict,
+     * since resolvePortfolioValue() always prefers the whole-total override first.
      *
      * @param array<string, float> $pricesByCoin coin ticker => EUR unit price
      */
     public function saveManualPrices(CrTrade $disposal, array $pricesByCoin): array
     {
+        $merged = $disposal->getManualCoinPrices();
         foreach ($pricesByCoin as $coin => $price) {
-            $this->priceService->setManualPrice($coin, $disposal->getTradeAt(), $price);
+            $merged[strtoupper($coin)] = $price;
         }
 
+        $disposal->setManualCoinPrices($merged);
         if ($disposal->getManualPortfolioValueTotal() !== null) {
-            $disposal->setManualPortfolioValueTotal(null)->setPortfolioValueSource(null);
-            $this->tradeRepository->save($disposal, true);
+            $disposal->setManualPortfolioValueTotal(null);
         }
+        $disposal->setPortfolioValueSource('manual');
+        $this->tradeRepository->save($disposal, true);
 
         return $this->computeSingleLine($disposal);
     }
@@ -320,15 +327,26 @@ class CrTaxReportService
             return [$trade->getManualPortfolioValueTotal(), 'manual', []];
         }
 
+        $manualPrices = $trade->getManualCoinPrices();
         $value = 0.0;
         $missingCoins = [];
+        $usedManual = false;
 
         foreach ($holdingsBeforeDisposal as $coin => $quantity) {
             if ($coin === 'EUR' || $quantity <= 0.00000001) {
                 continue;
             }
 
-            $price = $this->priceService->getPriceEur($coin, $trade->getTradeAt(), $liveFetch);
+            // A price entered by hand for THIS cession wins over the shared CoinGecko/CrPriceHistory
+            // cache, so a disposal is valued from its own prices even when another disposal exists on the
+            // same date.
+            $price = $manualPrices[strtoupper($coin)] ?? null;
+            if ($price !== null) {
+                $usedManual = true;
+            } else {
+                $price = $this->priceService->getPriceEur($coin, $trade->getTradeAt(), $liveFetch);
+            }
+
             if ($price === null) {
                 $missingCoins[] = $coin;
                 continue;
@@ -341,6 +359,6 @@ class CrTaxReportService
             return [null, null, $missingCoins];
         }
 
-        return [$value, 'api', []];
+        return [$value, $usedManual ? 'manual' : 'api', []];
     }
 }
