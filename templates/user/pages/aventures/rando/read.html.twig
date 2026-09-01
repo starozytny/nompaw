@@ -2,6 +2,10 @@
 
 {% set groupe = elem.groupe %}
 {% set author = elem.author %}
+{% set canManage = app.user.id == elem.author.id or app.user.isAdmin %}
+{% set adventure = elem.adventure %}
+{% set isCalee = elem.startAt and elem.adventure %}
+{% set hasInfo = elem.description or elem.distance or elem.devPlus or elem.altitude or elem.localisation or elem.story or (adventure and adventure.url and adventure.url != "https://") %}
 
 {% set page_title %}{{ elem.name }}{% endset %}
 {% set page_subtitle %}Groupe d'aventures : {{ groupe.name }}{% endset %}
@@ -15,69 +19,64 @@
 {% endblock %}
 
 {% set page_actions %}
-    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-        btn_link: path('user_aventures_groupes_read', {slug: groupe.slug}),
-        btn_type: 'default',
-        btn_icon: 'left-arrow',
-        btn_text: 'Retourner au groupe'
-    } %}
-    {% if app.user.id == elem.author.id or app.user.isAdmin %}
+    <div class="flex flex-wrap items-center justify-end gap-2">
         {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-            btn_link: path('user_aventures_randos_update', {slug: elem.slug}),
+            btn_link: path('user_aventures_groupes_read', {slug: groupe.slug}),
             btn_type: 'default',
-            btn_icon: 'pencil',
-            btn_text: 'Modifier'
+            btn_icon: 'left-arrow',
+            btn_text: 'Retourner au groupe'
         } %}
-    {% endif %}
+        {% if canManage %}
+            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                btn_link: path('user_aventures_randos_update', {slug: elem.slug}),
+                btn_type: 'default',
+                btn_icon: 'pencil',
+                btn_text: 'Modifier'
+            } %}
+
+            {% if isCalee %}
+                <div id="rando_date" data-variant="action"
+                     data-rando-id="{{ elem.id }}"
+                     data-start-at="{{ elem.startAt | date('Y-m-d') }}"
+                     data-propals="{{ propalDates }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-author-id="{{ elem.author.id }}"
+                     data-mode="{{ canManage }}"
+                     data-status="{{ elem.status }}"
+                     data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : '' }}"
+                     data-adventure-id="{{ elem.adventure ? elem.adventure.id : '' }}"></div>
+                <div id="rando_adventures" data-variant="action"
+                     data-rando-id="{{ elem.id }}"
+                     data-user-id="{{ app.user.id }}"
+                     data-have-adventure="1"
+                     data-adv-name="{{ elem.adventure.name }}"
+                     data-propals="{{ propalAdvs }}"
+                     data-author-id="{{ elem.author.id }}"
+                     data-mode="{{ canManage }}"
+                     data-status="{{ elem.status }}"></div>
+            {% endif %}
+
+            {% if elem.status != 2 and isCalee %}
+                <div class="end-rando" data-context="read" data-id="{{ elem.id }}" data-name="{{ elem.name }}" data-groupe-slug="{{ groupe.slug }}">
+                    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                        btn_link: "", btn_type: 'green', btn_icon: 'chart-3', btn_text: 'Terminer'
+                    } %}
+                </div>
+            {% endif %}
+
+            <div class="delete-rando" data-context="read" data-id="{{ elem.id }}" data-name="{{ elem.name }}" data-groupe-slug="{{ groupe.slug }}">
+                {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                    btn_link: "", btn_type: 'red', btn_icon: 'chart-3', btn_text: 'Supprimer'
+                } %}
+            </div>
+        {% endif %}
+    </div>
 {% endset %}
 
 {% block main_content %}
 <div class="flex flex-col gap-6">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 space-y-4">
-            <div class="flex items-center gap-2">
-                <div class="w-full">
-                    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-flex items-center gap-2">
-                        <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span class="text-sm font-medium text-amber-800">{{ elem.statusString }}</span>
-                    </div>
-                </div>
-                {% if app.user.id == elem.author.id or app.user.isAdmin %}
-                    <div class="w-full flex justify-end gap-1">
-                        <div class="delete-rando"
-                             data-context="read"
-                             data-id="{{ elem.id }}"
-                             data-name="{{ elem.name }}"
-                             data-groupe-slug="{{ groupe.slug }}"
-                        >
-                            {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                                btn_link: "",
-                                btn_type: 'red',
-                                btn_icon: 'chart-3',
-                                btn_text: 'Supprimer'
-                            } %}
-                        </div>
-                        {% if elem.status != 2 %}
-                            {% if elem.startAt != null and elem.adventure != null %}
-                                <div class="end-rando"
-                                     data-context="read"
-                                     data-id="{{ elem.id }}"
-                                     data-name="{{ elem.name }}"
-                                     data-groupe-slug="{{ groupe.slug }}"
-                                >
-                                    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                                        btn_link: "",
-                                        btn_type: 'green',
-                                        btn_icon: 'chart-3',
-                                        btn_text: 'Terminer'
-                                    } %}
-                                </div>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </div>
-
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                 <h3 class="text-sm font-semibold text-slate-700 mb-3">Participants</h3>
                 <div class="flex flex-col gap-3">
@@ -90,65 +89,94 @@
                 </div>
             </div>
 
-            {% if app.user.id == elem.author.id or app.user.isAdmin %}
+            {% if canManage %}
                 <div id="rando_deposit"
                      data-rando-id="{{ elem.id }}"
                      data-enabled="{{ elem.depositEnabled ? 1 : 0 }}"
                      data-has-password="{{ elem.depositPassword ? 1 : 0 }}"
                      data-url="{{ elem.depositToken ? url('app_aventure_album', {token: elem.depositToken}) : '' }}"></div>
             {% endif %}
-
-            <div class="flex flex-col gap-4">
-                <div id="rando_date" class="w-full"
-                     data-rando-id="{{ elem.id }}"
-                     data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : "" }}"
-                     data-propals="{{ propalDates }}"
-                     data-user-id="{{ app.user.id }}"
-                     data-author-id="{{ elem.author.id }}"
-                     data-mode="{{ app.user.id == elem.author.id or app.user.isAdmin }}"
-                     data-status="{{ elem.status }}"
-                     data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : "" }}"
-                     data-adventure-id="{{ elem.adventure ? elem.adventure.id : "" }}"
-                >
-                    {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-                </div>
-
-                {% if elem.startAt or elem.status == 2 %}
-                    <div id="rando_adventures" class="w-full"
-                         data-rando-id="{{ elem.id }}"
-                         data-user-id="{{ app.user.id }}"
-                         data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
-                         data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
-                         data-propals="{{ propalAdvs }}"
-                         data-author-id="{{ elem.author.id }}"
-                         data-mode="{{ app.user.id == elem.author.id or app.user.isAdmin }}"
-                         data-status="{{ elem.status }}"
-                    >
-                        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
-                    </div>
-                {% endif %}
-            </div>
         </div>
 
-        {% if elem.startAt and elem.adventure or elem.status == 2 %}
-            <div class="lg:col-span-2 space-y-6">
-                {% set adventure = elem.adventure %}
+        {# ── Panneau unique « L'aventure » ─────────────────────────────────────── #}
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-                        <h2 class="text-xl font-bold text-white">{{ adventure ? adventure.name : "" }}</h2>
-                        <p class="text-indigo-100 text-sm mt-1">{{ elem.startAt ? elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}</p>
+                {# En-tête #}
+                {% if isCalee %}
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h2 class="text-xl font-bold text-white truncate">{{ adventure.name }}</h2>
+                            <p class="text-indigo-100 text-sm mt-1 flex items-center gap-1.5">
+                                <span class="icon-calendar"></span>
+                                {{ elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize }}
+                            </p>
+                        </div>
+                        <span class="shrink-0 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white">{{ elem.statusString }}</span>
                     </div>
+                {% else %}
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4">
+                        <div>
+                            {% if elem.status == 2 %}
+                                <h2 class="text-lg font-bold text-slate-800">{{ elem.name }}</h2>
+                                <p class="text-sm text-slate-500 mt-0.5">Sortie terminée — ajustez la date ou l'activité si besoin.</p>
+                            {% else %}
+                                <h2 class="text-base font-bold text-slate-800">Organisation de la sortie</h2>
+                                <p class="text-sm text-slate-500 mt-0.5">Proposez et votez pour caler la date et l'activité.</p>
+                            {% endif %}
+                        </div>
+                        <span class="shrink-0 inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1">
+                            <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+                            <span class="text-xs font-medium text-amber-800">{{ elem.statusString }}</span>
+                        </span>
+                    </div>
+                {% endif %}
 
-                    <div class="p-6 space-y-4">
+                {# Décisions : votes / rappel de la date et de l'activité. Quand la sortie est
+                   calée, les actions « Changer » vivent dans la barre d'actions du haut. #}
+                {% if not isCalee %}
+                <div class="grid grid-cols-1 divide-y divide-slate-100 md:grid-cols-2 md:divide-y-0 md:divide-x">
+                    <div class="p-5">
+                        <div id="rando_date"
+                             data-variant="cell"
+                             data-rando-id="{{ elem.id }}"
+                             data-start-at="{{ elem.startAt ? elem.startAt | date('Y-m-d') : '' }}"
+                             data-propals="{{ propalDates }}"
+                             data-user-id="{{ app.user.id }}"
+                             data-author-id="{{ elem.author.id }}"
+                             data-mode="{{ canManage }}"
+                             data-status="{{ elem.status }}"
+                             data-date-id="{{ elem.adventureDate ? elem.adventureDate.id : '' }}"
+                             data-adventure-id="{{ elem.adventure ? elem.adventure.id : '' }}">
+                            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div id="rando_adventures"
+                             data-variant="cell"
+                             data-rando-id="{{ elem.id }}"
+                             data-user-id="{{ app.user.id }}"
+                             data-have-adventure="{{ elem.adventure ? 1 : 0 }}"
+                             data-adv-name="{{ elem.adventure ? elem.adventure.name : '' }}"
+                             data-propals="{{ propalAdvs }}"
+                             data-author-id="{{ elem.author.id }}"
+                             data-mode="{{ canManage }}"
+                             data-status="{{ elem.status }}">
+                            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Informations de la sortie #}
+                {% if hasInfo or canManage %}
+                    <div class="p-6 pt-5 border-t border-slate-100 space-y-4">
                         {% if elem.description %}
-                            <div class="text-slate-700">
-                                {{ elem.description | raw }}
-                            </div>
+                            <div class="text-slate-700">{{ elem.description | raw }}</div>
                         {% endif %}
 
                         {% if elem.distance or elem.devPlus or elem.altitude %}
-                            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 sm:grid-cols-3">
+                            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
                                 {% if elem.distance %}
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -188,7 +216,7 @@
                         {% endif %}
 
                         {% if elem.localisation or elem.story or (adventure and adventure.url and adventure.url != "https://") %}
-                            <div class="grid grid-cols-2 gap-4 pt-4 md:grid-cols-3">
+                            <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
                                 {% if elem.localisation %}
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 bg-color0/10 rounded-lg flex items-center justify-center">
@@ -231,16 +259,17 @@
                             </div>
                         {% endif %}
 
-                        {% if app.user.id == elem.author.id or app.user.isAdmin %}
-                            <a class="group pt-4 border-t border-slate-100 flex items-center gap-2 cursor-pointer" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
+                        {% if canManage %}
+                            <a class="group flex items-center gap-2 cursor-pointer" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
                                 <span class="icon-add text-blue-900"></span>
-                                <span class="text-sm font-medium text-blue-900 group-hover:underline">Ajouter des informations</span>
+                                <span class="text-sm font-medium text-blue-900 group-hover:underline">{{ hasInfo ? 'Modifier les informations' : 'Ajouter des informations' }}</span>
                             </a>
                         {% endif %}
                     </div>
-                </div>
+                {% endif %}
+
             </div>
-        {% endif %}
+        </div>
     </div>
 
     <div id="rando_images"
