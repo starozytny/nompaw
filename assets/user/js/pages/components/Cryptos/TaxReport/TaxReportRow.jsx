@@ -14,8 +14,10 @@ export function TaxReportRow ({ line, onReportUpdate }) {
 
 	return <tr className="border-t hover:bg-muted/40">
 		<td className="py-2.5 pl-4 pr-3 text-sm">
-			<div>{Sanitaze.toFormatDate(line.tradeAt, 'L')}</div>
-			<div className="text-xs text-muted-foreground">{Sanitaze.toFormatDate(line.tradeAt + ' ' + line.tradeTime, 'H[h]mm')}</div>
+			<div>
+				{Sanitaze.toFormatDate(line.tradeAt, 'L')} <span className="text-xs text-muted-foreground">{Sanitaze.toFormatDate(line.tradeAt + ' ' + line.tradeTime, 'H[h]mm')}</span>
+			</div>
+
 		</td>
 		<td className="py-2.5 pr-3 text-sm">
 			<div className="flex items-center gap-1.5">

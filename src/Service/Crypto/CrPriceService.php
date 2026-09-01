@@ -12,11 +12,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Resolves a coin's historical EUR price for a given day, via CoinGecko's free history endpoint,
  * with a persistent cache (CrPriceHistory) so the same coin/date is never fetched twice.
  *
- * The same cache can also be filled in by hand (setManualPrice(), used by
- * TaxReportController::updatePrices() when the user fills in a per-coin value for a report line CoinGecko
- * couldn't resolve) — once saved, it's indistinguishable from a CoinGecko-sourced entry to getPriceEur(),
- * so a manually-entered price for a coin/date is never looked up twice either, and benefits every future
- * report line (any user's, any year) that needs that exact coin/date again.
+ * Manual per-coin prices entered on the "Rapport fiscal" page are NOT stored here — they live on the
+ * individual disposal (CrTrade::manualCoinPrices), scoped to that one cession, and CrTaxReportService
+ * prefers them over this cache. This service is CoinGecko-only.
  *
  * Never throws: any failure (unknown ticker, transport error, unexpected payload) is logged and
  * results in a null return, so CrTaxReportService can degrade a single report line to "needs a
@@ -143,22 +141,4 @@ class CrPriceService
         $this->priceHistoryRepository->save($history, true);
     }
 
-    /**
-     * Records (or overwrites) a coin's price for one day by hand — see class docblock. Upserts on the
-     * (coin, priceDate) unique constraint so re-editing an already-manual entry doesn't create a
-     * duplicate row.
-     */
-    public function setManualPrice(string $coin, \DateTimeInterface $date, float $priceEur): void
-    {
-        $coin = strtoupper($coin);
-        $day = \DateTime::createFromInterface($date)->setTime(0, 0);
-
-        $history = $this->priceHistoryRepository->findOneByCoinAndDate($coin, $day) ?? (new CrPriceHistory())
-            ->setCoin($coin)
-            ->setPriceDate($day)
-        ;
-        $history->setPriceEur($priceEur)->setSource('manual');
-
-        $this->priceHistoryRepository->save($history, true);
-    }
 }

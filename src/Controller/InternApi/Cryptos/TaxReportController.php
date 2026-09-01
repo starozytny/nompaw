@@ -108,8 +108,9 @@ class TaxReportController extends AbstractController
 
         $reportService->saveManualPrices($obj, $pricesByCoin);
 
-        // Same reasoning as override() above: a coin/date price fix can ripple into the acquisition cost
-        // basis of every later disposal, so the caller re-fetches the whole report for this disposal's year.
+        // Same reasoning as override() above: valuing this disposal's portfolio can ripple into the
+        // acquisition cost basis of every later disposal, so the caller re-fetches the whole report for
+        // this disposal's year rather than patching a single row.
         $year = (int) $obj->getTradeAt()->format('Y');
 
         return $apiResponse->apiJsonResponseCustom($reportService->computeReport($this->getUser(), $year));

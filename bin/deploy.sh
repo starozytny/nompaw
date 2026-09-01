@@ -26,13 +26,15 @@ filter_locale_noise() {
 
 SKIP_BUILD=false
 RUN_COMPOSER=false
+RUN_YARN=false
 for arg in "$@"; do
   case "$arg" in
     --no-build) SKIP_BUILD=true ;;
     --composer) RUN_COMPOSER=true ;;
+    --yarn) RUN_YARN=true ;;
     *)
       echo "Option inconnue: $arg" >&2
-      echo "Usage: $0 [--no-build] [--composer]" >&2
+      echo "Usage: $0 [--no-build] [--composer] [--yarn]" >&2
       exit 1
       ;;
   esac
@@ -69,18 +71,22 @@ if [ "$SKIP_BUILD" = false ]; then
   tar xzf "$BUILD_ARCHIVE" -C public
   rm -f "$BUILD_ARCHIVE"
 fi
+step "Vidage du cache"
+php bin/console cache:clear --env=prod --no-debug --ansi
 step "git pull"
 git -c color.ui=always pull origin deploy
 if [ "$RUN_COMPOSER" = true ]; then
   step "composer install"
   composer install --no-dev --optimize-autoloader --no-interaction --ansi
 fi
+if [ "$RUN_YARN" = true ]; then
+  step "yarn install"
+  yarn install --frozen-lockfile
+fi
 step "Migrations Doctrine"
 php bin/console doctrine:migrations:migrate --no-interaction --env=prod --ansi
 step "Dump des routes JS"
 php bin/console fos:js-routing:dump --format=json --target=public/js/fos_js_routes.json --env=prod --ansi
-step "Vidage du cache"
-php bin/console cache:clear --env=prod --no-debug --ansi
 step "Réchauffement du cache"
 php bin/console cache:warmup --env=prod --ansi
 REMOTE_SCRIPT

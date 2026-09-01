@@ -120,98 +120,134 @@ export class RandoDate extends Component {
 	}
 
 	render () {
-		const { mode, startAt, userId, authorId, dateId } = this.props;
+		const { mode, startAt, userId, authorId, variant } = this.props;
 		const { errors, loadData, dateAt, data, propal } = this.state;
 
 		let params = { errors: errors, onChange: this.handleChange }
 
 		data.sort(Sort.compareDateAt);
 
-		let propalSelected = null;
-		if (dateId) {
-			data.forEach(d => {
-				if (d.id === parseInt(dateId)) {
-					propalSelected = d;
-				}
-			})
+		let canManage = mode || authorId === parseInt(userId);
+
+		// Date déjà fixée.
+		if (startAt) {
+			// variant "action" : bouton dans la barre d'actions du haut (style unifié
+			// avec Terminer / Supprimer).
+			if (variant === "action") {
+				return <>
+					{canManage && (
+						<Button iconLeft="refresh" type="default" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+							Changer la date
+						</Button>
+					)}
+					{this.renderModals(params, propal, dateAt)}
+				</>
+			}
+
+			// variant "cell" : dans la carte « Organisation » (l'activité, elle, est encore
+			// en vote) → on rappelle la date choisie + le bouton pour y revenir.
+			if (variant === "cell") {
+				return <>
+					<h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+						<span className="icon-calendar text-blue-600"></span> Quand&nbsp;?
+					</h3>
+					<div className="flex items-center justify-between gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+						<span className="text-sm font-medium text-blue-900">{Sanitaze.toFormatDate(startAt, 'LL', '', false)}</span>
+						{canManage && (
+							<button type="button"
+									className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
+									onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+								<span className="icon-refresh"></span>
+								<span>Changer</span>
+							</button>
+						)}
+					</div>
+					{this.renderModals(params, propal, dateAt)}
+				</>
+			}
+
+			// Panneau confirmé : bouton d'action bien visible dans le corps de la carte.
+			return <>
+				{canManage && (
+					<button type="button"
+							className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+							onClick={() => this.handleModal('cancelDate', 'delete', null)}>
+						<span className="icon-refresh"></span>
+						<span>Changer la date</span>
+					</button>
+				)}
+				{this.renderModals(params, propal, dateAt)}
+			</>
 		}
 
-		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-			<h3 className="text-sm font-semibold text-slate-700 mb-3">{startAt ? "Date sélectionnée" : "Proposition de dates"}</h3>
+		return <div>
+			<h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+				<span className="icon-calendar text-blue-600"></span> Quand&nbsp;?
+			</h3>
 
-			<div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-				{startAt
-					? <>
-						<div className="flex items-center gap-2">
-							<span className="icon-calendar text-blue-600"></span>
-							<span className="text-sm font-medium text-blue-900">{Sanitaze.toFormatDate(startAt, 'LL', '', false)}</span>
-						</div>
-						{mode || authorId === parseInt(userId)
-							? <button className="text-slate-400 hover:text-slate-600" onClick={() => this.handleModal('cancelDate', 'delete', null)}>
-								<span className="icon-close"></span>
-							</button>
-							: null
-						}
-					</>
-					: <div className="w-full flex flex-col gap-4">
-						{data.length > 0
-							? <div className="w-full flex flex-col gap-2">
-								{data.map((el, index) => {
+			<div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+				{data.length > 0
+					? <div className="flex flex-col gap-2">
+						{data.map((el, index) => {
 
-									let onVote = () => this.handleVote(el);
+							let onVote = () => this.handleVote(el);
 
-									let active = false;
-									el.votes.forEach(v => {
-										if (v === userId) {
-											active = true;
-										}
-									})
+							let active = false;
+							el.votes.forEach(v => {
+								if (v === userId) {
+									active = true;
+								}
+							})
 
-									return <div className="w-full flex items-center justify-between gap-2" key={index}>
-										<div className="flex items-center gap-2 group">
-											<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
-												 onClick={onVote}>
-												<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
-											</div>
-											<div className="font-medium text-sm" onClick={onVote}>
-												{Sanitaze.toFormatDate(el.dateAt, 'LL', "", false)}
-											</div>
+							return <div className="w-full flex items-center justify-between gap-2" key={index}>
+								<div className="flex items-center gap-2 group">
+									<div className={`cursor-pointer w-6 h-6 border-2 rounded-md ring-1 flex items-center justify-center ${active ? "bg-blue-700 ring-blue-700" : "bg-white ring-gray-100 group-hover:bg-blue-100"}`}
+										 onClick={onVote}>
+										<span className={`icon-check1 text-sm ${active ? "text-white" : "text-transparent"}`}></span>
+									</div>
+									<div className="font-medium text-sm" onClick={onVote}>
+										{Sanitaze.toFormatDate(el.dateAt, 'LL', "", false)}
+									</div>
+								</div>
+
+								<div>
+									<div className="flex gap-2">
+										<div className="flex gap-1">
+											{mode || el.author.id === parseInt(userId)
+												? <>
+													<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
+													<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
+													{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
+												</>
+												: null
+											}
 										</div>
-
-										<div>
-											<div className="flex gap-2">
-												<div className="flex gap-1">
-													{mode || el.author.id === parseInt(userId)
-														? <>
-															<ButtonIcon icon="pencil" type="yellow" onClick={() => this.handleModal("formPropal", "update", el)}>Modifier</ButtonIcon>
-															<ButtonIcon icon="trash" type="red" onClick={() => this.handleModal("deletePropal", "delete", el)}>Supprimer</ButtonIcon>
-															{mode && <ButtonIcon icon="check1" type="green" onClick={() => this.handleModal("endPropal", "update", el)}>Clôturer</ButtonIcon>}
-														</>
-														: null
-													}
-												</div>
-												<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
-													{loadData
-														? <span className="icon-chart-3" />
-														: `+ ${el.votes.length}`
-													}
-												</div>
-											</div>
+										<div className="bg-gray-200 px-2 py-0.5 text-xs rounded-md flex items-center justify-center" onClick={onVote}>
+											{loadData
+												? <span className="icon-chart-3" />
+												: `+ ${el.votes.length}`
+											}
 										</div>
 									</div>
-								})}
+								</div>
 							</div>
-							: null
-						}
-
-						<div className="group flex items-center gap-2 cursor-pointer" onClick={() => this.handleModal('formPropal', 'create', null)}>
-							<span className="icon-add text-blue-900"></span>
-							<span className="text-sm font-medium text-blue-900 group-hover:underline">Proposer une date</span>
-						</div>
+						})}
 					</div>
+					: <p className="text-sm text-blue-900/60">Aucune date proposée pour l'instant.</p>
 				}
+
+				<div className="group flex items-center gap-2 cursor-pointer" onClick={() => this.handleModal('formPropal', 'create', null)}>
+					<span className="icon-add text-blue-900"></span>
+					<span className="text-sm font-medium text-blue-900 group-hover:underline">Proposer une date</span>
+				</div>
 			</div>
 
+			{this.renderModals(params, propal, dateAt)}
+		</div>
+	}
+
+	renderModals (params, propal, dateAt) {
+		return <>
 			<Modal ref={this.formPropal} identifiant="form-dates" maxWidth={568} title="Proposer une date"
 				   content={<div>
 					   <Input type="date" identifiant="dateAt" valeur={dateAt} {...params}>Date</Input>
@@ -229,7 +265,7 @@ export class RandoDate extends Component {
 			<Modal ref={this.cancelDate} identifiant='cancel-date' maxWidth={414} title="Annuler la date sélectionnée"
 				   content={<p>Êtes-vous sûr de vouloir revenir sur les propositions de dates ?</p>}
 				   footer={null} closeTxt="Annuler" />
-		</div>
+		</>
 	}
 }
 
@@ -239,7 +275,8 @@ RandoDate.propTypes = {
 	randoId: PropTypes.string.isRequired,
 	propals: PropTypes.string.isRequired,
 	status: PropTypes.string.isRequired,
-	startAt: PropTypes.string
+	startAt: PropTypes.string,
+	variant: PropTypes.string
 }
 
 function modalFormPropal (self) {

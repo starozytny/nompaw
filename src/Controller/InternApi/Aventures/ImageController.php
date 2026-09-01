@@ -8,9 +8,8 @@ use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaImageRepository;
 use App\Repository\Rando\RaRandoRepository;
 use App\Service\Api\ApiResponse;
+use App\Service\Data\RandoImageUploader;
 use App\Service\FileUploader;
-use DateTime;
-use getID3;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -81,68 +80,16 @@ class ImageController extends AbstractController
 
     #[Route('/upload/photos/{id}', name: 'upload_images', options: ['expose' => true], methods: 'POST')]
     public function upload(Request $request, RaRando $obj, ApiResponse $apiResponse, RaRandoRepository $repository,
-                           FileUploader $fileUploader, RaImageRepository $imageRepository): Response
+                           RandoImageUploader $randoImageUploader, RaImageRepository $imageRepository): Response
     {
         if($request->files){
-            $randoFile = '/' . $obj->getId();
+            $mtime = $request->get('mtime') !== null ? (int) $request->get('mtime') : null;
             foreach($request->files as $file){
-                // Lu AVANT uploadDrive() : sa correction d'orientation (GD, pour les JPEG mal
-                // orientés — la quasi-totalité des photos de téléphone) réécrit le fichier et
-                // efface tout l'EXIF au passage, DateTimeOriginal compris. Lu après coup, la date
-                // de prise de vue retombait donc systématiquement sur mtime (date d'upload) dès
-                // qu'une rotation était nécessaire.
-                $exif = @exif_read_data($file->getPathname());
+                $image = $randoImageUploader->createFromUpload($file, $obj, $this->getUser(), null, $mtime);
 
-                $filenameImage = $fileUploader->uploadDrive($file, RaRando::FOLDER_IMAGES.$randoFile);
-
-                if ($filenameImage === false) {
+                if ($image === null) {
                     continue;
                 }
-
-                $image = (new RaImage())
-                    ->setFile($filenameImage)
-                    ->setMTime($request->get('mtime'))
-                    ->setAuthor($this->getUser())
-                    ->setRando($obj)
-                ;
-
-                if ($exif && isset($exif['DateTimeOriginal'])) {
-                    $date = \DateTime::createFromFormat('Y:m:d H:i:s', $exif['DateTimeOriginal']);
-                    $image->setTakenAt($date ?: new \DateTime());
-                } else {
-                    $date = new DateTime();
-                    $image->setTakenAt($date->setTimestamp($request->get('mtime')));
-                }
-
-                $fileUploaded = $this->getParameter('private_directory') . $image->getFileFile();
-                $mime = mime_content_type($fileUploaded);
-
-                if(str_contains($mime, "image/")){
-                    $image->setType(0);
-                }elseif(str_contains($mime, "video/")){
-                    $image->setType(1);
-
-                    $getID3 = new getID3();
-                    $info = $getID3->analyze($fileUploaded);
-
-                    if (isset($info['quicktime']['timestamps_unix']['create']['moov mvhd'])) {
-                        $timestamp = $info['quicktime']['timestamps_unix']['create']['moov mvhd'];
-
-                        if ($timestamp > 946684800 && $timestamp < 4102444800) {
-                            $date = new DateTime();
-                            $image->setTakenAt($date->setTimestamp($timestamp));
-                        }
-                    }
-                }else{
-                    $image->setType(99);
-                }
-
-                [$filenameThumbs, $filenameLightbox] = $fileUploader->thumbsAndLightbox($image->getFile(), RaRando::FOLDER_IMAGES.$randoFile, RaRando::FOLDER_THUMBS.$randoFile, RaRando::FOLDER_LIGHTBOX.$randoFile);
-
-                $image
-                    ->setThumbs($filenameThumbs)
-                    ->setLightbox($filenameLightbox)
-                ;
 
                 $imageRepository->save($image);
             }
@@ -270,6 +217,30 @@ class ImageController extends AbstractController
     public function visibility(RaImage $obj, RaImageRepository $repository, ApiResponse $apiResponse): Response
     {
         $obj->setVisibility(!$obj->getVisibility());
+
+        $repository->save($obj, true);
+        return $apiResponse->apiJsonResponse($obj, RaImage::LIST);
+    }
+
+    /**
+     * Corrige la date de prise de vue d'une photo. Utile quand l'EXIF a été supprimé :
+     * la date était retombée sur la date d'upload, cassant le tri chronologique de l'album.
+     */
+    #[Route('/taken-at/{id}', name: 'taken_at', options: ['expose' => true], methods: 'PUT')]
+    public function takenAt(RaImage $obj, Request $request, RaImageRepository $repository, ApiResponse $apiResponse): Response
+    {
+        $data = json_decode($request->getContent());
+        $value = is_object($data) ? (string) ($data->takenAt ?? '') : '';
+
+        $date = \DateTime::createFromFormat('Y-m-d\TH:i', $value)
+            ?: \DateTime::createFromFormat('Y-m-d\TH:i:s', $value)
+            ?: \DateTime::createFromFormat('!Y-m-d', $value);
+
+        if (!$date) {
+            return $apiResponse->apiJsonResponseBadRequest('Date invalide.');
+        }
+
+        $obj->setTakenAt($date);
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponse($obj, RaImage::LIST);

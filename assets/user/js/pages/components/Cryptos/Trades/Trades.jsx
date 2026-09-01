@@ -95,6 +95,7 @@ export class Trades extends Component {
 						self.setState({ data: trades, years, yearStats, yearHoldings, selectedYear: resolvedYear, loadingData: false });
 					})
 					.catch(function (error) {
+						console.log(error)
 						Formulaire.displayErrors(self, error);
 						self.yearCache[resolvedYear] = { trades, years, yearStats, yearHoldings: [] };
 						self.setState({ data: trades, years, yearStats, yearHoldings: [], selectedYear: resolvedYear, loadingData: false });
@@ -102,6 +103,7 @@ export class Trades extends Component {
 				;
 			})
 			.catch(function (error) {
+				console.log(error)
 				Formulaire.displayErrors(self, error);
 				self.setState({ loadingData: false })
 			})
