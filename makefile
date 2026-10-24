@@ -83,7 +83,6 @@ logs-php: ## Affiche les logs PHP
 logs-nginx: ## Affiche les logs Nginx
 	docker-compose logs -f nginx
 
-
 deploy: ## Build les assets et les envoie sur la prod
 	bash bin/deploy.sh
 
@@ -97,7 +96,7 @@ deploy-composer: ## Déploie avec composer install en plus
 	bash bin/deploy.sh --composer
 
 deploy-composer-yarn: ## Déploie avec composer install en plus et yarn install
-	bash bin/deploy.sh --composer -- yarn
+	bash bin/deploy.sh --composer --yarn
 
 deploy-no-build-composer: ## Déploie sans rebuild mais avec composer install
 	bash bin/deploy.sh --no-build --composer
