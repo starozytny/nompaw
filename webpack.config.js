@@ -95,9 +95,6 @@ Encore
     .addEntry('user_videos', './assets/user/js/pages/videos.js')
     .addEntry('user_photos', './assets/user/js/pages/photos.js')
 
-    // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
-    // .enableStimulusBridge('./assets/controllers.json')
-
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
 
