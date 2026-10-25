@@ -3,20 +3,45 @@
 {% block title %}Nompaw | Votre compagnon d'aventure pour vos voyages !{% endblock %}
 
 {% block main_content %}
-    <div class="mx-auto max-w-2xl py-32 sm:pb-0 sm:pt-12 xl:pt-20 sm:flex sm:flex-col sm:justify-center sm:items-center">
-        <div class="hidden sm:mb-8 sm:flex sm:justify-center">
-            <div class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-                Votre compagnon d'aventure pour vos voyages et budgets. <a href="{{ path('app_registration') }}" class="font-semibold text-indigo-600"><span class="absolute inset-0" aria-hidden="true"></span>Prêt.e pour l'aventure <span aria-hidden="true">&rarr;</span></a>
+    <div class="-mx-6 -my-14 flex flex-col justify-center bg-sidebar sm:min-h-[calc(100vh-100px-96px)] lg:-mx-8">
+        <div class="relative overflow-hidden px-6 py-16 sm:py-24 lg:px-8">
+            <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+                <img src="{{ asset('build/app/images/hero.jpg') }}" alt="" class="h-full w-full object-cover" style="object-position: 50% 62%;">
+                <div class="absolute inset-0 bg-sidebar/30"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-sidebar via-transparent to-sidebar"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-sidebar via-sidebar/10 to-sidebar/50"></div>
             </div>
-        </div>
-        <div class="text-center">
-            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Vivez <span class="text-blue-700">vos aventures</span> avec Nompaw. 👋</h1>
-            <p class="mt-6 text-lg leading-8 text-gray-600">Documentez vos randonnées, voyages et escapades tout en gardant un œil sur vos dépenses. Simple, naturel, efficace.</p>
-            <div class="mt-10 flex items-center justify-center gap-x-6">
-                <a href="{{ path('app_login') }}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                    Mon espace
-                </a>
-                <a href="{{ path('app_registration') }}" class="text-sm font-semibold leading-6 text-gray-900">Nous rejoindre <span aria-hidden="true">→</span></a>
+
+            <div class="relative mx-auto max-w-6xl">
+                <div class="hidden sm:mb-10 sm:flex sm:justify-center">
+                    <div class="relative rounded-full border border-sidebar-border bg-sidebar-accent px-4 py-1.5 text-sm leading-6 text-sidebar-foreground">
+                        Votre compagnon d'aventure pour vos voyages et budgets.
+                        <a href="{{ path('app_registration') }}" class="font-semibold text-sidebar-primary"><span class="absolute inset-0" aria-hidden="true"></span>Prêt.e pour l'aventure <span aria-hidden="true">&rarr;</span></a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                    <div class="text-center lg:text-left">
+                        <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">Vivez <span class="text-sidebar-primary">vos aventures</span> avec Nompaw. 👋</h1>
+                        <p class="mt-6 text-lg leading-8 text-sidebar-foreground">Documentez vos randonnées, voyages et escapades tout en gardant un œil sur vos dépenses. Simple, naturel, efficace.</p>
+                        <div class="mt-8 flex items-center justify-center gap-x-6 lg:justify-start">
+                            <a href="{{ path('app_login') }}" class="rounded-full bg-sidebar-primary px-5 py-2.5 text-sm font-semibold text-sidebar-primary-foreground shadow-sm hover:opacity-90">
+                                Mon espace
+                            </a>
+                            <a href="{{ path('app_registration') }}" class="text-sm font-semibold leading-6 text-sidebar-foreground hover:text-white">Nous rejoindre <span aria-hidden="true">→</span></a>
+                        </div>
+                    </div>
+
+                    <div id="connexion" class="scroll-mt-24">
+                        <div class="mx-auto w-full max-w-sm rounded-2xl border border-sidebar-border bg-card p-6 shadow-xl sm:p-8">
+                            <h2 class="text-center text-xl font-bold text-card-foreground">Espace membre 🔒</h2>
+                            <p class="mt-1 text-center text-sm text-muted-foreground">Connecte-toi pour accéder à ton espace.</p>
+                            <div class="mt-6">
+                                {% include 'app/pages/security/components/login_form.html.twig' with { last_username: last_username, error: error } %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

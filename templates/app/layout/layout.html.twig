@@ -3,16 +3,48 @@
 {% set page_prefix = "Nompaw.fr par Chanbora Chhun photographe" %}
 
 {% block footer %}
-    <div class="bg-black/90 px-4 py-8 text-sm sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-screen-2xl pt-4 flex flex-col text-center lg:flex-row lg:text-left gap-2 justify-center">
-            <p class="text-gray-300">&copy; 2024 - <a href="https://chanbora-chhun.fr" class="text-blue-600">Chanbora Chhun</a></p>
-            <span class="text-gray-300">-</span>
-            <a class="text-gray-300 hover:text-white" href="{{ path('app_mentions') }}">Mentions légales</a>
-            <a class="text-gray-300 hover:text-white" href="{{ path('app_politique') }}">Politique de confidentialité</a>
-            <a class="text-gray-300 hover:text-white" href="{{ path('app_cookies') }}">Gestion des cookies</a>
-            {% if is_granted('ROLE_ADMIN') %}
-                <a class="text-gray-300 hover:text-white" href="{{ path('admin_homepage') }}">Espace administrateur</a>
-            {% endif %}
+    <footer class="border-t border-sidebar-border bg-sidebar px-6 py-12 lg:px-8">
+        <div class="mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <a href="{{ path('app_homepage') }}" class="inline-flex items-center gap-2">
+                        <img class="h-10 w-auto rounded-md" src="{{ asset('build/app/images/logo.png') }}" alt="Nompaw">
+                        <span class="text-base font-semibold text-white">Nompaw</span>
+                    </a>
+                    <p class="mt-4 max-w-xs text-sm text-sidebar-foreground">Votre compagnon d'aventure pour documenter vos voyages et garder un œil sur votre budget.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-white">Navigation</h3>
+                    <ul class="mt-4 flex list-none flex-col gap-2 pl-0 ml-0 text-sm">
+                        <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('app_homepage') }}">Accueil</a></li>
+                        <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('app_contact') }}">Contact</a></li>
+                        <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('app_registration') }}">Nous rejoindre</a></li>
+                        <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('app_login') }}">Se connecter</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-white">Légal</h3>
+                    <ul class="mt-4 flex list-none flex-col gap-2 pl-0 ml-0 text-sm">
+                        <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('app_mentions') }}">Mentions légales</a></li>
+                        <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('app_politique') }}">Politique de confidentialité</a></li>
+                        <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('app_cookies') }}">Gestion des cookies</a></li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li><a class="text-sidebar-foreground hover:text-sidebar-primary" href="{{ path('admin_homepage') }}">Espace administrateur</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-white">À propos</h3>
+                    <p class="mt-4 text-sm text-sidebar-foreground">Un projet conçu et développé par <a href="https://chanbora-chhun.fr" class="font-semibold text-sidebar-primary hover:opacity-80">Chanbora Chhun</a>.</p>
+                </div>
+            </div>
+
+            <div class="mt-10 border-t border-sidebar-border pt-6 text-center text-xs text-sidebar-foreground sm:text-left">
+                <p>&copy; 2024 Nompaw.fr — Tous droits réservés.</p>
+            </div>
         </div>
-    </div>
+    </footer>
 {% endblock %}
