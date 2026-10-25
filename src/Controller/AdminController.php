@@ -2,19 +2,15 @@
 
 namespace App\Controller;
 
-use App\Entity\Main\Mail;
 use App\Entity\Main\Settings;
 use App\Repository\Main\ContactRepository;
-use App\Repository\Main\MailRepository;
 use App\Repository\Main\SettingsRepository;
 use App\Repository\Main\SocietyRepository;
 use App\Repository\Main\UserRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\MultipleDatabase\MultipleDatabase;
 use App\Service\SanitizeData;
-use App\Service\SettingsService;
 use App\Service\ValidatorService;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -119,27 +115,5 @@ class AdminController extends AbstractController
     public function storage(): Response
     {
         return $this->render('admin/pages/storage/index.html.twig');
-    }
-
-    #[Route('/mails/{type}', name: 'mails_index', options: ['expose' => true], methods: ['GET'])]
-    public function mails(Request $request, $type, MailRepository $repository, SerializerInterface $serializer,
-                          PaginatorInterface $paginator, SettingsService $settingsService): Response
-    {
-        $mailsSent = $repository->findBy(['isTrash' => false], ['createdAt' => 'DESC']);
-        $mailsTrash = $repository->findBy(['isTrash' => true], ['createdAt' => 'DESC']);
-
-        $pagination = $paginator->paginate($type == "corbeille" ? $mailsTrash : $mailsSent, $request->query->getInt('page', 1), 10);
-
-        $data = $serializer->serialize($pagination->getItems(), 'json', ['groups' => Mail::LIST]);
-
-        return $this->render('admin/pages/mails/index.html.twig', [
-            'type' => $type,
-            'data' => $data,
-            'pagination' => $pagination,
-            'from' => $settingsService->getEmailExpediteurGlobal(),
-            'fromName' => $settingsService->getWebsiteName(),
-            'totalSent' => count($mailsSent),
-            'totalTrash' => count($mailsTrash),
-        ]);
     }
 }

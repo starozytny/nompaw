@@ -24,11 +24,6 @@
         matchRoute: ['admin_contacts_index']
     },
     {
-        name: "Agenda", icon: "calendar",
-        path: path('admin_agenda_index'),
-        matchRoute: ['admin_agenda_index', 'admin_agenda_create', 'admin_agenda_update']
-    },
-    {
         name: "Stockage", icon: "box",
         path: path('admin_storage_index'),
         matchRoute: ['admin_storage_index',]
@@ -37,11 +32,6 @@
         name: "Accès photos famille", icon: "camera",
         path: path('admin_photos_access_index'),
         matchRoute: ['admin_photos_access_index',]
-    },
-    {
-        name: "Boite d'envois", icon: "email",
-        path: path('admin_mails_index', {'type': 'envoyes'}),
-        matchRoute: ['admin_mails_index',]
     }
 ] %}
 
