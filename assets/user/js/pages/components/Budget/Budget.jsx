@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import axios from "axios";
 import moment from "moment";
@@ -79,6 +79,14 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 	const [load, setLoad] = useState(false)
 	const [search, setSearch] = useState("")
 	const [detailOpen, setDetailOpen] = useState(false)
+	const [showFab, setShowFab] = useState(false)
+
+	useEffect(() => {
+		let onScroll = () => setShowFab(window.scrollY > 280);
+		onScroll();
+		window.addEventListener('scroll', onScroll, { passive: true });
+		return () => window.removeEventListener('scroll', onScroll);
+	}, [])
 
 	let refetchPlanning = (targetYear) => {
 		return axios({ method: "GET", url: Routing.generate(URL_PLANNING, { year: targetYear }) })
@@ -573,5 +581,14 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+
+		<button type="button" onClick={handleOpenCreate}
+				aria-label="Ajouter une opération"
+				className={cn(
+					"fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-all hover:bg-blue-500",
+					showFab ? "opacity-100 translate-y-0" : "pointer-events-none translate-y-4 opacity-0"
+				)}>
+			<span className="icon-add text-xl"></span>
+		</button>
 	</div>
 }
