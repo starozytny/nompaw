@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import axios from "axios";
+import moment from "moment";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Sort from "@commonFunctions/sort";
@@ -473,6 +474,21 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 						{itemsSavings.map(sa => {
 							let available = sa.total - sa.used;
 							let progress = sa.goal ? (available / sa.goal) * 100 : 0;
+
+							let pace = null;
+							if (sa.goal && sa.goalDate) {
+								let remaining = sa.goal - available;
+								let monthsLeft = Math.ceil(moment(sa.goalDate).diff(moment(`${year}-${month}-01`), 'months', true));
+
+								if (remaining <= 0) {
+									pace = { label: "Objectif atteint", tone: "text-emerald-600" };
+								} else if (monthsLeft <= 0) {
+									pace = { label: `Échéance dépassée : il manque ${Sanitaze.toFormatCurrency(remaining)}`, tone: "text-red-600" };
+								} else {
+									pace = { label: `≈ ${Sanitaze.toFormatCurrency(remaining / monthsLeft)}/mois pour l'atteindre le ${moment(sa.goalDate).format('DD/MM/YYYY')}`, tone: "text-muted-foreground" };
+								}
+							}
+
 							return <div key={sa.id} className="flex flex-col gap-1.5">
 								<div className="flex items-baseline justify-between gap-2">
 									<span className="text-sm font-medium">{sa.name}</span>
@@ -486,6 +502,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 										<button type="button" className="text-xs font-semibold text-[var(--cat-saving)] hover:underline" onClick={() => handleModal('savingRef', sa)}>Utiliser</button>
 									</div>
 								</div>
+								{pace && <span className={cn("text-[11px]", pace.tone)}>{pace.label}</span>}
 							</div>
 						})}
 						<div className="flex items-center justify-between border-t pt-3">

@@ -263,6 +263,7 @@ class BudgetService
                 'id' => $category->getId(),
                 'name' => $category->getName(),
                 'goal' => $category->getGoal(),
+                'goalDate' => $category->getGoalDate()?->format('Y-m-d'),
                 'totalByMonth' => array_map([self::class, 'centsToEuros'], $this->cumulativeByMonth($savingsItems, $category, $year)),
                 'usedByMonth' => array_map([self::class, 'centsToEuros'], $this->cumulativeByMonth($savingsUsed, $category, $year)),
             ];

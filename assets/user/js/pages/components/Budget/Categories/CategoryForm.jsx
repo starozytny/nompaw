@@ -36,6 +36,7 @@ export function CategoryFormulaire ({ context, element, open, onOpenChange, onSa
 
 					type={element ? Formulaire.setValue(element.type) : 0}
 					goal={element ? Formulaire.setValue(element.goal) : ""}
+					goalDate={element ? Formulaire.setValueDate(element.goalDate) : ""}
 					name={element ? Formulaire.setValue(element.name) : ""}
 
 					onClose={() => onOpenChange(false)}
@@ -53,6 +54,7 @@ class Form extends Component {
 		this.state = {
 			type: props.type,
 			goal: props.goal,
+			goalDate: props.goalDate,
 			name: props.name,
 			errors: [],
 			loadData: false,
@@ -69,7 +71,7 @@ class Form extends Component {
 
 		if (name === "type") {
 			if (parseInt(value) === 2) {
-				this.setState({ goal: this.state.goal ? this.state.goal : "" })
+				this.setState({ goal: this.state.goal ? this.state.goal : "", goalDate: this.state.goalDate ? this.state.goalDate : "" })
 			}
 		}
 
@@ -80,7 +82,7 @@ class Form extends Component {
 		e.preventDefault();
 
 		const { context, url } = this.props;
-		const { loadData, type, name, goal } = this.state;
+		const { loadData, type, name, goal, goalDate } = this.state;
 
 		this.setState({ errors: [] });
 
@@ -91,6 +93,10 @@ class Form extends Component {
 
 		if (parseInt(type) === 2 && goal) {
 			paramsToValidate.push({ type: "text", id: 'goal', value: goal });
+		}
+
+		if (parseInt(type) === 2 && goalDate !== "") {
+			paramsToValidate.push({ type: "date", id: 'goalDate', value: goalDate });
 		}
 
 		let validate = Validateur.validateur(paramsToValidate)
@@ -110,6 +116,8 @@ class Form extends Component {
 					})
 					.catch(function (error) {
 						Formulaire.displayErrors(self, error);
+					})
+					.then(function () {
 						Formulaire.loader(false);
 						self.setState({ loadData: false })
 					})
@@ -120,7 +128,7 @@ class Form extends Component {
 
 	render () {
 		const { context, onClose } = this.props;
-		const { errors, loadData, type, goal, name } = this.state;
+		const { errors, loadData, type, goal, goalDate, name } = this.state;
 
 		let typeItems = [
 			{ value: 0, label: 'Dépense', identifiant: 'it-depense' },
@@ -161,6 +169,13 @@ class Form extends Component {
 							<div>
 								<Input identifiant="goal" valeur={goal} {...paramsInput0} placeholder="Ex: 5000.00">
 									Objectif (€) <span className="text-gray-500 text-xs">(optionnel)</span>
+								</Input>
+							</div>
+						)}
+						{parseInt(type) === 2 && (
+							<div>
+								<Input type="date" identifiant="goalDate" valeur={goalDate} {...paramsInput0}>
+									Échéance <span className="text-gray-500 text-xs">(optionnel)</span>
 								</Input>
 							</div>
 						)}
