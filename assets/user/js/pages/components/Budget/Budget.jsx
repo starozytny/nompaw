@@ -30,6 +30,7 @@ const URL_PLANNING = "intern_api_budget_planning_index"
 const URL_DELETE_ELEMENT = "intern_api_budget_items_delete"
 const URL_ACTIVE_ELEMENT = "intern_api_budget_items_active"
 const URL_CANCEL_ELEMENT = "intern_api_budget_items_cancel"
+const URL_UPDATE_ELEMENT = "intern_api_budget_items_update"
 const URL_ACTIVE_RECURRENCE = "intern_api_budget_recurrences_active"
 const URL_TRASH_RECURRENCE = "intern_api_budget_recurrences_trash"
 const URL_USE_SAVING = "intern_api_budget_categories_use";
@@ -104,6 +105,45 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 
 	let handleUpdateList = () => {
 		refetchPlanning(year).then(() => setElement(null));
+	}
+
+	// Dragging an item between two neighbours gives it a date strictly between theirs, so the
+	// list order stays true to what it's sorted by (dateAt) instead of needing a separate,
+	// invisible manual-order field the dates would then contradict.
+	let handleReorder = (item, before, after) => {
+		let monthStart = moment(`${item.year}-${item.month}`, 'YYYY-M').startOf('month');
+		let monthEnd = moment(`${item.year}-${item.month}`, 'YYYY-M').endOf('month');
+
+		let newDateAt;
+		if (before && after) {
+			newDateAt = moment((moment(before.dateAt).valueOf() + moment(after.dateAt).valueOf()) / 2);
+		} else if (before) {
+			newDateAt = moment(before.dateAt).subtract(1, 'minute');
+		} else if (after) {
+			newDateAt = moment(after.dateAt).add(1, 'minute');
+		} else {
+			return;
+		}
+
+		if (newDateAt.isBefore(monthStart)) newDateAt = monthStart.add(1, 'minute');
+		if (newDateAt.isAfter(monthEnd)) newDateAt = monthEnd.subtract(1, 'minute');
+
+		let previousDateAt = item.dateAt;
+		setData(prev => prev.map(d => d.id === item.id ? { ...d, dateAt: newDateAt.toISOString() } : d));
+
+		axios({
+			method: "PUT", url: Routing.generate(URL_UPDATE_ELEMENT, { id: item.id }), data: {
+				year: item.year, month: item.month, type: item.type, price: item.price, name: item.name,
+				category: item.category ? item.category.id : "",
+				isActive: item.isActive ? [1] : [0],
+				dateAt: newDateAt.format('YYYY-MM-DD'), dateTime: newDateAt.format('HH:mm'),
+			}
+		})
+			.catch(function (error) {
+				Formulaire.displayErrors(null, error);
+				setData(prev => prev.map(d => d.id === item.id ? { ...d, dateAt: previousDateAt } : d));
+			})
+		;
 	}
 
 	let handleOpenCreate = () => {
@@ -538,6 +578,7 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 						<BudgetList data={filteredData} recurrencesData={filteredRecurrences}
 									onEdit={handleEdit} onModal={handleModal} onActive={handleActive} onCancel={handleCancelTrash}
 									onActiveRecurrence={handleActiveRecurrence}
+									sortable={!searchLower} onReorder={handleReorder}
 									emptyMessage={searchLower ? "Aucune opération ne correspond à la recherche." : "Aucune opération pour ce mois."} />
 					</CardContent>
 				</Card>

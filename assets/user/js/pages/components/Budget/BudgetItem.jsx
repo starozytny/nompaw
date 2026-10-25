@@ -1,5 +1,9 @@
 import React from 'react';
 
+import { GripVertical } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 import Sanitaze from '@commonFunctions/sanitaze';
 import { cn } from "@shadcnComponents/lib/utils";
 
@@ -9,16 +13,30 @@ import { Badge } from "@shadcnComponents/ui/badge";
 const TYPE_COLOR = ['var(--cat-expense)', 'var(--cat-income)', 'var(--cat-saving)', 'hsl(var(--muted-foreground))', 'hsl(var(--muted-foreground))'];
 const TYPE_SOFT = ['var(--cat-expense-soft)', 'var(--cat-income-soft)', 'var(--cat-saving-soft)', 'hsl(var(--muted))', 'hsl(var(--muted))'];
 
-export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel }) {
+export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel, sortable = false }) {
 	const isDeleted = elem.type === 3;
 	const isInactive = !elem.isActive;
 
+	const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: elem.id, disabled: !sortable });
+	const style = { transform: CSS.Transform.toString(transform), transition };
+
 	return <div
+		ref={sortable ? setNodeRef : undefined}
+		style={sortable ? style : undefined}
 		className={cn(
 			"flex items-center gap-3 border-b border-l-4 border-l-transparent px-4 py-2.5 last:border-b-0 transition-colors",
-			isDeleted ? "opacity-40" : (isInactive ? "border-l-[var(--status-critical)] bg-[var(--status-critical-soft)]" : "hover:bg-accent/50")
+			isDeleted ? "opacity-40" : (isInactive ? "border-l-[var(--status-critical)] bg-[var(--status-critical-soft)]" : "hover:bg-accent/50"),
+			isDragging && "relative z-10 bg-accent shadow-md"
 		)}
 	>
+		{sortable && (
+			<button type="button" {...attributes} {...listeners}
+					className="flex-shrink-0 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+					aria-label="Réordonner">
+				<GripVertical className="h-4 w-4" />
+			</button>
+		)}
+
 		<div
 			className="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center flex-shrink-0"
 			style={{
