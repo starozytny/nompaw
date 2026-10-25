@@ -173,9 +173,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuCategory::class)]
     private Collection $buCategories;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Mail::class)]
-    private Collection $mails;
-
     #[ORM\Column(nullable: true)]
     private ?int $budgetYear = null;
 
@@ -234,7 +231,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->buyPresents = new ArrayCollection();
         $this->buItems = new ArrayCollection();
         $this->buCategories = new ArrayCollection();
-        $this->mails = new ArrayCollection();
         $this->buRecurrents = new ArrayCollection();
         $this->crTrades = new ArrayCollection();
         $this->phMedia = new ArrayCollection();
@@ -1030,36 +1026,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             // set the owning side to null (unless already changed)
             if ($buCategory->getUser() === $this) {
                 $buCategory->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Mail>
-     */
-    public function getMails(): Collection
-    {
-        return $this->mails;
-    }
-
-    public function addMail(Mail $mail): static
-    {
-        if (!$this->mails->contains($mail)) {
-            $this->mails->add($mail);
-            $mail->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMail(Mail $mail): static
-    {
-        if ($this->mails->removeElement($mail)) {
-            // set the owning side to null (unless already changed)
-            if ($mail->getUser() === $this) {
-                $mail->setUser(null);
             }
         }
 

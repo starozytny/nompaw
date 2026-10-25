@@ -19,19 +19,9 @@
         matchRoute: ['admin_users_index', 'admin_users_create', 'admin_users_update', 'admin_users_read', 'admin_users_password']
     },
     {
-        name: "Changelogs", icon: "refresh1",
-        path: path('admin_changelogs_index'),
-        matchRoute: ['admin_changelogs_index', 'admin_changelogs_create', 'admin_changelogs_update']
-    },
-    {
         name: "Contacts", icon: "chat",
         path: path('admin_contacts_index'),
         matchRoute: ['admin_contacts_index']
-    },
-    {
-        name: "Agenda", icon: "calendar",
-        path: path('admin_agenda_index'),
-        matchRoute: ['admin_agenda_index', 'admin_agenda_create', 'admin_agenda_update']
     },
     {
         name: "Stockage", icon: "box",
@@ -42,11 +32,6 @@
         name: "Accès photos famille", icon: "camera",
         path: path('admin_photos_access_index'),
         matchRoute: ['admin_photos_access_index',]
-    },
-    {
-        name: "Boite d'envois", icon: "email",
-        path: path('admin_mails_index', {'type': 'envoyes'}),
-        matchRoute: ['admin_mails_index',]
     }
 ] %}
 
@@ -64,16 +49,14 @@
 ] %}
 
 {% block footer %}
-    <div class="bg-black/90 px-4 py-8 text-sm sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-screen-2xl pt-4 flex flex-col text-center lg:flex-row lg:text-left gap-2 justify-center">
-            <p class="text-gray-300">&copy; 2024 - <a href="https://chanbora-chhun.fr" class="text-blue-600">chanbora-chhun.fr</a></p>
-            <span class="text-gray-300">-</span>
-            <a class="text-gray-300 hover:text-white" href="{{ path('app_mentions') }}">Mentions légales</a>
-            <a class="text-gray-300 hover:text-white" href="{{ path('app_politique') }}">Politique de confidentialité</a>
-            <a class="text-gray-300 hover:text-white" href="{{ path('app_cookies') }}">Gestion des cookies</a>
-            {% if is_granted('ROLE_ADMIN') %}
-                <a class="text-gray-300 hover:text-white" href="{{ path('admin_homepage') }}">Espace administrateur</a>
-            {% endif %}
+    <div class="relative z-10 bg-sidebar px-4 py-8 text-sm sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-screen-2xl flex flex-col text-center sm:flex-row sm:text-left gap-2 justify-center">
+            <p class="text-slate-100">&copy; 2024 - <a href="https://chanbora-chhun.fr" class="text-blue-400">Chanbora Chhun</a></p>
+            <span class="text-slate-100">-</span>
+            <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('app_mentions') }}">Mentions légales</a>
+            <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('app_politique') }}">Politique de confidentialité</a>
+            <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('app_cookies') }}">Gestion des cookies</a>
+            <a class="text-gray-100 hover:text-gray-300 hover:underline" href="{{ path('user_homepage') }}">Espace utilisateur</a>
         </div>
     </div>
 {% endblock %}

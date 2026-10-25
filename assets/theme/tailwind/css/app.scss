@@ -187,6 +187,19 @@ input[type=number] {
     --sidebar-border: 240 35% 18%;
     --sidebar-ring: 156 64% 52%;
   }
+
+  /* Admin back-office: a near-black/neutral sidebar instead of the member's navy,
+     so the two environments are never visually confused at a glance. */
+  :root.theme-admin {
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 75%;
+    --sidebar-primary: 0 0% 95%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 0 0% 95%;
+  }
 }
 
 @layer base {

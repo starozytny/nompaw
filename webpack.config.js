@@ -78,11 +78,8 @@ Encore
     .addEntry('admin_settings', './assets/admin/js/pages/settings.js')
     .addEntry('admin_users', './assets/admin/js/pages/users.js')
     .addEntry('admin_societies', './assets/admin/js/pages/societies.js')
-    .addEntry('admin_changelogs', './assets/admin/js/pages/changelogs.js')
     .addEntry('admin_contacts', './assets/admin/js/pages/contacts.js')
-    .addEntry('admin_agenda', './assets/admin/js/pages/agenda.js')
     .addEntry('admin_storage', './assets/admin/js/pages/storage.js')
-    .addEntry('admin_mails', './assets/admin/js/pages/mails.js')
     .addEntry('admin_photos_access', './assets/admin/js/pages/photosAccess.js')
 
     .addEntry('user_app', './assets/user/js/app.js')

@@ -30,6 +30,8 @@ export function AppShell({
   user,
   profilePath,
   logoutPath,
+  subtitle,
+  headerRight = null,
 }: {
   menu: MenuItem[]
   menuSecondary: MenuItem[]
@@ -40,6 +42,8 @@ export function AppShell({
   user: NompawUser
   profilePath: string
   logoutPath: string
+  subtitle?: string
+  headerRight?: React.ReactNode
 }) {
   const mainRef = useRef<HTMLDivElement>(null)
 
@@ -66,6 +70,7 @@ export function AppShell({
         user={user}
         profilePath={profilePath}
         logoutPath={logoutPath}
+        subtitle={subtitle}
       />
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
@@ -78,6 +83,7 @@ export function AppShell({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          {headerRight && <div className="ml-auto flex items-center gap-2">{headerRight}</div>}
         </header>
         <div ref={mainRef} className="flex flex-1 flex-col" />
       </SidebarInset>

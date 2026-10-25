@@ -44,7 +44,6 @@ function switchFunction(type, search, v) {
         case "category":
         case "recurrence":
         case "contact":
-        case "changelog":
         case "name":
             if(searchContainsWith(v.name, search)){
                 return v;
