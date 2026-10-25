@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Main\Mail;
 use App\Entity\Main\Settings;
-use App\Repository\Main\ChangelogRepository;
 use App\Repository\Main\ContactRepository;
 use App\Repository\Main\MailRepository;
 use App\Repository\Main\SettingsRepository;
@@ -28,8 +27,7 @@ class AdminController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
     public function index(SettingsRepository $settingsRepository, SocietyRepository $societyRepository,
-                          UserRepository $userRepository, ContactRepository $contactRepository,
-                          ChangelogRepository $changelogRepository): Response
+                          UserRepository $userRepository, ContactRepository $contactRepository): Response
     {
         return $this->render('admin/pages/index.html.twig', [
             'settings' => $settingsRepository->findOneBy(['code' => 0]),
@@ -39,7 +37,6 @@ class AdminController extends AbstractController
             'users' => $userRepository->findLastLoginAt(11),
             'nbContacts' => $contactRepository->count([]),
             'nbContactsNew' => $contactRepository->countIsSeen(),
-            'changelogs' => $changelogRepository->findBy(['isPublished' => true], ['createdAt' => 'ASC'], 5),
         ]);
     }
 

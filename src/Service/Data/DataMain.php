@@ -3,7 +3,6 @@
 namespace App\Service\Data;
 
 use App\Entity\Main\Agenda\AgEvent;
-use App\Entity\Main\Changelog;
 use App\Entity\Main\Contact;
 use App\Entity\Main\Mail;
 use App\Entity\Main\Notification;
@@ -50,15 +49,6 @@ class DataMain
             ->setName($this->sanitizeData->trimData($data->name))
             ->setCode($this->sanitizeData->trimData($data->code))
             ->setManager($prefix . $this->sanitizeData->trimData($data->code))
-        ;
-    }
-
-    public function setDataChangelog(Changelog $obj, $data): Changelog
-    {
-        return ($obj)
-            ->setName($this->sanitizeData->trimData($data->name))
-            ->setType((int) $data->type)
-            ->setContent($this->sanitizeData->trimData($data->content->html))
         ;
     }
 

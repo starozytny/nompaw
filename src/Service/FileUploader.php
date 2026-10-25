@@ -7,7 +7,6 @@ namespace App\Service;
 
 use App\Entity\Enum\Image\ImageType;
 use App\Entity\Main\Agenda\AgEvent;
-use App\Entity\Main\Changelog;
 use App\Entity\Main\Image;
 use App\Entity\Rando\RaGroupe;
 use App\Entity\Rando\RaImage;
@@ -423,7 +422,6 @@ class FileUploader
         $file = $request->files->get('file');
         if($file){
             $folder = match ($type){
-                ImageType::Changelog => Changelog::FOLDER_EDITOR,
                 ImageType::AgEvent => AgEvent::FOLDER_EDITOR,
                 ImageType::Groupe => RaGroupe::FOLDER,
                 ImageType::Rando => RaRando::FOLDER,
