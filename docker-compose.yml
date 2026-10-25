@@ -10,18 +10,14 @@ services:
       - composer_cache:/root/.composer
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
     environment:
-      - DATABASE_URL=mysql://project:project@db_default:3306/nompaw?serverVersion=mariadb-11.4.9
-    depends_on:
-      db_default:
-        condition: service_healthy
+      - DATABASE_URL=mysql://nompaw:nompaw@shared_mariadb:3306/nompaw?serverVersion=mariadb-11.4.9
     networks:
       - symfony
+      - db_shared
 
   nginx:
     image: nginx:alpine
     container_name: nompaw_nginx
-    ports:
-      - "${NGINX_PORT:-8080}:80"
     volumes:
       - ./public:/var/www/nompaw/public:cached
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -29,26 +25,13 @@ services:
       - php
     networks:
       - symfony
-
-  db_default:
-    image: mariadb:11.4.9
-    container_name: nompaw_db
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: nompaw
-      MYSQL_USER: project
-      MYSQL_PASSWORD: project
-    ports:
-      - "${DB_PORT:-3306}:3306"
-    volumes:
-      - db_default:/var/lib/mysql
-    networks:
-      - symfony
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nompaw.rule=Host(`nompaw.local`)"
+      - "traefik.http.routers.nompaw.entrypoints=websecure"
+      - "traefik.http.routers.nompaw.tls=true"
+      - "traefik.http.services.nompaw.loadbalancer.server.port=80"
 
   node:
     image: node:24.19.0-alpine
@@ -64,9 +47,12 @@ services:
 networks:
   symfony:
     driver: bridge
+  proxy:
+    external: true
+  db_shared:
+    external: true
 
 volumes:
-  db_default:
   composer_cache:
     external: true
     name: composer_cache_shared
