@@ -1,0 +1,272 @@
+<?php
+
+namespace App\Controller\InternApi\Running;
+
+use App\Entity\Main\User;
+use App\Entity\Running\RuActivity;
+use App\Entity\Running\RuLog;
+use App\Entity\Running\RuWeight;
+use App\Repository\Running\RuActivityRepository;
+use App\Repository\Running\RuLogRepository;
+use App\Repository\Running\RuWeightRepository;
+use App\Service\Api\ApiResponse;
+use App\Service\Data\DataRunning;
+use App\Service\Running\RunningImportService;
+use App\Service\SanitizeData;
+use App\Service\ValidatorService;
+use DateTime;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/intern/api/running', name: 'intern_api_running_')]
+class RunningController extends AbstractController
+{
+    #[Route('/tracking', name: 'tracking', options: ['expose' => true], methods: 'GET')]
+    public function tracking(RuLogRepository $logRepository, RuActivityRepository $activityRepository,
+                             RuWeightRepository $weightRepository, ApiResponse $apiResponse): Response
+    {
+        return $apiResponse->apiJsonResponseCustom($this->buildTrackingPayload(
+            $this->getUser(), $logRepository, $activityRepository, $weightRepository
+        ));
+    }
+
+    #[Route('/log', name: 'log_save', options: ['expose' => true], methods: 'POST')]
+    public function saveLog(Request $request, RuLogRepository $logRepository, DataRunning $dataEntity,
+                            ValidatorService $validator, ApiResponse $apiResponse): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null || empty($data->date)) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $user = $this->getUser();
+        $date = DateTime::createFromFormat('Y-m-d', $data->date);
+        $log = $logRepository->findOneByUserAndDate($user, $date) ?? (new RuLog())->setUser($user);
+        $log = $dataEntity->setDataLog($log, $data);
+
+        $noErrors = $validator->validate($log);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        if ($log->isEmpty()) {
+            if ($log->getId()) {
+                $logRepository->remove($log, true);
+            }
+        } else {
+            $logRepository->save($log, true);
+        }
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/import', name: 'import', options: ['expose' => true], methods: 'POST')]
+    public function import(Request $request, RunningImportService $importService, RuLogRepository $logRepository,
+                           RuActivityRepository $activityRepository, RuWeightRepository $weightRepository,
+                           ApiResponse $apiResponse): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null || empty($data->runs) || !is_array($data->runs)) {
+            return $apiResponse->apiJsonResponseBadRequest('Aucune course à importer.');
+        }
+
+        $user = $this->getUser();
+        $runs = array_map(fn ($r) => (array) $r, $data->runs);
+        $result = $importService->import($user, $runs, $data->rangeStart ?? null, $data->rangeEnd ?? null);
+        $result['tracking'] = $this->buildTrackingPayload($user, $logRepository, $activityRepository, $weightRepository);
+
+        return $apiResponse->apiJsonResponseCustom($result);
+    }
+
+    #[Route('/weights', name: 'weights_save', options: ['expose' => true], methods: 'POST')]
+    public function saveWeight(Request $request, RuWeightRepository $weightRepository, DataRunning $dataEntity,
+                               ValidatorService $validator, ApiResponse $apiResponse): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null || empty($data->date) || !isset($data->kg)) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $user = $this->getUser();
+        $date = DateTime::createFromFormat('Y-m-d', $data->date);
+        $weight = $weightRepository->findOneByUserAndDate($user, $date) ?? (new RuWeight())->setUser($user);
+        $weight = $dataEntity->setDataWeight($weight, $data);
+
+        $noErrors = $validator->validate($weight);
+        if ($noErrors !== true) {
+            return $apiResponse->apiJsonResponseValidationFailed($noErrors);
+        }
+
+        $weightRepository->save($weight, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/weights/{id}', name: 'weights_delete', options: ['expose' => true], methods: 'DELETE')]
+    public function deleteWeight(RuWeight $weight, RuWeightRepository $weightRepository, ApiResponse $apiResponse): Response
+    {
+        if ($weight->getUser() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $weightRepository->remove($weight, true);
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/notes', name: 'notes_save', options: ['expose' => true], methods: 'PUT')]
+    public function saveNotes(Request $request, SanitizeData $sanitizeData, ManagerRegistry $doctrine, ApiResponse $apiResponse): Response
+    {
+        $data = json_decode($request->getContent());
+
+        /** @var User $user */
+        $user = $this->getUser();
+        $user->setRunningNotes($sanitizeData->trimData($data->notes ?? null));
+        $doctrine->getManager()->flush();
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    /**
+     * Full overwrite from an uploaded backup file, same semantics as the original's importBackup(): replaces
+     * every log/activity/weight/note for this user rather than merging.
+     */
+    #[Route('/backup/restore', name: 'backup_restore', options: ['expose' => true], methods: 'POST')]
+    public function restoreBackup(Request $request, RuLogRepository $logRepository, RuActivityRepository $activityRepository,
+                                  RuWeightRepository $weightRepository, SanitizeData $sanitizeData, ManagerRegistry $doctrine,
+                                  ApiResponse $apiResponse): Response
+    {
+        $data = json_decode($request->getContent());
+        if ($data === null || !isset($data->log) || !is_array($data->activities ?? null) || !is_array($data->weights ?? null)) {
+            return $apiResponse->apiJsonResponseBadRequest('Fichier de sauvegarde invalide.');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+        $logRepository->removeAllByUser($user);
+        $activityRepository->removeAllByUser($user);
+        $weightRepository->removeAllByUser($user);
+
+        foreach ((array) $data->log as $iso => $entry) {
+            $entry = (array) $entry;
+            $log = (new RuLog())->setUser($user)->setDate(DateTime::createFromFormat('Y-m-d', $iso))
+                ->setKm($entry['km'] ?? null)
+                ->setDurationSec(isset($entry['dur']) ? $this->parseDurToSec((string) $entry['dur']) : null)
+                ->setHr($entry['hr'] ?? null)
+                ->setHrMax($entry['hrmax'] ?? null)
+                ->setRpe($entry['rpe'] ?? null)
+                ->setNote($entry['note'] ?? null)
+                ->setDone(!empty($entry['done']))
+                ->setSource($entry['src'] ?? null)
+                ->setTitle($entry['title'] ?? null)
+            ;
+            if (!$log->isEmpty()) {
+                $logRepository->save($log);
+            }
+        }
+
+        foreach ($data->activities as $run) {
+            $run = (array) $run;
+            $activityRepository->save((new RuActivity())->setUser($user)
+                ->setDate(DateTime::createFromFormat('Y-m-d', $run['d']))
+                ->setKm($run['km'])
+                ->setDurationSec($run['sec'])
+                ->setHr($run['hr'] ?? null)
+                ->setHrMax($run['hrmax'] ?? null)
+                ->setTitle($run['title'] ?? null)
+            );
+        }
+
+        foreach ($data->weights as $w) {
+            $w = (array) $w;
+            $weightRepository->save((new RuWeight())->setUser($user)
+                ->setDate(DateTime::createFromFormat('Y-m-d', $w['d']))
+                ->setKg($w['kg'])
+            );
+        }
+
+        $user->setRunningNotes($sanitizeData->trimData($data->notes ?? null));
+        $doctrine->getManager()->flush();
+
+        return $apiResponse->apiJsonResponseCustom(
+            $this->buildTrackingPayload($user, $logRepository, $activityRepository, $weightRepository)
+        );
+    }
+
+    #[Route('/reset', name: 'reset', options: ['expose' => true], methods: 'DELETE')]
+    public function reset(RuLogRepository $logRepository, RuActivityRepository $activityRepository,
+                          RuWeightRepository $weightRepository, ManagerRegistry $doctrine, ApiResponse $apiResponse): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $logRepository->removeAllByUser($user);
+        $activityRepository->removeAllByUser($user);
+        $weightRepository->removeAllByUser($user);
+        $user->setRunningNotes(null);
+        $doctrine->getManager()->flush();
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    private function buildTrackingPayload(User $user, RuLogRepository $logRepository, RuActivityRepository $activityRepository,
+                                          RuWeightRepository $weightRepository): array
+    {
+        $log = [];
+        foreach ($logRepository->findAllByUser($user) as $entry) {
+            $log[$entry->getDate()->format('Y-m-d')] = [
+                'km' => $entry->getKm(),
+                'dur' => $entry->getDurationSec() !== null ? $this->formatSecToDur($entry->getDurationSec()) : null,
+                'hr' => $entry->getHr(),
+                'hrmax' => $entry->getHrMax(),
+                'rpe' => $entry->getRpe(),
+                'note' => $entry->getNote(),
+                'done' => $entry->isDone(),
+                'src' => $entry->getSource(),
+                'title' => $entry->getTitle(),
+            ];
+        }
+
+        $activities = array_map(fn ($a) => [
+            'd' => $a->getDate()->format('Y-m-d'),
+            'km' => $a->getKm(),
+            'sec' => $a->getDurationSec(),
+            'hr' => $a->getHr(),
+            'hrmax' => $a->getHrMax(),
+            'title' => $a->getTitle(),
+        ], $activityRepository->findAllByUser($user));
+
+        $weights = array_map(fn ($w) => [
+            'id' => $w->getId(),
+            'd' => $w->getDate()->format('Y-m-d'),
+            'kg' => $w->getKg(),
+        ], $weightRepository->findAllByUser($user));
+
+        return [
+            'log' => $log,
+            'activities' => $activities,
+            'weights' => $weights,
+            'notes' => $user->getRunningNotes() ?? '',
+        ];
+    }
+
+    private function parseDurToSec(string $dur): ?int
+    {
+        $parts = array_map('intval', explode(':', $dur));
+        if (count($parts) === 3) {
+            return $parts[0] * 3600 + $parts[1] * 60 + $parts[2];
+        }
+        if (count($parts) === 2) {
+            return $parts[0] * 60 + $parts[1];
+        }
+        return null;
+    }
+
+    private function formatSecToDur(int $sec): string
+    {
+        $h = intdiv($sec, 3600);
+        $m = intdiv($sec % 3600, 60);
+        $s = $sec % 60;
+        return $h ? sprintf('%d:%02d:%02d', $h, $m, $s) : sprintf('%d:%02d', $m, $s);
+    }
+}
