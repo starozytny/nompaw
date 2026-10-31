@@ -36,6 +36,11 @@ class RuWeight
     #[Assert\Range(min: 40, max: 200)]
     private ?float $kg = null;
 
+    #[ORM\Column(length: 10, nullable: true)]
+    #[Groups(['ru_weight_list'])]
+    #[Assert\Choice(choices: ['manuel', 'garmin'])]
+    private ?string $source = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -71,6 +76,17 @@ class RuWeight
     public function setKg(?float $kg): self
     {
         $this->kg = $kg;
+        return $this;
+    }
+
+    public function getSource(): ?string
+    {
+        return $this->source;
+    }
+
+    public function setSource(?string $source): self
+    {
+        $this->source = $source;
         return $this;
     }
 }

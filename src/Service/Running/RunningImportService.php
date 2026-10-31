@@ -5,20 +5,24 @@ namespace App\Service\Running;
 use App\Entity\Main\User;
 use App\Entity\Running\RuActivity;
 use App\Entity\Running\RuLog;
+use App\Entity\Running\RuWeight;
 use App\Repository\Running\RuActivityRepository;
 use App\Repository\Running\RuLogRepository;
+use App\Repository\Running\RuWeightRepository;
 use DateTime;
 
 /**
- * Merges a batch of runs parsed client-side from a Garmin CSV export (the parser itself stays in the
- * browser — see Suivi/lib/csv.js — only the merge-into-history-and-plan step moves server-side so every
- * device sees the same result). Ported from the original importGarminCSV()'s merge half.
+ * Merges a batch of runs parsed either client-side from a Garmin CSV export (see Suivi/lib/csv.js) or
+ * fetched server-side from Garmin's Personal API (see GarminApiClient/GarminActivityMapper) — in both
+ * cases only the merge-into-history-and-plan step happens here, so every source converges on the same
+ * result. Ported from the original importGarminCSV()'s merge half.
  */
 class RunningImportService
 {
     public function __construct(
         private readonly RuActivityRepository $activityRepository,
         private readonly RuLogRepository $logRepository,
+        private readonly RuWeightRepository $weightRepository,
     ) {}
 
     /**
@@ -94,6 +98,43 @@ class RunningImportService
         }
 
         return ['total' => count($runs), 'added' => $added, 'attached' => $attached, 'kept' => $kept];
+    }
+
+    /**
+     * Upserts weight entries fetched from Garmin, never overwriting a day a manual entry already exists
+     * for (RuWeight::source === 'manuel' wins, same precedence rule as import()'s RuLog attachment).
+     *
+     * @param array $weights each: ['d' => 'Y-m-d', 'kg' => float]
+     * @return array{total: int, added: int, updated: int, kept: int}
+     */
+    public function importWeights(User $user, array $weights): array
+    {
+        $added = 0;
+        $updated = 0;
+        $kept = 0;
+
+        foreach ($weights as $entry) {
+            $date = DateTime::createFromFormat('Y-m-d', (string) $entry['d']);
+            $kg = round((float) $entry['kg'], 1);
+            $weight = $this->weightRepository->findOneByUserAndDate($user, $date);
+
+            if ($weight && $weight->getSource() === 'manuel') {
+                $kept++;
+                continue;
+            }
+
+            if ($weight) {
+                $updated++;
+            } else {
+                $weight = (new RuWeight())->setUser($user)->setDate($date);
+                $added++;
+            }
+
+            $weight->setKg($kg)->setSource('garmin');
+            $this->weightRepository->save($weight, true);
+        }
+
+        return ['total' => count($weights), 'added' => $added, 'updated' => $updated, 'kept' => $kept];
     }
 
     private function activityKey(string $date, float $km, int $sec): string

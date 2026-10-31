@@ -51,7 +51,7 @@ const SUB_TABS = [
 	{ value: 'bilan', label: 'Bilan & sauvegarde', Icon: ClipboardList },
 ];
 
-export function SuiviTab ({ tracking, onImportRuns, onSaveNotes, onRestoreBackup, onReset, onSaveWeight, onDeleteWeight }) {
+export function SuiviTab ({ tracking, onImportRuns, onSyncGarmin, onSaveNotes, onRestoreBackup, onReset, onSaveWeight, onDeleteWeight }) {
 	const [subTab, setSubTab] = useState('semaines');
 	const kpis = useKpis(tracking.log);
 
@@ -88,7 +88,7 @@ export function SuiviTab ({ tracking, onImportRuns, onSaveNotes, onRestoreBackup
 
 			<TabsContent value="historique" className="pt-4">
 				<div className="flex flex-col gap-5">
-					<ImportCard onImportRuns={onImportRuns} />
+					<ImportCard onImportRuns={onImportRuns} onSyncGarmin={onSyncGarmin} />
 					<HistoryCard activities={tracking.activities} />
 					<PredictorCard activities={tracking.activities} />
 				</div>

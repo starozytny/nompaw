@@ -6,6 +6,7 @@ import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 const URL_TRACKING = 'intern_api_running_tracking';
 const URL_LOG_SAVE = 'intern_api_running_log_save';
 const URL_IMPORT = 'intern_api_running_import';
+const URL_GARMIN_SYNC = 'intern_api_running_garmin_sync';
 const URL_WEIGHTS_SAVE = 'intern_api_running_weights_save';
 const URL_WEIGHTS_DELETE = 'intern_api_running_weights_delete';
 const URL_NOTES_SAVE = 'intern_api_running_notes_save';
@@ -38,6 +39,11 @@ export function useRunningTracking () {
 			.then(res => { setTracking(res.data.tracking); return res.data; });
 	}, []);
 
+	const syncGarmin = useCallback(() => {
+		return axios.post(Routing.generate(URL_GARMIN_SYNC))
+			.then(res => { setTracking(res.data.tracking); return res.data; });
+	}, []);
+
 	const saveWeight = useCallback((date, kg) => {
 		return axios.post(Routing.generate(URL_WEIGHTS_SAVE), { date, kg }).then(refresh);
 	}, [refresh]);
@@ -59,5 +65,5 @@ export function useRunningTracking () {
 		return axios.delete(Routing.generate(URL_RESET)).then(refresh);
 	}, [refresh]);
 
-	return { tracking, loading, refresh, saveLog, importRuns, saveWeight, deleteWeight, saveNotes, restoreBackup, reset };
+	return { tracking, loading, refresh, saveLog, importRuns, syncGarmin, saveWeight, deleteWeight, saveNotes, restoreBackup, reset };
 }

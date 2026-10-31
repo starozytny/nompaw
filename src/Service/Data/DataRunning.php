@@ -50,6 +50,7 @@ class DataRunning
         return ($obj)
             ->setDate($this->sanitizeData->createDate($data->date))
             ->setKg($this->sanitizeData->setFloatValue($data->kg))
+            ->setSource('manuel')
         ;
     }
 }
