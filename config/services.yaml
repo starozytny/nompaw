@@ -10,6 +10,7 @@ parameters:
     env_file: '%kernel.project_dir%/.env.local'
     env(COINGECKO_API_KEY): ''
     env(CRYPTO_CREDENTIAL_SECRET): ''
+    env(GARMIN_API_KEY): ''
 
 services:
     # default configuration for services in *this* file
@@ -24,6 +25,7 @@ services:
             $appEnv: '%env(APP_ENV)%'
             $coingeckoApiKey: '%env(COINGECKO_API_KEY)%'
             $cryptoCredentialSecret: '%env(CRYPTO_CREDENTIAL_SECRET)%'
+            $garminApiKey: '%env(GARMIN_API_KEY)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

@@ -67,7 +67,7 @@ function PlanHeader () {
 
 export default function Running () {
 	const [activeTab, setActiveTab] = useState('plan');
-	const { tracking, loading, saveLog, importRuns, saveWeight, deleteWeight, saveNotes, restoreBackup, reset } = useRunningTracking();
+	const { tracking, loading, saveLog, importRuns, syncGarmin, saveWeight, deleteWeight, saveNotes, restoreBackup, reset } = useRunningTracking();
 
 	if (loading) {
 		return <LoaderElements text="Chargement du suivi" />;
@@ -93,6 +93,7 @@ export default function Running () {
 			<SuiviTab
 				tracking={tracking}
 				onImportRuns={importRuns}
+				onSyncGarmin={syncGarmin}
 				onSaveNotes={saveNotes}
 				onRestoreBackup={restoreBackup}
 				onReset={reset}

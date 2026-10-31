@@ -11,6 +11,9 @@ use App\Repository\Running\RuLogRepository;
 use App\Repository\Running\RuWeightRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Data\DataRunning;
+use App\Service\Garmin\GarminApiClient;
+use App\Service\Garmin\GarminApiException;
+use App\Service\Garmin\GarminActivityMapper;
 use App\Service\Running\RunningImportService;
 use App\Service\SanitizeData;
 use App\Service\ValidatorService;
@@ -77,6 +80,36 @@ class RunningController extends AbstractController
         $runs = array_map(fn ($r) => (array) $r, $data->runs);
         $result = $importService->import($user, $runs, $data->rangeStart ?? null, $data->rangeEnd ?? null);
         $result['tracking'] = $this->buildTrackingPayload($user, $logRepository, $activityRepository, $weightRepository);
+
+        return $apiResponse->apiJsonResponseCustom($result);
+    }
+
+    /**
+     * Pulls the last 14 days of activities and weights from Garmin's Personal API and merges them the same
+     * way a CSV import would (RunningImportService::import()), plus the equivalent for weights — a manual
+     * entry always wins over a Garmin one for the same day.
+     */
+    #[Route('/garmin-sync', name: 'garmin_sync', options: ['expose' => true], methods: 'POST')]
+    public function garminSync(GarminApiClient $garminClient, GarminActivityMapper $mapper, RunningImportService $importService,
+                               RuLogRepository $logRepository, RuActivityRepository $activityRepository,
+                               RuWeightRepository $weightRepository, ApiResponse $apiResponse): Response
+    {
+        $user = $this->getUser();
+        $from = (new DateTime('-14 days'))->format('Y-m-d');
+        $until = (new DateTime())->format('Y-m-d');
+
+        try {
+            $runs = $mapper->mapToRuns($garminClient->fetchActivitySummaries($from, $until));
+            $weights = $mapper->mapToWeights($garminClient->fetchWeights($from, $until));
+        } catch (GarminApiException $e) {
+            return $apiResponse->apiJsonResponseBadRequest($e->getMessage());
+        }
+
+        $result = [
+            'activities' => $importService->import($user, $runs, null, null),
+            'weights' => $importService->importWeights($user, $weights),
+            'tracking' => $this->buildTrackingPayload($user, $logRepository, $activityRepository, $weightRepository),
+        ];
 
         return $apiResponse->apiJsonResponseCustom($result);
     }
@@ -240,6 +273,7 @@ class RunningController extends AbstractController
             'id' => $w->getId(),
             'd' => $w->getDate()->format('Y-m-d'),
             'kg' => $w->getKg(),
+            'src' => $w->getSource(),
         ], $weightRepository->findAllByUser($user));
 
         return [
