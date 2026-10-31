@@ -55,10 +55,21 @@ CommandInput.displayName = CommandPrimitive.Input.displayName
 const CommandList = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
->(({ className, ...props }, ref) => (
+>(({ className, onWheel, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
     className={cn("max-h-[300px] overflow-y-auto overflow-x-hidden", className)}
+    onWheel={(e) => {
+      // When nested in a modal Sheet/Dialog, Radix's body scroll-lock can swallow native
+      // wheel-driven scrolling on this portaled list (dragging the scrollbar still works,
+      // since that isn't routed through the same lock) — defaultPrevented is already true
+      // by the time this bubbles here if that happened. Fall back to scrolling manually,
+      // left alone otherwise so this never doubles up on normal, unblocked scrolling.
+      if (e.defaultPrevented) {
+        e.currentTarget.scrollTop += e.deltaY
+      }
+      onWheel?.(e)
+    }}
     {...props}
   />
 ))

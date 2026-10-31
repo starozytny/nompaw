@@ -35,9 +35,6 @@ export function UsersItem ({ elem, highlight, onModal })
         { data: <DropdownItemA icon="lock-1" onClick={urlPass}>
                 Modifier son mot de passe
         </DropdownItemA> },
-        { data: <DropdownItem icon="email-edit" onClick={() => onModal("mail", elem)}>
-                Envoyer un mail
-        </DropdownItem> },
         { data: <DropdownItem icon={elem.isBlocked ? "unlock" : "disabled"} onClick={() => onModal("blocked", elem)}>
                 {elem.isBlocked ? "Débloquer" : "Bloquer"}
         </DropdownItem> },

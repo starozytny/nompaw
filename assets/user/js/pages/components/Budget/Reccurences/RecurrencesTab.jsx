@@ -14,9 +14,9 @@ import { Badge } from "@shadcnComponents/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 import { RecurrentFormulaire } from "@userPages/Budget/Reccurences/RecurrentForm";
+import { TypeColumns } from "@userPages/Budget/TypeColumns";
 
 const TYPE_COLOR = ['var(--cat-expense)', 'var(--cat-income)', 'var(--cat-saving)'];
-const TYPE_SOFT = ['var(--cat-expense-soft)', 'var(--cat-income-soft)', 'var(--cat-saving-soft)'];
 const URL_LIST = "intern_api_budget_recurrences_list";
 const URL_DELETE = "intern_api_budget_recurrences_delete";
 
@@ -82,12 +82,8 @@ export function RecurrencesTab () {
 					? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune récurrence pour l'instant.</div>
 					: filteredItems.length === 0
 						? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune récurrence ne correspond à la recherche.</div>
-						: <div className="flex flex-col">
-						{filteredItems.map(elem => (
-							<div key={elem.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-b-0 hover:bg-accent/50">
-								<div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg" style={{ background: TYPE_SOFT[elem.type], color: TYPE_COLOR[elem.type] }}>
-									<span className={`icon-${elem.typeIcon}`}></span>
-								</div>
+						: <TypeColumns items={filteredItems} emptyLabel="Aucune récurrence de ce type." renderItem={elem => (
+							<div key={elem.id} className="flex items-center gap-2 border-b px-3 py-2.5 last:border-b-0 hover:bg-accent/50">
 								<div className="flex-1 min-w-0">
 									<div className="font-medium text-sm truncate">{elem.name}</div>
 									<div className="flex flex-wrap items-center gap-1 mt-1">
@@ -95,7 +91,7 @@ export function RecurrencesTab () {
 										{elem.category && <Badge variant="outline" style={{ borderColor: TYPE_COLOR[elem.category.type] + '55', color: TYPE_COLOR[elem.category.type] }}>{elem.category.name}</Badge>}
 									</div>
 								</div>
-								<div className="text-sm font-semibold tabular-nums whitespace-nowrap" style={{ color: TYPE_COLOR[elem.type] }}>
+								<div className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: TYPE_COLOR[elem.type] }}>
 									{Sanitaze.toFormatCurrency(elem.price)}
 								</div>
 								<div className="flex gap-0.5 flex-shrink-0">
@@ -103,8 +99,7 @@ export function RecurrencesTab () {
 									<ButtonIcon type="default" icon="trash" onClick={() => { setToDelete(elem); setDeleteOpen(true); }}>Supprimer</ButtonIcon>
 								</div>
 							</div>
-						))}
-					</div>
+						)} />
 			}
 		</CardContent>
 

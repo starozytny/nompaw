@@ -59,6 +59,14 @@
     }]) %}
 {% endif %}
 
+{% if is_granted('ROLE_RUNNING') %}
+    {% set menu = menu | merge([{
+        name: "Running", icon: "run",
+        path: path('user_running_index'),
+        matchRoute: ['user_running_index']
+    }]) %}
+{% endif %}
+
 {% set menu_bottom = [] %}
 
 {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
@@ -67,12 +75,7 @@
             name: "Espace admin", icon: "earth",
             path: path('admin_homepage'),
             matchRoute: ['admin_homepage']
-        },
-        {
-            name: "Page accueil", icon: "earth",
-            path: path('app_homepage'),
-            matchRoute: ['app_homepage']
-        },
+        }
     ]) %}
 {% endif %}
 

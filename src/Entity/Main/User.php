@@ -21,6 +21,7 @@ use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -173,9 +174,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: BuCategory::class)]
     private Collection $buCategories;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Mail::class)]
-    private Collection $mails;
-
     #[ORM\Column(nullable: true)]
     private ?int $budgetYear = null;
 
@@ -204,6 +202,12 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     #[ORM\Column]
     #[Groups(['user_list', 'user_form'])]
     private bool $photosAccess = false;
+
+    /**
+     * Notes libres de l'espace Running (sensations, douleurs, sommeil...), reprises dans le bilan copiable.
+     */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $runningNotes = null;
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: \App\Entity\Photo\PhMedia::class)]
     private Collection $phMedia;
@@ -234,7 +238,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         $this->buyPresents = new ArrayCollection();
         $this->buItems = new ArrayCollection();
         $this->buCategories = new ArrayCollection();
-        $this->mails = new ArrayCollection();
         $this->buRecurrents = new ArrayCollection();
         $this->crTrades = new ArrayCollection();
         $this->phMedia = new ArrayCollection();
@@ -365,7 +368,9 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
             $roles[] = 'ROLE_FAMILY_PHOTOS';
         }
 
-        return array_unique($roles);
+        // array_unique() keeps original keys, which can leave gaps (e.g. [0, 2, 3]);
+        // json_encode would then serialize this as a JS object instead of an array.
+        return array_values(array_unique($roles));
     }
 
     public function setRoles(array $roles): self
@@ -1036,36 +1041,6 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
         return $this;
     }
 
-    /**
-     * @return Collection<int, Mail>
-     */
-    public function getMails(): Collection
-    {
-        return $this->mails;
-    }
-
-    public function addMail(Mail $mail): static
-    {
-        if (!$this->mails->contains($mail)) {
-            $this->mails->add($mail);
-            $mail->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMail(Mail $mail): static
-    {
-        if ($this->mails->removeElement($mail)) {
-            // set the owning side to null (unless already changed)
-            if ($mail->getUser() === $this) {
-                $mail->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getBudgetYear(): ?int
     {
         return $this->budgetYear;
@@ -1170,6 +1145,18 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     public function setPhotosAccess(bool $photosAccess): static
     {
         $this->photosAccess = $photosAccess;
+
+        return $this;
+    }
+
+    public function getRunningNotes(): ?string
+    {
+        return $this->runningNotes;
+    }
+
+    public function setRunningNotes(?string $runningNotes): static
+    {
+        $this->runningNotes = $runningNotes;
 
         return $this;
     }

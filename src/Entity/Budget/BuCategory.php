@@ -7,6 +7,7 @@ use App\Entity\Main\User;
 use App\Repository\Budget\BuCategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -41,6 +42,10 @@ class BuCategory
     #[ORM\Column(nullable: true)]
     #[Groups(['bucat_list', 'bucat_form'])]
     private ?int $goal = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['bucat_list', 'bucat_form'])]
+    private ?\DateTimeInterface $goalDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'buCategories')]
     #[ORM\JoinColumn(nullable: false)]
@@ -106,6 +111,18 @@ class BuCategory
     public function setGoal(?float $goal): static
     {
         $this->goal = $goal !== null ? (int) round($goal * 100) : null;
+
+        return $this;
+    }
+
+    public function getGoalDate(): ?\DateTimeInterface
+    {
+        return $this->goalDate;
+    }
+
+    public function setGoalDate(?\DateTimeInterface $goalDate): static
+    {
+        $this->goalDate = $goalDate;
 
         return $this;
     }

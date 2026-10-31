@@ -22,6 +22,7 @@ export function AppSidebar({
   user,
   profilePath,
   logoutPath,
+  subtitle = "Espace membre",
 }: {
   menu: MenuItem[]
   menuSecondary: MenuItem[]
@@ -31,6 +32,7 @@ export function AppSidebar({
   user: NompawUser
   profilePath: string
   logoutPath: string
+  subtitle?: string
 }) {
   return (
     <Sidebar variant="inset">
@@ -44,7 +46,7 @@ export function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Nompaw</span>
-                  <span className="truncate text-xs">Espace membre</span>
+                  <span className="truncate text-xs">{subtitle}</span>
                 </div>
               </a>
             </SidebarMenuButton>

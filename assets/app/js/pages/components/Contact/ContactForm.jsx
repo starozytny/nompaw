@@ -110,7 +110,7 @@ export class ContactFormulaire extends Component {
 						et vous recontacter si besoin.
 						<br />
 						Plus d'informations sur le traitement de vos données dans
-						notre <a target="_blank" href={Routing.generate('app_politique')} className="text-blue-700 underline">politique de confidentialité</a>.
+						notre <a target="_blank" href={Routing.generate('app_politique')} className="text-sidebar-primary underline">politique de confidentialité</a>.
 					</div>
 				</Alert>
 			</div>

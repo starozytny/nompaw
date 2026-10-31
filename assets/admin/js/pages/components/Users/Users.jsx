@@ -13,7 +13,6 @@ import { Search } from "@tailwindComponents/Elements/Search";
 import { Filter } from "@tailwindComponents/Elements/Filter";
 import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
-import { MailFormulaire } from "@tailwindComponents/Modules/Mails/MailForm";
 import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Pagination, TopSorterPagination } from "@tailwindComponents/Elements/Pagination";
 
@@ -53,7 +52,6 @@ export class Users extends Component {
 		this.pagination = React.createRef();
 		this.delete = React.createRef();
 		this.reinit = React.createRef();
-		this.mail = React.createRef();
 		this.blocked = React.createRef();
 	}
 
@@ -169,7 +167,7 @@ export class Users extends Component {
 	}
 
 	render () {
-		const { highlight, userEmail } = this.props;
+		const { highlight } = this.props;
 		const { data, dataImmuable, currentData, element, loadingData, perPage, currentPage, filters, nbSorter } = this.state;
 
 		let filtersItems = [
@@ -205,10 +203,6 @@ export class Users extends Component {
 					<Modal ref={this.reinit} identifiant="reinit" maxWidth={414}
 						   title={element ? "Générer un nouveau mot de passe pour " + element.lastname : ""}
 						   content={null} footer={null} />
-					<Modal ref={this.mail} identifiant="mail" maxWidth={768} margin={2}
-						   title="Envoyer un mail" isForm={true}
-						   content={<MailFormulaire identifiant="mail" from={userEmail} element={element} tos={dataImmuable} />}
-						   footer={null} />
 					<Modal ref={this.blocked} identifiant="blocked" maxWidth={414}
 						   title={element ? (element.isBlocked ? "Déblocage" : "Blocage") + " de " + element.lastname : ""}
 						   content={null} footer={null} />

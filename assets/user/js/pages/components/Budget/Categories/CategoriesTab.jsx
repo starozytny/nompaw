@@ -10,14 +10,11 @@ import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
 import { Search } from "@tailwindComponents/Elements/Search";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/card";
-import { Badge } from "@shadcnComponents/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 import { CategoryFormulaire } from "@userPages/Budget/Categories/CategoryForm";
+import { TypeColumns } from "@userPages/Budget/TypeColumns";
 
-const TYPE_COLOR = ['var(--cat-expense)', 'var(--cat-income)', 'var(--cat-saving)'];
-const TYPE_SOFT = ['var(--cat-expense-soft)', 'var(--cat-income-soft)', 'var(--cat-saving-soft)'];
-const TYPE_ICON = ['minus', 'add', 'time'];
 const URL_LIST = "intern_api_budget_categories_list";
 const URL_DELETE = "intern_api_budget_categories_delete";
 
@@ -78,21 +75,14 @@ export function CategoriesTab () {
 					? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune catégorie pour l'instant.</div>
 					: filteredItems.length === 0
 						? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune catégorie ne correspond à la recherche.</div>
-						: <div className="flex flex-col">
-						{filteredItems.map(elem => (
-							<div key={elem.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-b-0 hover:bg-accent/50">
-								<div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg" style={{ background: TYPE_SOFT[elem.type], color: TYPE_COLOR[elem.type] }}>
-									<span className={`icon-${TYPE_ICON[elem.type]}`}></span>
-								</div>
+						: <TypeColumns items={filteredItems} emptyLabel="Aucune catégorie de ce type." renderItem={elem => (
+							<div key={elem.id} className="flex items-center gap-2 border-b px-3 py-2.5 last:border-b-0 hover:bg-accent/50">
 								<div className="flex-1 min-w-0">
 									<div className="font-medium text-sm truncate">{elem.name}</div>
-									<Badge variant="outline" className="mt-1" style={{ borderColor: TYPE_COLOR[elem.type] + '55', color: TYPE_COLOR[elem.type] }}>
-										{elem.typeString}
-									</Badge>
 								</div>
 								{elem.goal ? (
-									<div className="text-sm font-semibold tabular-nums whitespace-nowrap text-muted-foreground">
-										Objectif {Sanitaze.toFormatCurrency(elem.goal)}
+									<div className="text-xs font-semibold tabular-nums whitespace-nowrap text-muted-foreground">
+										{Sanitaze.toFormatCurrency(elem.goal)}
 									</div>
 								) : null}
 								<div className="flex gap-0.5 flex-shrink-0">
@@ -100,8 +90,7 @@ export function CategoriesTab () {
 									<ButtonIcon type="default" icon="trash" onClick={() => { setToDelete(elem); setDeleteOpen(true); }}>Supprimer</ButtonIcon>
 								</div>
 							</div>
-						))}
-					</div>
+						)} />
 			}
 		</CardContent>
 
