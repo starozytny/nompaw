@@ -95,3 +95,7 @@ Import aliases (defined in both `webpack.config.js` and `jsconfig.json`, keep th
 - `Service/MailerService.php` + `templates/app/email/**` — transactional email templates.
 - `Service/SettingsService.php` / `Entity/Main/Settings.php` — per-installation settings.
 - `documents/` — generated/user-facing document output (emails, exports, storytelling, videotheque), not source code.
+
+### Runnings
+
+Pour la section running, lis /docs/RUNNING_CONTEXT.md
