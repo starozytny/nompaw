@@ -46,10 +46,15 @@
 - Sauvegarde JSON, import JSON, réinitialisation. Aucune IA dans la page ; l'analyse se fait dans la conversation.
 - Si le projet utilise Symfony/React : la persistance peut passer du localStorage à la base (une entité par séance et une pour les pesées) ; les formats ci-dessus servent de schéma.
 
+## Journal des bilans
+- Bilan S3 : voir ci-dessus.
+
 ## Règles quand tu modifies le plan
 - Garder la cohérence : lignes d'allure ↔ séances ↔ checkpoints ↔ fiches de course ↔ phases.
 - Ne jamais mettre de déficit calorique la semaine d'une course ni sur les semaines de pic.
 - Toute douleur localisée > 3 jours : sauter la séance et adapter.
+- La FC prime sur l'allure en endurance : en EF (et sorties longues), la consigne principale est FC 145–160 bpm (au-delà
+  de 160, ralentis ou marche 30 s) ; l'allure affichée n'est qu'un repère indicatif.
 
 ## Points ouverts
 - VO₂max, FC de repos, VFC de la Fenix à fournir (pour affiner).

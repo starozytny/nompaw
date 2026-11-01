@@ -21,6 +21,14 @@
     return null;
   };
   const paceSec = (p) => { const m = String(p).match(/(\d+):(\d+)/); return +m[1]*60 + +m[2]; };
+  // La FC prime sur l'allure en endurance : l'allure EF affichée est élargie de 10 s/km en haut
+  // de fourchette et devient un repère indicatif (voir docs/RUNNING_CONTEXT.md, bilan S3).
+  const widenEFPace = (range) => {
+    const [lo, hi] = range.split('–');
+    const [hm, hs] = hi.split(':').map(Number);
+    const total = hm*60 + hs + 10;
+    return `${lo}–${Math.floor(total/60)}:${String(total%60).padStart(2,'0')}`;
+  };
   const repSec = (t, pace) => {
     const s = toSec(t); if (s !== null) return s;
     const m = String(t).match(/^([\d\s]+)\s*(km|m)$/);
@@ -32,6 +40,7 @@
   function H(l){
     const [,EF,SEU,INT,AS] = LV[l];
     const ef = EF+' /km', seu = SEU+' /km', int = INT+' /km', as = AS+' /km';
+    const efFC = widenEFPace(EF)+' /km, selon la FC';
     const reps = (label, n, t, r, pace, paceTxt, zone, extra, lite) => {
       const total = n*repSec(t, pace) + (n-1)*toSec(r);
       return [
@@ -45,7 +54,7 @@
     return {
       wu:(m)=>B('Échauffement',m+' min',`Footing très facile : démarre à 8:30–9:00 /km et accélère progressivement jusqu'à ton allure EF (${ef}). FC sous 150 bpm. Termine par 30 s de mobilité active : talons-fesses, montées de genoux, cercles de chevilles.`,ef,'Z2','warmup','Footing très facile, progressif'),
       cd:(m)=>B('Retour au calme',m+' min',`Trot très lent (8:30–9:30 /km) pendant ${Math.max(m-2,2)} min, puis 2 min de marche. FC sous 130 bpm à la fin. Étirements doux ensuite : mollets, quadriceps, ischio-jambiers, psoas (30 s par muscle).`,'≥ 8:30 /km','Z1','cooldown','Trot léger puis marche, étirements'),
-      ef:(dur,desc)=>B('Endurance fondamentale',dur,desc||`Allure conversationnelle : tu dois pouvoir parler en phrases complètes. FC entre 145 et 160 bpm ; au-dessus de 160, ralentis ou marche 30 s.`,ef,'Z2','main','Allure conversationnelle (FC 145–160)'),
+      ef:(dur,desc)=>B('Endurance fondamentale',dur,desc||`Allure conversationnelle : tu dois pouvoir parler en phrases complètes. FC entre 145 et 160 bpm ; au-delà de 160, ralentis ou marche 30 s.`,efFC,'Z2','main','Allure conversationnelle · FC ≤ 160'),
       seu:(n,t,r)=>reps('seuil',n,t,r,SEU,seu,'Z4',`Dur mais tenable : respiration forte, tu ne peux dire que quelques mots. La FC se stabilise entre 175 et 185 bpm à partir de la 2e minute. Garde la même allure sur toutes les répétitions : si la dernière est plus lente de plus de 10 s/km, tu es parti trop vite.`,'Dur mais tenable, respiration forte'),
       int:(n,t,r)=>reps('intervalles',n,t,r,INT,int,'Z5',`Effort soutenu mais contrôlé (≈ 8/10), la FC monte à 185–195 bpm en fin de répétition. Les 2 premières doivent sembler faciles ; la dernière doit être aussi rapide que la première. Si tu ne tiens plus l'allure, arrête la série plutôt que de ralentir.`,'Effort soutenu, pas un sprint'),
       asb:(n,t,r)=>reps('à allure semi',n,t,r,AS,as,'Z3',`Allure régulière et relâchée : c'est l'allure du jour J. FC entre 160 et 175 bpm. Épaules basses, foulée courte et rythmée.`,'Allure objectif semi, régulière'),
@@ -212,7 +221,7 @@
     // ── PHASE 2 : trail 18 km ──
     mkWeek({n:4,phase:'p2',start:[2026,11,2],dates:'2 – 8 nov 2026',label:'Récupération post-course',volume:'≈ 16 km',charge:45,lvl:0,
       lun:REST('Repos des jambes le lendemain de la course.','Repos post-course'),
-      desc:`Retour en douceur après le 11 km. Si les jambes sont encore raides, remplace le footing de mercredi par du repos.`,
+      desc:`Semaine de récupération active après la course : tous les footings en Z2 strict. Retour en douceur après le 11 km. Si les jambes sont encore raides, remplace le footing de mercredi par du repos.`,
       mer:h=>easy(h,4,{desc:'Très facile, jambes libres',short:'4 km EF très facile (ou repos)'}),
       ven:h=>easy(h,4,{st:4}),
       dim:h=>longEF(h,8,{note:'sentier'})}),
