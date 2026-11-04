@@ -22,6 +22,7 @@ import { SavingForm } from "@userPages/Budget/SavingForm";
 import { BudgetTrendChart } from "@userPages/Budget/BudgetTrendChart";
 import { RecurrencesTab } from "@userPages/Budget/Reccurences/RecurrencesTab";
 import { CategoriesTab } from "@userPages/Budget/Categories/CategoriesTab";
+import { BilanTab } from "@userPages/Budget/Bilan/BilanTab";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
@@ -46,6 +47,7 @@ export default function Budget (props) {
 			<TabsTrigger value="planning">Planning</TabsTrigger>
 			<TabsTrigger value="recurrences">Récurrences</TabsTrigger>
 			<TabsTrigger value="categories">Catégories</TabsTrigger>
+			<TabsTrigger value="bilan">Bilan</TabsTrigger>
 		</TabsList>
 
 		<TabsContent value="planning" forceMount className={activeTab === 'planning' ? '' : 'hidden'}>
@@ -56,6 +58,9 @@ export default function Budget (props) {
 		</TabsContent>
 		<TabsContent value="categories">
 			<CategoriesTab />
+		</TabsContent>
+		<TabsContent value="bilan">
+			<BilanTab initialYear={parseInt(props.y)} yearMin={parseInt(props.yearMin)} />
 		</TabsContent>
 	</Tabs>
 }

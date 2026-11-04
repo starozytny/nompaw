@@ -93,6 +93,7 @@ Encore
     .addEntry('user_videos', './assets/user/js/pages/videos.js')
     .addEntry('user_photos', './assets/user/js/pages/photos.js')
     .addEntry('user_running', './assets/user/js/pages/running.js')
+    .addEntry('user_invest', './assets/user/js/pages/invest.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

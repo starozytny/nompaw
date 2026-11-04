@@ -70,6 +70,8 @@ security:
          - { path: ^/intern/api/photos,                         roles: ROLE_FAMILY_PHOTOS }
          - { path: ^/espace-membre/running,                     roles: ROLE_RUNNING }
          - { path: ^/intern/api/running,                        roles: ROLE_RUNNING }
+         - { path: ^/espace-membre/investissements,             roles: ROLE_INVEST }
+         - { path: ^/intern/api/invest,                         roles: ROLE_INVEST }
          - { path: ^/intern/api,                                roles: ROLE_USER }
          - { path: ^/api,                                       roles: ROLE_USER }
          - { path: ^/espace-membre,                             roles: ROLE_USER }
