@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { Plus } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@shadcnComponents/ui/popover";
+import { Button } from "@shadcnComponents/ui/button";
 
 import { fr1, isoFr, todayISO } from "@userPages/Running/Suivi/lib/format";
 import { START_WEIGHT_KG } from "@userPages/Running/Suivi/lib/weight";
@@ -31,7 +32,7 @@ export function WeightKpiTile ({ weights, onSaveWeight }) {
 			<div className="text-xl font-bold">{last ? `${fr1(last.kg)} kg` : '—'}</div>
 			<div className="text-xs text-muted-foreground mt-1">
 				{last
-					? <>Dernier poids ({isoFr(last.d)}) · <span className={lost > 0 ? 'text-emerald-700 font-semibold' : ''}>{lost > 0 ? '−' : '+'}{fr1(Math.abs(lost))} kg</span> depuis le départ</>
+					? <>Dernier poids ({isoFr(last.d)}) · <span className={lost > 0 ? 'text-[var(--status-good)] font-semibold' : ''}>{lost > 0 ? '−' : '+'}{fr1(Math.abs(lost))} kg</span> depuis le départ</>
 					: 'Aucune pesée enregistrée'
 				}
 			</div>
@@ -55,7 +56,7 @@ export function WeightKpiTile ({ weights, onSaveWeight }) {
 						<input type="text" inputMode="decimal" placeholder="89,4" value={kg} onChange={e => setKg(e.target.value)}
 							   className="px-2 py-1 border rounded-md text-sm font-normal normal-case tracking-normal bg-white w-[80px]" />
 					</label>
-					<button onClick={add} className="text-xs font-bold px-3 py-1.5 rounded-full bg-foreground text-background">OK</button>
+					<Button size="sm" onClick={add}>OK</Button>
 				</div>
 			</PopoverContent>
 		</Popover>

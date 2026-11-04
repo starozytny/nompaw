@@ -38,7 +38,7 @@ export function ZonesTab () {
 			tu es trop rapide : ralentis. Programme une alerte FC 145–160 sur la Fenix.
 		</Callout>
 
-		<div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+		<div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
 			{ZONES.map(zone => <Card key={zone.code} style={{ borderTopColor: zone.border, borderTopWidth: 3 }}>
 				<CardContent className="pt-4 flex flex-col gap-2">
 					<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{zone.tag}</div>

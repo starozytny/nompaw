@@ -32,7 +32,7 @@ export function MentalTab () {
 			départ trop rapide de 15–20 s/km → dette énergétique accumulée → explosion entre km 14–17.
 		</Callout>
 
-		<div className="grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+		<div className="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
 			{STRATEGIES.map(s => <Card key={s.n} className={`p-[18px] border-t-[3px] ${s.border}`}>
 				<div className={`text-4xl font-bold leading-none mb-2.5 ${s.color}`}>{s.n}</div>
 				<div className="font-semibold text-sm mb-1.5">{s.title}</div>

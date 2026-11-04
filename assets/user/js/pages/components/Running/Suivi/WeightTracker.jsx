@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Card } from "@shadcnComponents/ui/card";
+import { Button } from "@shadcnComponents/ui/button";
 
 import { fr1, isoFr, todayISO } from "@userPages/Running/Suivi/lib/format";
 import { START_WEIGHT_KG, weightTarget } from "@userPages/Running/Suivi/lib/weight";
@@ -19,7 +20,7 @@ export function WeightTracker ({ weights, onSaveWeight, onDeleteWeight }) {
 	const last = ws[0];
 	const lost = last ? START_WEIGHT_KG - last.kg : null;
 	const diff = last ? last.kg - weightTarget(last.d) : null;
-	const diffColor = diff == null ? '' : diff <= 0.5 ? 'text-emerald-700' : diff <= 1.5 ? 'text-orange-600' : 'text-red-600';
+	const diffColor = diff == null ? '' : diff <= 0.5 ? 'text-[var(--status-good)]' : diff <= 1.5 ? 'text-orange-600' : 'text-[var(--status-critical)]';
 
 	return <Card className="p-5">
 		<h3 className="font-semibold mb-1.5">Suivi du poids</h3>
@@ -34,7 +35,7 @@ export function WeightTracker ({ weights, onSaveWeight, onDeleteWeight }) {
 					<div className="text-xs text-muted-foreground mt-0.5">{last ? `Dernière pesée (${isoFr(last.d)})` : 'Aucune pesée enregistrée'}</div>
 				</div>
 				<div className="flex-1 min-w-[140px]">
-					<div className={`text-lg font-bold ${lost != null && lost > 0 ? 'text-emerald-700' : ''}`}>
+					<div className={`text-lg font-bold ${lost != null && lost > 0 ? 'text-[var(--status-good)]' : ''}`}>
 						{lost != null ? `${lost > 0 ? '−' : '+'}${fr1(Math.abs(lost))} kg` : '—'}
 					</div>
 					<div className="text-xs text-muted-foreground mt-0.5">Perdu depuis le départ ({fr1(START_WEIGHT_KG)} kg)</div>
@@ -52,7 +53,7 @@ export function WeightTracker ({ weights, onSaveWeight, onDeleteWeight }) {
 					<input type="text" inputMode="decimal" placeholder="89,4" value={kg} onChange={e => setKg(e.target.value)}
 						   className="px-2.5 py-1.5 border rounded-md text-sm font-normal normal-case tracking-normal bg-white" />
 				</label>
-				<button onClick={add} className="text-sm font-bold px-4 py-2 rounded-full bg-foreground text-background">Ajouter</button>
+				<Button onClick={add}>Ajouter</Button>
 			</div>
 		</div>
 

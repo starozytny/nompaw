@@ -39,25 +39,7 @@
         path: path('user_cryptos_index'),
         matchRoute: ['user_cryptos_index']
     },
-    {
-        name: "Vidéothèque", icon: "camera",
-        path: path('user_videotheque_index'),
-        matchRoute: ['user_videotheque_index']
-    },
-    {
-        name: "Mon profil", icon: "user-octagon",
-        path: path('user_profil_index'),
-        matchRoute: ['user_profil_index']
-    },
 ] %}
-
-{% if is_granted('ROLE_FAMILY_PHOTOS') %}
-    {% set menu = menu | merge([{
-        name: "Photos", icon: "image",
-        path: path('user_photos_index'),
-        matchRoute: ['user_photos_index']
-    }]) %}
-{% endif %}
 
 {% if is_granted('ROLE_RUNNING') %}
     {% set menu = menu | merge([{
@@ -75,7 +57,21 @@
     }]) %}
 {% endif %}
 
-{% set menu_bottom = [] %}
+{% set menu_bottom = [
+    {
+        name: "Vidéothèque", icon: "camera",
+        path: path('user_videotheque_index'),
+        matchRoute: ['user_videotheque_index']
+    },
+] %}
+
+{% if is_granted('ROLE_FAMILY_PHOTOS') %}
+    {% set menu_bottom = menu_bottom | merge([{
+        name: "Photos", icon: "image",
+        path: path('user_photos_index'),
+        matchRoute: ['user_photos_index']
+    }]) %}
+{% endif %}
 
 {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
     {% set menu_bottom = menu_bottom | merge([

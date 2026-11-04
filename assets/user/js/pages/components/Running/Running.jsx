@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 
-import { HeartPulse, CalendarDays, LineChart, Flag, Dumbbell, Utensils, Brain, AlertTriangle } from "lucide-react";
+import { HeartPulse, CalendarDays, LineChart, Flag, Dumbbell, Utensils, Brain, AlertTriangle, Timer, Target, CalendarClock } from "lucide-react";
 
+import { Card, CardContent } from "@shadcnComponents/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shadcnComponents/ui/tabs";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 
 import { useRunningTracking } from "@userPages/Running/lib/useRunningTracking";
+import { GarminSyncButton } from "@userPages/Running/GarminSyncButton";
+import { WeightMilestoneCard } from "@userPages/Running/WeightMilestoneCard";
+
+import { WEEKS } from "@userPages/Running/Plan/weeks";
+import { findNextRace } from "@userPages/Running/Plan/lib/nextRace";
+import { todayISO } from "@userPages/Running/Suivi/lib/format";
 
 import { ZonesTab } from "@userPages/Running/Zones/ZonesTab";
 import { PlanTab } from "@userPages/Running/Plan/PlanTab";
@@ -16,51 +23,67 @@ import { NutritionTab } from "@userPages/Running/Nutrition/NutritionTab";
 import { MentalTab } from "@userPages/Running/Mental/MentalTab";
 import { AlertsTab } from "@userPages/Running/Alerts/AlertsTab";
 
-// Tailwind only generates classes it can see as complete literal strings in the source, so the per-tab
-// accent is a lookup of fully-written class names here rather than a `text-${color}-500` template.
-const TAB_COLORS = {
-	rose: { icon: 'text-rose-500', active: 'data-[state=active]:bg-rose-50 data-[state=active]:text-rose-700' },
-	blue: { icon: 'text-blue-500', active: 'data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700' },
-	emerald: { icon: 'text-emerald-500', active: 'data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700' },
-	amber: { icon: 'text-amber-500', active: 'data-[state=active]:bg-amber-50 data-[state=active]:text-amber-700' },
-	orange: { icon: 'text-orange-500', active: 'data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700' },
-	lime: { icon: 'text-lime-600', active: 'data-[state=active]:bg-lime-50 data-[state=active]:text-lime-700' },
-	violet: { icon: 'text-violet-500', active: 'data-[state=active]:bg-violet-50 data-[state=active]:text-violet-700' },
-	red: { icon: 'text-red-500', active: 'data-[state=active]:bg-red-50 data-[state=active]:text-red-700' },
-};
-
 const TABS = [
-	{ value: 'plan', label: 'Plan Semaines', Icon: CalendarDays, color: 'blue' },
-	{ value: 'suivi', label: 'Suivi', Icon: LineChart, color: 'emerald' },
-	{ value: 'races', label: 'Plans Jour J', Icon: Flag, color: 'amber' },
-	{ value: 'zones', label: 'Zones Cardio', Icon: HeartPulse, color: 'rose' },
-	{ value: 'muscu', label: 'Musculation', Icon: Dumbbell, color: 'orange' },
-	{ value: 'nutrition', label: 'Nutrition', Icon: Utensils, color: 'lime' },
-	{ value: 'mental', label: 'Mental', Icon: Brain, color: 'violet' },
-	{ value: 'alerts', label: 'Signaux', Icon: AlertTriangle, color: 'red' },
+	{ value: 'plan', label: 'Plan Semaines', Icon: CalendarDays },
+	{ value: 'suivi', label: 'Suivi', Icon: LineChart },
+	{ value: 'races', label: 'Plans Jour J', Icon: Flag },
+	{ value: 'zones', label: 'Zones Cardio', Icon: HeartPulse },
+	{ value: 'muscu', label: 'Musculation', Icon: Dumbbell },
+	{ value: 'nutrition', label: 'Nutrition', Icon: Utensils },
+	{ value: 'mental', label: 'Mental', Icon: Brain },
+	{ value: 'alerts', label: 'Signaux', Icon: AlertTriangle },
 ];
 
-function PlanHeader () {
-	return <div className="rounded-xl p-6 text-white" style={{ background: 'linear-gradient(135deg, #2c2825 0%, #3d3530 100%)' }}>
-		<div className="flex flex-wrap justify-between items-end gap-4">
+// A bespoke harmonious blue for "Semi" rather than --chart-2 (a teal), since --chart-1 already
+// covers "10 km" and the two pace milestones read better sharing the blue family, each a shade apart.
+const SEMI_BLUE = '#2563eb';
+
+const MILESTONES = [
+	{ label: '10 km', value: '≈ 1h02 → 59 min', Icon: Timer, varName: '--chart-1' },
+	{ label: 'Semi', value: 'Objectif 2h10', Icon: Target, color: SEMI_BLUE, soft: `${SEMI_BLUE}1f` },
+	{ label: '5 courses', value: '1er nov · 29 nov · 14 mars · 15 mai · 10 oct', Icon: Flag, varName: '--chart-3' },
+];
+
+function MilestoneTile ({ label, value, Icon, varName, color, soft }) {
+	const resolvedColor = color || `hsl(var(${varName}))`;
+	const resolvedSoft = soft || `hsl(var(${varName}) / 0.12)`;
+
+	return <Card>
+		<CardContent className="p-4 flex items-center gap-3">
+			<div
+				className="flex h-9 w-9 flex-none items-center justify-center rounded-lg"
+				style={{ background: resolvedSoft, color: resolvedColor }}
+			>
+				<Icon className="h-[18px] w-[18px]" />
+			</div>
+			<div className="min-w-0">
+				<div className="text-xs text-muted-foreground">{label}</div>
+				<div className="text-sm font-bold mt-0.5 truncate" style={{ color: resolvedColor }}>{value}</div>
+			</div>
+		</CardContent>
+	</Card>;
+}
+
+function Header ({ onSyncGarmin, weights, onSaveWeight }) {
+	const { next, daysTo } = findNextRace(WEEKS, todayISO());
+
+	return <div className="flex flex-col gap-3">
+		<div className="flex flex-wrap items-end justify-between gap-3">
 			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Plan d'entraînement Course</h1>
-				<p className="text-sm opacity-60 mt-1.5">Octobre 2026 → Octobre 2027 &nbsp;·&nbsp; Départ 13 octobre 2026</p>
+				<h1 className="text-lg font-semibold">Plan d'entraînement Course</h1>
+				<p className="text-sm text-muted-foreground">Octobre 2026 → Octobre 2027 · Départ 13 octobre 2026</p>
 			</div>
-			<div className="flex gap-2.5 flex-wrap">
-				<div className="rounded-lg px-3.5 py-2 text-center" style={{ background: 'rgba(212,96,42,0.2)', border: '1px solid rgba(212,96,42,0.4)' }}>
-					<div className="text-lg font-bold" style={{ color: '#e8835a' }}>10km</div>
-					<div className="text-xs opacity-70">≈ 1h02 → 59 min</div>
-				</div>
-				<div className="rounded-lg px-3.5 py-2 text-center" style={{ background: 'rgba(58,138,92,0.2)', border: '1px solid rgba(58,138,92,0.4)' }}>
-					<div className="text-lg font-bold" style={{ color: '#6abf8a' }}>Semi</div>
-					<div className="text-xs opacity-70">Objectif 2h10</div>
-				</div>
-				<div className="rounded-lg px-3.5 py-2 text-center" style={{ background: 'rgba(50,104,168,0.2)', border: '1px solid rgba(50,104,168,0.4)' }}>
-					<div className="text-lg font-bold" style={{ color: '#80aadf' }}>5 courses</div>
-					<div className="text-xs opacity-70">1er nov · 29 nov · 14 mars · 15 mai · 10 oct</div>
-				</div>
-			</div>
+			<GarminSyncButton onSyncGarmin={onSyncGarmin} />
+		</div>
+
+		<div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+			<MilestoneTile
+				label="Prochaine course"
+				value={next ? `J-${daysTo} · ${next.short}` : 'Aucun jalon à venir'}
+				Icon={CalendarClock} varName="--chart-4"
+			/>
+			{MILESTONES.map(m => <MilestoneTile key={m.label} {...m} />)}
+			<WeightMilestoneCard weights={weights} onSaveWeight={onSaveWeight} />
 		</div>
 	</div>
 }
@@ -74,14 +97,11 @@ export default function Running () {
 	}
 
 	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-5">
-		<PlanHeader />
+		<Header onSyncGarmin={syncGarmin} weights={tracking.weights} onSaveWeight={saveWeight} />
 
-		<TabsList className="self-start flex-wrap h-auto bg-muted/70">
-			{TABS.map(({ value, label, Icon, color }) => <TabsTrigger
-				key={value} value={value}
-				className={`gap-1.5 focus-visible:ring-1 focus-visible:ring-offset-1 ${TAB_COLORS[color].active}`}
-			>
-				<Icon className={`h-4 w-4 ${TAB_COLORS[color].icon}`} /> {label}
+		<TabsList className="self-start flex-wrap h-auto">
+			{TABS.map(({ value, label, Icon }) => <TabsTrigger key={value} value={value} className="gap-1.5">
+				<Icon className="h-4 w-4" /> {label}
 			</TabsTrigger>)}
 		</TabsList>
 
