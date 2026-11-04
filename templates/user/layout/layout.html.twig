@@ -67,6 +67,14 @@
     }]) %}
 {% endif %}
 
+{% if is_granted('ROLE_INVEST') %}
+    {% set menu = menu | merge([{
+        name: "Investissements", icon: "chart-up",
+        path: path('user_invest_index'),
+        matchRoute: ['user_invest_index']
+    }]) %}
+{% endif %}
+
 {% set menu_bottom = [] %}
 
 {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}

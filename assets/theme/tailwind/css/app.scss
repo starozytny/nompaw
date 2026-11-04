@@ -122,6 +122,9 @@ input[type=number] {
     --cat-crypto: #4a3aa7;
     --cat-crypto-soft: #efecfb;
     --cat-crypto-gradient: linear-gradient(90deg, #8f7fe0, #4a3aa7);
+    /* Invest module: slot 6 (green) of the same validated categorical palette, unused until now */
+    --cat-invest: #008300;
+    --cat-invest-soft: #e8f7e5;
     --status-good: #0ca30c;
     --status-good-soft: #e9f7e9;
     --status-critical: #d03b3b;
@@ -173,6 +176,8 @@ input[type=number] {
     --cat-crypto: #9085e9;
     --cat-crypto-soft: #221d3d;
     --cat-crypto-gradient: linear-gradient(90deg, #b3a8f5, #9085e9);
+    --cat-invest: #2ecc40;
+    --cat-invest-soft: #10240f;
     --status-good: #3fbf3f;
     --status-good-soft: #10240f;
     --status-critical: #e66767;
