@@ -28,7 +28,7 @@ export default function Invest () {
 		tracking, loading,
 		saveEnveloppe, deleteEnveloppe,
 		saveLine, deleteLine,
-		saveSnapshot,
+		saveSnapshot, seedInitialData,
 	} = useInvestTracking();
 
 	if (loading) {
@@ -52,7 +52,7 @@ export default function Invest () {
 				tracking={tracking}
 				onSaveEnveloppe={saveEnveloppe} onDeleteEnveloppe={deleteEnveloppe}
 				onSaveLine={saveLine} onDeleteLine={deleteLine}
-				onSaveSnapshot={saveSnapshot}
+				onSaveSnapshot={saveSnapshot} onSeedInitialData={seedInitialData}
 			/>
 		</TabsContent>
 

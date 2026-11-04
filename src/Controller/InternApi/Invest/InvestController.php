@@ -16,8 +16,10 @@ use App\Repository\Invest\InLineRepository;
 use App\Repository\Invest\InSnapshotRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Data\DataInvest;
+use App\Service\Invest\InvestSeedService;
 use App\Service\ValidatorService;
 use DateTime;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +36,22 @@ class InvestController extends AbstractController
         return $apiResponse->apiJsonResponseCustom($this->buildTrackingPayload(
             $this->getUser(), $enveloppeRepository, $categoryRepository, $recurrentRepository, $itemRepository
         ));
+    }
+
+    /**
+     * Fills an empty account with Shanbo's real starting positions (see InvestSeedService) — the
+     * button shown when the Positions tab has no envelope yet, needed on prod which starts empty.
+     */
+    #[Route('/seed', name: 'seed', options: ['expose' => true], methods: 'POST')]
+    public function seed(InvestSeedService $seedService, ApiResponse $apiResponse): Response
+    {
+        try {
+            $seedService->seedInitialData($this->getUser());
+        } catch (RuntimeException $e) {
+            return $apiResponse->apiJsonResponseBadRequest($e->getMessage());
+        }
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
     #[Route('/enveloppes', name: 'enveloppe_save', options: ['expose' => true], methods: 'POST')]

@@ -10,6 +10,7 @@ const URL_LINE_SAVE = 'intern_api_invest_line_save';
 const URL_LINE_DELETE = 'intern_api_invest_line_delete';
 const URL_SNAPSHOT_SAVE = 'intern_api_invest_snapshot_save';
 const URL_SNAPSHOT_DELETE = 'intern_api_invest_snapshot_delete';
+const URL_SEED = 'intern_api_invest_seed';
 
 const EMPTY = { enveloppes: [], buCategories: [], contributions: [] };
 
@@ -51,10 +52,15 @@ export function useInvestTracking () {
 		return axios.delete(Routing.generate(URL_SNAPSHOT_DELETE, { id })).then(refresh);
 	}, [refresh]);
 
+	const seedInitialData = useCallback(() => {
+		return axios.post(Routing.generate(URL_SEED)).then(refresh);
+	}, [refresh]);
+
 	return {
 		tracking, loading, refresh,
 		saveEnveloppe, deleteEnveloppe,
 		saveLine, deleteLine,
 		saveSnapshot, deleteSnapshot,
+		seedInitialData,
 	};
 }

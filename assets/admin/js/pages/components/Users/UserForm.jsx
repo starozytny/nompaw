@@ -158,6 +158,7 @@ class Form extends Component {
 		let rolesItems = [
 			{ value: 'ROLE_ADMIN', identifiant: 'admin', label: 'Admin' },
 			{ value: 'ROLE_RUNNING', identifiant: 'running', label: 'Running' },
+			{ value: 'ROLE_INVEST', identifiant: 'invest', label: 'Investissements' },
 			{ value: 'ROLE_USER', identifiant: 'user', label: 'Utilisateur' },
 		]
 
