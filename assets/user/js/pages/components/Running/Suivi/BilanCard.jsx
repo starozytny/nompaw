@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Card } from "@shadcnComponents/ui/card";
+import { Button } from "@shadcnComponents/ui/button";
 
 import { makeBilan } from "@userPages/Running/Suivi/lib/bilan";
 
@@ -45,10 +46,8 @@ export function BilanCard ({ tracking, onSaveNotes }) {
 				<option value="4w">4 dernières semaines</option>
 				<option value="all">Depuis le début du plan</option>
 			</select>
-			<button onClick={generateAndCopy} className="text-sm font-bold px-4 py-2 rounded-full bg-foreground text-background">
-				Générer et copier le bilan
-			</button>
-			{msg && <span className="text-sm font-semibold text-emerald-700">{msg}</span>}
+			<Button onClick={generateAndCopy}>Générer et copier le bilan</Button>
+			{msg && <span className="text-sm font-semibold text-[var(--status-good)]">{msg}</span>}
 		</div>
 
 		{bilan && <textarea

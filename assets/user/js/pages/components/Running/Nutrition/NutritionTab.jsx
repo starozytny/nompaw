@@ -29,7 +29,7 @@ export function NutritionTab () {
 			</p>
 		</div>
 
-		<div className="grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
+		<div className="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
 			<Card className="border-t-[3px] border-t-orange-500 p-[18px]">
 				<div className="text-2xl mb-2">⚡</div>
 				<h3 className="font-semibold mb-2.5 text-orange-700">Anti-crampes</h3>
@@ -63,7 +63,7 @@ export function NutritionTab () {
 		</div>
 
 		<h3 className="font-semibold text-lg">Plan repas — 5 jours</h3>
-		<div className="grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
+		<div className="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
 			{MEALS.map(m => <Card key={m.day} className="overflow-hidden">
 				<div className="px-4 py-3 bg-foreground text-background">
 					<div className="font-semibold">{m.day}</div>
@@ -112,7 +112,7 @@ export function NutritionTab () {
 				<span className="text-2xl">✅</span>
 				<h3 className="font-semibold">Option A — Jeûne matinal (fenêtre 12h–20h)</h3>
 			</div>
-			<div className="grid gap-2.5 grid-cols-[repeat(auto-fill,minmax(220px,1fr))] text-sm text-muted-foreground">
+			<div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(220px,1fr))] text-sm text-muted-foreground">
 				{FASTING_ITEMS.map((it, i) => <div key={i} className={`p-2.5 rounded-lg ${it.warn ? 'bg-amber-50 border border-amber-200' : 'bg-emerald-50'}`}>
 					{it.emoji} <strong className="text-foreground">{it.label}</strong> {it.text}
 				</div>)}
@@ -120,7 +120,7 @@ export function NutritionTab () {
 		</Card>
 
 		<h3 className="font-semibold text-lg">Tes compléments — protocole quotidien</h3>
-		<div className="grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(270px,1fr))]">
+		<div className="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(270px,1fr))]">
 			{SUPPLEMENTS.map(s => <Card key={s.name} className="p-[18px]">
 				<div className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${s.color}`}>{s.tag}</div>
 				<div className="font-semibold mb-2.5">{s.name}</div>
@@ -134,7 +134,7 @@ export function NutritionTab () {
 			<h3 className="font-semibold text-lg mb-1">Midi au boulot — supermarché + micro-ondes</h3>
 			<p className="text-sm text-muted-foreground mb-3">Tout s'achète en grande surface, se chauffe 2–3 min ou se mange froid. Préparation max : 2 min.</p>
 		</div>
-		<div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
+		<div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
 			{LUNCH_CATEGORIES.map(cat => <Card key={cat.title} className="p-[18px]">
 				<div className={`font-semibold mb-3 ${cat.color}`}>{cat.title}</div>
 				<ul className="text-sm text-muted-foreground flex flex-col gap-1.5">
@@ -145,7 +145,7 @@ export function NutritionTab () {
 
 		<Card className="p-5">
 			<h3 className="font-semibold mb-3">🛒 Liste courses hebdomadaire — à toujours avoir</h3>
-			<div className="grid gap-2 grid-cols-[repeat(auto-fill,minmax(190px,1fr))] text-sm">
+			<div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(190px,1fr))] text-sm">
 				{SHOPPING_LIST.map((it, i) => <div key={i} className="px-3 py-2 bg-muted/40 border rounded-lg">{it}</div>)}
 			</div>
 		</Card>
@@ -154,7 +154,7 @@ export function NutritionTab () {
 			<h3 className="font-semibold text-lg mb-1">Plan semaine — midi superm + soir maison</h3>
 			<p className="text-sm text-muted-foreground mb-3">~1 800–2 000 kcal/jour · ~160–180 g protéines · Déficit ~350 kcal</p>
 		</div>
-		<div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(210px,1fr))]">
+		<div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(210px,1fr))]">
 			{POIDS_MEALS.map(m => <Card key={m.day} className="overflow-hidden">
 				<div className="px-4 py-3 bg-foreground text-background">
 					<div className="font-semibold">{m.day}</div>
@@ -191,7 +191,7 @@ export function NutritionTab () {
 
 		<h3 className="font-semibold text-lg">🍺 Alcool — stratégie sans tout interdire</h3>
 		<Card className="p-5">
-			<div className="grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+			<div className="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
 				{ALCOHOL_COLUMNS.map(col => <div key={col.title}>
 					<div className={`font-semibold mb-2 ${col.color}`}>{col.title}</div>
 					<ul className="text-sm text-muted-foreground flex flex-col">

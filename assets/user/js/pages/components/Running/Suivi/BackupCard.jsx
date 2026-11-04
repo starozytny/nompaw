@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 
 import { Card } from "@shadcnComponents/ui/card";
+import { Button } from "@shadcnComponents/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 import { todayISO } from "@userPages/Running/Suivi/lib/format";
 
 export function BackupCard ({ tracking, onRestoreBackup, onReset }) {
 	const [msg, setMsg] = useState(null);
+	const [confirmReset, setConfirmReset] = useState(false);
 
 	const exportBackup = () => {
 		const blob = new Blob([JSON.stringify(tracking, null, 1)], { type: 'application/json' });
@@ -39,7 +42,6 @@ export function BackupCard ({ tracking, onRestoreBackup, onReset }) {
 	};
 
 	const reset = () => {
-		if (!window.confirm('Effacer tout le suivi (séances saisies, historique importé, notes) ?')) return;
 		onReset().then(() => setMsg({ text: '✓ Suivi réinitialisé.' }));
 	};
 
@@ -50,17 +52,30 @@ export function BackupCard ({ tracking, onRestoreBackup, onReset }) {
 			pour garder une copie de côté.
 		</p>
 		<div className="flex gap-2.5 flex-wrap">
-			<button onClick={exportBackup} className="text-sm font-bold px-4 py-2 rounded-full bg-foreground text-background">
-				Exporter la sauvegarde (JSON)
-			</button>
-			<label className="text-sm font-bold px-4 py-2 rounded-full border border-border text-muted-foreground cursor-pointer">
-				Importer une sauvegarde
-				<input type="file" accept=".json,application/json" className="hidden" onChange={e => { importBackup(e.target.files[0]); e.target.value = ''; }} />
-			</label>
-			<button onClick={reset} className="text-sm font-bold px-4 py-2 rounded-full border border-red-200 text-red-700">
-				Tout effacer
-			</button>
+			<Button onClick={exportBackup}>Exporter la sauvegarde (JSON)</Button>
+			<Button variant="outline" asChild>
+				<label className="cursor-pointer">
+					Importer une sauvegarde
+					<input type="file" accept=".json,application/json" className="hidden" onChange={e => { importBackup(e.target.files[0]); e.target.value = ''; }} />
+				</label>
+			</Button>
+			<Button variant="destructive" onClick={() => setConfirmReset(true)}>Tout effacer</Button>
 		</div>
-		{msg && <div className={`mt-2.5 text-sm ${msg.error ? 'text-red-700' : 'text-emerald-700 font-semibold'}`}>{msg.error || msg.text}</div>}
+		{msg && <div className={`mt-2.5 text-sm ${msg.error ? 'text-[var(--status-critical)]' : 'text-[var(--status-good)] font-semibold'}`}>{msg.error || msg.text}</div>}
+
+		<Dialog open={confirmReset} onOpenChange={setConfirmReset}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Tout effacer</DialogTitle>
+					<DialogDescription>
+						Effacer définitivement tout le suivi (séances saisies, historique importé, notes) ? Cette action est irréversible.
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<Button variant="outline" onClick={() => setConfirmReset(false)}>Annuler</Button>
+					<Button variant="destructive" onClick={() => { reset(); setConfirmReset(false); }}>Tout effacer</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	</Card>
 }

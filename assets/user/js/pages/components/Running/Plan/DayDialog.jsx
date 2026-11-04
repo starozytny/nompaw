@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Dialog, DialogContent } from "@shadcnComponents/ui/dialog";
 import { Badge } from "@shadcnComponents/ui/badge";
+import { Button } from "@shadcnComponents/ui/button";
 
 import { dayTypeStyle, phaseBlockStyle, zoneBadgeClass } from "@userPages/Running/Plan/styleMaps";
 import { liteText } from "@userPages/Running/Plan/detailMode";
@@ -13,8 +14,8 @@ function PhaseBlock ({ phase, lite }) {
 		<div className="flex flex-wrap justify-between items-center gap-2 mb-1">
 			<div className={`text-[11px] font-bold uppercase tracking-wide ${style.text}`}>{phase.name}</div>
 			<div className="flex gap-1.5 flex-wrap">
-				{phase.dur !== '—' && <span className="text-xs bg-black/5 rounded-full px-2 py-0.5 text-muted-foreground">{phase.dur}</span>}
-				{phase.allure !== '—' && <span className="text-xs font-semibold bg-foreground text-background rounded-full px-2 py-0.5">{phase.allure}</span>}
+				{phase.dur !== '—' && <Badge variant="secondary">{phase.dur}</Badge>}
+				{phase.allure !== '—' && <Badge>{phase.allure}</Badge>}
 				{phase.zone !== '—' && <Badge variant="outline" className={zoneBadgeClass(phase.zone)}>{phase.zone}</Badge>}
 			</div>
 		</div>
@@ -49,14 +50,8 @@ export function DayDialog ({ day, open, onOpenChange, detailMode, onDetailModeCh
 
 			<div className="px-6 py-5 overflow-y-auto flex flex-col gap-3.5">
 				<div className="flex gap-2 flex-wrap">
-					<button
-						onClick={() => onDetailModeChange('full')}
-						className={`text-xs font-bold px-3.5 py-1.5 rounded-full border ${!lite ? 'bg-foreground text-background border-foreground' : 'bg-white text-muted-foreground border-border'}`}
-					>Avec explication</button>
-					<button
-						onClick={() => onDetailModeChange('lite')}
-						className={`text-xs font-bold px-3.5 py-1.5 rounded-full border ${lite ? 'bg-foreground text-background border-foreground' : 'bg-white text-muted-foreground border-border'}`}
-					>Sans explication</button>
+					<Button size="sm" variant={!lite ? 'default' : 'outline'} onClick={() => onDetailModeChange('full')}>Avec explication</Button>
+					<Button size="sm" variant={lite ? 'default' : 'outline'} onClick={() => onDetailModeChange('lite')}>Sans explication</Button>
 				</div>
 
 				<h4 className="text-sm font-semibold text-muted-foreground">Déroulé de la séance</h4>

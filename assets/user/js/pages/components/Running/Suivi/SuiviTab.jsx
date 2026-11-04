@@ -4,6 +4,7 @@ import { ListChecks, TrendingUp, Scale, ClipboardList } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shadcnComponents/ui/tabs";
 
 import { WEEKS } from "@userPages/Running/Plan/weeks";
+import { findNextRace } from "@userPages/Running/Plan/lib/nextRace";
 import { weekPlannedKm, weekStats } from "@userPages/Running/Suivi/lib/stats";
 import { fr1, todayISO } from "@userPages/Running/Suivi/lib/format";
 
@@ -31,9 +32,7 @@ function useKpis (log) {
 		let rpeS = 0, rpeN = 0;
 		last4.forEach(w => { const s = weekStats(w, log); if (s.rpe != null) { rpeS += s.rpe; rpeN++; } });
 
-		let next = null;
-		WEEKS.forEach(w => w.days.forEach(d => { if (!next && d.type === 'race' && d.iso >= today) next = d; }));
-		const daysTo = next ? Math.round((Date.parse(next.iso) - Date.parse(today)) / 86400000) : null;
+		const { next, daysTo } = findNextRace(WEEKS, today);
 
 		return [
 			[plannedRuns ? Math.round(doneRuns / plannedRuns * 100) + ' %' : '—', `Courses faites : ${doneRuns} sur ${plannedRuns} prévues depuis le début`],

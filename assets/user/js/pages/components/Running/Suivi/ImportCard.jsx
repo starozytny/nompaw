@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
 import { Card } from "@shadcnComponents/ui/card";
-import { Button } from "@shadcnComponents/ui/button";
 
 import { buildRunsFromCsv } from "@userPages/Running/Suivi/lib/csv";
 import { WEEKS } from "@userPages/Running/Plan/weeks";
 import { isoAdd } from "@userPages/Running/Suivi/lib/format";
+import { GarminSyncButton } from "@userPages/Running/GarminSyncButton";
 
 const RANGE_START = WEEKS[0].iso0;
 const RANGE_END = isoAdd(WEEKS[WEEKS.length - 1].iso0, 6);
@@ -13,22 +13,6 @@ const RANGE_END = isoAdd(WEEKS[WEEKS.length - 1].iso0, 6);
 export function ImportCard ({ onImportRuns, onSyncGarmin }) {
 	const [over, setOver] = useState(false);
 	const [msg, setMsg] = useState(null);
-	const [syncing, setSyncing] = useState(false);
-
-	const handleSync = () => {
-		setSyncing(true);
-		setMsg(null);
-		onSyncGarmin().then(r => {
-			const a = r.activities, w = r.weights;
-			setMsg({
-				text: `✓ Synchro Garmin (14 derniers jours) : ${a.added} nouvelle(s) course(s)`
-					+ `${a.kept ? `, ${a.kept} saisie(s) manuelle(s) conservée(s)` : ''} · poids : `
-					+ `${w.added + w.updated} jour(s) mis à jour${w.kept ? `, ${w.kept} pesée(s) manuelle(s) conservée(s)` : ''}.`,
-			});
-		}).catch(e => {
-			setMsg({ error: e.response?.data?.message || 'Synchronisation Garmin impossible.' });
-		}).finally(() => setSyncing(false));
-	};
 
 	const handleFile = (file) => {
 		if (!file) return;
@@ -71,10 +55,8 @@ export function ImportCard ({ onImportRuns, onSyncGarmin }) {
 			<div className="h-px flex-1 bg-border" />
 		</div>
 
-		<Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
-			{syncing ? 'Synchronisation…' : 'Synchroniser depuis Garmin (14 derniers jours)'}
-		</Button>
+		<GarminSyncButton onSyncGarmin={onSyncGarmin} variant="outline" size="sm" label="Synchroniser depuis Garmin (14 derniers jours)" />
 
-		{msg && <div className={`mt-2.5 text-sm ${msg.error ? 'text-red-700' : ''}`}>{msg.error || msg.text}</div>}
+		{msg && <div className={`mt-2.5 text-sm ${msg.error ? 'text-[var(--status-critical)]' : ''}`}>{msg.error || msg.text}</div>}
 	</Card>
 }

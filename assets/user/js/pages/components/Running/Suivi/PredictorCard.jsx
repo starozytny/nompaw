@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Card } from "@shadcnComponents/ui/card";
+import { Button } from "@shadcnComponents/ui/button";
 
 import { bestRecentOverall } from "@userPages/Running/Suivi/lib/history";
 import { fmtDur, fr1, isoFr, parseDur } from "@userPages/Running/Suivi/lib/format";
@@ -58,11 +59,11 @@ export function PredictorCard ({ activities }) {
 				<input type="text" placeholder="59:30" value={t} onChange={e => setT(e.target.value)}
 					   className="px-2.5 py-1.5 border rounded-md text-sm font-normal normal-case tracking-normal bg-white" />
 			</label>
-			<button onClick={() => { setNote(null); run(km, t); }} className="text-sm font-bold px-4 py-2 rounded-full bg-foreground text-background">Calculer</button>
-			<button onClick={fillBestEffort} className="text-sm font-bold px-4 py-2 rounded-full border border-border text-muted-foreground">Utiliser mon meilleur effort récent</button>
+			<Button onClick={() => { setNote(null); run(km, t); }}>Calculer</Button>
+			<Button variant="outline" onClick={fillBestEffort}>Utiliser mon meilleur effort récent</Button>
 		</div>
 
-		{error && <div className="mt-3.5 text-sm text-red-700">{error}</div>}
+		{error && <div className="mt-3.5 text-sm text-[var(--status-critical)]">{error}</div>}
 
 		{result && <div className="mt-3.5 grid gap-3 grid-cols-[repeat(auto-fill,minmax(190px,1fr))]">
 			<div className="p-4 border rounded-lg">
