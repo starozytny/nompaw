@@ -1,14 +1,17 @@
 import React from 'react';
 
-import { GripVertical } from 'lucide-react';
+import { GripVertical, MoreVertical, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import Sanitaze from '@commonFunctions/sanitaze';
 import { cn } from "@shadcnComponents/lib/utils";
 
-import { ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button } from "@shadcnComponents/ui/button";
 import { Badge } from "@shadcnComponents/ui/badge";
+import {
+	DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@shadcnComponents/ui/dropdown-menu";
 
 const TYPE_COLOR = ['var(--cat-expense)', 'var(--cat-income)', 'var(--cat-saving)', 'hsl(var(--muted-foreground))', 'hsl(var(--muted-foreground))'];
 const TYPE_SOFT = ['var(--cat-expense-soft)', 'var(--cat-income-soft)', 'var(--cat-saving-soft)', 'hsl(var(--muted))', 'hsl(var(--muted))'];
@@ -89,13 +92,29 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel, sortabl
 			{Sanitaze.toFormatCurrency(elem.price)}
 		</div>
 
-		<div className="flex gap-0.5 flex-shrink-0">
+		<div className="flex-shrink-0">
 			{elem.type === 3
-				? <ButtonIcon type="default" icon="refresh1" onClick={() => onCancel(elem)} tooltipWidth={150}>Annuler la suppression</ButtonIcon>
-				: <>
-					<ButtonIcon type="default" icon="pencil" onClick={() => onEdit(elem)}>Modifier</ButtonIcon>
-					<ButtonIcon type="default" icon="trash" onClick={() => onModal('deleteRef', elem)}>Supprimer</ButtonIcon>
-				</>
+				? <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" title="Annuler la suppression" onClick={() => onCancel(elem)}>
+					<RotateCcw className="h-4 w-4" />
+				</Button>
+				: <DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+							<MoreVertical className="h-4 w-4" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end">
+						<DropdownMenuItem onClick={() => onEdit(elem)}>
+							<Pencil /> Modifier
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => onModal('deleteRef', elem)}
+							className="text-[var(--status-critical)] focus:text-[var(--status-critical)]"
+						>
+							<Trash2 /> Supprimer
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			}
 		</div>
 	</div>
@@ -122,8 +141,10 @@ export function BudgetItemRecurrent ({ elem, onModal, onActive }) {
 			{Sanitaze.toFormatCurrency(elem.price)}
 		</div>
 
-		<div className="flex gap-0.5 flex-shrink-0">
-			<ButtonIcon type="default" icon="trash" onClick={() => onModal('trashRef', elem)}>Supprimer</ButtonIcon>
+		<div className="flex-shrink-0">
+			<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" title="Supprimer" onClick={() => onModal('trashRef', elem)}>
+				<Trash2 className="h-4 w-4" />
+			</Button>
 		</div>
 	</div>
 }

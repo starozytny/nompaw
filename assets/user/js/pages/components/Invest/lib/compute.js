@@ -16,6 +16,21 @@ export function totalInvestedFor (buCategoryId, totalInvested) {
 	return row ? row.totalInvested : null;
 }
 
+/**
+ * Versé/plus-value only make sense for envelopes linked to a Budget category (that's where "versé"
+ * comes from) — envelopes without a link (e.g. a plain Livret) contribute to the total valorisation
+ * but are left out of this calculation rather than silently counted as "0 versé, all gain".
+ */
+export function portfolioGain (enveloppes, totalInvested) {
+	const linked = enveloppes.filter(e => e.buCategoryId != null);
+	const investedSum = linked.reduce((sum, e) => sum + (totalInvestedFor(e.buCategoryId, totalInvested) ?? 0), 0);
+	const valorisationLinked = linked.reduce((sum, e) => sum + enveloppeValue(e), 0);
+	const gain = linked.length ? valorisationLinked - investedSum : null;
+	const gainPct = gain != null && investedSum ? (gain / investedSum) * 100 : null;
+
+	return { linkedCount: linked.length, investedSum, gain, gainPct };
+}
+
 export function enveloppeAllocation (enveloppes) {
 	const total = totalValorisation(enveloppes);
 	return enveloppes
@@ -28,6 +43,24 @@ export function lineAllocation (enveloppe) {
 	return enveloppe.lines
 		.map(l => ({ name: l.name, value: lineValue(l), pct: total ? (lineValue(l) / total) * 100 : 0 }))
 		.filter(row => row.value > 0);
+}
+
+/**
+ * Same lines, grouped across every envelope instead of within one — e.g. "MSCI World ETF" held in
+ * both the PEA and the AV collapses into a single slice, answering "what am I actually holding in
+ * total" rather than "which account holds it" (that's enveloppeAllocation's job).
+ */
+export function lineAllocationAcrossEnveloppes (enveloppes) {
+	const total = totalValorisation(enveloppes);
+	const byName = new Map();
+	enveloppes.forEach(e => e.lines.forEach(l => {
+		const value = lineValue(l);
+		byName.set(l.name, (byName.get(l.name) ?? 0) + value);
+	}));
+
+	return Array.from(byName, ([name, value]) => ({ name, value, pct: total ? (value / total) * 100 : 0 }))
+		.filter(row => row.value > 0)
+		.sort((a, b) => b.value - a.value);
 }
 
 /**

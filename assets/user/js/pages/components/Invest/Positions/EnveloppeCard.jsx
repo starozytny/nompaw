@@ -30,10 +30,12 @@ export function EnveloppeCard ({ enveloppe, totalInvested, onSaveEnveloppe, onSa
 
 	return <Card className="p-5">
 		<div className="flex flex-wrap justify-between items-start gap-3 mb-3">
-			<div>
-				<div className="flex items-center gap-2 mb-1">
-					<EditableLabel value={enveloppe.name} onCommit={renameEnveloppe} className="font-semibold" />
-					<Badge variant="outline">{enveloppe.typeString}</Badge>
+			<div className="min-w-0">
+				<div className="flex items-center gap-2 mb-1 min-w-0">
+					<div className="min-w-0 flex-1">
+						<EditableLabel value={enveloppe.name} onCommit={renameEnveloppe} className="font-semibold" />
+					</div>
+					<Badge variant="outline" className="flex-shrink-0 whitespace-nowrap">{enveloppe.typeString}</Badge>
 				</div>
 				{enveloppe.taxExemptDate && <div className="text-xs text-muted-foreground">Exonération fiscale à partir du {dateFr(enveloppe.taxExemptDate)}</div>}
 			</div>

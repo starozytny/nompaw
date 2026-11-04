@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 
-import Sanitaze from "@commonFunctions/sanitaze";
-
-import { Card, CardContent } from "@shadcnComponents/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@shadcnComponents/ui/tabs";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 
 import { useInvestTracking } from "@userPages/Invest/lib/useInvestTracking";
-import { totalValorisation } from "@userPages/Invest/lib/compute";
+import { DashboardHeader } from "@userPages/Invest/DashboardHeader";
 
 import { PositionsTab } from "@userPages/Invest/Positions/PositionsTab";
 import { VersementsTab } from "@userPages/Invest/Versements/VersementsTab";
@@ -25,29 +22,6 @@ const TABS = [
 	{ value: 'formation', label: 'Formation' },
 ];
 
-function Header ({ total }) {
-	return <div className="flex flex-wrap items-end justify-between gap-3">
-		<div>
-			<h1 className="text-lg font-semibold">Investissements</h1>
-			<p className="text-sm text-muted-foreground">Positions, versements, valorisation et bilan.</p>
-		</div>
-		<Card>
-			<CardContent className="p-4 flex items-center gap-3">
-				<div
-					className="flex h-9 w-9 flex-none items-center justify-center rounded-lg"
-					style={{ background: 'var(--cat-invest-soft)', color: 'var(--cat-invest)' }}
-				>
-					<span className="icon-bar-chart text-base"></span>
-				</div>
-				<div>
-					<div className="text-xs text-muted-foreground">Valorisation totale</div>
-					<div className="text-lg font-bold tabular-nums">{Sanitaze.toFormatCurrency(total)}</div>
-				</div>
-			</CardContent>
-		</Card>
-	</div>
-}
-
 export default function Invest () {
 	const [activeTab, setActiveTab] = useState('positions');
 	const {
@@ -62,7 +36,12 @@ export default function Invest () {
 	}
 
 	return <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-5">
-		<Header total={totalValorisation(tracking.enveloppes)} />
+		<div>
+			<h1 className="text-lg font-semibold">Investissements</h1>
+			<p className="text-sm text-muted-foreground">Positions, versements, valorisation et bilan.</p>
+		</div>
+
+		<DashboardHeader tracking={tracking} />
 
 		<TabsList className="self-start flex-wrap h-auto">
 			{TABS.map(({ value, label }) => <TabsTrigger key={value} value={value}>{label}</TabsTrigger>)}
