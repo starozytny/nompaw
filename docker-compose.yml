@@ -10,7 +10,7 @@ services:
       - composer_cache:/root/.composer
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
     environment:
-      - DATABASE_URL=mysql://nompaw:nompaw@shared_mariadb:3306/nompaw?serverVersion=mariadb-11.4.9
+      - DATABASE_URL=mysql://nompaw:nompaw@shared_mariadb:3306/nompaw?serverVersion=mariadb-10.3.39
     networks:
       - symfony
       - db_shared

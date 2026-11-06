@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Autoriser l'accès – Nompaw</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f4f4f5; margin: 0; display: grid; place-items: center; min-height: 100vh; }
+        main { background: #fff; padding: 2rem; border-radius: 12px; max-width: 26rem; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+        ul { padding-left: 1.2rem; }
+        .actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+        button { flex: 1; padding: .7rem; border-radius: 8px; border: 1px solid #d4d4d8; background: #fff; font-size: 1rem; cursor: pointer; }
+        button[value=allow] { background: #18181b; color: #fff; border-color: #18181b; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Autoriser « {{ client }} » ?</h1>
+    <p>Cette application demande un accès <strong>en lecture seule</strong> à votre suivi running :</p>
+    <ul>
+        {% for scope in scopes %}
+            <li>{{ scope == 'running:read' ? 'Séances, activités, pesées et notes de running' : scope }}</li>
+        {% endfor %}
+    </ul>
+    <form method="post" action="{{ action }}">
+        <input type="hidden" name="_token" value="{{ csrf_token }}">
+        <div class="actions">
+            <button type="submit" name="decision" value="deny">Refuser</button>
+            <button type="submit" name="decision" value="allow">Autoriser</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

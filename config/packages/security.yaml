@@ -24,6 +24,13 @@ security:
             pattern: ^/api
             stateless: true
             jwt: ~
+        # Serveur MCP (connecteur claude.ai) : Bearer token OAuth 2.1 émis par league/oauth2-server-bundle.
+        mcp:
+            pattern: ^/mcp
+            stateless: true
+            oauth2: true
+            entry_point: App\Security\McpEntryPoint
+            provider: app_user_provider
         main:
             lazy: true
             provider: app_user_provider
@@ -56,6 +63,10 @@ security:
         ROLE_DEVELOPER: [ ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH ]
 
     access_control:
+         - { path: ^/\.well-known/oauth-,                       roles: PUBLIC_ACCESS }
+         - { path: ^/token,                                     roles: PUBLIC_ACCESS }
+         - { path: ^/authorize,                                 roles: ROLE_RUNNING }
+         - { path: ^/mcp/running,                               roles: ROLE_OAUTH2_RUNNING:READ }
          - { path: ^/espace-membre/anniversaires/anniversaire,  roles: PUBLIC_ACCESS }
          - { path: ^/intern/api/birthdays/presents/end,         roles: PUBLIC_ACCESS }
          - { path: ^/espace-membre/projets/projet,              roles: PUBLIC_ACCESS }

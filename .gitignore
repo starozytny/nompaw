@@ -46,3 +46,7 @@ winpty.exe.stackdump
 ###< lexik/jwt-authentication-bundle ###
 
 /public/tinymce/*
+
+###> league/oauth2-server-bundle ###
+/config/jwt/*.pem
+###< league/oauth2-server-bundle ###
