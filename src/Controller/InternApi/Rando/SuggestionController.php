@@ -6,6 +6,7 @@ use App\Entity\Rando\RaSuggestion;
 use App\Repository\Rando\RaSuggestionRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Data\DataRandos;
+use App\Service\FileUploader;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,6 +51,27 @@ class SuggestionController extends AbstractController
 
         $suggestionRepository->save($suggestion, true);
         return $apiResponse->apiJsonResponseCustom($this->toArray($suggestion));
+    }
+
+    /**
+     * Uploads one photo for a suggestion (hand-added, not an AI-provided URL) and returns its
+     * public path, to be appended to the suggestion's photoUrls on save — same field, same shape
+     * as an AI-proposed URL, so the frontend/backend don't need to know which is which.
+     */
+    #[Route('/photos', name: 'upload_photo', options: ['expose' => true], methods: 'POST')]
+    public function uploadPhoto(Request $request, FileUploader $fileUploader, ApiResponse $apiResponse): Response
+    {
+        $file = $request->files->get('photo');
+        if (!$file) {
+            return $apiResponse->apiJsonResponseBadRequest('Aucune photo envoyée.');
+        }
+
+        $fileName = $fileUploader->upload($file, RaSuggestion::FOLDER_PHOTOS);
+        if (!$fileName) {
+            return $apiResponse->apiJsonResponseBadRequest("L'envoi de la photo a échoué.");
+        }
+
+        return $apiResponse->apiJsonResponseCustom(['url' => '/' . RaSuggestion::FOLDER_PHOTOS . '/' . $fileName]);
     }
 
     #[Route('/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

@@ -4,9 +4,10 @@ import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
+import { Plus } from 'lucide-react';
 
-import { Button } from "@tailwindComponents/Elements/Button";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
+import { Button } from "@shadcnComponents/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 import { SuggestionCard } from "@userPages/Aventures/Suggestions/SuggestionCard";
@@ -51,18 +52,21 @@ export function SuggestionsList () {
 		}
 	};
 
-	return <div className="flex flex-col gap-4">
+	return <div className="flex flex-col gap-5">
 		<div className="flex items-center justify-between gap-3">
-			<h1 className="text-lg font-semibold">Suggestions <span className="font-normal text-muted-foreground">({items.length})</span></h1>
-			<Button type="blue" onClick={handleOpenCreate}>
-				<span className="icon-add mr-1"></span>Ajouter
+			<div>
+				<h1 className="text-lg font-semibold">Suggestions</h1>
+				<p className="text-sm text-muted-foreground">{items.length} idée{items.length === 1 ? '' : 's'} de randonnée ou de bivouac</p>
+			</div>
+			<Button onClick={handleOpenCreate}>
+				<Plus className="h-4 w-4" /> Ajouter
 			</Button>
 		</div>
 
 		{loading
 			? <div className="p-6"><LoaderElements /></div>
 			: items.length === 0
-				? <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+				? <div className="px-4 py-12 text-center text-sm text-muted-foreground border rounded-lg bg-muted/40">
 					Aucune suggestion pour l'instant — demande à Claude de t'en proposer une via le connecteur Nompaw, ou ajoutes-en une toi-même.
 				</div>
 				: <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -84,8 +88,8 @@ export function SuggestionsList () {
 					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
-					<Button type="default" onClick={() => setDeleteOpen(false)}>Annuler</Button>
-					<Button type="red" onClick={handleDelete} iconLeft={load ? "chart-3" : ""}>Confirmer la suppression</Button>
+					<Button variant="outline" onClick={() => setDeleteOpen(false)}>Annuler</Button>
+					<Button variant="destructive" onClick={handleDelete} disabled={load}>Confirmer la suppression</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
