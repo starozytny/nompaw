@@ -13,6 +13,7 @@
         "ext-imagick": "*",
         "ext-openssl": "*",
         "ext-pdo": "*",
+        "ext-sodium": "*",
         "ext-zip": "*",
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.7",
@@ -31,6 +32,8 @@
         "league/oauth2-google": "^4.0",
         "league/oauth2-instagram": "^3.1",
         "lexik/jwt-authentication-bundle": "^2.18",
+        "mcp/sdk": "^0.9.0",
+        "nyholm/psr7": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpoffice/phpspreadsheet": "^1.26",
         "phpstan/phpdoc-parser": "^1.13",
@@ -55,6 +58,7 @@
         "symfony/property-access": "6.4.*",
         "symfony/property-info": "6.4.*",
         "symfony/proxy-manager-bridge": "6.4.*",
+        "symfony/psr-http-message-bridge": "6.4.*",
         "symfony/runtime": "6.4.*",
         "symfony/security-bundle": "^6.4",
         "symfony/sendinblue-mailer": "^6.4",
@@ -68,8 +72,7 @@
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.5",
-        "twig/twig": "^2.12|^3.0",
-      "ext-sodium": "*"
+        "twig/twig": "^2.12|^3.0"
     },
     "config": {
         "allow-plugins": {

@@ -15,6 +15,7 @@ use App\Service\Garmin\GarminApiClient;
 use App\Service\Garmin\GarminApiException;
 use App\Service\Garmin\GarminActivityMapper;
 use App\Service\Running\RunningImportService;
+use App\Service\Running\RunningTrackingBuilder;
 use App\Service\SanitizeData;
 use App\Service\ValidatorService;
 use DateTime;
@@ -28,12 +29,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class RunningController extends AbstractController
 {
     #[Route('/tracking', name: 'tracking', options: ['expose' => true], methods: 'GET')]
-    public function tracking(RuLogRepository $logRepository, RuActivityRepository $activityRepository,
-                             RuWeightRepository $weightRepository, ApiResponse $apiResponse): Response
+    public function tracking(RunningTrackingBuilder $trackingBuilder, ApiResponse $apiResponse): Response
     {
-        return $apiResponse->apiJsonResponseCustom($this->buildTrackingPayload(
-            $this->getUser(), $logRepository, $activityRepository, $weightRepository
-        ));
+        return $apiResponse->apiJsonResponseCustom($trackingBuilder->build($this->getUser()));
     }
 
     #[Route('/log', name: 'log_save', options: ['expose' => true], methods: 'POST')]
@@ -67,8 +65,7 @@ class RunningController extends AbstractController
     }
 
     #[Route('/import', name: 'import', options: ['expose' => true], methods: 'POST')]
-    public function import(Request $request, RunningImportService $importService, RuLogRepository $logRepository,
-                           RuActivityRepository $activityRepository, RuWeightRepository $weightRepository,
+    public function import(Request $request, RunningImportService $importService, RunningTrackingBuilder $trackingBuilder,
                            ApiResponse $apiResponse): Response
     {
         $data = json_decode($request->getContent());
@@ -79,7 +76,7 @@ class RunningController extends AbstractController
         $user = $this->getUser();
         $runs = array_map(fn ($r) => (array) $r, $data->runs);
         $result = $importService->import($user, $runs, $data->rangeStart ?? null, $data->rangeEnd ?? null);
-        $result['tracking'] = $this->buildTrackingPayload($user, $logRepository, $activityRepository, $weightRepository);
+        $result['tracking'] = $trackingBuilder->build($user);
 
         return $apiResponse->apiJsonResponseCustom($result);
     }
@@ -91,8 +88,7 @@ class RunningController extends AbstractController
      */
     #[Route('/garmin-sync', name: 'garmin_sync', options: ['expose' => true], methods: 'POST')]
     public function garminSync(GarminApiClient $garminClient, GarminActivityMapper $mapper, RunningImportService $importService,
-                               RuLogRepository $logRepository, RuActivityRepository $activityRepository,
-                               RuWeightRepository $weightRepository, ApiResponse $apiResponse): Response
+                               RunningTrackingBuilder $trackingBuilder, ApiResponse $apiResponse): Response
     {
         $user = $this->getUser();
         $from = (new DateTime('-14 days'))->format('Y-m-d');
@@ -108,7 +104,7 @@ class RunningController extends AbstractController
         $result = [
             'activities' => $importService->import($user, $runs, null, null),
             'weights' => $importService->importWeights($user, $weights),
-            'tracking' => $this->buildTrackingPayload($user, $logRepository, $activityRepository, $weightRepository),
+            'tracking' => $trackingBuilder->build($user),
         ];
 
         return $apiResponse->apiJsonResponseCustom($result);
@@ -167,8 +163,8 @@ class RunningController extends AbstractController
      */
     #[Route('/backup/restore', name: 'backup_restore', options: ['expose' => true], methods: 'POST')]
     public function restoreBackup(Request $request, RuLogRepository $logRepository, RuActivityRepository $activityRepository,
-                                  RuWeightRepository $weightRepository, SanitizeData $sanitizeData, ManagerRegistry $doctrine,
-                                  ApiResponse $apiResponse): Response
+                                  RuWeightRepository $weightRepository, RunningTrackingBuilder $trackingBuilder,
+                                  SanitizeData $sanitizeData, ManagerRegistry $doctrine, ApiResponse $apiResponse): Response
     {
         $data = json_decode($request->getContent());
         if ($data === null || !isset($data->log) || !is_array($data->activities ?? null) || !is_array($data->weights ?? null)) {
@@ -222,9 +218,7 @@ class RunningController extends AbstractController
         $user->setRunningNotes($sanitizeData->trimData($data->notes ?? null));
         $doctrine->getManager()->flush();
 
-        return $apiResponse->apiJsonResponseCustom(
-            $this->buildTrackingPayload($user, $logRepository, $activityRepository, $weightRepository)
-        );
+        return $apiResponse->apiJsonResponseCustom($trackingBuilder->build($user));
     }
 
     #[Route('/reset', name: 'reset', options: ['expose' => true], methods: 'DELETE')]
@@ -242,48 +236,6 @@ class RunningController extends AbstractController
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
-    private function buildTrackingPayload(User $user, RuLogRepository $logRepository, RuActivityRepository $activityRepository,
-                                          RuWeightRepository $weightRepository): array
-    {
-        $log = [];
-        foreach ($logRepository->findAllByUser($user) as $entry) {
-            $log[$entry->getDate()->format('Y-m-d')] = [
-                'km' => $entry->getKm(),
-                'dur' => $entry->getDurationSec() !== null ? $this->formatSecToDur($entry->getDurationSec()) : null,
-                'hr' => $entry->getHr(),
-                'hrmax' => $entry->getHrMax(),
-                'rpe' => $entry->getRpe(),
-                'note' => $entry->getNote(),
-                'done' => $entry->isDone(),
-                'src' => $entry->getSource(),
-                'title' => $entry->getTitle(),
-            ];
-        }
-
-        $activities = array_map(fn ($a) => [
-            'd' => $a->getDate()->format('Y-m-d'),
-            'km' => $a->getKm(),
-            'sec' => $a->getDurationSec(),
-            'hr' => $a->getHr(),
-            'hrmax' => $a->getHrMax(),
-            'title' => $a->getTitle(),
-        ], $activityRepository->findAllByUser($user));
-
-        $weights = array_map(fn ($w) => [
-            'id' => $w->getId(),
-            'd' => $w->getDate()->format('Y-m-d'),
-            'kg' => $w->getKg(),
-            'src' => $w->getSource(),
-        ], $weightRepository->findAllByUser($user));
-
-        return [
-            'log' => $log,
-            'activities' => $activities,
-            'weights' => $weights,
-            'notes' => $user->getRunningNotes() ?? '',
-        ];
-    }
-
     private function parseDurToSec(string $dur): ?int
     {
         $parts = array_map('intval', explode(':', $dur));
@@ -294,13 +246,5 @@ class RunningController extends AbstractController
             return $parts[0] * 60 + $parts[1];
         }
         return null;
-    }
-
-    private function formatSecToDur(int $sec): string
-    {
-        $h = intdiv($sec, 3600);
-        $m = intdiv($sec % 3600, 60);
-        $s = $sec % 60;
-        return $h ? sprintf('%d:%02d:%02d', $h, $m, $s) : sprintf('%d:%02d', $m, $s);
     }
 }
