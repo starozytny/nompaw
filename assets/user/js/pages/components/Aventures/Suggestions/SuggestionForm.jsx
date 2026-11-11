@@ -1,29 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import axios from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
+import { Plus, X, Upload, Link as LinkIcon } from 'lucide-react';
 
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button } from "@tailwindComponents/Elements/Button";
+import { Button } from "@shadcnComponents/ui/button";
+import { Input } from "@shadcnComponents/ui/input";
+import { Textarea } from "@shadcnComponents/ui/textarea";
+import { Label } from "@shadcnComponents/ui/label";
+import { Badge } from "@shadcnComponents/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@shadcnComponents/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shadcnComponents/ui/select";
 
 const URL_SAVE = "intern_api_rando_suggestions_save";
+const URL_UPLOAD_PHOTO = "intern_api_rando_suggestions_upload_photo";
 
 const TYPES = [
-	{ value: 0, label: 'Randonnée' },
-	{ value: 1, label: 'Bivouac' },
+	{ value: '0', label: 'Randonnée' },
+	{ value: '1', label: 'Bivouac' },
 ];
 
 const DIFFICULTIES = [
-	{ value: 0, label: 'Facile' },
-	{ value: 1, label: 'Modéré' },
-	{ value: 2, label: 'Difficile' },
-	{ value: 3, label: 'Expert' },
+	{ value: '0', label: 'Facile' },
+	{ value: '1', label: 'Modéré' },
+	{ value: '2', label: 'Difficile' },
+	{ value: '3', label: 'Expert' },
 ];
-
-const INPUT_CLASS = "px-2.5 py-1.5 rounded-md border-0 ring-1 ring-inset ring-gray-300 text-sm font-normal normal-case tracking-normal bg-gray-100 focus:ring-1 focus:ring-inset focus:ring-gray-500 w-full";
-const LABEL_CLASS = "flex flex-col gap-1 text-xs font-bold uppercase tracking-wide text-muted-foreground";
 
 function toLines (value) {
 	return (value || "").split("\n").map(v => v.trim()).filter(v => v !== "");
@@ -32,8 +36,8 @@ function toLines (value) {
 function emptyState (element) {
 	return {
 		name: element?.name || "",
-		type: element ? element.type : 0,
-		difficulty: element ? element.difficulty : 0,
+		type: String(element ? element.type : 0),
+		difficulty: String(element ? element.difficulty : 0),
 		description: element?.description || "",
 		location: element?.location || "",
 		distanceKm: element?.distanceKm ?? "",
@@ -41,7 +45,7 @@ function emptyState (element) {
 		altitudeMaxM: element?.altitudeMaxM ?? "",
 		durationMinutes: element?.durationMinutes ?? "",
 		pointsOfInterest: (element?.pointsOfInterest || []).join("\n"),
-		photoUrls: (element?.photoUrls || []).join("\n"),
+		photoUrls: element?.photoUrls || [],
 		sourceUrl: element?.sourceUrl || "",
 		parkRules: element?.parkRules || "",
 		travelTimeFromPeyrollesMinutes: element?.travelTimeFromPeyrollesMinutes ?? "",
@@ -50,16 +54,55 @@ function emptyState (element) {
 	};
 }
 
+const SECTION_CLASS = "flex flex-col gap-4 bg-muted/40 p-5 rounded-lg border";
+const GRID_2 = "grid grid-cols-1 sm:grid-cols-2 gap-4";
+const GRID_4 = "grid grid-cols-2 sm:grid-cols-4 gap-4";
+
 export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 	const [state, setState] = useState(() => emptyState(element));
+	const [newPhotoUrl, setNewPhotoUrl] = useState("");
+	const [uploading, setUploading] = useState(false);
 	const [load, setLoad] = useState(false);
+	const fileInputRef = useRef(null);
 
-	const handleOpenChange = (next) => {
-		if (next) setState(emptyState(element));
-		onOpenChange(next);
-	};
+	// The Sheet is opened by the parent setting `open` from outside (not from its own trigger),
+	// so Radix never fires onOpenChange for that transition — reset the form here instead,
+	// whenever `open` flips to true for a (possibly different) element.
+	useEffect(() => {
+		if (open) {
+			setState(emptyState(element));
+			setNewPhotoUrl("");
+		}
+	}, [open, element]);
 
 	const set = (name) => (e) => setState(s => ({ ...s, [name]: e.target.value }));
+
+	const addPhotoUrl = () => {
+		let url = newPhotoUrl.trim();
+		if (!url) return;
+		setState(s => ({ ...s, photoUrls: [...s.photoUrls, url] }));
+		setNewPhotoUrl("");
+	};
+
+	const removePhotoUrl = (index) => {
+		setState(s => ({ ...s, photoUrls: s.photoUrls.filter((_, i) => i !== index) }));
+	};
+
+	const handleFileChange = (e) => {
+		let file = e.target.files[0];
+		e.target.value = "";
+		if (!file) return;
+
+		setUploading(true);
+		let data = new FormData();
+		data.append('photo', file);
+
+		axios.post(Routing.generate(URL_UPLOAD_PHOTO), data)
+			.then((response) => setState(s => ({ ...s, photoUrls: [...s.photoUrls, response.data.url] })))
+			.catch((error) => Formulaire.displayErrors(null, error))
+			.then(() => setUploading(false))
+		;
+	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -71,7 +114,6 @@ export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 			...state,
 			id: element ? element.id : undefined,
 			pointsOfInterest: toLines(state.pointsOfInterest),
-			photoUrls: toLines(state.photoUrls),
 		};
 
 		axios.post(Routing.generate(URL_SAVE), payload)
@@ -84,84 +126,141 @@ export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 		;
 	};
 
-	return <Sheet open={open} onOpenChange={handleOpenChange}>
+	return <Sheet open={open} onOpenChange={onOpenChange}>
 		<SheetContent className="flex flex-col p-0 sm:max-w-xl">
 			<SheetHeader>
 				<SheetTitle>{element ? "Modifier la suggestion" : "Nouvelle suggestion"}</SheetTitle>
 			</SheetHeader>
 
 			<form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
-				<label className={LABEL_CLASS}>Nom
-					<input type="text" required value={state.name} onChange={set('name')} className={INPUT_CLASS} placeholder="Ex: Sommet des Encombres" />
-				</label>
+				<div className={SECTION_CLASS}>
+					<div className={GRID_2}>
+						<div className="flex flex-col gap-1.5">
+							<Label htmlFor="suggestion-name">Nom</Label>
+							<Input id="suggestion-name" required value={state.name} onChange={set('name')} placeholder="Ex: Sommet des Encombres" />
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Lieu</Label>
+							<Input value={state.location} onChange={set('location')} placeholder="Ex: Massif des Encombres, Savoie" />
+						</div>
+					</div>
 
-				<div className="grid grid-cols-2 gap-3">
-					<label className={LABEL_CLASS}>Type
-						<select value={state.type} onChange={e => setState(s => ({ ...s, type: Number(e.target.value) }))} className={INPUT_CLASS}>
-							{TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-						</select>
-					</label>
-					<label className={LABEL_CLASS}>Difficulté
-						<select value={state.difficulty} onChange={e => setState(s => ({ ...s, difficulty: Number(e.target.value) }))} className={INPUT_CLASS}>
-							{DIFFICULTIES.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
-						</select>
-					</label>
+					<div className={GRID_2}>
+						<div className="flex flex-col gap-1.5">
+							<Label>Type</Label>
+							<Select value={state.type} onValueChange={(v) => setState(s => ({ ...s, type: v }))}>
+								<SelectTrigger><SelectValue /></SelectTrigger>
+								<SelectContent>
+									{TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Difficulté</Label>
+							<Select value={state.difficulty} onValueChange={(v) => setState(s => ({ ...s, difficulty: v }))}>
+								<SelectTrigger><SelectValue /></SelectTrigger>
+								<SelectContent>
+									{DIFFICULTIES.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+
+					<div className="flex flex-col gap-1.5">
+						<Label>Description</Label>
+						<Textarea rows={3} value={state.description} onChange={set('description')} />
+					</div>
 				</div>
 
-				<label className={LABEL_CLASS}>Description
-					<textarea rows={3} value={state.description} onChange={set('description')} className={INPUT_CLASS} />
-				</label>
+				<div className={SECTION_CLASS}>
+					<div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Topo</div>
+					<div className={GRID_4}>
+						<div className="flex flex-col gap-1.5">
+							<Label>Distance (km)</Label>
+							<Input type="number" step="0.1" value={state.distanceKm} onChange={set('distanceKm')} />
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Dénivelé (m)</Label>
+							<Input type="number" value={state.elevationGainM} onChange={set('elevationGainM')} />
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Altitude max (m)</Label>
+							<Input type="number" value={state.altitudeMaxM} onChange={set('altitudeMaxM')} />
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Durée (min)</Label>
+							<Input type="number" value={state.durationMinutes} onChange={set('durationMinutes')} />
+						</div>
+					</div>
 
-				<label className={LABEL_CLASS}>Lieu
-					<input type="text" value={state.location} onChange={set('location')} className={INPUT_CLASS} placeholder="Ex: Massif des Encombres, Savoie" />
-				</label>
-
-				<div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-					<label className={LABEL_CLASS}>Distance (km)
-						<input type="number" step="0.1" value={state.distanceKm} onChange={set('distanceKm')} className={INPUT_CLASS} />
-					</label>
-					<label className={LABEL_CLASS}>Dénivelé (m)
-						<input type="number" value={state.elevationGainM} onChange={set('elevationGainM')} className={INPUT_CLASS} />
-					</label>
-					<label className={LABEL_CLASS}>Altitude max (m)
-						<input type="number" value={state.altitudeMaxM} onChange={set('altitudeMaxM')} className={INPUT_CLASS} />
-					</label>
-					<label className={LABEL_CLASS}>Durée (min)
-						<input type="number" value={state.durationMinutes} onChange={set('durationMinutes')} className={INPUT_CLASS} />
-					</label>
+					<div className="flex flex-col gap-1.5">
+						<Label>Points d'intérêt <span className="font-normal text-muted-foreground">(un par ligne)</span></Label>
+						<Textarea rows={3} value={state.pointsOfInterest} onChange={set('pointsOfInterest')} placeholder={"Cascade\nPoint de vue\nLac"} />
+					</div>
 				</div>
 
-				<label className={LABEL_CLASS}>Points d'intérêt <span className="font-normal normal-case">(un par ligne)</span>
-					<textarea rows={3} value={state.pointsOfInterest} onChange={set('pointsOfInterest')} className={INPUT_CLASS} placeholder={"Cascade\nPoint de vue\nLac"} />
-				</label>
+				<div className={SECTION_CLASS}>
+					<div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Photos</div>
 
-				<label className={LABEL_CLASS}>Photos <span className="font-normal normal-case">(une URL par ligne)</span>
-					<textarea rows={3} value={state.photoUrls} onChange={set('photoUrls')} className={INPUT_CLASS} placeholder={"https://..."} />
-				</label>
+					{state.photoUrls.length > 0 && (
+						<div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+							{state.photoUrls.map((url, i) => (
+								<div key={i} className="relative group aspect-square">
+									<img src={url} alt="" className="h-full w-full rounded-md object-cover border" />
+									<button type="button" onClick={() => removePhotoUrl(i)}
+										className="absolute -top-1.5 -right-1.5 bg-background border rounded-full p-0.5 shadow-sm text-muted-foreground hover:text-[var(--status-critical)]">
+										<X className="h-3.5 w-3.5" />
+									</button>
+								</div>
+							))}
+						</div>
+					)}
 
-				<label className={LABEL_CLASS}>Lien source
-					<input type="url" value={state.sourceUrl} onChange={set('sourceUrl')} className={INPUT_CLASS} placeholder="https://..." />
-				</label>
+					<div className="flex gap-2">
+						<Input type="url" value={newPhotoUrl} onChange={(e) => setNewPhotoUrl(e.target.value)}
+							   placeholder="https://... (lien d'une photo)" className="flex-1" />
+						<Button type="button" variant="outline" size="icon" onClick={addPhotoUrl} title="Ajouter ce lien">
+							<LinkIcon className="h-4 w-4" />
+						</Button>
+						<input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+						<Button type="button" variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}
+							   disabled={uploading} title="Envoyer une photo depuis cet appareil">
+							<Upload className="h-4 w-4" />
+						</Button>
+					</div>
+					{uploading && <div className="text-xs text-muted-foreground">Envoi de la photo...</div>}
+				</div>
 
-				<label className={LABEL_CLASS}>Règles du parc
-					<textarea rows={2} value={state.parkRules} onChange={set('parkRules')} className={INPUT_CLASS} />
-				</label>
+				<div className={SECTION_CLASS}>
+					<div className="flex flex-col gap-1.5">
+						<Label>Lien source</Label>
+						<Input type="url" value={state.sourceUrl} onChange={set('sourceUrl')} placeholder="https://..." />
+					</div>
 
-				<div className="grid grid-cols-3 gap-3">
-					<label className={LABEL_CLASS}>Trajet depuis Peyrolles (min)
-						<input type="number" value={state.travelTimeFromPeyrollesMinutes} onChange={set('travelTimeFromPeyrollesMinutes')} className={INPUT_CLASS} />
-					</label>
-					<label className={LABEL_CLASS}>Budget trajet (€)
-						<input type="number" step="0.01" value={state.travelBudget} onChange={set('travelBudget')} className={INPUT_CLASS} />
-					</label>
-					<label className={LABEL_CLASS}>Budget rando (€)
-						<input type="number" step="0.01" value={state.randoBudget} onChange={set('randoBudget')} className={INPUT_CLASS} />
-					</label>
+					<div className="flex flex-col gap-1.5">
+						<Label>Règles du parc</Label>
+						<Textarea rows={2} value={state.parkRules} onChange={set('parkRules')} />
+					</div>
+
+					<div className={GRID_4.replace('grid-cols-4', 'grid-cols-3')}>
+						<div className="flex flex-col gap-1.5">
+							<Label>Trajet depuis Peyrolles (min)</Label>
+							<Input type="number" value={state.travelTimeFromPeyrollesMinutes} onChange={set('travelTimeFromPeyrollesMinutes')} />
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Budget trajet (€)</Label>
+							<Input type="number" step="0.01" value={state.travelBudget} onChange={set('travelBudget')} />
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Budget rando (€)</Label>
+							<Input type="number" step="0.01" value={state.randoBudget} onChange={set('randoBudget')} />
+						</div>
+					</div>
 				</div>
 
 				<div className="mt-2 flex justify-end gap-2">
-					<Button type="default" onClick={() => onOpenChange(false)}>Annuler</Button>
-					<Button type="blue" isSubmit={true} iconLeft={load ? "chart-3" : ""}>
+					<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+					<Button type="submit" disabled={load}>
 						{element ? "Enregistrer" : "Créer"}
 					</Button>
 				</div>

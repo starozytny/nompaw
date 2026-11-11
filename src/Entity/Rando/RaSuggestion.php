@@ -20,6 +20,7 @@ class RaSuggestion
 {
     const FORM = ['suggestion_form'];
     const LIST = ['suggestion_list'];
+    const FOLDER_PHOTOS = 'suggestions/photos';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
