@@ -3,6 +3,7 @@
 namespace App\Entity\Main;
 
 use App\Repository\Main\McpAuthCodeRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -33,10 +34,10 @@ class McpAuthCode
     #[ORM\Column(length: 16)]
     private ?string $codeChallengeMethod = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $expiresAt = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $usedAt = null;
 
     public function getId(): ?int
