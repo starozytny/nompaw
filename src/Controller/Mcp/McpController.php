@@ -10,6 +10,8 @@ use App\Service\Budget\BudgetService;
 use App\Service\Invest\InvestTrackingBuilder;
 use App\Service\Running\RunningTrackingBuilder;
 use Mcp\Server;
+use Mcp\Server\Transport\Http\Middleware\CorsMiddleware;
+use Mcp\Server\Transport\Http\Middleware\DnsRebindingProtectionMiddleware;
 use Mcp\Server\Transport\StreamableHttpTransport;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
@@ -84,7 +86,17 @@ class McpController extends AbstractController
         $psrHttpFactory = new PsrHttpFactory();
         $psrRequest = $psrHttpFactory->createRequest($request);
 
-        $psrResponse = $server->run(new StreamableHttpTransport($psrRequest));
+        // The default DnsRebindingProtectionMiddleware only allows a localhost Host header, which
+        // is right for a server run on someone's machine but wrong here: Symfony's `jwt: ~`
+        // firewall already authenticated this request with a token scoped to /mcp (see
+        // McpOauthService / McpTokenScopeListener), so the Host/Origin check below would just
+        // reject every real request from claude.ai's servers for no added safety.
+        $transport = new StreamableHttpTransport($psrRequest, middleware: [
+            new CorsMiddleware(),
+            new DnsRebindingProtectionMiddleware(allowedHosts: ['*'], allowedOrigins: ['*']),
+        ]);
+
+        $psrResponse = $server->run($transport);
 
         return (new HttpFoundationFactory())->createResponse($psrResponse);
     }
