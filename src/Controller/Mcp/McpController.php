@@ -3,10 +3,13 @@
 namespace App\Controller\Mcp;
 
 use App\Entity\Main\User;
+use App\Entity\Rando\RaSuggestion;
 use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Budget\BuItemRepository;
 use App\Repository\Budget\BuRecurrentRepository;
+use App\Repository\Rando\RaSuggestionRepository;
 use App\Service\Budget\BudgetService;
+use App\Service\Data\DataRandos;
 use App\Service\Invest\InvestTrackingBuilder;
 use App\Service\Running\RunningTrackingBuilder;
 use Mcp\Server;
@@ -41,6 +44,8 @@ class McpController extends AbstractController
         BuRecurrentRepository $buRecurrentRepository,
         BuCategoryRepository $buCategoryRepository,
         SerializerInterface $serializer,
+        DataRandos $dataRandos,
+        RaSuggestionRepository $suggestionRepository,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -80,6 +85,55 @@ class McpController extends AbstractController
                 },
                 name: 'get_budget_bilan',
                 description: 'Bilan du planificateur budgétaire (dépenses, revenus, épargne, catégories) pour une année donnée, pour analyse.',
+            )
+            ->addTool(
+                function (
+                    string $name,
+                    int $type,
+                    int $difficulty,
+                    ?string $description = null,
+                    ?string $location = null,
+                    ?float $distanceKm = null,
+                    ?int $elevationGainM = null,
+                    ?int $altitudeMaxM = null,
+                    ?int $durationMinutes = null,
+                    array $pointsOfInterest = [],
+                    array $photoUrls = [],
+                    ?string $sourceUrl = null,
+                    ?string $parkRules = null,
+                    ?int $travelTimeFromPeyrollesMinutes = null,
+                    ?float $travelBudget = null,
+                    ?float $randoBudget = null,
+                ) use ($dataRandos, $suggestionRepository, $user): array {
+                    $data = (object) [
+                        'name' => $name,
+                        'type' => $type,
+                        'difficulty' => $difficulty,
+                        'description' => $description,
+                        'location' => $location,
+                        'distanceKm' => $distanceKm,
+                        'elevationGainM' => $elevationGainM,
+                        'altitudeMaxM' => $altitudeMaxM,
+                        'durationMinutes' => $durationMinutes,
+                        'pointsOfInterest' => $pointsOfInterest,
+                        'photoUrls' => $photoUrls,
+                        'sourceUrl' => $sourceUrl,
+                        'parkRules' => $parkRules,
+                        'travelTimeFromPeyrollesMinutes' => $travelTimeFromPeyrollesMinutes,
+                        'travelBudget' => $travelBudget,
+                        'randoBudget' => $randoBudget,
+                    ];
+
+                    $suggestion = $dataRandos->setDataSuggestion((new RaSuggestion())->setAuthor($user), $data);
+                    $suggestionRepository->save($suggestion, true);
+
+                    return ['id' => $suggestion->getId(), 'name' => $suggestion->getName()];
+                },
+                name: 'propose_rando',
+                description: 'Propose une idée de randonnée ou de bivouac, visible ensuite sur /espace-membre/suggestions. '
+                    . 'type: 0=Randonnée, 1=Bivouac. difficulty: 0=Facile, 1=Modéré, 2=Difficile, 3=Expert. '
+                    . 'travelTimeFromPeyrollesMinutes est le temps de trajet depuis Peyrolles-en-Provence (13860). '
+                    . 'travelBudget et randoBudget sont en euros (trajet et activité/entrée). photoUrls sont des URLs publiques trouvées sur le web, pas des fichiers.',
             )
             ->build();
 
