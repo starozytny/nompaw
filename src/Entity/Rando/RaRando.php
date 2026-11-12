@@ -116,6 +116,15 @@ class RaRando extends DataEntity
     #[Groups(['rando_form'])]
     private ?array $participants = [];
 
+    #[ORM\Column(length: 64, nullable: true, unique: true)]
+    private ?string $depositToken = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $depositPassword = null;
+
+    #[ORM\Column(options: ['default' => 0])]
+    private bool $depositEnabled = false;
+
     public function __construct()
     {
         $this->propalDates = new ArrayCollection();
@@ -469,6 +478,42 @@ class RaRando extends DataEntity
     public function setParticipants(?array $participants): static
     {
         $this->participants = $participants;
+
+        return $this;
+    }
+
+    public function getDepositToken(): ?string
+    {
+        return $this->depositToken;
+    }
+
+    public function setDepositToken(?string $depositToken): static
+    {
+        $this->depositToken = $depositToken;
+
+        return $this;
+    }
+
+    public function getDepositPassword(): ?string
+    {
+        return $this->depositPassword;
+    }
+
+    public function setDepositPassword(?string $depositPassword): static
+    {
+        $this->depositPassword = $depositPassword;
+
+        return $this;
+    }
+
+    public function isDepositEnabled(): bool
+    {
+        return $this->depositEnabled;
+    }
+
+    public function setDepositEnabled(bool $depositEnabled): static
+    {
+        $this->depositEnabled = $depositEnabled;
 
         return $this;
     }

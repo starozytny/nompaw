@@ -24,6 +24,10 @@ security:
             pattern: ^/api
             stateless: true
             jwt: ~
+        mcp:
+            pattern: ^/mcp$
+            stateless: true
+            jwt: ~
         main:
             lazy: true
             provider: app_user_provider
@@ -63,10 +67,19 @@ security:
          - { path: ^/intern/api/users/create,                   roles: PUBLIC_ACCESS }
          - { path: ^/intern/api/contacts/create,                roles: PUBLIC_ACCESS }
          - { path: ^/api/login_check,                           roles: PUBLIC_ACCESS }
+         - { path: ^/\.well-known/oauth-,                       roles: PUBLIC_ACCESS }
+         - { path: ^/mcp/oauth/token,                           roles: PUBLIC_ACCESS }
+         - { path: ^/mcp/oauth/authorize,                       roles: ROLE_USER }
+         - { path: ^/mcp$,                                      roles: ROLE_USER }
          - { path: ^/connexion-photos,                          roles: PUBLIC_ACCESS }
          - { path: ^/partage-photos,                            roles: PUBLIC_ACCESS }
+         - { path: ^/album-aventure,                            roles: PUBLIC_ACCESS }
          - { path: ^/espace-membre/photos,                      roles: ROLE_FAMILY_PHOTOS }
          - { path: ^/intern/api/photos,                         roles: ROLE_FAMILY_PHOTOS }
+         - { path: ^/espace-membre/running,                     roles: ROLE_RUNNING }
+         - { path: ^/intern/api/running,                        roles: ROLE_RUNNING }
+         - { path: ^/espace-membre/investissements,             roles: ROLE_INVEST }
+         - { path: ^/intern/api/invest,                         roles: ROLE_INVEST }
          - { path: ^/intern/api,                                roles: ROLE_USER }
          - { path: ^/api,                                       roles: ROLE_USER }
          - { path: ^/espace-membre,                             roles: ROLE_USER }

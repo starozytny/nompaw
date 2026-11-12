@@ -3,20 +3,26 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+
 import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button } from "@tailwindComponents/Elements/Button";
 import { Search } from "@tailwindComponents/Elements/Search";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/card";
 import { Badge } from "@shadcnComponents/ui/badge";
+import { Button as ButtonIconGhost } from "@shadcnComponents/ui/button";
+import {
+	DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@shadcnComponents/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 import { RecurrentFormulaire } from "@userPages/Budget/Reccurences/RecurrentForm";
+import { TypeColumns } from "@userPages/Budget/TypeColumns";
 
 const TYPE_COLOR = ['var(--cat-expense)', 'var(--cat-income)', 'var(--cat-saving)'];
-const TYPE_SOFT = ['var(--cat-expense-soft)', 'var(--cat-income-soft)', 'var(--cat-saving-soft)'];
 const URL_LIST = "intern_api_budget_recurrences_list";
 const URL_DELETE = "intern_api_budget_recurrences_delete";
 
@@ -82,12 +88,8 @@ export function RecurrencesTab () {
 					? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune récurrence pour l'instant.</div>
 					: filteredItems.length === 0
 						? <div className="px-4 py-8 text-center text-sm text-muted-foreground">Aucune récurrence ne correspond à la recherche.</div>
-						: <div className="flex flex-col">
-						{filteredItems.map(elem => (
-							<div key={elem.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-b-0 hover:bg-accent/50">
-								<div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg" style={{ background: TYPE_SOFT[elem.type], color: TYPE_COLOR[elem.type] }}>
-									<span className={`icon-${elem.typeIcon}`}></span>
-								</div>
+						: <TypeColumns items={filteredItems} emptyLabel="Aucune récurrence de ce type." renderItem={elem => (
+							<div key={elem.id} className="flex items-center gap-2 border-b px-3 py-2.5 last:border-b-0 hover:bg-accent/50">
 								<div className="flex-1 min-w-0">
 									<div className="font-medium text-sm truncate">{elem.name}</div>
 									<div className="flex flex-wrap items-center gap-1 mt-1">
@@ -95,16 +97,31 @@ export function RecurrencesTab () {
 										{elem.category && <Badge variant="outline" style={{ borderColor: TYPE_COLOR[elem.category.type] + '55', color: TYPE_COLOR[elem.category.type] }}>{elem.category.name}</Badge>}
 									</div>
 								</div>
-								<div className="text-sm font-semibold tabular-nums whitespace-nowrap" style={{ color: TYPE_COLOR[elem.type] }}>
+								<div className="text-xs font-semibold tabular-nums whitespace-nowrap" style={{ color: TYPE_COLOR[elem.type] }}>
 									{Sanitaze.toFormatCurrency(elem.price)}
 								</div>
-								<div className="flex gap-0.5 flex-shrink-0">
-									<ButtonIcon type="default" icon="pencil" onClick={() => handleEdit(elem)}>Modifier</ButtonIcon>
-									<ButtonIcon type="default" icon="trash" onClick={() => { setToDelete(elem); setDeleteOpen(true); }}>Supprimer</ButtonIcon>
+								<div className="flex-shrink-0">
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<ButtonIconGhost variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+												<MoreVertical className="h-4 w-4" />
+											</ButtonIconGhost>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem onClick={() => handleEdit(elem)}>
+												<Pencil /> Modifier
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => { setToDelete(elem); setDeleteOpen(true); }}
+												className="text-[var(--status-critical)] focus:text-[var(--status-critical)]"
+											>
+												<Trash2 /> Supprimer
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</div>
 							</div>
-						))}
-					</div>
+						)} />
 			}
 		</CardContent>
 

@@ -9,6 +9,13 @@ import {
   UserRound,
   Image,
   Globe,
+  Landmark,
+  Users,
+  RefreshCw,
+  MessageCircle,
+  Package,
+  Mail,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react"
 
@@ -23,6 +30,13 @@ export const MENU_ICONS: Record<string, LucideIcon> = {
   "user-octagon": UserRound,
   image: Image,
   earth: Globe,
+  bank: Landmark,
+  group: Users,
+  refresh1: RefreshCw,
+  chat: MessageCircle,
+  box: Package,
+  email: Mail,
+  "chart-up": TrendingUp,
 }
 
 export function menuIcon(key: string): LucideIcon {

@@ -127,26 +127,69 @@ export class RandoAdventure extends Component {
 	}
 
 	render () {
-		const { mode, haveAdventure, advName, userId, authorId } = this.props;
+		const { mode, haveAdventure, advName, userId, authorId, variant } = this.props;
 		const { errors, loadData, name, duration, url, data, propal } = this.state;
 
 		let params = { errors: errors, onChange: this.handleChange }
 
-		return <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-			<h3 className="text-sm font-semibold text-slate-700 mb-3">{haveAdventure ? "Activité sélectionnée" : "Proposition d'activité"}</h3>
+		let canManage = mode || authorId === parseInt(userId);
 
-			<div className="flex items-center justify-between bg-purple-50 border border-purple-200 rounded-lg px-4 py-3">
-				{haveAdventure
-					? <>
-						<span className="text-sm font-medium text-purple-900">{advName}</span>
-						{mode || authorId === parseInt(userId)
-							? <button className="text-slate-400 hover:text-slate-600" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
-								<span className="icon-close"></span>
-							</button>
-							: null
-						}
-					</>
-					: <div className="w-full flex flex-col gap-4">
+		// Activité déjà choisie.
+		if (haveAdventure) {
+			// variant "action" : bouton dans la barre d'actions du haut (style unifié).
+			if (variant === "action") {
+				return <>
+					{canManage && (
+						<Button iconLeft="refresh" type="default" onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
+							Changer l'activité
+						</Button>
+					)}
+					{this.renderModals(params, propal, name, duration, url)}
+				</>
+			}
+
+			// variant "cell" : dans la carte « Organisation » (la date est encore en vote).
+			if (variant === "cell") {
+				return <>
+				<h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+					<span className="icon-placeholder text-purple-600"></span> Quoi&nbsp;?
+				</h3>
+				<div className="flex items-center justify-between gap-2 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+					<span className="text-sm font-medium text-purple-900">{advName}</span>
+					{canManage && (
+						<button type="button"
+								className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-purple-700 transition-colors hover:bg-purple-100"
+								onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
+							<span className="icon-refresh"></span>
+							<span>Changer</span>
+						</button>
+					)}
+				</div>
+				{this.renderModals(params, propal, name, duration, url)}
+			</>
+			}
+
+			// Panneau confirmé : bouton d'action bien visible dans le corps de la carte.
+			return <>
+				{canManage && (
+					<button type="button"
+							className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+							onClick={() => this.handleModal('cancelAdventure', 'delete', null)}>
+						<span className="icon-refresh"></span>
+						<span>Changer l'activité</span>
+					</button>
+				)}
+				{this.renderModals(params, propal, name, duration, url)}
+			</>
+		}
+
+		return <div>
+			<h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+				<span className="icon-placeholder text-purple-600"></span> Quoi&nbsp;?
+			</h3>
+
+			<div className="flex flex-col gap-4 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+					<div className="w-full flex flex-col gap-4">
 						{data.length > 0
 							? <div className="flex flex-col gap-2">
 								{data.map((el, index) => {
@@ -201,7 +244,7 @@ export class RandoAdventure extends Component {
 									</div>
 								})}
 							</div>
-							: null
+							: <p className="text-sm text-purple-900/60">Aucune activité proposée pour l'instant.</p>
 						}
 
 						<div className="group flex items-center gap-2 cursor-pointer" onClick={() => this.handleModal('formPropal', 'create', null)}>
@@ -209,9 +252,14 @@ export class RandoAdventure extends Component {
 							<span className="text-sm font-medium text-blue-900 group-hover:underline">Proposer une activité</span>
 						</div>
 					</div>
-				}
 			</div>
 
+			{this.renderModals(params, propal, name, duration, url)}
+		</div>
+	}
+
+	renderModals (params, propal, name, duration, url) {
+		return <>
 			<Modal ref={this.formPropal} identifiant="form-adventures" maxWidth={568} title="Proposer une activité"
 				   content={<div className="flex flex-col gap-4">
 					   <div className="flex gap-4">
@@ -239,7 +287,7 @@ export class RandoAdventure extends Component {
 			<Modal ref={this.cancelAdventure} identifiant='cancel-adventure' maxWidth={414} title="Annuler l'activité sélectionnée"
 				   content={<p>Êtes-vous sûr de vouloir revenir sur les propositions des activités ?</p>}
 				   footer={null} closeTxt="Annuler" />
-		</div>
+		</>
 	}
 }
 
@@ -250,6 +298,7 @@ RandoAdventure.propTypes = {
 	userId: PropTypes.string.isRequired,
 	randoId: PropTypes.string.isRequired,
 	status: PropTypes.string.isRequired,
+	variant: PropTypes.string,
 }
 
 function modalFormPropal (self) {

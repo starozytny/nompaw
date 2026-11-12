@@ -1,0 +1,27 @@
+{% extends 'app/layout/layout.html.twig' %}
+
+{% block noindex %}
+    <meta name="robots" content="noindex">
+    <meta name="googlebot" content="noindex">
+{% endblock %}
+
+{% set page_title %}{{ randoName }} — Album{% endset %}
+
+{% block main_content %}
+    <div class="w-full max-w-screen-xl mx-auto sm:my-8 px-2 sm:px-4">
+        <div id="aventure_album"
+             data-token="{{ token }}"
+             data-name="{{ randoName }}"
+             data-unlocked="{{ unlocked ? 1 : 0 }}"
+             data-is-member="{{ isMember ? 1 : 0 }}"
+             data-member-name="{{ memberName }}"
+             data-login-url="{{ loginUrl }}">
+            {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('app_aventure_album') }}
+{% endblock %}

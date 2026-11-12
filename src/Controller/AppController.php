@@ -5,13 +5,21 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AppController extends AbstractController
 {
     #[Route('/', name: 'app_homepage')]
-    public function index(): Response
+    public function index(AuthenticationUtils $authenticationUtils): Response
     {
-        return $this->render('app/pages/index.html.twig');
+        if ($this->getUser()) {
+            return $this->redirectToRoute('user_homepage');
+        }
+
+        return $this->render('app/pages/index.html.twig', [
+            'last_username' => $authenticationUtils->getLastUsername(),
+            'error' => $authenticationUtils->getLastAuthenticationError(),
+        ]);
     }
 
     #[Route('/contact', name: 'app_contact')]

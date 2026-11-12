@@ -108,6 +108,7 @@ class DataBudget
             ->setType(TypeType::tryFrom((int) $data->type))
             ->setName($this->sanitizeData->trimData($data->name))
             ->setGoal($this->sanitizeData->setFloatValue($data->goal))
+            ->setGoalDate($this->sanitizeData->createDate($data->goalDate ?? '')?->setTime(0, 0, 0))
         ;
     }
 

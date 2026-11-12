@@ -11,7 +11,7 @@
             </div>
 
             <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
-                {% include 'app/pages/security/components/login_form.html.twig' %}
+                {% include 'app/pages/security/components/login_form.html.twig' with { target_path: target_path|default(null) } %}
             </div>
         </div>
     </div>

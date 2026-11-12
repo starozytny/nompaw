@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Route('/intern/api/aventures/rando', name: 'intern_api_aventures_randos_')]
 class RandoController extends AbstractController
@@ -138,6 +139,51 @@ class RandoController extends AbstractController
                            RaPropalAdventureRepository $propalAdventureRepository, RaPropalDateRepository $propalDateRepository): Response
     {
         return $this->submitForm("update", $repository, $obj, $request, $apiResponse, $validator, $dataEntity, $groupe, $userRepository,  $propalAdventureRepository, $propalDateRepository);
+    }
+
+    /**
+     * Active/désactive le dépôt public de photos pour une rando et (re)définit son mot de passe.
+     * Le lien public correspondant est servi par App\Controller\AventureAlbumController.
+     */
+    #[Route('/{id}/deposit', name: 'deposit', options: ['expose' => true], methods: 'PUT')]
+    public function deposit(RaRando $obj, Request $request, ApiResponse $apiResponse, RaRandoRepository $repository,
+                            UrlGeneratorInterface $urlGenerator): Response
+    {
+        if ($obj->getAuthor()->getId() != $this->getUser()->getId() && !$this->isGranted('ROLE_ADMIN')) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $data = json_decode($request->getContent());
+        if ($data === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Les données sont vides.');
+        }
+
+        $enabled = (bool) ($data->enabled ?? false);
+        $password = trim((string) ($data->password ?? ''));
+
+        if ($password !== '') {
+            $obj->setDepositPassword(password_hash($password, PASSWORD_DEFAULT));
+        }
+
+        if ($enabled) {
+            if (!$obj->getDepositPassword()) {
+                return $apiResponse->apiJsonResponseBadRequest('Définissez d\'abord un mot de passe.');
+            }
+            if (!$obj->getDepositToken()) {
+                $obj->setDepositToken(bin2hex(random_bytes(16)));
+            }
+        }
+
+        $obj->setDepositEnabled($enabled);
+        $repository->save($obj, true);
+
+        return $apiResponse->apiJsonResponseData([
+            'enabled' => $obj->isDepositEnabled(),
+            'hasPassword' => (bool) $obj->getDepositPassword(),
+            'url' => $obj->getDepositToken()
+                ? $urlGenerator->generate('app_aventure_album', ['token' => $obj->getDepositToken()], UrlGeneratorInterface::ABSOLUTE_URL)
+                : null,
+        ]);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]

@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.4-fpm
 
 # Installation des dépendances système
 # libheif-examples (heif-convert) et libraw-bin (dcraw_emu) servent à pré-convertir les photos

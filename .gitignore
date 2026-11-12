@@ -15,7 +15,6 @@
 ###< phpunit/phpunit ###
 
 graph.svg
-yarn.lock
 error_log
 
 ###> symfony/webpack-encore-bundle ###

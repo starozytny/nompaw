@@ -18,6 +18,11 @@
         ]
     },
     {
+        name: "Suggestions", icon: "star",
+        path: path('user_suggestions_index'),
+        matchRoute: ['user_suggestions_index']
+    },
+    {
         name: "Projets", icon: "calendar",
         path: path('user_projects_index'),
         matchRoute: [
@@ -39,27 +44,39 @@
         path: path('user_cryptos_index'),
         matchRoute: ['user_cryptos_index']
     },
+] %}
+
+{% if is_granted('ROLE_RUNNING') %}
+    {% set menu = menu | merge([{
+        name: "Running", icon: "run",
+        path: path('user_running_index'),
+        matchRoute: ['user_running_index']
+    }]) %}
+{% endif %}
+
+{% if is_granted('ROLE_INVEST') %}
+    {% set menu = menu | merge([{
+        name: "Investissements", icon: "chart-up",
+        path: path('user_invest_index'),
+        matchRoute: ['user_invest_index']
+    }]) %}
+{% endif %}
+
+{% set menu_bottom = [
     {
         name: "Vidéothèque", icon: "camera",
         path: path('user_videotheque_index'),
         matchRoute: ['user_videotheque_index']
     },
-    {
-        name: "Mon profil", icon: "user-octagon",
-        path: path('user_profil_index'),
-        matchRoute: ['user_profil_index']
-    },
 ] %}
 
 {% if is_granted('ROLE_FAMILY_PHOTOS') %}
-    {% set menu = menu | merge([{
+    {% set menu_bottom = menu_bottom | merge([{
         name: "Photos", icon: "image",
         path: path('user_photos_index'),
         matchRoute: ['user_photos_index']
     }]) %}
 {% endif %}
-
-{% set menu_bottom = [] %}
 
 {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_DEVELOPER') %}
     {% set menu_bottom = menu_bottom | merge([
@@ -67,12 +84,7 @@
             name: "Espace admin", icon: "earth",
             path: path('admin_homepage'),
             matchRoute: ['admin_homepage']
-        },
-        {
-            name: "Page accueil", icon: "earth",
-            path: path('app_homepage'),
-            matchRoute: ['app_homepage']
-        },
+        }
     ]) %}
 {% endif %}
 

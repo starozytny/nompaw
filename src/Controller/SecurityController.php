@@ -9,6 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -16,9 +17,17 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 class SecurityController extends AbstractController
 {
     #[Route('/connexion', name: 'app_login', options: ['expose' => true])]
-    public function index(AuthenticationUtils $authenticationUtils): Response
+    public function index(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        // Redirection post-connexion optionnelle (ex. retour vers un album d'aventure partagé).
+        // Restreinte à un chemin local pour éviter tout open redirect.
+        $redirect = $request->query->get('redirect');
+        $targetPath = (is_string($redirect) && str_starts_with($redirect, '/') && !str_starts_with($redirect, '//'))
+            ? $redirect
+            : null;
+
         if ($this->getUser()) {
+            if ($targetPath) return $this->redirect($targetPath);
             if($this->isGranted('ROLE_ADMIN')) return $this->redirectToRoute('user_homepage');
             if($this->isGranted('ROLE_USER')) return $this->redirectToRoute('user_homepage');
         }
@@ -28,7 +37,8 @@ class SecurityController extends AbstractController
 
         return $this->render('app/pages/security/index.html.twig', [
             'last_username' => $lastUsername,
-            'error' => $error
+            'error' => $error,
+            'target_path' => $targetPath,
         ]);
     }
 

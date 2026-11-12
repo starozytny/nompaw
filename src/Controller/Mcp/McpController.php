@@ -1,0 +1,190 @@
+<?php
+
+namespace App\Controller\Mcp;
+
+use App\Entity\Main\User;
+use App\Entity\Rando\RaSuggestion;
+use App\Repository\Budget\BuCategoryRepository;
+use App\Repository\Budget\BuItemRepository;
+use App\Repository\Budget\BuRecurrentRepository;
+use App\Repository\Rando\RaSuggestionRepository;
+use App\Service\Budget\BudgetService;
+use App\Service\Data\DataRandos;
+use App\Service\Invest\InvestTrackingBuilder;
+use App\Service\Running\RunningTrackingBuilder;
+use Mcp\Server;
+use Mcp\Server\Transport\Http\Middleware\CorsMiddleware;
+use Mcp\Server\Transport\Http\Middleware\DnsRebindingProtectionMiddleware;
+use Mcp\Server\Transport\StreamableHttpTransport;
+use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
+
+/**
+ * The MCP resource server: one Streamable HTTP endpoint exposing the three read-only "bilan"
+ * tools. Authentication is entirely Symfony's own job (the `mcp` firewall, `jwt: ~`, validating
+ * the same Lexik JWT the OAuth token endpoint issues) — mcp/sdk itself only acts as a resource
+ * server for the protocol, not for auth (see its ADR 0001/0002), so no SDK-side token checking
+ * is wired in here; by the time this action runs, $this->getUser() is already resolved and
+ * role-gating below is the same isGranted() check the equivalent InternApi controllers use.
+ */
+class McpController extends AbstractController
+{
+    #[Route('/mcp', name: 'mcp_endpoint', methods: ['GET', 'POST', 'DELETE'])]
+    public function __invoke(
+        Request $request,
+        RunningTrackingBuilder $runningTrackingBuilder,
+        InvestTrackingBuilder $investTrackingBuilder,
+        BudgetService $budgetService,
+        BuItemRepository $buItemRepository,
+        BuRecurrentRepository $buRecurrentRepository,
+        BuCategoryRepository $buCategoryRepository,
+        SerializerInterface $serializer,
+        DataRandos $dataRandos,
+        RaSuggestionRepository $suggestionRepository,
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $server = Server::builder()
+            ->setServerInfo('Nompaw', '1.0.0')
+            ->addTool(
+                function () use ($runningTrackingBuilder, $user): array {
+                    if (!$this->isGranted('ROLE_RUNNING')) {
+                        throw $this->createAccessDeniedException('Le module Running n\'est pas activé pour ce compte.');
+                    }
+
+                    return $runningTrackingBuilder->build($user);
+                },
+                name: 'get_running_bilan',
+                description: 'Historique complet de suivi running (séances, activités Garmin, poids, notes) pour analyse.',
+            )
+            ->addTool(
+                function () use ($investTrackingBuilder, $user): array {
+                    if (!$this->isGranted('ROLE_INVEST')) {
+                        throw $this->createAccessDeniedException('Le module Investissements n\'est pas activé pour ce compte.');
+                    }
+
+                    return $investTrackingBuilder->build($user);
+                },
+                name: 'get_invest_bilan',
+                description: 'Positions, lignes, valorisations et versements (couplés au budget) des enveloppes d\'investissement, pour analyse.',
+            )
+            ->addTool(
+                function (?int $year = null) use ($budgetService, $buItemRepository, $buRecurrentRepository, $buCategoryRepository, $serializer, $user): array {
+                    $year ??= (int) (new \DateTime())->format('Y');
+                    if ($year < $user->getBudgetYear()) {
+                        $year = $user->getBudgetYear();
+                    }
+
+                    return $budgetService->getData($serializer, $user, $year, $buItemRepository, $buRecurrentRepository, $buCategoryRepository);
+                },
+                name: 'get_budget_bilan',
+                description: 'Bilan du planificateur budgétaire (dépenses, revenus, épargne, catégories) pour une année donnée, pour analyse.',
+            )
+            ->addTool(
+                function () use ($suggestionRepository, $user): array {
+                    return array_map(fn (RaSuggestion $s) => [
+                        'id' => $s->getId(),
+                        'name' => $s->getName(),
+                        'type' => $s->getType()?->value,
+                        'location' => $s->getLocation(),
+                        'latitude' => $s->getLatitude(),
+                        'longitude' => $s->getLongitude(),
+                        'sourceUrl' => $s->getSourceUrl(),
+                    ], $suggestionRepository->findAllByUser($user));
+                },
+                name: 'list_suggestions',
+                description: 'Liste les randonnées/bivouacs déjà suggérés (nom, lieu, coordonnées, source) pour éviter de reproposer un doublon.',
+            )
+            ->addTool(
+                function (
+                    string $name,
+                    int $type,
+                    int $difficulty,
+                    ?string $description = null,
+                    ?string $location = null,
+                    ?float $latitude = null,
+                    ?float $longitude = null,
+                    ?float $distanceKm = null,
+                    ?int $elevationGainM = null,
+                    ?int $altitudeMaxM = null,
+                    ?int $durationMinutes = null,
+                    array $pointsOfInterest = [],
+                    array $photoUrls = [],
+                    ?string $sourceUrl = null,
+                    ?string $parkRules = null,
+                    ?int $travelTimeFromPeyrollesMinutes = null,
+                    ?float $travelBudget = null,
+                    ?float $randoBudget = null,
+                ) use ($dataRandos, $suggestionRepository, $user): array {
+                    $data = (object) [
+                        'name' => $name,
+                        'type' => $type,
+                        'difficulty' => $difficulty,
+                        'description' => $description,
+                        'location' => $location,
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                        'distanceKm' => $distanceKm,
+                        'elevationGainM' => $elevationGainM,
+                        'altitudeMaxM' => $altitudeMaxM,
+                        'durationMinutes' => $durationMinutes,
+                        'pointsOfInterest' => $pointsOfInterest,
+                        'photoUrls' => $photoUrls,
+                        'sourceUrl' => $sourceUrl,
+                        'parkRules' => $parkRules,
+                        'travelTimeFromPeyrollesMinutes' => $travelTimeFromPeyrollesMinutes,
+                        'travelBudget' => $travelBudget,
+                        'randoBudget' => $randoBudget,
+                    ];
+
+                    $suggestion = $dataRandos->setDataSuggestion((new RaSuggestion())->setAuthor($user), $data);
+
+                    $slugger = new AsciiSlugger('fr');
+                    $duplicate = $suggestionRepository->findDuplicate($user, $suggestion, strtolower($slugger->slug((string) $suggestion->getName())->toString()));
+                    if ($duplicate !== null) {
+                        throw new \RuntimeException(sprintf(
+                            'Doublon refusé : la suggestion « %s » (id %d) existe déjà. Appelle list_suggestions avant de proposer et choisis un autre lieu.',
+                            $duplicate->getName(),
+                            $duplicate->getId()
+                        ));
+                    }
+
+                    $suggestionRepository->save($suggestion, true);
+
+                    return ['id' => $suggestion->getId(), 'name' => $suggestion->getName()];
+                },
+                name: 'propose_rando',
+                description: 'Propose une idée de randonnée ou de bivouac, visible ensuite sur /espace-membre/suggestions. '
+                    . 'TOUJOURS appeler list_suggestions avant : un doublon (même nom, même sourceUrl ou lieu à moins de 300 m) est refusé. '
+                    . 'type: 0=Randonnée, 1=Bivouac. difficulty: 0=Facile, 1=Modéré, 2=Difficile, 3=Expert. '
+                    . 'latitude/longitude: coordonnées GPS décimales (WGS84) du point de départ du sentier ou du lieu de bivouac, ex 45.2167 / 6.5833. '
+                    . 'travelTimeFromPeyrollesMinutes est le temps de trajet depuis Peyrolles-en-Provence (13860). '
+                    . 'travelBudget et randoBudget sont en euros (trajet et activité/entrée). photoUrls sont des URLs publiques trouvées sur le web, pas des fichiers.',
+            )
+            ->build();
+
+        $psrHttpFactory = new PsrHttpFactory();
+        $psrRequest = $psrHttpFactory->createRequest($request);
+
+        // The default DnsRebindingProtectionMiddleware only allows a localhost Host header, which
+        // is right for a server run on someone's machine but wrong here: Symfony's `jwt: ~`
+        // firewall already authenticated this request with a token scoped to /mcp (see
+        // McpOauthService / McpTokenScopeListener), so the Host/Origin check below would just
+        // reject every real request from claude.ai's servers for no added safety.
+        $transport = new StreamableHttpTransport($psrRequest, middleware: [
+            new CorsMiddleware(),
+            new DnsRebindingProtectionMiddleware(allowedHosts: ['*'], allowedOrigins: ['*']),
+        ]);
+
+        $psrResponse = $server->run($transport);
+
+        return (new HttpFoundationFactory())->createResponse($psrResponse);
+    }
+}
