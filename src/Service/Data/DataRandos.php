@@ -72,6 +72,8 @@ class DataRandos
             ->setDifficulty(isset($data->difficulty) ? DifficultyType::from((int) $data->difficulty) : null)
             ->setDescription($this->sanitizeData->trimData($data->description ?? null))
             ->setLocation($this->sanitizeData->trimData($data->location ?? null))
+            ->setLatitude($this->sanitizeData->setFloatValue($data->latitude ?? null))
+            ->setLongitude($this->sanitizeData->setFloatValue($data->longitude ?? null))
             ->setDistanceKm($this->sanitizeData->setFloatValue($data->distanceKm ?? null))
             ->setElevationGainM($this->sanitizeData->setIntValue($data->elevationGainM ?? null))
             ->setAltitudeMaxM($this->sanitizeData->setIntValue($data->altitudeMaxM ?? null))

@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
  * The MCP resource server: one Streamable HTTP endpoint exposing the three read-only "bilan"
@@ -87,12 +88,29 @@ class McpController extends AbstractController
                 description: 'Bilan du planificateur budgétaire (dépenses, revenus, épargne, catégories) pour une année donnée, pour analyse.',
             )
             ->addTool(
+                function () use ($suggestionRepository, $user): array {
+                    return array_map(fn (RaSuggestion $s) => [
+                        'id' => $s->getId(),
+                        'name' => $s->getName(),
+                        'type' => $s->getType()?->value,
+                        'location' => $s->getLocation(),
+                        'latitude' => $s->getLatitude(),
+                        'longitude' => $s->getLongitude(),
+                        'sourceUrl' => $s->getSourceUrl(),
+                    ], $suggestionRepository->findAllByUser($user));
+                },
+                name: 'list_suggestions',
+                description: 'Liste les randonnées/bivouacs déjà suggérés (nom, lieu, coordonnées, source) pour éviter de reproposer un doublon.',
+            )
+            ->addTool(
                 function (
                     string $name,
                     int $type,
                     int $difficulty,
                     ?string $description = null,
                     ?string $location = null,
+                    ?float $latitude = null,
+                    ?float $longitude = null,
                     ?float $distanceKm = null,
                     ?int $elevationGainM = null,
                     ?int $altitudeMaxM = null,
@@ -111,6 +129,8 @@ class McpController extends AbstractController
                         'difficulty' => $difficulty,
                         'description' => $description,
                         'location' => $location,
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
                         'distanceKm' => $distanceKm,
                         'elevationGainM' => $elevationGainM,
                         'altitudeMaxM' => $altitudeMaxM,
@@ -125,13 +145,26 @@ class McpController extends AbstractController
                     ];
 
                     $suggestion = $dataRandos->setDataSuggestion((new RaSuggestion())->setAuthor($user), $data);
+
+                    $slugger = new AsciiSlugger('fr');
+                    $duplicate = $suggestionRepository->findDuplicate($user, $suggestion, strtolower($slugger->slug((string) $suggestion->getName())->toString()));
+                    if ($duplicate !== null) {
+                        throw new \RuntimeException(sprintf(
+                            'Doublon refusé : la suggestion « %s » (id %d) existe déjà. Appelle list_suggestions avant de proposer et choisis un autre lieu.',
+                            $duplicate->getName(),
+                            $duplicate->getId()
+                        ));
+                    }
+
                     $suggestionRepository->save($suggestion, true);
 
                     return ['id' => $suggestion->getId(), 'name' => $suggestion->getName()];
                 },
                 name: 'propose_rando',
                 description: 'Propose une idée de randonnée ou de bivouac, visible ensuite sur /espace-membre/suggestions. '
+                    . 'TOUJOURS appeler list_suggestions avant : un doublon (même nom, même sourceUrl ou lieu à moins de 300 m) est refusé. '
                     . 'type: 0=Randonnée, 1=Bivouac. difficulty: 0=Facile, 1=Modéré, 2=Difficile, 3=Expert. '
+                    . 'latitude/longitude: coordonnées GPS décimales (WGS84) du point de départ du sentier ou du lieu de bivouac, ex 45.2167 / 6.5833. '
                     . 'travelTimeFromPeyrollesMinutes est le temps de trajet depuis Peyrolles-en-Provence (13860). '
                     . 'travelBudget et randoBudget sont en euros (trajet et activité/entrée). photoUrls sont des URLs publiques trouvées sur le web, pas des fichiers.',
             )
