@@ -35,7 +35,8 @@ use App\Repository\Crypto\CrTradeRepository;
  * - Depot/Retrait/Recuperation/Stacking/Transfert do not affect the coin-holdings replay below: this
  *   mirrors the interpretation already used by the existing frontend cash-flow view
  *   (assets/user/js/pages/components/Cryptos/Trades/TradesList.jsx), which only adjusts per-coin
- *   holdings on Achat (+toNbToken of toCoin) and Vente (-fromNbToken of fromCoin). A coin acquired
+ *   holdings on Achat (+toNbToken of toCoin, and -fromNbToken of fromCoin when paid in crypto) and
+ *   Vente (-fromNbToken of fromCoin). A coin acquired
  *   only via Depot/Recuperation/Stacking will therefore be under-counted in the automatic portfolio
  *   valuation for years to come; the manual override (CrTrade::manualPortfolioValueTotal) exists
  *   specifically as the escape hatch for that gap.
@@ -138,6 +139,11 @@ class CrTaxReportService
             if ($trade->getType() === TypeType::Achat) {
                 $grossAcquisitionCost += $trade->getTotal();
                 $holdings[$trade->getToCoin()] = ($holdings[$trade->getToCoin()] ?? 0.0) + $trade->getToNbToken();
+                // A crypto-to-crypto conversion (recorded as Achat, e.g. MCO -> CRO) spends the fromCoin
+                // too — without this the spent coin stays in the portfolio valuation forever.
+                if ($trade->getFromCoin() !== 'EUR') {
+                    $holdings[$trade->getFromCoin()] = ($holdings[$trade->getFromCoin()] ?? 0.0) - $trade->getFromNbToken();
+                }
             } elseif ($isVente) {
                 $holdings[$trade->getFromCoin()] = ($holdings[$trade->getFromCoin()] ?? 0.0) - $trade->getFromNbToken();
             }
@@ -282,6 +288,11 @@ class CrTaxReportService
             if ($trade->getType() === TypeType::Achat) {
                 $grossAcquisitionCost += $trade->getTotal();
                 $holdings[$trade->getToCoin()] = ($holdings[$trade->getToCoin()] ?? 0.0) + $trade->getToNbToken();
+                // A crypto-to-crypto conversion (recorded as Achat, e.g. MCO -> CRO) spends the fromCoin
+                // too — without this the spent coin stays in the portfolio valuation forever.
+                if ($trade->getFromCoin() !== 'EUR') {
+                    $holdings[$trade->getFromCoin()] = ($holdings[$trade->getFromCoin()] ?? 0.0) - $trade->getFromNbToken();
+                }
             }
         }
 
