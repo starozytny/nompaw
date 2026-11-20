@@ -17,8 +17,10 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * pattern CrTaxReportService already uses for the fiscal report.
  *
  * Business rules below are ported as-is from the JS originals (kept in one place now instead of two):
- * - "Dispo" (EUR cash running total): Vente +totalReal, Depot +total, Achat -total, Retrait -totalReal,
- *   Recuperation/Stacking -> bonus only (no Dispo effect), Transfert/ACategoriser -> no effect.
+ * - "Dispo" (EUR cash running total) = the EUR balance of the validity check below, i.e. only legs where
+ *   EUR is actually the coin moved, in token quantities (EUR fromCoin debits fromNbToken, EUR toCoin
+ *   credits toNbToken). Crypto-to-crypto swaps don't touch it, and it doesn't rely on totalReal (which can
+ *   be 0 or fee-adjusted on imports) — so it always matches the EUR coin ledger.
  * - Holdings (replayHoldings, valuation-oriented, EUR untracked): Achat +toCoin (and -fromCoin when paid
  *   in crypto rather than EUR); Vente -fromCoin (+toCoin
  *   too if toCoin isn't EUR, i.e. a crypto-to-crypto swap); Depot/Retrait only move the balance if the
@@ -60,10 +62,7 @@ class CrTradeReplayService
         // dispo/cumDepot/cumRetrait/cumBonus are ALL-TIME running totals (since account inception, not
         // year-scoped) — TradesList.jsx's per-month header shows these four cumulative figures (as of
         // the end of that month), separate from $statsByYear below which is scoped to a single year for
-        // the stat cards. Vente/Depot/Achat's dispo effect uses getTotalReal() (the real, fee-affected
-        // amount actually received/credited/paid); Retrait's dispo effect is the one exception and uses
-        // getTotal() (the fee-free reference) instead — a deliberate asymmetry, not a bug.
-        $dispo = 0.0;
+        // the stat cards. dispo is read from the EUR balance checkValidity maintains (see class docblock).
         $cumDepot = 0.0;
         $cumRetrait = 0.0;
         $cumBonus = 0.0;
@@ -80,6 +79,7 @@ class CrTradeReplayService
             }
 
             $invalid = $this->checkValidity($trade, $validityBalances);
+            $dispo = round($validityBalances['EUR'] ?? 0.0, 2);
             if ($invalid !== null) {
                 // The first impossible row of an episode is the cause; the rest are just its knock-on effect.
                 $invalid['root'] = in_array($trade->getId(), $rootIds, true);
@@ -87,22 +87,18 @@ class CrTradeReplayService
 
             switch ($trade->getType()) {
                 case TypeType::Vente:
-                    $dispo += $trade->getTotalReal();
                     $statsByYear[$tradeYear]['vente'] += $trade->getTotal();
                     $statsByYear[$tradeYear]['venteCount']++;
                     break;
                 case TypeType::Depot:
-                    $dispo += $trade->getTotalReal();
                     $cumDepot += $trade->getTotal();
                     $statsByYear[$tradeYear]['depot'] += $trade->getTotal();
                     break;
                 case TypeType::Achat:
-                    $dispo -= $trade->getTotalReal();
                     $statsByYear[$tradeYear]['achat'] += $trade->getTotal();
                     $statsByYear[$tradeYear]['achatCount']++;
                     break;
                 case TypeType::Retrait:
-                    $dispo -= $trade->getTotal();
                     $cumRetrait += $trade->getTotalReal();
                     $statsByYear[$tradeYear]['retrait'] += $trade->getTotalReal();
                     break;
@@ -116,7 +112,6 @@ class CrTradeReplayService
             }
 
             $statsByYear[$tradeYear]['count']++;
-            $dispo = round($dispo, 2);
             $cumDepot = round($cumDepot, 2);
             $cumRetrait = round($cumRetrait, 2);
             $cumBonus = round($cumBonus, 2);
