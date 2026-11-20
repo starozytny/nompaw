@@ -12,9 +12,9 @@ use App\Entity\Enum\Crypto\TypeType;
  * Unlike Kraken/Coinbase, Binance's commission on a trade can be charged in an asset that is neither the
  * base nor the quote coin of that trade (e.g. paid in BNB when the fee-discount option is enabled), so
  * costPrice/costCoin here track the fee honestly in whatever asset Binance actually charged it in, rather
- * than assuming it's always the quote/fiat currency — totalReal/total both hold the trade's gross quote
- * value (quoteQty) since netting a same-asset fee against it (as KrakenApiTransactionMapper does) isn't
- * meaningful when the fee is in a third asset.
+ * than assuming it's always the quote/fiat currency. totalReal/total come from BinanceEurTotals: only
+ * EUR-quoted pairs get an EUR total — a USDT/BTC/... quote amount is NOT euros and stays at 0, like any
+ * other crypto-to-crypto trade in the app.
  *
  * Only deposits with status 1 (success) and withdrawals with status 6 (completed) are mapped — pending/
  * failed/cancelled entries are skipped, matching how a manual CSV export would only ever show completed
@@ -111,8 +111,7 @@ class BinanceApiTransactionMapper
                 'toNbToken' => $qty,
                 'costPrice' => $commission,
                 'costCoin' => $commissionAsset,
-                'totalReal' => $quoteQty,
-                'total' => $quoteQty,
+                ...BinanceEurTotals::compute(TypeType::Achat, $pair['quote'], $quoteQty, $pair['base'], $qty, $commission, $commissionAsset),
             ];
         }
 
@@ -126,8 +125,7 @@ class BinanceApiTransactionMapper
             'toNbToken' => $quoteQty,
             'costPrice' => $commission,
             'costCoin' => $commissionAsset,
-            'totalReal' => $quoteQty,
-            'total' => $quoteQty,
+            ...BinanceEurTotals::compute(TypeType::Vente, $pair['base'], $qty, $pair['quote'], $quoteQty, $commission, $commissionAsset),
         ];
     }
 
