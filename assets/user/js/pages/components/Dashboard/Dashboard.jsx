@@ -11,7 +11,7 @@ import { Card, CardContent } from "@shadcnComponents/ui/card";
 
 import { useDashboardStats } from "@userPages/Dashboard/lib/useDashboardStats";
 import { StatCard } from "@userPages/Dashboard/StatCard";
-import { ShortcutCard } from "@userPages/Dashboard/ShortcutCard";
+import { ShortcutGroups } from "@userPages/Dashboard/ShortcutGroups";
 import { WeeklyVolumeChart } from "@userPages/Dashboard/WeeklyVolumeChart";
 import { DashboardSkeleton } from "@userPages/Dashboard/DashboardSkeleton";
 
@@ -26,17 +26,17 @@ import { todayISO } from "@userPages/Running/Suivi/lib/format";
 
 const TODAY_LABEL = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
-// Order requested: Aventures, Projets, Anniversaires, Planificateur, Crypto, Investissements, Running, Vidéothèque, Photos.
+// Order within each group (see ShortcutGroups) follows this array.
 const SHORTCUTS = [
-	{ key: 'aventures', Icon: Mountain, title: 'Aventures', description: 'Parcourez vos aventures et revivez vos moments à travers vos photos.', cta: 'Voir les aventures', color: '#2563eb', soft: '#2563eb1a' },
-	{ key: 'projets', Icon: Compass, title: 'Projets', description: 'Planifiez vos prochaines escapades et organisez vos itinéraires.', cta: 'Planifier un voyage', color: '#ea580c', soft: '#ea580c1a' },
-	{ key: 'anniversaires', Icon: Cake, title: 'Anniversaires', description: 'Consultez les albums et les idées de cadeaux.', cta: 'Voir les anniversaires', color: '#db2777', soft: '#db27771a' },
-	{ key: 'budget', Icon: Calculator, title: 'Planificateur', description: 'Gérez vos dépenses et suivez votre budget mensuel.', cta: 'Gérer le budget', color: '#16a34a', soft: '#16a34a1a' },
-	{ key: 'cryptos', Icon: Bitcoin, title: 'Cryptomonnaies', description: "Vue d'ensemble de vos échanges et de votre portefeuille.", cta: 'Voir les échanges', color: '#4f46e5', soft: '#4f46e51a' },
-	{ key: 'invest', Icon: TrendingUp, title: 'Investissements', description: 'Positions, versements et valorisation de ton patrimoine.', cta: 'Voir le portefeuille', roleKey: 'invest', color: '#0d9488', soft: '#0d94881a' },
-	{ key: 'running', Icon: Footprints, title: 'Running', description: "Plan d'entraînement, suivi et bilan de course.", cta: 'Voir le plan', roleKey: 'running', color: '#e11d48', soft: '#e11d481a' },
-	{ key: 'videotheque', Icon: Clapperboard, title: 'Vidéothèque', description: 'Accédez à votre collection de films et séries.', cta: 'Voir les films', color: '#7c3aed', soft: '#7c3aed1a' },
-	{ key: 'photos', Icon: Images, title: 'Photos', description: 'Retrouvez les albums photo partagés en famille.', cta: 'Voir les albums', roleKey: 'photos', color: '#0891b2', soft: '#0891b21a' },
+	{ key: 'aventures', Icon: Mountain, title: 'Aventures', group: 'souvenirs', description: 'Parcourez vos aventures et revivez vos moments à travers vos photos.', color: '#2563eb', soft: '#2563eb1a' },
+	{ key: 'projets', Icon: Compass, title: 'Projets', group: 'projets', description: 'Planifiez vos prochaines escapades et organisez vos itinéraires.', color: '#ea580c', soft: '#ea580c1a' },
+	{ key: 'anniversaires', Icon: Cake, title: 'Anniversaires', group: 'souvenirs', description: 'Consultez les albums et les idées de cadeaux.', color: '#db2777', soft: '#db27771a' },
+	{ key: 'budget', Icon: Calculator, title: 'Planificateur', group: 'argent', description: 'Gérez vos dépenses et suivez votre budget mensuel.', color: '#16a34a', soft: '#16a34a1a' },
+	{ key: 'cryptos', Icon: Bitcoin, title: 'Cryptomonnaies', group: 'argent', description: "Vue d'ensemble de vos échanges et de votre portefeuille.", color: '#4f46e5', soft: '#4f46e51a' },
+	{ key: 'invest', Icon: TrendingUp, title: 'Investissements', group: 'argent', description: 'Positions, versements et valorisation de ton patrimoine.', roleKey: 'invest', color: '#0d9488', soft: '#0d94881a' },
+	{ key: 'running', Icon: Footprints, title: 'Running', group: 'projets', description: "Plan d'entraînement, suivi et bilan de course.", roleKey: 'running', color: '#e11d48', soft: '#e11d481a' },
+	{ key: 'videotheque', Icon: Clapperboard, title: 'Vidéothèque', group: 'souvenirs', description: 'Accédez à votre collection de films et séries.', color: '#7c3aed', soft: '#7c3aed1a' },
+	{ key: 'photos', Icon: Images, title: 'Photos', group: 'souvenirs', description: 'Retrouvez les albums photo partagés en famille.', roleKey: 'photos', color: '#0891b2', soft: '#0891b21a' },
 ];
 
 export default function Dashboard ({ paths }) {
@@ -118,11 +118,6 @@ export default function Dashboard ({ paths }) {
 			</div>}
 		</>)}
 
-		<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-			{SHORTCUTS.filter(s => !s.roleKey || paths[s.roleKey]).map(s => <ShortcutCard
-				key={s.key} href={paths[s.key]} Icon={s.Icon} title={s.title} description={s.description} cta={s.cta}
-				color={s.color} soft={s.soft}
-			/>)}
-		</div>
+		<ShortcutGroups items={SHORTCUTS.filter(s => !s.roleKey || paths[s.roleKey])} paths={paths} />
 	</div>;
 }

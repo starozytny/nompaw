@@ -75,6 +75,30 @@ class RaImageRepository extends ServiceEntityRepository
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
+    /**
+     * Photos of past (non-"next") adventures per group, in one query — counting via $rando->getImages()
+     * would hydrate every image.
+     *
+     * @return array<int, int> groupe id => photo count
+     */
+    public function countByGroupes(array $groupes): array
+    {
+        if (!$groupes) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('i')
+            ->select('IDENTITY(r.groupe) AS gid, COUNT(i.id) AS total')
+            ->join('i.rando', 'r')
+            ->where('r.groupe IN (:groupes)')
+            ->andWhere('r.isNext = false')
+            ->setParameter('groupes', $groupes)
+            ->groupBy('r.groupe')
+            ->getQuery()->getArrayResult();
+
+        return array_column(array_map(fn ($row) => ['gid' => (int) $row['gid'], 'total' => (int) $row['total']], $rows), 'total', 'gid');
+    }
+
     private function visibleImagesQueryBuilder(RaRando $rando, bool $canSeePrivate)
     {
         $qb = $this->createQueryBuilder('i')
