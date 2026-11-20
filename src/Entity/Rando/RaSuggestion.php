@@ -6,6 +6,8 @@ use App\Entity\Enum\Rando\DifficultyType;
 use App\Entity\Enum\Rando\SuggestionType;
 use App\Entity\Main\User;
 use App\Repository\Rando\RaSuggestionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -108,9 +110,21 @@ class RaSuggestion
     #[Groups(['suggestion_list'])]
     private ?\DateTimeInterface $createdAt = null;
 
+    /** @var Collection<int, RaSuggestionTrace> */
+    #[ORM\OneToMany(mappedBy: 'suggestion', targetEntity: RaSuggestionTrace::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['id' => 'ASC'])]
+    private Collection $traces;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
+        $this->traces = new ArrayCollection();
+    }
+
+    /** @return Collection<int, RaSuggestionTrace> */
+    public function getTraces(): Collection
+    {
+        return $this->traces;
     }
 
     public function getId(): ?int

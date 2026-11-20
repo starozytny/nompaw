@@ -3,10 +3,13 @@
 namespace App\Controller\InternApi\Rando;
 
 use App\Entity\Rando\RaSuggestion;
+use App\Entity\Rando\RaSuggestionTrace;
 use App\Repository\Rando\RaSuggestionRepository;
+use App\Repository\Rando\RaSuggestionTraceRepository;
 use App\Service\Api\ApiResponse;
 use App\Service\Data\DataRandos;
 use App\Service\FileUploader;
+use App\Service\Rando\GpxService;
 use App\Service\ValidatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,11 +77,53 @@ class SuggestionController extends AbstractController
         return $apiResponse->apiJsonResponseCustom(['url' => '/' . RaSuggestion::FOLDER_PHOTOS . '/' . $fileName]);
     }
 
-    #[Route('/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
-    public function delete(RaSuggestion $suggestion, RaSuggestionRepository $suggestionRepository, ApiResponse $apiResponse): Response
+    /**
+     * Imports a GPX file as an additional route for the suggestion (a suggestion can hold several).
+     */
+    #[Route('/{id}/traces', name: 'trace_add', options: ['expose' => true], requirements: ['id' => '\d+'], methods: 'POST')]
+    public function addTrace(RaSuggestion $suggestion, Request $request, GpxService $gpxService, ApiResponse $apiResponse): Response
     {
         if ($suggestion->getAuthor() !== $this->getUser()) {
             return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $file = $request->files->get('gpx');
+        if (!$file) {
+            return $apiResponse->apiJsonResponseBadRequest('Aucun fichier GPX envoyé.');
+        }
+
+        try {
+            $name = trim((string) $request->request->get('name')) ?: pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $trace = $gpxService->addTrace($suggestion, $name, (string) file_get_contents($file->getPathname()), RaSuggestionTrace::SOURCE_USER);
+        } catch (\InvalidArgumentException $e) {
+            return $apiResponse->apiJsonResponseBadRequest($e->getMessage());
+        }
+
+        return $apiResponse->apiJsonResponseCustom($this->traceToArray($trace));
+    }
+
+    #[Route('/traces/{id}', name: 'trace_delete', options: ['expose' => true], methods: 'DELETE')]
+    public function deleteTrace(RaSuggestionTrace $trace, RaSuggestionTraceRepository $traceRepository, GpxService $gpxService, ApiResponse $apiResponse): Response
+    {
+        if ($trace->getSuggestion()?->getAuthor() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $gpxService->deleteFile($trace);
+        $traceRepository->remove($trace, true);
+
+        return $apiResponse->apiJsonResponseSuccessful('ok');
+    }
+
+    #[Route('/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
+    public function delete(RaSuggestion $suggestion, RaSuggestionRepository $suggestionRepository, GpxService $gpxService, ApiResponse $apiResponse): Response
+    {
+        if ($suggestion->getAuthor() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        foreach ($suggestion->getTraces() as $trace) {
+            $gpxService->deleteFile($trace);
         }
 
         $suggestionRepository->remove($suggestion, true);
@@ -109,7 +154,21 @@ class SuggestionController extends AbstractController
             'travelTimeFromPeyrollesMinutes' => $s->getTravelTimeFromPeyrollesMinutes(),
             'travelBudget' => $s->getTravelBudget(),
             'randoBudget' => $s->getRandoBudget(),
+            'traces' => $s->getTraces()->map(fn (RaSuggestionTrace $t) => $this->traceToArray($t))->getValues(),
             'createdAt' => $s->getCreatedAt()?->format('Y-m-d\TH:i:s'),
+        ];
+    }
+
+    private function traceToArray(RaSuggestionTrace $t): array
+    {
+        return [
+            'id' => $t->getId(),
+            'name' => $t->getName(),
+            'url' => '/' . RaSuggestionTrace::FOLDER . '/' . $t->getFileName(),
+            'distanceKm' => $t->getDistanceKm(),
+            'elevationGainM' => $t->getElevationGainM(),
+            'altitudeMaxM' => $t->getAltitudeMaxM(),
+            'source' => $t->getSource(),
         ];
     }
 }

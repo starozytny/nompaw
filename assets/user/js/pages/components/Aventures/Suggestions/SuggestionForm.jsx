@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import axios from 'axios';
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
-import { Plus, X, Upload, Link as LinkIcon } from 'lucide-react';
+import { Plus, X, Upload, Link as LinkIcon, Route as RouteIcon } from 'lucide-react';
 
 import Formulaire from "@commonFunctions/formulaire";
 
@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const URL_SAVE = "intern_api_rando_suggestions_save";
 const URL_UPLOAD_PHOTO = "intern_api_rando_suggestions_upload_photo";
+const URL_TRACE_ADD = "intern_api_rando_suggestions_trace_add";
+const URL_TRACE_DELETE = "intern_api_rando_suggestions_trace_delete";
 
 const TYPES = [
 	{ value: '0', label: 'Randonnée' },
@@ -66,6 +68,9 @@ export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 	const [uploading, setUploading] = useState(false);
 	const [load, setLoad] = useState(false);
 	const fileInputRef = useRef(null);
+	const gpxInputRef = useRef(null);
+	const [traces, setTraces] = useState([]);
+	const [traceLoading, setTraceLoading] = useState(false);
 
 	// The Sheet is opened by the parent setting `open` from outside (not from its own trigger),
 	// so Radix never fires onOpenChange for that transition — reset the form here instead,
@@ -74,6 +79,7 @@ export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 		if (open) {
 			setState(emptyState(element));
 			setNewPhotoUrl("");
+			setTraces(element?.traces || []);
 		}
 	}, [open, element]);
 
@@ -103,6 +109,29 @@ export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 			.then((response) => setState(s => ({ ...s, photoUrls: [...s.photoUrls, response.data.url] })))
 			.catch((error) => Formulaire.displayErrors(null, error))
 			.then(() => setUploading(false))
+		;
+	};
+
+	// Traces are saved on their own (they need the suggestion's id), so the list is refreshed through onSaved.
+	const handleGpxChange = (e) => {
+		let file = e.target.files[0];
+		e.target.value = "";
+		if (!file || !element?.id) return;
+
+		setTraceLoading(true);
+		let data = new FormData();
+		data.append('gpx', file);
+		axios.post(Routing.generate(URL_TRACE_ADD, { id: element.id }), data)
+			.then((response) => { setTraces(t => [...t, response.data]); onSaved(); })
+			.catch((error) => Formulaire.displayErrors(null, error))
+			.then(() => setTraceLoading(false))
+		;
+	};
+
+	const removeTrace = (trace) => {
+		axios({ method: "DELETE", url: Routing.generate(URL_TRACE_DELETE, { id: trace.id }) })
+			.then(() => { setTraces(t => t.filter(x => x.id !== trace.id)); onSaved(); })
+			.catch((error) => Formulaire.displayErrors(null, error))
 		;
 	};
 
@@ -242,6 +271,26 @@ export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 						</Button>
 					</div>
 					{uploading && <div className="text-xs text-muted-foreground">Envoi de la photo...</div>}
+				</div>
+
+				<div className={SECTION_CLASS}>
+					<div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Traces GPX</div>
+
+					{!element?.id
+						? <p className="text-sm text-foreground/70">Enregistre d'abord la suggestion, puis modifie-la pour importer des traces GPX.</p>
+						: <>
+							{traces.map(t => (
+								<div key={t.id} className="flex items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 text-sm text-foreground">
+									<span className="min-w-0 truncate"><RouteIcon className="mr-1.5 inline h-4 w-4" />{t.name} · {t.distanceKm} km{t.elevationGainM !== null ? ` · ${t.elevationGainM} m D+` : ''}</span>
+									<button type="button" onClick={() => removeTrace(t)} aria-label={`Supprimer la trace ${t.name}`}
+										className="text-muted-foreground hover:text-[var(--status-critical)]"><X className="h-4 w-4" /></button>
+								</div>
+							))}
+							<input type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" ref={gpxInputRef} onChange={handleGpxChange} className="hidden" />
+							<Button type="button" variant="outline" className="self-start" disabled={traceLoading} onClick={() => gpxInputRef.current?.click()}>
+								<Upload className="h-4 w-4" /> {traceLoading ? 'Import…' : 'Importer un fichier GPX'}
+							</Button>
+						</>}
 				</div>
 
 				<div className={SECTION_CLASS}>

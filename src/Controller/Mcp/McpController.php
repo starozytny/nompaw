@@ -4,6 +4,7 @@ namespace App\Controller\Mcp;
 
 use App\Entity\Main\User;
 use App\Entity\Rando\RaSuggestion;
+use App\Entity\Rando\RaSuggestionTrace;
 use App\Repository\Budget\BuCategoryRepository;
 use App\Repository\Budget\BuItemRepository;
 use App\Repository\Budget\BuRecurrentRepository;
@@ -11,6 +12,7 @@ use App\Repository\Rando\RaSuggestionRepository;
 use App\Service\Budget\BudgetService;
 use App\Service\Data\DataRandos;
 use App\Service\Invest\InvestTrackingBuilder;
+use App\Service\Rando\GpxService;
 use App\Service\Running\RunningTrackingBuilder;
 use Mcp\Server;
 use Mcp\Server\Transport\Http\Middleware\CorsMiddleware;
@@ -47,6 +49,7 @@ class McpController extends AbstractController
         SerializerInterface $serializer,
         DataRandos $dataRandos,
         RaSuggestionRepository $suggestionRepository,
+        GpxService $gpxService,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -97,10 +100,36 @@ class McpController extends AbstractController
                         'latitude' => $s->getLatitude(),
                         'longitude' => $s->getLongitude(),
                         'sourceUrl' => $s->getSourceUrl(),
+                        'traces' => $s->getTraces()->map(fn (RaSuggestionTrace $t) => $t->getName())->getValues(),
                     ], $suggestionRepository->findAllByUser($user));
                 },
                 name: 'list_suggestions',
                 description: 'Liste les randonnées/bivouacs déjà suggérés (nom, lieu, coordonnées, source) pour éviter de reproposer un doublon.',
+            )
+            ->addTool(
+                function (int $suggestionId, string $name, ?string $gpxUrl = null, ?string $gpxContent = null) use ($gpxService, $suggestionRepository, $user): array {
+                    $suggestion = $suggestionRepository->find($suggestionId);
+                    if ($suggestion === null || $suggestion->getAuthor() !== $user) {
+                        throw new \RuntimeException("Suggestion $suggestionId introuvable.");
+                    }
+                    if (($gpxUrl === null) === ($gpxContent === null)) {
+                        throw new \RuntimeException('Fournis exactement un des deux : gpxUrl ou gpxContent.');
+                    }
+
+                    try {
+                        $xml = $gpxUrl !== null ? $gpxService->download($gpxUrl) : $gpxContent;
+                        $trace = $gpxService->addTrace($suggestion, $name, $xml, RaSuggestionTrace::SOURCE_AI);
+                    } catch (\InvalidArgumentException $e) {
+                        throw new \RuntimeException($e->getMessage());
+                    }
+
+                    return ['id' => $trace->getId(), 'name' => $trace->getName(), 'distanceKm' => $trace->getDistanceKm(), 'elevationGainM' => $trace->getElevationGainM()];
+                },
+                name: 'add_suggestion_trace',
+                description: 'Ajoute une trace GPX (itinéraire) à une suggestion existante (suggestionId vient de list_suggestions ou propose_rando). '
+                    . 'Fournis soit gpxUrl (lien direct vers un fichier .gpx public, téléchargé par le serveur), soit gpxContent (le texte XML du GPX). '
+                    . 'Appelle plusieurs fois pour proposer plusieurs variantes de parcours (nom explicite, ex. « Boucle classique », « Variante par la crête »). '
+                    . 'Le fichier doit être un vrai GPX (balises trkpt/rtept avec lat/lon, idéalement <ele>) : n\'invente jamais de coordonnées.',
             )
             ->addTool(
                 function (
