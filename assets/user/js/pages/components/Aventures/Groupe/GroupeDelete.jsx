@@ -1,5 +1,7 @@
 import React, { useRef } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
+import { Trash2 } from "lucide-react";
 
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
@@ -11,6 +13,9 @@ import { Modal } from "@tailwindComponents/Elements/Modal";
 
 const URL_INDEX_ELEMENTS = 'user_aventures_groupes_index';
 const URL_DELETE_ELEMENT = 'intern_api_aventures_groupes_delete';
+
+// Same CSS-only tooltip as the "Modifier" link in templates/user/pages/aventures/index.html.twig (shadcn tooltip look).
+const TOOLTIP = "pointer-events-none absolute right-0 top-full z-10 mt-1.5 whitespace-nowrap rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md opacity-0 scale-95 origin-top-right transition-[opacity,transform] duration-150 ease-out group-hover/tip:opacity-100 group-hover/tip:scale-100 group-hover/tip:delay-300 group-focus-within/tip:opacity-100 group-focus-within/tip:scale-100 motion-reduce:transition-none";
 
 export function GroupeDelete ({ context, id, name }) {
 	let modalRef = useRef(null);
@@ -37,16 +42,18 @@ export function GroupeDelete ({ context, id, name }) {
 	return <>
 		{context === "read"
 			? <Button iconLeft="trash" type="red" onClick={handleClick}>Supprimer</Button>
-			: <button onClick={handleClick}
-					  className="relative w-full flex-1 bg-gray-50 hover:bg-red-50 text-gray-700 hover:text-red-600 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-			>
-				<span className="icon-trash"></span>
-				<span className="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -top-7 right-2.5 text-xs hidden">Supprimer</span>
-			</button>
+			: <span className="relative inline-flex group/tip">
+				<button type="button" onClick={handleClick} aria-label="Supprimer le groupe"
+						className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-foreground shadow-sm ring-offset-background transition-colors hover:bg-accent hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+					<Trash2 className="h-4 w-4" />
+				</button>
+				<span role="tooltip" className={TOOLTIP}>Supprimer</span>
+			</span>
 		}
-		<Modal ref={modalRef} identifiant={`delete-groupe-${id}`} maxWidth={414} title="Supprimer le groupe"
+		{/* Portal: the card's action bar fades out when not hovered, which would hide an inline modal. */}
+		{createPortal(<Modal ref={modalRef} identifiant={`delete-groupe-${id}`} maxWidth={414} title="Supprimer le groupe"
 			   content={<p>Êtes-vous sûr de vouloir supprimer le groupe de randonnée : <b>{name}</b> ?</p>}
-		   footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />
+		   footer={<Button type="red" onClick={handleDelete}>Confirmer la suppression</Button>} closeTxt="Annuler" />, document.body)}
 </>
 }
 
