@@ -46,19 +46,19 @@
     },
 ] %}
 
-{% if is_granted('ROLE_RUNNING') %}
-    {% set menu = menu | merge([{
-        name: "Running", icon: "run",
-        path: path('user_running_index'),
-        matchRoute: ['user_running_index']
-    }]) %}
-{% endif %}
-
 {% if is_granted('ROLE_INVEST') %}
     {% set menu = menu | merge([{
         name: "Investissements", icon: "chart-up",
         path: path('user_invest_index'),
         matchRoute: ['user_invest_index']
+    }]) %}
+{% endif %}
+
+{% if is_granted('ROLE_RUNNING') %}
+    {% set menu = menu | merge([{
+        name: "Running", icon: "run",
+        path: path('user_running_index'),
+        matchRoute: ['user_running_index']
     }]) %}
 {% endif %}
 

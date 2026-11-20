@@ -16,7 +16,7 @@ function haversine ([lat1, lon1], [lat2, lon2]) {
 }
 
 // → [{ lat, lon, ele, km }] downsampled, km = cumulative distance
-function parseGpx (text) {
+export function parseGpx (text, maxPoints = MAX_POINTS) {
 	const doc = new DOMParser().parseFromString(text, 'application/xml');
 	const pts = [...doc.querySelectorAll('trkpt, rtept')].map(p => ({
 		lat: parseFloat(p.getAttribute('lat')),
@@ -29,7 +29,7 @@ function parseGpx (text) {
 		if (i > 0) km += haversine([pts[i - 1].lat, pts[i - 1].lon], [p.lat, p.lon]);
 		return { ...p, km };
 	});
-	const step = Math.max(1, Math.ceil(withKm.length / MAX_POINTS));
+	const step = Math.max(1, Math.ceil(withKm.length / maxPoints));
 	return withKm.filter((_, i) => i % step === 0 || i === withKm.length - 1);
 }
 

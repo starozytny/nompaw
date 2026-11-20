@@ -4,13 +4,14 @@ import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
 import Formulaire from "@commonFunctions/formulaire";
-import { Plus } from 'lucide-react';
+import { List, Map as MapIcon } from 'lucide-react';
 
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Button } from "@shadcnComponents/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 import { SuggestionCard } from "@userPages/Aventures/Suggestions/SuggestionCard";
+import { SuggestionsMap } from "@userPages/Aventures/Suggestions/SuggestionsMap";
 import { SuggestionForm } from "@userPages/Aventures/Suggestions/SuggestionForm";
 
 const URL_LIST = "intern_api_rando_suggestions_list";
@@ -24,6 +25,7 @@ export function SuggestionsList () {
 	const [toDelete, setToDelete] = useState(null);
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [load, setLoad] = useState(false);
+	const [view, setView] = useState('list'); // list | map
 
 	const fetchData = () => {
 		setLoading(true);
@@ -36,6 +38,13 @@ export function SuggestionsList () {
 	useEffect(() => { fetchData(); }, []);
 
 	const handleOpenCreate = () => { setElement(null); setSheetOpen(true); };
+
+	// The « Ajouter » button lives in the Twig page header (next to the title), outside this React tree.
+	useEffect(() => {
+		const btn = document.getElementById('suggestion-add');
+		btn?.addEventListener('click', handleOpenCreate);
+		return () => btn?.removeEventListener('click', handleOpenCreate);
+	}, []);
 	const handleEdit = (elem) => { setElement(elem); setSheetOpen(true); };
 	const handleSheetOpenChange = (open) => { setSheetOpen(open); if (!open) setElement(null); };
 	const handleSaved = () => { fetchData(); };
@@ -55,12 +64,18 @@ export function SuggestionsList () {
 	return <div className="flex flex-col gap-5">
 		<div className="flex items-center justify-between gap-3">
 			<div>
-				<h1 className="text-lg font-semibold">Suggestions</h1>
 				<p className="text-sm text-muted-foreground">{items.length} idée{items.length === 1 ? '' : 's'} de randonnée ou de bivouac</p>
 			</div>
-			<Button onClick={handleOpenCreate}>
-				<Plus className="h-4 w-4" /> Ajouter
-			</Button>
+			<div className="flex items-center gap-2">
+				<div className="inline-flex h-9 items-center rounded-md bg-muted p-1" role="tablist" aria-label="Affichage">
+					{[['list', List, 'Liste'], ['map', MapIcon, 'Carte']].map(([key, Icon, label]) => (
+						<button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)}
+							className={`inline-flex h-7 items-center gap-1.5 rounded px-3 text-sm font-medium ${view === key ? 'bg-background text-foreground shadow-sm' : 'text-foreground/70 hover:text-foreground'}`}>
+							<Icon className="h-4 w-4" /> {label}
+						</button>
+					))}
+				</div>
+			</div>
 		</div>
 
 		{loading
@@ -69,6 +84,8 @@ export function SuggestionsList () {
 				? <div className="px-4 py-12 text-center text-sm text-muted-foreground border rounded-lg bg-muted/40">
 					Aucune suggestion pour l'instant — demande à Claude de t'en proposer une via le connecteur Nompaw, ou ajoutes-en une toi-même.
 				</div>
+				: view === 'map'
+				? <SuggestionsMap items={items} />
 				: <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 					{items.map(elem => (
 						<SuggestionCard key={elem.id} elem={elem} onEdit={handleEdit}
