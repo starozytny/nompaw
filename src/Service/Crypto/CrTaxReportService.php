@@ -87,7 +87,7 @@ class CrTaxReportService
      * than there might really be. Pass true (the "Actualiser" button, and export()) to actually pay for
      * the CoinGecko round trips and fill in whatever can be resolved.
      */
-    public function computeReport(User $user, int $year, bool $liveFetch = false): array
+    public function computeReport(User $user, int $year, bool $liveFetch = false, bool $withHoldings = false): array
     {
         $trades = $this->tradeRepository->findBy(['user' => $user], ['tradeAt' => 'ASC', 'id' => 'ASC']);
 
@@ -108,6 +108,11 @@ class CrTaxReportService
                 $tradeYear = (int) $trade->getTradeAt()->format('Y');
 
                 if ($tradeYear === $year) {
+                    if ($withHoldings) {
+                        // Same snapshot as computeHoldingsSnapshot(), but from this single replay instead of
+                        // one full-history replay per disposal (21 × 17k trades made the MCP tool time out).
+                        $line['holdingsBefore'] = $this->snapshotOf($trade, $holdings, $liveFetch);
+                    }
                     if ($line['plusValue'] === null) {
                         $hasMissingValues = true;
                     } else {
@@ -183,6 +188,15 @@ class CrTaxReportService
     {
         [, , $holdings] = $this->replayBefore($disposal);
 
+        return $this->snapshotOf($disposal, $holdings, true);
+    }
+
+    /**
+     * @param array<string, float> $holdings held strictly before $disposal
+     * @return list<array{coin: string, quantity: float, price: ?float}>
+     */
+    private function snapshotOf(CrTrade $disposal, array $holdings, bool $liveFetch): array
+    {
         $manualPrices = $disposal->getManualCoinPrices();
 
         $snapshot = [];
@@ -194,9 +208,9 @@ class CrTaxReportService
             $snapshot[] = [
                 'coin' => $coin,
                 'quantity' => $quantity,
-                // The per-cession manual price wins over the shared CoinGecko/CrPriceHistory cache, so
-                // reopening the panel shows what was actually entered for THIS disposal.
-                'price' => $manualPrices[strtoupper($coin)] ?? $this->priceService->getPriceEur($coin, $disposal->getTradeAt()),
+                // The per-cession manual price wins over the shared price cache, so reopening the panel
+                // shows what was actually entered for THIS disposal.
+                'price' => $manualPrices[strtoupper($coin)] ?? $this->priceService->getPriceEur($coin, $disposal->getTradeAt(), $liveFetch),
             ];
         }
 
