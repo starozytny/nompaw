@@ -31,218 +31,167 @@
 
 {% block main_content %}
     <div class="flex flex-col gap-12">
-        <div class="flex flex-col gap-4 sm:flex-row">
-            <div class="w-full max-w-screen-md bg-white p-4 border rounded-md flex flex-col gap-2">
+        {# Prochaine aventure : la photo du groupe en panneau, la date posée dessus, le reste à côté. #}
+        <section class="bg-white rounded-2xl shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] max-w-6xl">
+            <div class="relative min-h-56 bg-slate-800">
+                <img src="{{ asset(elem.imageFile) }}" alt="" class="absolute inset-0 w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <div class="text-xs uppercase tracking-[0.14em] text-white/75">Prochaine aventure</div>
+                    {% if next and next.startAt %}
+                        {% set daysTo = ((next.startAt|date('U')) - ('today'|date('U'))) // 86400 %}
+                        <div class="text-4xl font-bold leading-tight mt-1">{{ next.startAt|format_datetime(locale='fr', pattern='d MMMM') }}</div>
+                        <div class="text-sm text-white/85 mt-1">
+                            {{ next.startAt|format_datetime(locale='fr', pattern='EEEE y')|capitalize }}
+                            {% if daysTo > 1 %} · dans {{ daysTo }} jours{% elseif daysTo == 1 %} · demain{% elseif daysTo == 0 %} · aujourd'hui{% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-3xl font-bold leading-tight mt-1">{{ next ? 'Date à définir' : 'Rien de prévu' }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="p-6 flex flex-col gap-5">
                 {% if next %}
-                   <div class="w-full grid grid-cols-3">
-                       <div class="flex flex-col gap-4 col-span-2">
-                           <div>
-                               <h2 class="text-xl font-semibold">{{ next.name }}</h2>
-                               <div class="text-sm mb-4">{{ next.description | raw }}</div>
-                               <div class="flex items-center gap-2 text-sm text-gray-600">
-                                   <span class="icon-calendar !text-sm"></span>
-                                   <span>
-                                        {{ next.startAt ? next.startAt | format_datetime('full', 'none', locale='fr') | capitalize : 'Date indéfinie' }}
-                                    </span>
-                               </div>
-                               {% if next.adventure %}
-                                   <div class="flex items-center gap-2 text-sm mt-2 text-gray-600">
-                                       <span class="icon-book-1 !text-sm"></span>
-                                       <span>{{ next.adventure.name }}</span>
-                                   </div>
-                                   {% if next.adventure.duration %}
-                                       <div class="flex items-center gap-2 text-sm mt-2 text-gray-600">
-                                           <span class="icon-time !text-sm"></span>
-                                           <span>{{ next.adventure.duration | date('H\\hi') }}</span>
-                                       </div>
-                                   {% endif %}
-                                   {% if next.adventure.url and next.adventure.url != "https://" %}
-                                       <div class="flex items-center gap-2 text-sm mt-2 text-gray-600">
-                                           <span class="icon-link !text-sm"></span>
-                                           <span>
-                                               <a href="{{ next.adventure.url }}"
-                                                  class="text-blue-700 hover:text-blue-500 hover:underline"
-                                                  target="_blank">Lien du topo
-                                               </a>
-                                           </span>
-                                       </div>
-                                   {% endif %}
-                               {% endif %}
-                           </div>
-                           <div class="flex gap-1">
-                               {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
-                                   btn_link: path('user_aventures_randos_update', {slug: next.slug}),
-                                   btn_type: 'default',
-                                   btn_icon: 'pencil',
-                                   btn_text: 'Modifier'
-                               } %}
+                    {% set steps = ['Proposition', 'Validée', 'Terminée'] %}
+                    <ol class="flex items-center gap-2 text-xs" aria-label="Statut de l'aventure">
+                        {% for step in steps %}
+                            {% set reached = loop.index0 <= next.status %}
+                            <li class="flex items-center gap-2 {{ reached ? 'text-gray-900 font-medium' : 'text-gray-400' }}"{% if loop.index0 == next.status %} aria-current="step"{% endif %}>
+                                <span class="w-2 h-2 rounded-full {{ loop.index0 == next.status ? 'bg-blue-600 ring-4 ring-blue-100' : (reached ? 'bg-blue-600' : 'bg-gray-300') }}"></span>
+                                {{ step }}
+                            </li>
+                            {% if not loop.last %}<li aria-hidden="true" class="h-px w-6 {{ loop.index0 < next.status ? 'bg-blue-600' : 'bg-gray-200' }}"></li>{% endif %}
+                        {% endfor %}
+                    </ol>
 
-                               <div class="delete-rando"
-                                    data-context="randos"
-                                    data-id="{{ next.id }}"
-                                    data-name="{{ next.name }}"
-                                    data-groupe-slug="{{ elem.slug }}"
-                               >
-                                   {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
-                                       btn_link: "",
-                                       btn_type: 'transparent',
-                                       btn_icon: 'chart-3',
-                                       btn_text: 'Supprimer'
-                                   } %}
-                               </div>
-                           </div>
-                       </div>
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-900">
+                            <a href="{{ path('user_aventures_randos_read', {slug: next.slug}) }}" class="hover:underline underline-offset-4">{{ next.name }}</a>
+                        </h2>
+                        {% if next.description %}
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-3">{{ next.description|striptags }}</p>
+                        {% endif %}
+                    </div>
 
-                       <div class="flex flex-col items-end justify-between gap-4">
-                           <div class="flex flex-col gap-2">
-                               <div class="flex items-center gap-2 text-xs rounded-2xl px-2 py-1 {{ next.status == 0 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-gray-500/10 text-gray-800'  -}}">
-                                   <div class="w-2 h-2 {{ next.status == 0 ? 'bg-yellow-500' : 'bg-gray-300'  }} rounded-full"></div>
-                                   <div>en proposition</div>
-                               </div>
-                               <div class="flex items-center gap-2 text-xs rounded-2xl px-2 py-1 {{ next.status == 1 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-gray-500/10 text-gray-800'  -}}">
-                                   <div class="w-2 h-2 {{ next.status == 1 ? 'bg-yellow-500' : 'bg-gray-300'  }} rounded-full"></div>
-                                   <div>validée</div>
-                               </div>
-                               <div class="flex items-center gap-2 text-xs rounded-2xl px-2 py-1 {{ next.status == 2 ? 'bg-yellow-500/10 text-yellow-600' : 'bg-gray-500/10 text-gray-800'  -}}">
-                                   <div class="w-2 h-2 {{ next.status == 2 ? 'bg-yellow-500' : 'bg-gray-300'  }} rounded-full"></div>
-                                   <div>terminée</div>
-                               </div>
-                           </div>
-
-                           <div>
-                               {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                                   btn_link: path('user_aventures_randos_read', {slug: next.slug}),
-                                   btn_type: 'blue',
-                                   btn_icon: 'right-arrow',
-                                   btn_text: 'Voir l\'aventure'
-                               } %}
-                           </div>
-                       </div>
-                   </div>
+                    {% if next.adventure %}
+                        <div class="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-600">
+                            <span><span class="icon-book-1 text-gray-400"></span> {{ next.adventure.name }}</span>
+                            {% if next.adventure.duration %}<span><span class="icon-time text-gray-400"></span> {{ next.adventure.duration|date('H\\hi') }}</span>{% endif %}
+                            {% if next.adventure.url and next.adventure.url != "https://" %}
+                                <a href="{{ next.adventure.url }}" target="_blank" class="text-blue-600 hover:text-blue-700"><span class="icon-link"></span> Topo</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 {% else %}
                     <div>
-                        <h2 class="text-xl font-semibold">Aucune aventure de prévue.</h2>
-                        <div class="text-gray-600">Préparez la prochaine aventure en cliquant sur <i>Créer une aventure</i></div>
-                    </div>
-
-                    <div>
-                        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-                            btn_link: path('user_aventures_randos_create', {g_slug: elem.slug}),
-                            btn_type: 'blue',
-                            btn_icon: 'add',
-                            btn_text: 'Créer une aventure'
-                        } %}
+                        <h2 class="text-2xl font-semibold text-gray-900">Aucune aventure de prévue</h2>
+                        <p class="text-sm text-gray-600 mt-2">Proposez la prochaine sortie : dates et itinéraires se votent ensuite à plusieurs.</p>
                     </div>
                 {% endif %}
-            </div>
-            <div class="min-w-64 bg-blue-500 p-4 rounded-md text-slate-50 flex flex-col gap-4">
-                <div>
-                    <h2 class="font-medium"><span class="icon-user-octagon"></span> {{ elem.author.displayName }}</h2>
-                    <div class="text-sm">Référent.e du groupe d'aventures</div>
-                </div>
-                {% if next %}
-                   <div>
-                       <h2 class="font-medium"><span class="icon-user-octagon"></span> {{ next.author.displayName }}</h2>
-                       <div class="text-sm">Référent.e de la prochaine aventure</div>
-                   </div>
-                {% endif %}
-            </div>
-        </div>
 
-        <div class="groupe-line-1">
-            <div>
-                <h2 class="text-2xl font-semibold mb-4">Anciennes aventures</h2>
-                {% if randos | length > 0 %}
-                    <div class="flex justify-center gap-4 flex-wrap xl:justify-start qhd:gap-6">
-                        {% for rando in randos %}
-                            <article class="group w-full sm:w-72 md:w-80 xl:w-72 2xl:w-80 bg-white rounded-md shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-1"
-                                     onclick="location.href='{{ path('user_aventures_randos_read', {slug: rando.slug}) }}';">
-                                <div class="relative h-64 overflow-hidden bg-slate-200">
-                                    <img
-                                            src="{{ path('intern_api_aventures_randos_cover_src', {id: rando.id}) }}"
-                                            alt="{{ rando.name }}"
-                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                    <div class="absolute bottom-3 right-3">
-                                        <span class="px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-medium text-white flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ rando.images | length }}
-                                        </span>
-                                    </div>
+                <div class="mt-auto flex flex-wrap items-end justify-between gap-4 pt-4 border-t border-gray-100">
+                    <div class="flex flex-wrap gap-5 text-sm">
+                        {% for ref in [{user: elem.author, role: 'Référent·e du groupe'}]|merge(next ? [{user: next.author, role: "Référent·e de l'aventure"}] : []) %}
+                            <div class="flex items-center gap-2">
+                                {% set member = {user: ref.user} %}
+                                {% include "user/layout/components/elements/avatar.html.twig" %}
+                                <div class="leading-tight">
+                                    <div class="font-medium text-gray-900">{{ ref.user.displayName }}</div>
+                                    <div class="text-xs text-gray-500">{{ ref.role }}</div>
                                 </div>
-
-                                <div class="p-5">
-                                    <h2 class="text-xl font-bold text-slate-800 mb-2 line-clamp-2">
-                                        {{ rando.name }}
-                                    </h2>
-
-                                    <div class="flex flex-wrap items-center gap-3 text-sm text-slate-600 mb-3">
-                                        <div class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            <span>{{ rando.startAt | format_datetime(locale='fr', timeFormat="none") }}</span>
-                                        </div>
-
-                                        {% if rando.localisation %}
-                                        <div class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            </svg>
-                                            <span>{{ rando.localisation }}</span>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="text-slate-600 text-sm line-clamp-3 mb-4">
-                                        {{ rando.description | raw }}
-                                    </div>
-
-                                    <a href="{{ path('user_aventures_randos_read', {slug: rando.slug}) }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm group/link">
-                                        Voir l'aventure
-                                        <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </a>
-
-                                    {% if rando.story %}
-                                        <a href="{{ path('user_homepage') ~ "blog/" ~ rando.story }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm group/link">
-                                            Voir l'histoire
-                                            <svg class="w-4 h-4 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                            </svg>
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </article>
+                            </div>
                         {% endfor %}
                     </div>
-                {% else %}
-                    <div class="max-w-md flex flex-col items-center justify-center bg-white p-12 rounded-xl shadow-sm">
-                        <div class="bg-blue-100 rounded-lg p-3">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </div>
-                        <div class="text-xl font-medium mt-4">Aucune aventure enregistrée</div>
-                        <div class="max-w-sm text-gray-500 text-center mt-2">
-                            Vous n'avez aucune aventure de créée pour ce groupe.
-                        </div>
-                        <div class="mt-4">
+
+                    <div class="flex items-center gap-1">
+                        {% if next %}
+                            {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                btn_link: path('user_aventures_randos_update', {slug: next.slug}),
+                                btn_type: 'transparent',
+                                btn_icon: 'pencil',
+                                btn_text: 'Modifier'
+                            } %}
+                            <div class="delete-rando"
+                                 data-context="randos"
+                                 data-id="{{ next.id }}"
+                                 data-name="{{ next.name }}"
+                                 data-groupe-slug="{{ elem.slug }}"
+                            >
+                                {% include 'layout/components/tailwind/buttons/button_icon.html.twig' with {
+                                    btn_link: "",
+                                    btn_type: 'transparent',
+                                    btn_icon: 'chart-3',
+                                    btn_text: 'Supprimer'
+                                } %}
+                            </div>
+                            <span class="ml-2">
+                                {% include 'layout/components/tailwind/buttons/button.html.twig' with {
+                                    btn_link: path('user_aventures_randos_read', {slug: next.slug}),
+                                    btn_type: 'blue',
+                                    btn_icon: 'right-arrow',
+                                    btn_text: "Voir l'aventure"
+                                } %}
+                            </span>
+                        {% else %}
                             {% include 'layout/components/tailwind/buttons/button.html.twig' with {
                                 btn_link: path('user_aventures_randos_create', {g_slug: elem.slug}),
                                 btn_type: 'blue',
                                 btn_icon: 'add',
                                 btn_text: 'Créer une aventure'
                             } %}
-                        </div>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-6">Anciennes aventures</h2>
+            {% if albums|length > 0 %}
+                <div class="grid gap-8 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {% for a in albums %}
+                        {% set cover = a.hd ? path('intern_api_aventures_images_file_hd_src', {id: a.hd.id}) : path('intern_api_aventures_randos_cover_src', {id: a.r.id}) %}
+                        <article class="bg-white rounded-xl p-2 shadow-[5px_5px_0_-1px_#fff,5px_5px_0_0_rgb(0_0_0/0.08),10px_10px_0_-1px_#fff,10px_10px_0_0_rgb(0_0_0/0.06),0_2px_8px_rgb(0_0_0/0.08)]">
+                            <a href="{{ path('user_aventures_randos_read', {slug: a.r.slug}) }}" class="group relative block overflow-hidden rounded-lg aspect-[4/3] bg-slate-200 active:scale-[0.99] transition-transform duration-150 ease-out motion-reduce:transition-none">
+                                <img src="{{ cover }}" alt="{{ a.r.name }}" loading="lazy"
+                                     class="w-full h-full object-cover transition-transform duration-300 ease-out [@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none">
+                                <span class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></span>
+                                <span class="absolute bottom-0 left-0 right-0 p-4 text-white">
+                                    <span class="block text-xs uppercase tracking-[0.12em] text-white/75">{{ a.r.startAt ? a.r.startAt|format_datetime(locale='fr', pattern='MMMM y') : 'Date inconnue' }}</span>
+                                    <span class="block text-xl font-semibold leading-tight mt-0.5 line-clamp-2">{{ a.r.name }}</span>
+                                </span>
+                            </a>
+
+                            {% if a.peeks|length %}
+                                <div class="grid grid-cols-4 gap-1 mt-1">
+                                    {% for img in a.peeks %}
+                                        <a href="{{ path('user_aventures_randos_read', {slug: a.r.slug}) }}" class="relative block aspect-square overflow-hidden rounded bg-slate-200" tabindex="-1" aria-hidden="true">
+                                            <img src="{{ path('intern_api_aventures_images_thumbs_src', {id: img.id}) }}" alt="" loading="lazy" class="w-full h-full object-cover">
+                                            {% if loop.last and a.photos > a.peeks|length %}
+                                                <span class="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-semibold">+{{ a.photos - a.peeks|length }}</span>
+                                            {% endif %}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="px-2 pt-3 pb-1 flex items-center justify-between gap-3 text-sm">
+                                <span class="text-gray-500 truncate">{%- set parts = [] -%}{%- if a.r.localisation %}{% set parts = parts|merge([a.r.localisation]) %}{% endif -%}{%- if a.r.distance %}{% set parts = parts|merge([a.r.distance|round(1) ~ ' km']) %}{% endif -%}{%- if a.r.devPlus %}{% set parts = parts|merge([a.r.devPlus ~ ' m D+']) %}{% endif -%}{{ parts|join(' · ') }}</span>
+                                {% if a.r.story %}
+                                    <a href="{{ path('user_homepage') ~ 'blog/' ~ a.r.story }}" class="flex-none font-medium text-blue-600 hover:text-blue-700">Histoire →</a>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="max-w-md flex flex-col items-center justify-center bg-white p-12 rounded-xl shadow-sm text-center">
+                    <div class="bg-blue-100 rounded-lg p-3"><span class="icon-camera text-blue-600 text-xl"></span></div>
+                    <div class="text-xl font-medium mt-4">Aucun souvenir pour l'instant</div>
+                    <div class="text-gray-500 mt-2">Les albums apparaîtront ici après votre première aventure.</div>
+                </div>
+            {% endif %}
+        </section>
     </div>
 {% endblock %}
