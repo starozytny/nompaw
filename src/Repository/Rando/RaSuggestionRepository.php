@@ -53,4 +53,51 @@ class RaSuggestionRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    /**
+     * Returns the author's existing suggestion that the candidate duplicates, if any: same
+     * normalized name, same source URL, or a similar name within ~300 m (needs lat/lon).
+     */
+    public function findDuplicate(User $user, RaSuggestion $candidate, string $normalizedName): ?RaSuggestion
+    {
+        $slugger = new \Symfony\Component\String\Slugger\AsciiSlugger('fr');
+        $slug = fn (?string $v): string => strtolower($slugger->slug((string) $v)->toString());
+
+        foreach ($this->findAllByUser($user) as $existing) {
+            if ($existing === $candidate) {
+                continue;
+            }
+
+            $existingSlug = $slug($existing->getName());
+            if ($existingSlug !== '' && $existingSlug === $normalizedName) {
+                return $existing;
+            }
+
+            if ($candidate->getSourceUrl() && $existing->getSourceUrl()
+                && rtrim($candidate->getSourceUrl(), '/') === rtrim($existing->getSourceUrl(), '/')) {
+                return $existing;
+            }
+
+            if ($candidate->getLatitude() !== null && $candidate->getLongitude() !== null
+                && $existing->getLatitude() !== null && $existing->getLongitude() !== null
+                && self::distanceMeters($candidate->getLatitude(), $candidate->getLongitude(), $existing->getLatitude(), $existing->getLongitude()) <= 300) {
+                similar_text($existingSlug, $normalizedName, $percent);
+                if ($percent >= 60 || str_contains($existingSlug, $normalizedName) || str_contains($normalizedName, $existingSlug)) {
+                    return $existing;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static function distanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $r = 6371000;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) ** 2;
+
+        return 2 * $r * asin(min(1, sqrt($a)));
+    }
 }

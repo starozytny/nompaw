@@ -40,6 +40,8 @@ function emptyState (element) {
 		difficulty: String(element ? element.difficulty : 0),
 		description: element?.description || "",
 		location: element?.location || "",
+		latitude: element?.latitude ?? "",
+		longitude: element?.longitude ?? "",
 		distanceKm: element?.distanceKm ?? "",
 		elevationGainM: element?.elevationGainM ?? "",
 		altitudeMaxM: element?.altitudeMaxM ?? "",
@@ -142,6 +144,17 @@ export function SuggestionForm ({ element, open, onOpenChange, onSaved }) {
 						<div className="flex flex-col gap-1.5">
 							<Label>Lieu</Label>
 							<Input value={state.location} onChange={set('location')} placeholder="Ex: Massif des Encombres, Savoie" />
+						</div>
+					</div>
+
+					<div className={GRID_2}>
+						<div className="flex flex-col gap-1.5">
+							<Label>Latitude</Label>
+							<Input type="number" step="any" value={state.latitude} onChange={set('latitude')} placeholder="Ex: 45.2167" />
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label>Longitude</Label>
+							<Input type="number" step="any" value={state.longitude} onChange={set('longitude')} placeholder="Ex: 6.5833" />
 						</div>
 					</div>
 

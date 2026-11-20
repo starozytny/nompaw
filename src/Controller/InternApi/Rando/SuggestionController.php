@@ -96,6 +96,8 @@ class SuggestionController extends AbstractController
             'difficultyString' => $s->getDifficultyString(),
             'description' => $s->getDescription(),
             'location' => $s->getLocation(),
+            'latitude' => $s->getLatitude(),
+            'longitude' => $s->getLongitude(),
             'distanceKm' => $s->getDistanceKm(),
             'elevationGainM' => $s->getElevationGainM(),
             'altitudeMaxM' => $s->getAltitudeMaxM(),
