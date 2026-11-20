@@ -208,8 +208,7 @@ class BinanceHistoryParser implements CryptoImportParserInterface
             'toNbToken' => $inflow['change'],
             'costPrice' => $fee !== null ? abs($fee['change']) : 0.0,
             'costCoin' => $fee !== null ? $fee['coin'] : $inflow['coin'],
-            'totalReal' => 0.0,
-            'total' => 0.0,
+            ...BinanceEurTotals::compute($type, $outflow['coin'], abs($outflow['change']), $inflow['coin'], $inflow['change'], $fee !== null ? abs($fee['change']) : 0.0, $fee !== null ? $fee['coin'] : $inflow['coin']),
         ]];
     }
 
@@ -306,8 +305,7 @@ class BinanceHistoryParser implements CryptoImportParserInterface
             'toNbToken' => $inflow['change'],
             'costPrice' => 0.0,
             'costCoin' => $inflow['coin'],
-            'totalReal' => 0.0,
-            'total' => 0.0,
+            ...BinanceEurTotals::compute($type, $outflow['coin'], abs($outflow['change']), $inflow['coin'], $inflow['change'], 0.0, $inflow['coin']),
         ]];
     }
 

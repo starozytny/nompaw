@@ -16,6 +16,8 @@ const COLUMNS = 6;
 
 const MANUAL_PLATFORM = "__manual__";
 
+const TYPE_STACKING = 5;
+
 // Toggles `item` ({value, label}) in/out of a multi-select filter's selection array.
 function toggleFilterValue (setter) {
 	return (identifiant, item) => {
@@ -34,6 +36,7 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 	const [typeFilter, setTypeFilter] = useState([]);
 	const [platformFilter, setPlatformFilter] = useState([]);
 	const [tokenFilter, setTokenFilter] = useState([]);
+	const [hideStacking, setHideStacking] = useState(false);
 	const [cryptosDialogOpen, setCryptosDialogOpen] = useState(false);
 
 	// Set from TradesIssues' "Voir dans la liste": narrow the list to the coin of the selected problem.
@@ -60,6 +63,7 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 	const tokenItems = filterOptions.tokens.map(t => ({ value: t, label: t }));
 
 	const filteredData = data.filter(item => {
+		if (hideStacking && item.type === TYPE_STACKING) return false;
 		if (typeFilter.length > 0 && !typeFilter.some(f => f.value === String(item.type))) return false;
 		if (platformFilter.length > 0 && !platformFilter.some(f => f.value === MANUAL_PLATFORM ? !item.importedFrom : f.value === item.importedFrom)) return false;
 		if (tokenFilter.length > 0 && !tokenFilter.some(f => f.value === item.fromCoin || f.value === item.toCoin)) return false;
@@ -76,6 +80,10 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 		{tokenItems.length > 0 && <div className="w-52">
 			<ComboboxMultiple identifiant="token" valeurs={tokenFilter} items={tokenItems} withItems placeholder="Tous les tokens" onSelect={toggleFilterValue(setTokenFilter)} />
 		</div>}
+		<label className="flex cursor-pointer select-none items-center gap-1.5 text-sm text-muted-foreground">
+			<input type="checkbox" checked={hideStacking} onChange={e => setHideStacking(e.target.checked)} />
+			Masquer le stacking
+		</label>
 	</div>;
 
 	const yearSelect = <div className="w-28">

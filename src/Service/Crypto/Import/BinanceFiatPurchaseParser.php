@@ -55,8 +55,7 @@ class BinanceFiatPurchaseParser implements CryptoImportParserInterface
                 'toNbToken' => $receivedQty,
                 'costPrice' => $fee,
                 'costCoin' => $feeCoin,
-                'totalReal' => 0.0,
-                'total' => 0.0,
+                ...BinanceEurTotals::compute(TypeType::Achat, $spentCoin, $spentQty, $receivedCoin, $receivedQty, $fee, $feeCoin),
             ];
         }
 
