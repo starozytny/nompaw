@@ -130,6 +130,12 @@ input[type=number] {
     --status-critical: #d03b3b;
     --status-critical-soft: #fbeaea;
 
+    /* Multi-series charts (crypto stats): dataviz reference categorical palette, fixed order, validated
+       light/dark as a set — assign by entity, never cycle; a 9th series folds into a neutral "Autres". */
+    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+    --series-5: #e87ba4; --series-6: #008300; --series-7: #6250d6; --series-8: #e34948;
+    --series-other: #a1a1aa;
+
     /* Espace membre sidebar: always navy (matches the logo mark), regardless of app theme */
     --sidebar-background: 240 55% 8%;
     --sidebar-foreground: 231 20% 78%;
@@ -182,6 +188,10 @@ input[type=number] {
     --status-good-soft: #10240f;
     --status-critical: #e66767;
     --status-critical-soft: #2b1414;
+
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --series-5: #d55181; --series-6: #0ca30c; --series-7: #9085e9; --series-8: #e66767;
+    --series-other: #71717a;
 
     --sidebar-background: 240 55% 8%;
     --sidebar-foreground: 231 20% 78%;

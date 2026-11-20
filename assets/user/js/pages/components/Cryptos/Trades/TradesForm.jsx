@@ -34,12 +34,12 @@ export function TradesFormulaire ({ context, element, open, onOpenChange, onUpda
 	return <Sheet open={open} onOpenChange={onOpenChange}>
 		<SheetContent className="flex flex-col p-0 sm:max-w-lg [&_label]:mb-1.5 [&_label]:mt-0">
 			<SheetHeader>
-				<SheetTitle>{context === "create" ? "Ajouter une transaction" : "Modifier la transaction"}</SheetTitle>
+				<SheetTitle>{context === "create" ? (element ? "Ajouter l'opération manquante" : "Ajouter une transaction") : "Modifier la transaction"}</SheetTitle>
 			</SheetHeader>
 
 			<div className="flex-1 overflow-y-auto px-6 py-5">
 				<Form
-					key={element ? element.id : 'new'}
+					key={element ? (element.id ?? element.prefillKey) : 'new'}
 					context={context}
 					element={element}
 					onClose={() => onOpenChange(false)}

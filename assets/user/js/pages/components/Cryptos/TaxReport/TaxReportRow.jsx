@@ -35,8 +35,8 @@ export function TaxReportRow ({ line, onReportUpdate }) {
 				? <Button type="yellow" pa="py-1 px-2.5" onClick={() => setDialogOpen(true)}>Renseigner les prix</Button>
 				: <div className="flex items-center gap-1.5">
 					<span>{Sanitaze.toFormatCurrency(line.portfolioValue)}</span>
-					<Badge type={line.portfolioValueSource === 'manual' ? 'gray' : 'indigo'}>
-						{line.portfolioValueSource === 'manual' ? 'manuel' : 'auto'}
+					<Badge type={line.portfolioValueSource === 'ia' ? 'yellow' : line.portfolioValueSource === 'manual' ? 'gray' : 'indigo'}>
+						{line.portfolioValueSource === 'ia' ? 'IA' : line.portfolioValueSource === 'manual' ? 'manuel' : 'auto'}
 					</Badge>
 					<button type="button" className="icon-pencil text-xs text-muted-foreground hover:text-foreground"
 							title="Corriger les prix par actif" onClick={() => setDialogOpen(true)} />

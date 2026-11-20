@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from 'prop-types';
 
 import moment from "moment/moment";
@@ -29,12 +29,21 @@ function toggleFilterValue (setter) {
  * component only does light client-side work now: grouping into months and applying the type/platform/
  * token filters, both cheap over a single year's worth of data.
  */
-export const TradesList = React.memo(function TradesList ({ data, years, selectedYear, yearStats, yearHoldings, filterOptions, onYearChange, onModal, onEdit }) {
+export const TradesList = React.memo(function TradesList ({ data, years, selectedYear, yearStats, yearHoldings, filterOptions, focusCoin, onYearChange, onModal, onEdit }) {
 	const [openMonths, setOpenMonths] = useState({});
 	const [typeFilter, setTypeFilter] = useState([]);
 	const [platformFilter, setPlatformFilter] = useState([]);
 	const [tokenFilter, setTokenFilter] = useState([]);
 	const [cryptosDialogOpen, setCryptosDialogOpen] = useState(false);
+
+	// Set from TradesIssues' "Voir dans la liste": narrow the list to the coin of the selected problem.
+	useEffect(() => {
+		if (focusCoin) {
+			setTypeFilter([]);
+			setPlatformFilter([]);
+			setTokenFilter([{ value: focusCoin.coin, label: focusCoin.coin }]);
+		}
+	}, [focusCoin]);
 
 	if (data.length === 0) {
 		return <div className="flex flex-col items-center gap-2 p-8 text-center">
@@ -204,6 +213,7 @@ TradesList.propTypes = {
 	selectedYear: PropTypes.number,
 	yearStats: PropTypes.object,
 	yearHoldings: PropTypes.array,
+	focusCoin: PropTypes.shape({ coin: PropTypes.string }),
 	filterOptions: PropTypes.shape({
 		platforms: PropTypes.array,
 		tokens: PropTypes.array,

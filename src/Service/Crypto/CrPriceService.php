@@ -36,7 +36,99 @@ class CrPriceService
         private readonly CrPriceHistoryRepository $priceHistoryRepository,
         private readonly LoggerInterface $logger,
         private readonly string $coingeckoApiKey = '',
+        private readonly ?HttpClientInterface $binanceClient = null,
     ) {}
+
+    /** Dollar and stablecoins valued straight from the EUR/USDT rate (USDC & co treated as 1 USDT). */
+    private const USD_STABLES = ['USD', 'USDT', 'USDC', 'BUSD', 'FDUSD', 'TUSD', 'DAI'];
+
+    /** @var array<string, float>|null EUR/USDT daily open, loaded once per service instance */
+    private ?array $eurUsdt = null;
+
+    /**
+     * Imports daily EUR prices for $coin from Binance's public klines (free, no key, full history — unlike
+     * CoinGecko's demo key, which refuses anything older than 365 days) into the shared CrPriceHistory
+     * cache as source 'binance'. Price = the day's OPEN (00:00 UTC), the same instant CoinGecko's /history
+     * endpoint returns, so the tax report reads it with unchanged semantics. Uses the {COIN}EUR pair, and
+     * fills the days it doesn't cover (pair listed later, or missing) from {COIN}USDT / EURUSDT. Incremental:
+     * starts after the last 'binance' day already stored. Never throws; returns the number of rows written.
+     */
+    public function importDailyHistory(string $coin, \DateTimeInterface $from): int
+    {
+        $coin = strtoupper($coin);
+        if ($coin === 'EUR' || $this->binanceClient === null) {
+            return 0;
+        }
+
+        $start = \DateTimeImmutable::createFromInterface($from)->setTime(0, 0);
+        $last = $this->priceHistoryRepository->findLastDate($coin, 'binance');
+        if ($last !== null && $last >= $start) {
+            $start = $last->modify('+1 day');
+        }
+        if ($start > new \DateTimeImmutable('today')) {
+            return 0;
+        }
+
+        $eurUsdt = $this->eurUsdt ??= ($this->fetchDailyOpens('EURUSDT', new \DateTimeImmutable('2019-01-01')) ?? []);
+
+        if (in_array($coin, self::USD_STABLES, true)) {
+            $prices = array_map(fn (float $rate) => 1 / $rate, array_filter($eurUsdt, fn ($d) => $d >= $start->format('Y-m-d'), ARRAY_FILTER_USE_KEY));
+        } else {
+            $prices = $this->fetchDailyOpens($coin . 'EUR', $start) ?? [];
+            $firstEurDay = array_key_first($prices);
+            if ($firstEurDay === null || $firstEurDay > $start->format('Y-m-d')) {
+                foreach ($this->fetchDailyOpens($coin . 'USDT', $start) ?? [] as $day => $usdt) {
+                    if (!isset($prices[$day]) && isset($eurUsdt[$day])) {
+                        $prices[$day] = $usdt / $eurUsdt[$day];
+                    }
+                }
+            }
+        }
+
+        if ($prices === []) {
+            $this->logger->info('Crypto prices: no Binance EUR/USDT market for "{coin}".', ['coin' => $coin]);
+
+            return 0;
+        }
+
+        ksort($prices);
+
+        return $this->priceHistoryRepository->upsertImported($coin, $prices, 'binance');
+    }
+
+    /**
+     * @return array<string, float>|null [Y-m-d => open], null when the symbol doesn't exist on Binance
+     *         (or the request failed — logged)
+     */
+    private function fetchDailyOpens(string $symbol, \DateTimeInterface $start): ?array
+    {
+        $opens = [];
+        $startMs = $start->getTimestamp() * 1000;
+
+        try {
+            do {
+                $response = $this->binanceClient->request('GET', 'api/v3/klines', [
+                    'query' => ['symbol' => $symbol, 'interval' => '1d', 'startTime' => $startMs, 'limit' => 1000],
+                    'timeout' => 10,
+                ]);
+                if ($response->getStatusCode() === 400) {
+                    return null; // "Invalid symbol": no such market
+                }
+
+                $klines = $response->toArray();
+                foreach ($klines as $kline) {
+                    $opens[gmdate('Y-m-d', intdiv((int) $kline[0], 1000))] = (float) $kline[1];
+                }
+                $startMs = $klines === [] ? null : (int) end($klines)[0] + 86_400_000;
+            } while (count($klines) === 1000);
+        } catch (HttpExceptionInterface|\Throwable $e) {
+            $this->logger->warning('Crypto prices: Binance klines failed for {symbol}: {message}', ['symbol' => $symbol, 'message' => $e->getMessage()]);
+
+            return $opens === [] ? null : $opens;
+        }
+
+        return $opens;
+    }
 
     /**
      * $liveFetch = false restricts this to whatever is already in the persistent cache (a plain DB read,
