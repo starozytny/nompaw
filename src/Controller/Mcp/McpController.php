@@ -20,6 +20,7 @@ use App\Service\Invest\InvestTrackingBuilder;
 use App\Service\Rando\GpxService;
 use App\Service\Running\RunningTrackingBuilder;
 use Mcp\Server;
+use Psr\Log\LoggerInterface;
 use Mcp\Server\Transport\Http\Middleware\CorsMiddleware;
 use Mcp\Server\Transport\Http\Middleware\DnsRebindingProtectionMiddleware;
 use Mcp\Server\Transport\StreamableHttpTransport;
@@ -59,12 +60,15 @@ class McpController extends AbstractController
         CrTradeRepository $tradeRepository,
         CrTradeReplayService $replayService,
         CrStatsService $statsService,
+        LoggerInterface $logger,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
 
         $server = Server::builder()
             ->setServerInfo('Nompaw', '1.0.0')
+            // Without it the SDK swallows tool exceptions into a bare -32603 with nothing in var/log.
+            ->setLogger($logger)
             ->addTool(
                 function () use ($runningTrackingBuilder, $user): array {
                     if (!$this->isGranted('ROLE_RUNNING')) {
@@ -157,7 +161,9 @@ class McpController extends AbstractController
             )
             ->addTool(
                 function (int $year) use ($taxReportService, $user): array {
-                    $report = $taxReportService->computeReport($user, $year);
+                    // Cache-only (no CoinGecko round trips: the AI supplies what's missing) and a single
+                    // history replay for all lines — both needed to answer within the client's timeout.
+                    $report = $taxReportService->computeReport($user, $year, false, true);
                     $out = [];
                     foreach ($report['lines'] as $line) {
                         if ($line['missingCoins'] === []) {
@@ -170,7 +176,7 @@ class McpController extends AbstractController
                             'soldQuantity' => $line['fromNbToken'],
                             'cessionPriceEur' => $line['cessionPrice'],
                             'missingCoins' => $line['missingCoins'],
-                            'holdingsBefore' => $taxReportService->computeHoldingsSnapshot($this->ownedTrade($line['id'], $user, $tradeRepository)),
+                            'holdingsBefore' => $line['holdingsBefore'],
                         ];
                     }
 
