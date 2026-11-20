@@ -16,6 +16,33 @@ const URL_HOLDINGS = "intern_api_cryptos_tax_report_holdings";
 const URL_PRICES = "intern_api_cryptos_tax_report_prices";
 
 /**
+ * Prompt to paste into any AI chat to get a first draft of the missing prices, one row per coin, in the
+ * same order as the form so the answer can be typed back in directly. Always every coin held, even those
+ * already priced, so the user can cross-check them; our own prices are deliberately left out so they
+ * don't bias the answer.
+ */
+function buildPricePrompt (line, coins) {
+	const asked = coins;
+	const date = Sanitaze.toFormatDate(line.tradeAt, 'LL');
+	const time = Sanitaze.toFormatDate(line.tradeAt + ' ' + line.tradeTime, 'H[h]mm');
+
+	return [
+		`Pour ma déclaration fiscale crypto (formulaire 2086), j'ai besoin du prix unitaire en euros (EUR) de chacune de ces cryptomonnaies le ${date} vers ${time} (heure de Paris).`,
+		``,
+		`Cryptos : ${asked.map(c => c.coin).join(', ')}`,
+		``,
+		`Réponds uniquement avec un tableau Markdown, une ligne par crypto, dans cet ordre exact, avec ces colonnes :`,
+		`| Crypto | Prix unitaire (€) | Source | Fiabilité |`,
+		``,
+		`- Prix unitaire : nombre avec un point décimal, sans symbole ni espace (ex. 42150.37 ; pour un token à moins de 1 €, garde au moins 4 chiffres significatifs, ex. 0.004521).`,
+		`- Source : où tu as trouvé le cours (ex. CoinGecko, CoinMarketCap, Binance), cours d'ouverture ou de clôture du jour s'il n'y a pas de cours horaire.`,
+		`- Fiabilité : « sûre » si tu as un cours historique daté, « estimée » si tu déduis le prix (conversion USD→EUR, jour proche, etc.).`,
+		`- Si une crypto n'existait pas encore, n'était pas cotée, ou si tu ne trouves aucune source, écris « inconnu » dans la colonne prix : n'invente jamais de prix.`,
+		`- Attention aux tickers ambigus (plusieurs tokens avec le même symbole) : précise dans Source lequel tu as retenu.`,
+	].join('\n');
+}
+
+/**
  * Lets the user fill in a EUR unit price for each coin they actually held right before one disposal,
  * instead of a single opaque portfolio total — saved onto that disposal (CrTrade.manualCoinPrices) via
  * the /prices endpoint, scoped to this one cession, so two disposals on the same date are valued from
@@ -26,6 +53,12 @@ export function TaxReportPriceDialog ({ open, onOpenChange, line, onReportUpdate
 	const [values, setValues] = useState({});
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
+	const [copied, setCopied] = useState(false);
+
+	const handleCopyPrompt = () => {
+		navigator.clipboard.writeText(buildPricePrompt(line, coins))
+			.then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+	}
 
 	useEffect(() => {
 		if (!open || !line) return;
@@ -128,9 +161,16 @@ export function TaxReportPriceDialog ({ open, onOpenChange, line, onReportUpdate
 					}
 				</form>
 
-				<DialogFooter>
+				<DialogFooter className="gap-2 sm:justify-between">
+					{coins && coins.length > 0
+						? <Button type="default" onClick={handleCopyPrompt} iconLeft={copied ? "check1" : "copy"}>
+							{copied ? "Prompt copié" : "Copier le prompt IA"}
+						</Button>
+						: <span />}
+					<div className="flex flex-col-reverse gap-2 sm:flex-row">
 					<Button type="default" onClick={() => onOpenChange(false)}>Annuler</Button>
 					<Button type="blue" onClick={handleSubmit} iconLeft={saving ? "chart-3" : ""}>Enregistrer les prix</Button>
+					</div>
 				</DialogFooter>
 			</>}
 		</DialogContent>
