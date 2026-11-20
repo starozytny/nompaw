@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 
-import { MoreVertical, Pencil, Trash2, ChevronDown, Ruler, TrendingUp, Clock, Car, ExternalLink, X } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, ChevronDown, Ruler, TrendingUp, Clock, Car, ExternalLink, X, Map as MapIcon } from 'lucide-react';
 
 import { Card, CardContent } from "@shadcnComponents/ui/card";
 import { Badge } from "@shadcnComponents/ui/badge";
 import { Button } from "@shadcnComponents/ui/button";
+import { SuggestionTraces } from "@userPages/Aventures/Suggestions/SuggestionTraces";
 import {
 	DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@shadcnComponents/ui/dropdown-menu";
@@ -30,9 +31,11 @@ function Chip ({ icon: Icon, children }) {
 export function SuggestionCard ({ elem, onEdit, onDelete }) {
 	const [lightboxUrl, setLightboxUrl] = useState(null);
 	const [open, setOpen] = useState(false);
+	const [tracesOpen, setTracesOpen] = useState(false);
 
 	const photos = elem.photoUrls || [];
 	const pois = elem.pointsOfInterest || [];
+	const traces = elem.traces || [];
 	const hasBudget = elem.travelBudget || elem.randoBudget;
 
 	return <Card className="overflow-hidden">
@@ -74,6 +77,14 @@ export function SuggestionCard ({ elem, onEdit, onDelete }) {
 			</div>
 
 			{elem.description && <p className="text-base leading-relaxed text-foreground">{elem.description}</p>}
+
+			{traces.length > 0 && <>
+				<button type="button" onClick={() => setTracesOpen(true)}
+					className="inline-flex items-center gap-2 self-start rounded-md border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted">
+					<MapIcon className="h-4 w-4" /> Voir la carte et le profil ({traces.length} trace{traces.length > 1 ? 's' : ''})
+				</button>
+				<SuggestionTraces suggestion={elem} open={tracesOpen} onOpenChange={setTracesOpen} />
+			</>}
 
 			<button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
 				className="flex items-center gap-1 self-start text-sm font-medium text-blue-700">
