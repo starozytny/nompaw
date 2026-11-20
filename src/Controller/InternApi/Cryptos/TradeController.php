@@ -65,6 +65,12 @@ class TradeController extends AbstractController
         );
     }
 
+    #[Route('/issues', name: 'issues', options: ['expose' => true], methods: 'GET')]
+    public function issues(ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
+    {
+        return $apiResponse->apiJsonResponseCustom(['issues' => $replayService->findIssues(null, $this->getUser())]);
+    }
+
     #[Route('/filters', name: 'filters', options: ['expose' => true], methods: 'GET')]
     public function filters(ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
     {

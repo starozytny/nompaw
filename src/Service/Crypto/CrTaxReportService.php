@@ -215,8 +215,9 @@ class CrTaxReportService
      * since resolvePortfolioValue() always prefers the whole-total override first.
      *
      * @param array<string, float> $pricesByCoin coin ticker => EUR unit price
+     * @param string $source 'manual' (human) or 'ia' (MCP first draft) — an 'ia' draft stays flagged until a human re-saves it
      */
-    public function saveManualPrices(CrTrade $disposal, array $pricesByCoin): array
+    public function saveManualPrices(CrTrade $disposal, array $pricesByCoin, string $source = 'manual'): array
     {
         $merged = $disposal->getManualCoinPrices();
         foreach ($pricesByCoin as $coin => $price) {
@@ -227,7 +228,7 @@ class CrTaxReportService
         if ($disposal->getManualPortfolioValueTotal() !== null) {
             $disposal->setManualPortfolioValueTotal(null);
         }
-        $disposal->setPortfolioValueSource('manual');
+        $disposal->setPortfolioValueSource($source);
         $this->tradeRepository->save($disposal, true);
 
         return $this->computeSingleLine($disposal);
@@ -359,6 +360,6 @@ class CrTaxReportService
             return [null, null, $missingCoins];
         }
 
-        return [$value, $usedManual ? 'manual' : 'api', []];
+        return [$value, $usedManual ? ($trade->getPortfolioValueSource() === 'ia' ? 'ia' : 'manual') : 'api', []];
     }
 }

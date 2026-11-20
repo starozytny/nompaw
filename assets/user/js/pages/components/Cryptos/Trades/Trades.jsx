@@ -12,12 +12,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/c
 
 import { TradesList } from "@userPages/Cryptos/Trades/TradesList";
 import { TradesFormulaire } from "@userPages/Cryptos/Trades/TradesForm";
+import { TradesIssues } from "@userPages/Cryptos/Trades/TradesIssues";
 import { ModalDelete } from "@tailwindComponents/Shortcut/Modal";
 
 const URL_GET_DATA = "intern_api_cryptos_trades_list";
 const URL_GET_HOLDINGS = "intern_api_cryptos_trades_holdings";
 const URL_GET_HOLDINGS_YEAR = "intern_api_cryptos_trades_holdings_year";
 const URL_GET_FILTERS = "intern_api_cryptos_trades_filters";
+const URL_GET_ISSUES = "intern_api_cryptos_trades_issues";
 const URL_DELETE_ELEMENT = "intern_api_cryptos_trades_delete";
 
 export class Trades extends Component {
@@ -37,6 +39,8 @@ export class Trades extends Component {
 			holdings: [],
 			netInvested: { depot: 0, retrait: 0 },
 			filterOptions: { platforms: [], tokens: [], hasManual: false },
+			issues: [],
+			focusCoin: null,
 		}
 
 		// One year's trades per key, so switching back to an already-visited year is instant instead of
@@ -51,6 +55,7 @@ export class Trades extends Component {
 		this.handleGetYearData(null);
 		this.handleGetHoldings();
 		this.handleGetFilters();
+		this.handleGetIssues();
 	}
 
 	componentDidUpdate = (prevProps) => {
@@ -59,6 +64,7 @@ export class Trades extends Component {
 			this.handleGetYearData(this.state.selectedYear);
 			this.handleGetHoldings();
 			this.handleGetFilters();
+		this.handleGetIssues();
 		}
 	}
 
@@ -134,6 +140,31 @@ export class Trades extends Component {
 		;
 	}
 
+	handleGetIssues = () => {
+		const self = this;
+		axios({ method: "GET", url: Routing.generate(URL_GET_ISSUES) })
+			.then(function (response) {
+				self.setState({ issues: response.data.issues })
+			})
+			.catch(function (error) {
+				Formulaire.displayErrors(self, error);
+			})
+		;
+	}
+
+	// "Voir dans la liste" from TradesIssues: jump to the year the problem starts, filtered on its coin.
+	// focusCoin is a fresh object each time so TradesList re-applies it even for the same coin twice.
+	handleShowIssue = (year, coin) => {
+		this.setState({ focusCoin: { coin } });
+		if (year !== this.state.selectedYear) {
+			this.handleGetYearData(year, { silent: true });
+		}
+	}
+
+	handleFixIssue = (draft) => {
+		this.setState({ editElement: draft, sheetOpen: true })
+	}
+
 	handleYearChange = (year) => {
 		this.handleGetYearData(year);
 	}
@@ -146,6 +177,7 @@ export class Trades extends Component {
 		this.handleGetYearData(this.state.selectedYear, { silent: true });
 		this.handleGetHoldings();
 		this.handleGetFilters();
+		this.handleGetIssues();
 	}
 
 	handleModal = (identifiant, elem) => {
@@ -166,7 +198,7 @@ export class Trades extends Component {
 	}
 
 	render () {
-		const { data, loadingData, deleteElement, editElement, sheetOpen, years, selectedYear, yearStats, yearHoldings, holdings, netInvested, filterOptions } = this.state;
+		const { data, loadingData, deleteElement, editElement, sheetOpen, years, selectedYear, yearStats, yearHoldings, holdings, netInvested, filterOptions, issues, focusCoin } = this.state;
 
 		return <>
 			{loadingData
@@ -208,6 +240,10 @@ export class Trades extends Component {
 						</Card>
 					</div>
 
+					<div className={issues.length > 0 ? "grid grid-cols-1 items-start gap-4 xl:grid-cols-[340px_minmax(0,1fr)]" : ""}>
+					{issues.length > 0 && <TradesIssues issues={issues} invalidCount={issues.reduce((sum, i) => sum + i.count, 0)}
+														onFix={this.handleFixIssue} onShow={this.handleShowIssue} />}
+
 					<Card className="overflow-hidden">
 						<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
 							<CardTitle className="text-sm">Transactions</CardTitle>
@@ -219,13 +255,15 @@ export class Trades extends Component {
 							<TradesList data={data} years={years} selectedYear={selectedYear} yearStats={yearStats}
 										yearHoldings={yearHoldings}
 										filterOptions={filterOptions} onYearChange={this.handleYearChange}
+										focusCoin={focusCoin}
 										onModal={this.handleModal} onEdit={this.handleEdit} />
 						</CardContent>
 					</Card>
+					</div>
 				</div>
             }
 
-			<TradesFormulaire context={editElement ? "update" : "create"} element={editElement}
+			<TradesFormulaire context={editElement?.id ? "update" : "create"} element={editElement}
 							  open={sheetOpen} onOpenChange={this.handleSheetOpenChange}
 							  onUpdateList={this.handleUpdateList} />
 

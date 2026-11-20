@@ -19,7 +19,8 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * Business rules below are ported as-is from the JS originals (kept in one place now instead of two):
  * - "Dispo" (EUR cash running total): Vente +totalReal, Depot +total, Achat -total, Retrait -totalReal,
  *   Recuperation/Stacking -> bonus only (no Dispo effect), Transfert/ACategoriser -> no effect.
- * - Holdings (replayHoldings, valuation-oriented, EUR untracked): Achat +toCoin; Vente -fromCoin (+toCoin
+ * - Holdings (replayHoldings, valuation-oriented, EUR untracked): Achat +toCoin (and -fromCoin when paid
+ *   in crypto rather than EUR); Vente -fromCoin (+toCoin
  *   too if toCoin isn't EUR, i.e. a crypto-to-crypto swap); Depot/Retrait only move the balance if the
  *   coin involved isn't EUR (a real external crypto deposit/withdrawal); Recuperation/Stacking +fromCoin
  *   (a reward); Transfert -> no net holdings impact (moves between the user's own wallets).
@@ -29,6 +30,12 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 class CrTradeReplayService
 {
     private const DEFICIT_EPSILON = 0.00000001;
+
+    private const TYPE_LABELS = [
+        TypeType::Achat => 'Achat', TypeType::Vente => 'Vente', TypeType::Depot => 'Dépôt', TypeType::Retrait => 'Retrait',
+        TypeType::Recuperation => 'Récupération', TypeType::Stacking => 'Stacking', TypeType::Transfert => 'Transfert',
+        TypeType::ACategoriser => 'À catégoriser',
+    ];
 
     public function __construct(
         private readonly CrTradeRepository $tradeRepository,
@@ -49,6 +56,7 @@ class CrTradeReplayService
         }
 
         $validityBalances = [];
+        $rootIds = array_column($this->findIssues($trades), 'rootId');
         // dispo/cumDepot/cumRetrait/cumBonus are ALL-TIME running totals (since account inception, not
         // year-scoped) — TradesList.jsx's per-month header shows these four cumulative figures (as of
         // the end of that month), separate from $statsByYear below which is scoped to a single year for
@@ -72,6 +80,10 @@ class CrTradeReplayService
             }
 
             $invalid = $this->checkValidity($trade, $validityBalances);
+            if ($invalid !== null) {
+                // The first impossible row of an episode is the cause; the rest are just its knock-on effect.
+                $invalid['root'] = in_array($trade->getId(), $rootIds, true);
+            }
 
             switch ($trade->getType()) {
                 case TypeType::Vente:
@@ -153,6 +165,110 @@ class CrTradeReplayService
             'yearStats' => $yearStats,
             'year' => $effectiveYear,
         ];
+    }
+
+    /**
+     * One "issue" per coin whose balance ever goes negative (checkValidity rules), instead of N red rows
+     * that all stem from the same missing operation. It starts at the first trade that drives the coin
+     * negative (the root/cause); maxDeficit is the largest gap seen from there on, so adding that amount
+     * just before the root clears EVERY later red row of this coin (a constant added at the start shifts
+     * all later balances by the same amount). Per coin rather than per negative stretch on purpose: a
+     * single missing amount often makes the balance flap around zero (seen on real USDC data), which would
+     * otherwise show as a dozen "issues" for one cause. `kind` is a heuristic guess the UI turns into a
+     * suggested fix — a first draft to check, not a certainty: 'deposit' (EUR short), 'reward' (short by
+     * < 3% of the root operation: staking/fees not imported), 'transfer' (bought/received elsewhere).
+     *
+     * @param CrTrade[]|null $trades full history ascending; fetched for $user when null
+     */
+    public function findIssues(?array $trades, ?User $user = null): array
+    {
+        $trades ??= $this->tradeRepository->findBy(['user' => $user], ['tradeAt' => 'ASC', 'id' => 'ASC']);
+
+        $balances = [];
+        $issues = [];
+
+        foreach ($trades as $trade) {
+            $this->checkValidity($trade, $balances);
+
+            foreach (array_unique(array_filter([$trade->getFromCoin(), $trade->getToCoin()])) as $coin) {
+                $deficit = $this->deficitOf($balances, $coin);
+
+                if ($deficit === null) {
+                    // Back to >= 0: remember when, but a later dip reopens the same issue.
+                    if (isset($issues[$coin]) && $issues[$coin]['endAt'] === null) {
+                        $issues[$coin]['endAt'] = $trade->getTradeAt()->format(DATE_ATOM);
+                    }
+                    continue;
+                }
+
+                if (!isset($issues[$coin])) {
+                    $rootQty = (float) $trade->getFromNbToken();
+                    $issues[$coin] = [
+                        'coin' => $coin,
+                        'kind' => $coin === 'EUR' ? 'deposit' : 'transfer',
+                        'rootId' => $trade->getId(),
+                        'rootType' => $trade->getType(),
+                        'rootQty' => $rootQty,
+                        'rootDeficit' => $deficit,
+                        'startAt' => $trade->getTradeAt()->format(DATE_ATOM),
+                        'endAt' => null,
+                        'platform' => $trade->getImportedFrom(),
+                        'count' => 0,
+                        'maxDeficit' => 0.0,
+                    ];
+                }
+
+                $issues[$coin]['endAt'] = null;
+                $issues[$coin]['count']++;
+                $issues[$coin]['maxDeficit'] = max($issues[$coin]['maxDeficit'], $deficit);
+            }
+        }
+
+        foreach ($issues as &$issue) {
+            if ($issue['kind'] !== 'deposit' && $issue['rootQty'] > 0 && $issue['maxDeficit'] / $issue['rootQty'] < 0.03) {
+                $issue['kind'] = 'reward';
+            }
+        }
+
+        return array_values($issues);
+    }
+
+    /**
+     * Every trade touching $coin (as fromCoin or toCoin), chronological, with the coin's running balance
+     * after it under the checkValidity rules — the same balance that drives the red rows and findIssues().
+     * Read-only view for analysis (MCP), so an AI can see exactly where and why a coin goes negative.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function coinLedger(User $user, string $coin): array
+    {
+        $coin = strtoupper($coin);
+        $trades = $this->tradeRepository->findBy(['user' => $user], ['tradeAt' => 'ASC', 'id' => 'ASC']);
+
+        $balances = [];
+        $ledger = [];
+        foreach ($trades as $trade) {
+            $this->checkValidity($trade, $balances);
+            if ($trade->getFromCoin() !== $coin && $trade->getToCoin() !== $coin) {
+                continue;
+            }
+
+            $ledger[] = [
+                'id' => $trade->getId(),
+                'tradeAt' => $trade->getTradeAt()->format(DATE_ATOM),
+                'type' => self::TYPE_LABELS[$trade->getType()] ?? (string) $trade->getType(),
+                'fromCoin' => $trade->getFromCoin(),
+                'fromNbToken' => $trade->getFromNbToken(),
+                'toCoin' => $trade->getToCoin(),
+                'toNbToken' => $trade->getToNbToken(),
+                'totalReal' => $trade->getTotalReal(),
+                'platform' => $trade->getImportedFrom() ?? 'manuel',
+                'rawCategory' => $trade->getRawCategory(),
+                'balanceAfter' => round($balances[$coin] ?? 0.0, 10),
+            ];
+        }
+
+        return $ledger;
     }
 
     /**
@@ -276,40 +392,10 @@ class CrTradeReplayService
         $alerts = [];
 
         foreach ($trades as $trade) {
-            switch ($trade->getType()) {
-                case TypeType::Achat:
-                    $this->credit($balances, $trade->getToCoin(), $trade->getToNbToken());
-                    break;
-                case TypeType::Vente:
-                    $this->credit($balances, $trade->getFromCoin(), -$trade->getFromNbToken());
-                    $deficit = $this->deficitOf($balances, $trade->getFromCoin());
-                    if ($deficit !== null) {
-                        $alerts[] = $this->alert($trade, $trade->getFromCoin(), 'vente', $trade->getFromNbToken(), $deficit);
-                    }
-                    if ($trade->getToCoin() !== 'EUR') {
-                        $this->credit($balances, $trade->getToCoin(), $trade->getToNbToken());
-                    }
-                    break;
-                case TypeType::Depot:
-                    if ($trade->getToCoin() !== 'EUR') {
-                        $this->credit($balances, $trade->getToCoin(), $trade->getToNbToken());
-                    }
-                    break;
-                case TypeType::Retrait:
-                    if ($trade->getFromCoin() !== 'EUR') {
-                        $this->credit($balances, $trade->getFromCoin(), -$trade->getFromNbToken());
-                        $deficit = $this->deficitOf($balances, $trade->getFromCoin());
-                        if ($deficit !== null) {
-                            $alerts[] = $this->alert($trade, $trade->getFromCoin(), 'retrait', $trade->getFromNbToken(), $deficit);
-                        }
-                    }
-                    break;
-                case TypeType::Recuperation:
-                case TypeType::Stacking:
-                    $this->credit($balances, $trade->getFromCoin(), $trade->getFromNbToken());
-                    break;
-                default:
-                    break;
+            $debited = $this->applyHolding($balances, $trade);
+            $deficit = $debited === null ? null : $this->deficitOf($balances, $debited);
+            if ($deficit !== null) {
+                $alerts[] = $this->alert($trade, $debited, [TypeType::Achat => 'achat', TypeType::Vente => 'vente'][$trade->getType()] ?? 'retrait', $trade->getFromNbToken(), $deficit);
             }
         }
 
@@ -322,6 +408,58 @@ class CrTradeReplayService
         usort($holdings, fn (array $a, array $b) => $b['quantity'] <=> $a['quantity']);
 
         return ['holdings' => $holdings, 'alerts' => $alerts];
+    }
+
+    /**
+     * Applies one trade to valuation-oriented holdings (the replayHoldings rules in the class docblock:
+     * EUR untracked; an Achat debits fromCoin only when it was paid in crypto). Shared with CrStatsService
+     * so the stats charts and "Cryptos restantes" can never disagree. Returns the crypto debited (Vente,
+     * crypto Retrait, crypto-funded Achat) so the
+     * caller can check it for a deficit, else null.
+     *
+     * @param array<string, float> $balances
+     */
+    public function applyHolding(array &$balances, CrTrade $trade): ?string
+    {
+        switch ($trade->getType()) {
+            case TypeType::Achat:
+                $this->credit($balances, $trade->getToCoin(), $trade->getToNbToken());
+                // A purchase paid in crypto (e.g. LINK bought with USDT) spends that crypto too; only EUR
+                // (untracked here) was skipped by the original rule, which left ~54k phantom USDT.
+                if ($trade->getFromCoin() === 'EUR') {
+                    return null;
+                }
+                $this->credit($balances, $trade->getFromCoin(), -$trade->getFromNbToken());
+
+                return $trade->getFromCoin();
+            case TypeType::Vente:
+                $this->credit($balances, $trade->getFromCoin(), -$trade->getFromNbToken());
+                if ($trade->getToCoin() !== 'EUR') {
+                    $this->credit($balances, $trade->getToCoin(), $trade->getToNbToken());
+                }
+
+                return $trade->getFromCoin();
+            case TypeType::Depot:
+                if ($trade->getToCoin() !== 'EUR') {
+                    $this->credit($balances, $trade->getToCoin(), $trade->getToNbToken());
+                }
+
+                return null;
+            case TypeType::Retrait:
+                if ($trade->getFromCoin() === 'EUR') {
+                    return null;
+                }
+                $this->credit($balances, $trade->getFromCoin(), -$trade->getFromNbToken());
+
+                return $trade->getFromCoin();
+            case TypeType::Recuperation:
+            case TypeType::Stacking:
+                $this->credit($balances, $trade->getFromCoin(), $trade->getFromNbToken());
+
+                return null;
+            default:
+                return null;
+        }
     }
 
     /**

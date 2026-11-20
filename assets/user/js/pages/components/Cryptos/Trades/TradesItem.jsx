@@ -38,7 +38,12 @@ export function TradesItem ({ elem, onModal, onEditElement, invalid }) {
 	const showSortie = SHOWS_SORTIE[elem.type];
 	const showEntree = SHOWS_ENTREE[elem.type];
 
-	return <tr className={cn("border-t hover:bg-muted/40", invalid && "bg-[var(--status-critical-soft)] hover:bg-[var(--status-critical-soft)]")}>
+	// Only the trade that first drove a coin negative is the cause (strong red); later ones are its knock-on effect.
+	const isCause = invalid && invalid.root !== false;
+
+	return <tr className={cn("border-t hover:bg-muted/40",
+		isCause && "bg-[var(--status-critical-soft)] shadow-[inset_3px_0_0_var(--status-critical)] hover:bg-[var(--status-critical-soft)]",
+		invalid && !isCause && "bg-[var(--status-critical-soft)]/40 hover:bg-[var(--status-critical-soft)]/60")}>
 		<td className="py-2.5 pl-4 pr-3 text-sm align-top">
 			<div className="flex items-center gap-2">
 				<div className="hidden sm:flex w-7 h-7 rounded-lg items-center justify-center flex-shrink-0" style={{ background: soft, color: color }}>
@@ -49,7 +54,7 @@ export function TradesItem ({ elem, onModal, onEditElement, invalid }) {
 			{(elem.importedFrom || elem.costPrice > 0 || elem.rawCategory || invalid) && <div className="flex flex-wrap items-center gap-1.5 mt-1 sm:pl-9">
 				{invalid && <Badge variant="outline" style={{ borderColor: 'var(--status-critical)55', color: 'var(--status-critical)' }}
 									title={`Manque ${formatAmount(invalid.deficit, invalid.coin)} à cette date`}>
-					<span className="icon-warning1 mr-1" />Incohérent · manque {formatAmount(invalid.deficit, invalid.coin)}
+					<span className="icon-warning1 mr-1" />{isCause ? "Cause" : "Conséquence"} · manque {formatAmount(invalid.deficit, invalid.coin)}
 				</Badge>}
 				{elem.importedFrom && <Badge variant="muted">Importé · {elem.importedFrom}</Badge>}
 				{elem.costPrice > 0 && <Badge variant="muted">Frais {formatAmount(elem.costPrice, elem.costCoin)}</Badge>}
@@ -106,5 +111,6 @@ TradesItem.propTypes = {
 		coin: PropTypes.string,
 		deficit: PropTypes.number,
 		action: PropTypes.string,
+		root: PropTypes.bool,
 	}),
 }
