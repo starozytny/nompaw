@@ -74,67 +74,81 @@
 {% endset %}
 
 {% block main_content %}
-<div class="flex flex-col gap-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-1 space-y-4">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                <h3 class="text-sm font-semibold text-slate-700 mb-3">Participants</h3>
-                <div class="flex flex-col gap-3">
-                    <div class="flex -space-x-2">
-                        {% for participant in participants %}
-                            <img src="{{ asset(participant.avatarFile) }}" alt="Avatar utilisateur" class="w-8 h-8 object-cover rounded-full border-2 border-white">
-                        {% endfor %}
-                    </div>
-                    <div class="text-sm text-slate-600">Référent : {{ author.displayName }}</div>
-                </div>
+{# Carnet : texte et photo se partagent l'en-tête ; les chiffres deviennent une fiche technique. #}
+{% set coverSrc = hd ? path('intern_api_aventures_images_file_hd_src', {id: hd.id}) : (elem.cover ? path('intern_api_aventures_randos_cover_src', {id: elem.id, v: elem.cover}) : asset(groupe.imageFile)) %}
+{% set stats = [] %}
+{% import 'layout/components/lucide.html.twig' as lucide %}
+{% if elem.distance %}{% set stats = stats|merge([{label: 'Distance', icon: 'route', value: elem.distance|number_format(1, ',', ' ') ~ ' km'}]) %}{% endif %}
+{% if elem.devPlus %}{% set stats = stats|merge([{label: 'D+', icon: 'trending-up', long: 'Dénivelé positif', value: elem.devPlus|number_format(0, ',', ' ') ~ ' m'}]) %}{% endif %}
+{% if elem.altitude %}{% set stats = stats|merge([{label: 'Altitude', icon: 'mountain-snow', long: 'Altitude max', value: elem.altitude|number_format(0, ',', ' ') ~ ' m'}]) %}{% endif %}
+{% if adventure and adventure.duration %}{% set stats = stats|merge([{label: 'Durée', icon: 'clock', value: adventure.duration|date('G\\hi')}]) %}{% endif %}
+{% if photos %}{% set stats = stats|merge([{label: 'Photos', icon: 'images', value: photos}]) %}{% endif %}
+
+<div class="flex flex-col gap-8">
+    <section class="bg-white rounded-2xl shadow-sm p-6 sm:p-10 grid gap-10 lg:grid-cols-2 items-center">
+        <div class="order-2 lg:order-1 flex flex-col gap-6">
+            <div>
+                <a href="{{ path('user_aventures_groupes_read', {slug: groupe.slug}) }}" class="text-xs uppercase tracking-[0.16em] text-blue-600 font-semibold hover:text-blue-700">{{ groupe.name }}</a>
+                <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 leading-[1.05] mt-2 [text-wrap:balance]">{{ elem.name }}</h2>
+                <p class="text-gray-500 mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span class="inline-flex items-center gap-1.5">{{ lucide.icon('calendar', 'w-4 h-4 text-gray-400') }}{{ elem.startAt ? elem.startAt|format_datetime('full', 'none', locale='fr')|capitalize : 'Date à définir' }}</span>
+                    {% if elem.localisation %}<span class="inline-flex items-center gap-1.5">{{ lucide.icon('map-pin', 'w-4 h-4 text-gray-400') }}{{ elem.localisation }}</span>{% endif %}
+                </p>
             </div>
 
-            {% if canManage %}
-                <div id="rando_deposit"
-                     data-rando-id="{{ elem.id }}"
-                     data-enabled="{{ elem.depositEnabled ? 1 : 0 }}"
-                     data-has-password="{{ elem.depositPassword ? 1 : 0 }}"
-                     data-url="{{ elem.depositToken ? url('app_aventure_album', {token: elem.depositToken}) : '' }}"></div>
+            {% if elem.description %}
+                <div class="text-lg text-gray-700 leading-relaxed">{{ elem.description|raw }}</div>
             {% endif %}
+
+            <dl class="text-sm border-y border-dashed border-gray-300 divide-y divide-dashed divide-gray-200">
+                {% for s in stats|merge([{label: 'Statut', icon: 'flag', value: elem.statusString}]) %}
+                    <div class="flex items-baseline gap-3 py-2.5">
+                        <dt class="text-gray-500 inline-flex items-center gap-2 self-center">{{ lucide.icon(s.icon, 'w-4 h-4 text-gray-400') }}{{ s.long ?? s.label }}</dt>
+                        <span class="flex-1 border-b border-dotted border-gray-300 translate-y-[-3px]" aria-hidden="true"></span>
+                        <dd class="font-semibold text-gray-900 tabular-nums">{{ s.value }}</dd>
+                    </div>
+                {% endfor %}
+            </dl>
+
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    {{ lucide.icon('users', 'w-4 h-4 text-gray-400') }}
+                    <div class="flex -space-x-2">
+                        {% for participant in participants|slice(0, 6) %}
+                            <img src="{{ asset(participant.avatarFile) }}" alt="{{ participant.displayName }}" title="{{ participant.displayName }}" class="w-9 h-9 object-cover rounded-full border-2 border-white">
+                        {% endfor %}
+                        {% if participants|length > 6 %}
+                            <span class="w-9 h-9 rounded-full border-2 border-white bg-slate-700 text-white text-xs font-medium flex items-center justify-center">+{{ participants|length - 6 }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="text-sm text-gray-500">Référent·e : <span class="font-medium text-gray-900">{{ author.displayName }}</span></span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    {% set linkClass = 'inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150' %}
+                    {% if adventure and adventure.url and adventure.url != "https://" %}
+                        <a href="{{ adventure.url }}" target="_blank" class="{{ linkClass }}">{{ lucide.icon('book-open', 'w-4 h-4 text-gray-500') }} Topo</a>
+                    {% endif %}
+                    {% if elem.story %}
+                        <a href="{{ path('user_homepage') ~ 'blog/' ~ elem.story }}" target="_blank" class="{{ linkClass }}">{{ lucide.icon('scroll-text', 'w-4 h-4 text-gray-500') }} Lire l'histoire</a>
+                    {% endif %}
+                    {% if canManage %}
+                        <a href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}" class="{{ linkClass }}">{{ lucide.icon('pencil', 'w-4 h-4 text-gray-500') }} {{ hasInfo ? 'Modifier les informations' : 'Ajouter des informations' }}</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
 
-        {# ── Panneau unique « L'aventure » ─────────────────────────────────────── #}
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="order-1 lg:order-2 relative px-2 sm:px-6 pb-6">
+            <img src="{{ coverSrc }}" alt="{{ elem.name }}" class="w-full aspect-[4/5] object-cover rounded-xl shadow-lg rotate-[1.5deg]">
+            {% if insetPhoto %}
+                <img src="{{ path('intern_api_aventures_images_thumbs_src', {id: insetPhoto.id}) }}" alt="" loading="lazy"
+                     class="hidden sm:block absolute bottom-0 left-0 w-2/5 aspect-square object-cover rounded-lg ring-8 ring-white shadow-xl rotate-[-4deg]">
+            {% endif %}
+        </div>
+    </section>
 
-                {# En-tête #}
-                {% if isCalee %}
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-start justify-between gap-4">
-                        <div class="min-w-0">
-                            <h2 class="text-xl font-bold text-white truncate">{{ adventure.name }}</h2>
-                            <p class="text-indigo-100 text-sm mt-1 flex items-center gap-1.5">
-                                <span class="icon-calendar"></span>
-                                {{ elem.startAt | format_datetime('full', 'none', locale='fr') | capitalize }}
-                            </p>
-                        </div>
-                        <span class="shrink-0 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white">{{ elem.statusString }}</span>
-                    </div>
-                {% else %}
-                    <div class="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4">
-                        <div>
-                            {% if elem.status == 2 %}
-                                <h2 class="text-lg font-bold text-slate-800">{{ elem.name }}</h2>
-                                <p class="text-sm text-slate-500 mt-0.5">Sortie terminée — ajustez la date ou l'activité si besoin.</p>
-                            {% else %}
-                                <h2 class="text-base font-bold text-slate-800">Organisation de la sortie</h2>
-                                <p class="text-sm text-slate-500 mt-0.5">Proposez et votez pour caler la date et l'activité.</p>
-                            {% endif %}
-                        </div>
-                        <span class="shrink-0 inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1">
-                            <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
-                            <span class="text-xs font-medium text-amber-800">{{ elem.statusString }}</span>
-                        </span>
-                    </div>
-                {% endif %}
-
-                {# Décisions : votes / rappel de la date et de l'activité. Quand la sortie est
-                   calée, les actions « Changer » vivent dans la barre d'actions du haut. #}
-                {% if not isCalee %}
+    {% if not isCalee %}
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="grid grid-cols-1 divide-y divide-slate-100 md:grid-cols-2 md:divide-y-0 md:divide-x">
                     <div class="p-5">
                         <div id="rando_date"
@@ -166,111 +180,15 @@
                         </div>
                     </div>
                 </div>
-                {% endif %}
-
-                {# Informations de la sortie #}
-                {% if hasInfo or canManage %}
-                    <div class="p-6 pt-5 border-t border-slate-100 space-y-4">
-                        {% if elem.description %}
-                            <div class="text-slate-700">{{ elem.description | raw }}</div>
-                        {% endif %}
-
-                        {% if elem.distance or elem.devPlus or elem.altitude %}
-                            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                                {% if elem.distance %}
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                            <span class="icon-map text-emerald-600"></span>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500">Distance</p>
-                                            <p class="text-sm font-medium text-slate-900">{{ elem.distance }} km</p>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                {% if elem.devPlus %}
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                                            <span class="icon-placeholder text-red-600"></span>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500">D+</p>
-                                            <p class="text-sm font-medium text-slate-900">{{ elem.devPlus }} m</p>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                {% if elem.altitude %}
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                            <span class="icon-placeholder text-amber-600"></span>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500">Altitude</p>
-                                            <p class="text-sm font-medium text-slate-900">{{ elem.altitude }} m</p>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-
-                        {% if elem.localisation or elem.story or (adventure and adventure.url and adventure.url != "https://") %}
-                            <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
-                                {% if elem.localisation %}
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-color0/10 rounded-lg flex items-center justify-center">
-                                            <span class="icon-placeholder text-color0"></span>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500">Lieu</p>
-                                            <p class="text-sm font-medium text-slate-900">{{ elem.localisation }}</p>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                {% if elem.story %}
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <span class="icon-book-1 text-blue-600"></span>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500">Histoire</p>
-                                            <div class="text-sm font-medium">
-                                                <a href="{{ path('user_homepage') ~ "blog/" ~ elem.story }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien vers l'histoire</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                {% if adventure and adventure.url and adventure.url != "https://" %}
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <span class="icon-book-1 text-gray-600"></span>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500">Topo</p>
-                                            <div class="text-sm font-medium">
-                                                <a href="{{ adventure.url }}" class="text-blue-700 hover:text-blue-500 hover:underline" target="_blank">Lien du topo</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-
-                        {% if canManage %}
-                            <a class="group flex items-center gap-2 cursor-pointer" href="{{ path('user_aventures_randos_update', {slug: elem.slug}) }}">
-                                <span class="icon-add text-blue-900"></span>
-                                <span class="text-sm font-medium text-blue-900 group-hover:underline">{{ hasInfo ? 'Modifier les informations' : 'Ajouter des informations' }}</span>
-                            </a>
-                        {% endif %}
-                    </div>
-                {% endif %}
-
-            </div>
-        </div>
     </div>
+    {% endif %}
+            {% if canManage %}
+                <div id="rando_deposit"
+                     data-rando-id="{{ elem.id }}"
+                     data-enabled="{{ elem.depositEnabled ? 1 : 0 }}"
+                     data-has-password="{{ elem.depositPassword ? 1 : 0 }}"
+                     data-url="{{ elem.depositToken ? url('app_aventure_album', {token: elem.depositToken}) : '' }}"></div>
+            {% endif %}
 
     <div id="rando_images"
          data-rando-id="{{ elem.id }}"

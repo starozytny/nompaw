@@ -208,6 +208,7 @@ class RandoController extends AbstractController
             $fileUploader->deleteFile($item->getFile(), RaRando::FOLDER_IMAGES.'/'.$item->getRando()->getId(), false);
             $fileUploader->deleteFile($item->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$item->getRando()->getId(), false);
             $fileUploader->deleteFile($item->getLightbox(), RaRando::FOLDER_LIGHTBOX.'/'.$item->getRando()->getId(), false);
+            $fileUploader->deleteFile($item->getMiniName(), RaRando::FOLDER_MINI.'/'.$item->getRando()->getId(), false);
 
             $imageRepository->remove($item);
         }
@@ -263,6 +264,7 @@ class RandoController extends AbstractController
             if(file_exists($oldCoverFile)){
                 unlink($oldCoverFile);
             }
+            $fileUploader->deleteFile(pathinfo($oldCover, PATHINFO_FILENAME) . '.webp', RaRando::FOLDER_MINI . '/' . $obj->getId(), false);
         }
 
         $randoFile = "/" . $obj->getId();
@@ -274,13 +276,20 @@ class RandoController extends AbstractController
         return $apiResponse->apiJsonResponseSuccessful('ok');
     }
 
+    // Cached: templates add ?v=<cover file name>, so a new cover gets a new URL.
     #[Route('/src/cover/{id}', name: 'cover_src', options: ['expose' => true], methods: 'GET')]
-    public function getCover(RaRando $obj): Response
+    public function getCover(RaRando $obj, FileUploader $fileUploader): Response
     {
-        $file = $this->getParameter('private_directory') . $obj->getCoverFile();
-        if(!file_exists($file)){
-            return $this->file('placeholders/placeholder.jpg');
-        }
-        return $this->file($file);
+        return $fileUploader->cachedImage($obj->getCover() ? $this->getParameter('private_directory') . $obj->getCoverFile() : null);
+    }
+
+    #[Route('/src/cover-mini/{id}', name: 'cover_mini_src', options: ['expose' => true], methods: 'GET')]
+    public function getCoverMini(RaRando $obj, FileUploader $fileUploader): Response
+    {
+        $mini = $obj->getCover()
+            ? $fileUploader->miniature($obj->getCoverFile(), RaRando::FOLDER_MINI . '/' . $obj->getId(), pathinfo($obj->getCover(), PATHINFO_FILENAME) . '.webp')
+            : null;
+
+        return $fileUploader->cachedImage($mini);
     }
 }

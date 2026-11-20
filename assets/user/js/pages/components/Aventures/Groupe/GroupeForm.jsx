@@ -192,6 +192,7 @@ class Form extends Component {
                                            placeholder="Glissez et déposer une image" {...params}>
                                     Illustration
                                 </InputFile>
+                                <p className="text-xs text-gray-500 mt-1">Photo en paysage recommandée : elle est affichée en grand bandeau et recadrée au centre.</p>
                             </div>
                         </div>
                         <div>

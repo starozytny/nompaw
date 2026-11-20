@@ -17,10 +17,12 @@ use ImagickException;
 use PHPImageWorkshop\Core\Exception\ImageWorkshopLayerException;
 use PHPImageWorkshop\Exception\ImageWorkshopException;
 use PHPImageWorkshop\ImageWorkshop;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\Process\Process;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -365,6 +367,106 @@ class FileUploader
         }
 
         return $fileName;
+    }
+
+    /**
+     * Converts an uploaded file in place to WebP (q80), downsized to $maxWidth, and deletes the
+     * original. Returns the new file name — or the original one, untouched, if it can't be converted.
+     */
+    public function toWebp(string $folder, string $fileName, int $maxWidth = 2400, bool $isPublic = true): string
+    {
+        $directory = $this->getDirectory($isPublic) . $folder . '/';
+        $fileOri = $directory . $fileName;
+
+        if (!file_exists($fileOri) || !$this->isPreviewable($fileOri)) {
+            return $fileName;
+        }
+
+        [$decodedPath, $isTemp] = $this->decodeForPreview($fileOri);
+
+        try {
+            $imagick = new Imagick($decodedPath);
+            $imagick->autoOrient();
+            $imagick->stripImage();
+
+            if ($imagick->getImageWidth() > $maxWidth) {
+                $imagick->resizeImage($maxWidth, 0, Imagick::FILTER_LANCZOS, 1);
+            }
+
+            $imagick->setImageFormat('webp');
+            $imagick->setImageCompressionQuality(80);
+
+            $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
+            $imagick->writeImage($directory . $newFileName);
+            $imagick->clear();
+
+            if ($newFileName !== $fileName) {
+                unlink($fileOri);
+            }
+
+            return $newFileName;
+        } catch (ImagickException $e) {
+            return $fileName;
+        } finally {
+            if ($isTemp) {
+                @unlink($decodedPath);
+            }
+        }
+    }
+
+    /**
+     * Small WebP copy of a private file, for thumbnails shown at ~100px. Generated on first request,
+     * then served from disk. Returns the absolute path, or null if the source is missing.
+     */
+    public function miniature(string $sourceRelative, string $targetFolder, string $targetName, int $width = 240): ?string
+    {
+        $target = $this->privateDirectory . $targetFolder . '/' . $targetName;
+        if (is_file($target)) {
+            return $target;
+        }
+
+        $source = $this->privateDirectory . ltrim($sourceRelative, '/');
+        if (!is_file($source)) {
+            return null;
+        }
+
+        try {
+            $imagick = new Imagick($source);
+            $imagick->autoOrient();
+            if ($imagick->getImageWidth() > $width) {
+                $imagick->thumbnailImage($width, 0);
+            }
+            $imagick->stripImage();
+            $imagick->setImageFormat('webp');
+            $imagick->setImageCompressionQuality(75);
+
+            if (!is_dir(dirname($target))) {
+                mkdir(dirname($target), 0755, true);
+            }
+            $imagick->writeImage($target);
+            $imagick->clear();
+
+            return $target;
+        } catch (ImagickException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Serves a private image with a browser cache (the session listener would otherwise force
+     * "no cache" on every response). Only for URLs whose content never changes, or that carry a
+     * version parameter.
+     */
+    public function cachedImage(?string $absolutePath, int $maxAge = 604800): BinaryFileResponse
+    {
+        $response = new BinaryFileResponse(
+            $absolutePath && is_file($absolutePath) ? $absolutePath : $this->publicDirectory . 'placeholders/placeholder.jpg'
+        );
+        $response->setPrivate();
+        $response->setMaxAge($maxAge);
+        $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
+
+        return $response;
     }
 
     public function deleteFile($fileName, $folderName, $isPublic = true): void

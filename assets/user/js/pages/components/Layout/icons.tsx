@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Package,
   Mail,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react"
 
@@ -35,6 +36,7 @@ export const MENU_ICONS: Record<string, LucideIcon> = {
   chat: MessageCircle,
   box: Package,
   email: Mail,
+  "chart-up": TrendingUp,
 }
 
 export function menuIcon(key: string): LucideIcon {

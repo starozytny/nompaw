@@ -135,4 +135,25 @@ class CrTradeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Every coin that ever appears in a trade (either side, EUR excluded) with the date of its first
+     * trade — the range CrPriceService::importDailyHistory() needs prices for. All users when $user is null.
+     *
+     * @return array<string, string> coin => Y-m-d
+     */
+    public function findCoinFirstDates(?User $user): array
+    {
+        $where = $user !== null ? 'WHERE user_id = :user' : '';
+        $rows = $this->getEntityManager()->getConnection()->fetchAllKeyValue(
+            "SELECT coin, DATE(MIN(trade_at)) FROM (
+                SELECT from_coin AS coin, trade_at FROM cr_trade $where
+                UNION ALL
+                SELECT to_coin AS coin, trade_at FROM cr_trade $where
+             ) t WHERE coin <> 'EUR' GROUP BY coin ORDER BY coin",
+            $user !== null ? ['user' => $user->getId()] : []
+        );
+
+        return $rows;
+    }
 }

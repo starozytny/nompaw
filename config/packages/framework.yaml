@@ -47,6 +47,14 @@ framework:
             frankfurter.client:
                 base_uri: 'https://api.frankfurter.dev/v1/'
                 timeout: 5
+            garmin_token.client:
+                base_uri: 'https://personal.connectapi.garmin.com/'
+                timeout: 10
+            garmin.client:
+                # Data endpoints also live on the "personal" host, not connectapi.garmin.com (which rejects
+                # Personal API tokens with a bare 400) — confirmed live against the real API.
+                base_uri: 'https://personal.connectapi.garmin.com/'
+                timeout: 10
 
 when@test:
     framework:

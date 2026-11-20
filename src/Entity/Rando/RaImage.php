@@ -101,6 +101,11 @@ class RaImage extends DataEntity
         return $this;
     }
 
+    public function getMiniName(): ?string
+    {
+        return $this->thumbs ? pathinfo($this->thumbs, PATHINFO_FILENAME) . '.webp' : null;
+    }
+
     #[Groups(['ra_img_list'])]
     public function getThumbsFile()
     {

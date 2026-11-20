@@ -21,6 +21,7 @@ class RaRando extends DataEntity
     const FOLDER_THUMBS = "images/entity/randos/thumbs";
     const FOLDER_COVER = "images/entity/randos/cover";
     const FOLDER_LIGHTBOX = "images/entity/randos/lightbox";
+    const FOLDER_MINI = "images/entity/randos/mini"; // 240px WebP, generated on first request (FileUploader::miniature)
 
     const FORM = ['rando_form'];
 

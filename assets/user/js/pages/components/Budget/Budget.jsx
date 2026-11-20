@@ -22,6 +22,7 @@ import { SavingForm } from "@userPages/Budget/SavingForm";
 import { BudgetTrendChart } from "@userPages/Budget/BudgetTrendChart";
 import { RecurrencesTab } from "@userPages/Budget/Reccurences/RecurrencesTab";
 import { CategoriesTab } from "@userPages/Budget/Categories/CategoriesTab";
+import { BilanTab } from "@userPages/Budget/Bilan/BilanTab";
 
 const SORTER = Sort.compareDateAtInverseThenId;
 
@@ -46,6 +47,7 @@ export default function Budget (props) {
 			<TabsTrigger value="planning">Planning</TabsTrigger>
 			<TabsTrigger value="recurrences">Récurrences</TabsTrigger>
 			<TabsTrigger value="categories">Catégories</TabsTrigger>
+			<TabsTrigger value="bilan">Bilan</TabsTrigger>
 		</TabsList>
 
 		<TabsContent value="planning" forceMount className={activeTab === 'planning' ? '' : 'hidden'}>
@@ -56,6 +58,9 @@ export default function Budget (props) {
 		</TabsContent>
 		<TabsContent value="categories">
 			<CategoriesTab />
+		</TabsContent>
+		<TabsContent value="bilan">
+			<BilanTab initialYear={parseInt(props.y)} yearMin={parseInt(props.yearMin)} />
 		</TabsContent>
 	</Tabs>
 }
@@ -292,7 +297,9 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 
 	let currentSummary = summaries[month - 1];
 
-	let nData = data.filter(d => d.month === month).sort(SORTER);
+	// "Utiliser des économies" + revenu = 2 opérations liées : on n'affiche que la ligne d'économie utilisée (type 4)
+	let usedIds = new Set(data.filter(d => d.type === 4).map(d => d.id));
+	let nData = data.filter(d => d.month === month && !(d.type === 1 && usedIds.has(d.linkedItemId))).sort(SORTER);
 	let visibleRecurrences = nRecurrencesData.filter(r => {
 		let eligible = (year > r.initYear || (r.initYear === year && month >= r.initMonth)) && r.months.includes(month);
 		if (!eligible) return false;

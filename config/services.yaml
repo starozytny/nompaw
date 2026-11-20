@@ -10,6 +10,10 @@ parameters:
     env_file: '%kernel.project_dir%/.env.local'
     env(COINGECKO_API_KEY): ''
     env(CRYPTO_CREDENTIAL_SECRET): ''
+    env(GARMIN_API_KEY): ''
+    env(MCP_OAUTH_CLIENT_ID): ''
+    env(MCP_OAUTH_CLIENT_SECRET): ''
+    env(MCP_OAUTH_REDIRECT_URI): ''
 
 services:
     # default configuration for services in *this* file
@@ -24,6 +28,10 @@ services:
             $appEnv: '%env(APP_ENV)%'
             $coingeckoApiKey: '%env(COINGECKO_API_KEY)%'
             $cryptoCredentialSecret: '%env(CRYPTO_CREDENTIAL_SECRET)%'
+            $garminApiKey: '%env(GARMIN_API_KEY)%'
+            $mcpOauthClientId: '%env(MCP_OAUTH_CLIENT_ID)%'
+            $mcpOauthClientSecret: '%env(MCP_OAUTH_CLIENT_SECRET)%'
+            $mcpOauthRedirectUri: '%env(MCP_OAUTH_REDIRECT_URI)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -40,3 +48,7 @@ services:
     App\EventListener\SecurityListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request }
+
+    App\EventListener\McpTokenScopeListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_authenticated, method: onJwtAuthenticated }

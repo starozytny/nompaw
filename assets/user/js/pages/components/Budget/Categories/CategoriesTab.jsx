@@ -3,13 +3,19 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+
 import Sanitaze from "@commonFunctions/sanitaze";
 import Formulaire from "@commonFunctions/formulaire";
 
-import { Button, ButtonIcon } from "@tailwindComponents/Elements/Button";
+import { Button } from "@tailwindComponents/Elements/Button";
 import { Search } from "@tailwindComponents/Elements/Search";
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Card, CardHeader, CardTitle, CardContent } from "@shadcnComponents/ui/card";
+import { Button as ButtonIconGhost } from "@shadcnComponents/ui/button";
+import {
+	DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@shadcnComponents/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@shadcnComponents/ui/dialog";
 
 import { CategoryFormulaire } from "@userPages/Budget/Categories/CategoryForm";
@@ -85,9 +91,25 @@ export function CategoriesTab () {
 										{Sanitaze.toFormatCurrency(elem.goal)}
 									</div>
 								) : null}
-								<div className="flex gap-0.5 flex-shrink-0">
-									<ButtonIcon type="default" icon="pencil" onClick={() => handleEdit(elem)}>Modifier</ButtonIcon>
-									<ButtonIcon type="default" icon="trash" onClick={() => { setToDelete(elem); setDeleteOpen(true); }}>Supprimer</ButtonIcon>
+								<div className="flex-shrink-0">
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<ButtonIconGhost variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+												<MoreVertical className="h-4 w-4" />
+											</ButtonIconGhost>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem onClick={() => handleEdit(elem)}>
+												<Pencil /> Modifier
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => { setToDelete(elem); setDeleteOpen(true); }}
+												className="text-[var(--status-critical)] focus:text-[var(--status-critical)]"
+											>
+												<Trash2 /> Supprimer
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</div>
 							</div>
 						)} />

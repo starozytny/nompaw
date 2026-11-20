@@ -35,7 +35,8 @@ use App\Repository\Crypto\CrTradeRepository;
  * - Depot/Retrait/Recuperation/Stacking/Transfert do not affect the coin-holdings replay below: this
  *   mirrors the interpretation already used by the existing frontend cash-flow view
  *   (assets/user/js/pages/components/Cryptos/Trades/TradesList.jsx), which only adjusts per-coin
- *   holdings on Achat (+toNbToken of toCoin) and Vente (-fromNbToken of fromCoin). A coin acquired
+ *   holdings on Achat (+toNbToken of toCoin, and -fromNbToken of fromCoin when paid in crypto) and
+ *   Vente (-fromNbToken of fromCoin). A coin acquired
  *   only via Depot/Recuperation/Stacking will therefore be under-counted in the automatic portfolio
  *   valuation for years to come; the manual override (CrTrade::manualPortfolioValueTotal) exists
  *   specifically as the escape hatch for that gap.
@@ -87,7 +88,7 @@ class CrTaxReportService
      * than there might really be. Pass true (the "Actualiser" button, and export()) to actually pay for
      * the CoinGecko round trips and fill in whatever can be resolved.
      */
-    public function computeReport(User $user, int $year, bool $liveFetch = false): array
+    public function computeReport(User $user, int $year, bool $liveFetch = false, bool $withHoldings = false): array
     {
         $trades = $this->tradeRepository->findBy(['user' => $user], ['tradeAt' => 'ASC', 'id' => 'ASC']);
 
@@ -108,6 +109,11 @@ class CrTaxReportService
                 $tradeYear = (int) $trade->getTradeAt()->format('Y');
 
                 if ($tradeYear === $year) {
+                    if ($withHoldings) {
+                        // Same snapshot as computeHoldingsSnapshot(), but from this single replay instead of
+                        // one full-history replay per disposal (21 × 17k trades made the MCP tool time out).
+                        $line['holdingsBefore'] = $this->snapshotOf($trade, $holdings, $liveFetch);
+                    }
                     if ($line['plusValue'] === null) {
                         $hasMissingValues = true;
                     } else {
@@ -133,6 +139,11 @@ class CrTaxReportService
             if ($trade->getType() === TypeType::Achat) {
                 $grossAcquisitionCost += $trade->getTotal();
                 $holdings[$trade->getToCoin()] = ($holdings[$trade->getToCoin()] ?? 0.0) + $trade->getToNbToken();
+                // A crypto-to-crypto conversion (recorded as Achat, e.g. MCO -> CRO) spends the fromCoin
+                // too — without this the spent coin stays in the portfolio valuation forever.
+                if ($trade->getFromCoin() !== 'EUR') {
+                    $holdings[$trade->getFromCoin()] = ($holdings[$trade->getFromCoin()] ?? 0.0) - $trade->getFromNbToken();
+                }
             } elseif ($isVente) {
                 $holdings[$trade->getFromCoin()] = ($holdings[$trade->getFromCoin()] ?? 0.0) - $trade->getFromNbToken();
             }
@@ -183,6 +194,15 @@ class CrTaxReportService
     {
         [, , $holdings] = $this->replayBefore($disposal);
 
+        return $this->snapshotOf($disposal, $holdings, true);
+    }
+
+    /**
+     * @param array<string, float> $holdings held strictly before $disposal
+     * @return list<array{coin: string, quantity: float, price: ?float}>
+     */
+    private function snapshotOf(CrTrade $disposal, array $holdings, bool $liveFetch): array
+    {
         $manualPrices = $disposal->getManualCoinPrices();
 
         $snapshot = [];
@@ -194,9 +214,9 @@ class CrTaxReportService
             $snapshot[] = [
                 'coin' => $coin,
                 'quantity' => $quantity,
-                // The per-cession manual price wins over the shared CoinGecko/CrPriceHistory cache, so
-                // reopening the panel shows what was actually entered for THIS disposal.
-                'price' => $manualPrices[strtoupper($coin)] ?? $this->priceService->getPriceEur($coin, $disposal->getTradeAt()),
+                // The per-cession manual price wins over the shared price cache, so reopening the panel
+                // shows what was actually entered for THIS disposal.
+                'price' => $manualPrices[strtoupper($coin)] ?? $this->priceService->getPriceEur($coin, $disposal->getTradeAt(), $liveFetch),
             ];
         }
 
@@ -215,8 +235,9 @@ class CrTaxReportService
      * since resolvePortfolioValue() always prefers the whole-total override first.
      *
      * @param array<string, float> $pricesByCoin coin ticker => EUR unit price
+     * @param string $source 'manual' (human) or 'ia' (MCP first draft) — an 'ia' draft stays flagged until a human re-saves it
      */
-    public function saveManualPrices(CrTrade $disposal, array $pricesByCoin): array
+    public function saveManualPrices(CrTrade $disposal, array $pricesByCoin, string $source = 'manual'): array
     {
         $merged = $disposal->getManualCoinPrices();
         foreach ($pricesByCoin as $coin => $price) {
@@ -227,7 +248,7 @@ class CrTaxReportService
         if ($disposal->getManualPortfolioValueTotal() !== null) {
             $disposal->setManualPortfolioValueTotal(null);
         }
-        $disposal->setPortfolioValueSource('manual');
+        $disposal->setPortfolioValueSource($source);
         $this->tradeRepository->save($disposal, true);
 
         return $this->computeSingleLine($disposal);
@@ -267,6 +288,11 @@ class CrTaxReportService
             if ($trade->getType() === TypeType::Achat) {
                 $grossAcquisitionCost += $trade->getTotal();
                 $holdings[$trade->getToCoin()] = ($holdings[$trade->getToCoin()] ?? 0.0) + $trade->getToNbToken();
+                // A crypto-to-crypto conversion (recorded as Achat, e.g. MCO -> CRO) spends the fromCoin
+                // too — without this the spent coin stays in the portfolio valuation forever.
+                if ($trade->getFromCoin() !== 'EUR') {
+                    $holdings[$trade->getFromCoin()] = ($holdings[$trade->getFromCoin()] ?? 0.0) - $trade->getFromNbToken();
+                }
             }
         }
 
@@ -359,6 +385,6 @@ class CrTaxReportService
             return [null, null, $missingCoins];
         }
 
-        return [$value, $usedManual ? 'manual' : 'api', []];
+        return [$value, $usedManual ? ($trade->getPortfolioValueSource() === 'ia' ? 'ia' : 'manual') : 'api', []];
     }
 }

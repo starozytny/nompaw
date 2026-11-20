@@ -107,6 +107,7 @@ class ImageController extends AbstractController
         $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId(), false);
         $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId(), false);
         $fileUploader->deleteFile($obj->getLightbox(), RaRando::FOLDER_LIGHTBOX.'/'.$obj->getRando()->getId(), false);
+        $fileUploader->deleteFile($obj->getMiniName(), RaRando::FOLDER_MINI.'/'.$obj->getRando()->getId(), false);
 
         $repository->remove($obj, true);
 
@@ -129,6 +130,7 @@ class ImageController extends AbstractController
             $fileUploader->deleteFile($obj->getFile(), RaRando::FOLDER_IMAGES.'/'.$obj->getRando()->getId(), false);
             $fileUploader->deleteFile($obj->getThumbs(), RaRando::FOLDER_THUMBS.'/'.$obj->getRando()->getId(), false);
             $fileUploader->deleteFile($obj->getLightbox(), RaRando::FOLDER_LIGHTBOX.'/'.$obj->getRando()->getId(), false);
+            $fileUploader->deleteFile($obj->getMiniName(), RaRando::FOLDER_MINI.'/'.$obj->getRando()->getId(), false);
 
             $repository->remove($obj);
         }
@@ -196,21 +198,31 @@ class ImageController extends AbstractController
     }
 
     #[Route('/src/thumbs/{id}', name: 'thumbs_src', options: ['expose' => true], methods: 'GET')]
-    public function getThumbs(RaImage $obj): Response
+    public function getThumbs(RaImage $obj, FileUploader $fileUploader): Response
     {
-        return $this->file($this->getParameter('private_directory') . $obj->getThumbsFile());
+        return $fileUploader->cachedImage($this->getParameter('private_directory') . $obj->getThumbsFile());
+    }
+
+    #[Route('/src/mini/{id}', name: 'mini_src', options: ['expose' => true], methods: 'GET')]
+    public function getMini(RaImage $obj, FileUploader $fileUploader): Response
+    {
+        $mini = $obj->getMiniName()
+            ? $fileUploader->miniature($obj->getThumbsFile(), RaRando::FOLDER_MINI . '/' . $obj->getRando()->getId(), $obj->getMiniName())
+            : null;
+
+        return $fileUploader->cachedImage($mini);
     }
 
     #[Route('/src/file/{id}', name: 'file_src', options: ['expose' => true], methods: 'GET')]
-    public function getFile(RaImage $obj): Response
+    public function getFile(RaImage $obj, FileUploader $fileUploader): Response
     {
-        return $this->file($this->getParameter('private_directory') . $obj->getFileFile());
+        return $fileUploader->cachedImage($this->getParameter('private_directory') . $obj->getFileFile());
     }
 
     #[Route('/src/file-hd/{id}', name: 'file_hd_src', options: ['expose' => true], methods: 'GET')]
-    public function getFileHD(RaImage $obj): Response
+    public function getFileHD(RaImage $obj, FileUploader $fileUploader): Response
     {
-        return $this->file($this->getParameter('private_directory') . $obj->getLightboxFile());
+        return $fileUploader->cachedImage($this->getParameter('private_directory') . $obj->getLightboxFile());
     }
 
     #[Route('/visibility/{id}', name: 'visibility', options: ['expose' => true], methods: 'PUT')]
@@ -245,4 +257,5 @@ class ImageController extends AbstractController
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponse($obj, RaImage::LIST);
     }
+
 }
