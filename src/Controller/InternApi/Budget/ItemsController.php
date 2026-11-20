@@ -77,6 +77,14 @@ class ItemsController extends AbstractController
             return $apiResponse->apiJsonResponse($obj, BuItem::LIST);
         }
 
+        // économie utilisée <-> revenu lié : affichés en 1 ligne, supprimés ensemble
+        if ($obj->getLinkedItemId()) {
+            $linked = $repository->find($obj->getLinkedItemId());
+            if ($linked && $linked->getUser() === $obj->getUser()) {
+                $repository->remove($linked);
+            }
+        }
+
         $repository->remove($obj, true);
         return $apiResponse->apiJsonResponseSuccessful("ok");
     }

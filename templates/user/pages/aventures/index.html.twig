@@ -13,73 +13,74 @@
 {% endset %}
 
 {% block main_content %}
-    {% if groupes | length > 0 %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-            {% for elem in groupes %}
-                <div class="w-full bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
-                    <div class="relative h-48 overflow-hidden cursor-pointer" onclick="location.href='{{ path('user_aventures_groupes_read', {slug: elem.slug}) }}'">
-                        <img src="{{ asset(elem.imageFile) }}" alt="Image du groupe {{ elem.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        {% if elem.isVisible == false %}
-                            <div class="absolute top-3 right-3 bg-pink-500 text-white p-2 rounded-full">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                                </svg>
+    {% if cards | length > 0 %}
+        <div class="grid gap-6 grid-cols-1 lg:grid-cols-2">
+            {% for c in cards %}
+                <article class="relative overflow-hidden rounded-2xl bg-slate-800 group {{ loop.first ? 'lg:col-span-2 h-[460px]' : 'h-[380px]' }}">
+                    <a href="{{ path('user_aventures_groupes_read', {slug: c.g.slug}) }}" class="absolute inset-0" aria-label="Voir le groupe {{ c.g.name }}">
+                        <img src="{{ asset(c.g.imageFile) }}" alt="" loading="lazy"
+                             class="w-full h-full object-cover transition-transform duration-300 ease-out [@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none">
+                    </a>
+                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10"></div>
+
+                    <div class="absolute top-4 left-4 right-4 flex items-start justify-between gap-3">
+                        <div class="flex flex-wrap gap-2">
+                            {% if c.next %}
+                                <span class="bg-white/90 text-gray-900 text-xs font-medium px-3 py-1.5 rounded-full">
+                                    Prochaine aventure · {{ c.next.startAt ? c.next.startAt|format_datetime(locale='fr', pattern='d MMMM') : 'en préparation' }}
+                                </span>
+                            {% endif %}
+                            {% if not c.g.isVisible %}
+                                <span class="bg-black/50 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full"><span class="icon-padlock"></span> Privé</span>
+                            {% endif %}
+                        </div>
+                        {% if app.user.id == c.g.author.id %}
+                            <div class="flex gap-1">
+                                <a href="{{ path('user_aventures_groupes_update', {slug: c.g.slug}) }}" aria-label="Modifier le groupe"
+                                   class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                    <span class="icon-pencil"></span>
+                                </a>
+                                <div class="delete-groupe w-9 h-9 flex" data-context="groupes" data-id="{{ c.g.id }}" data-name="{{ c.g.name }}"></div>
                             </div>
                         {% endif %}
                     </div>
-                    <div class="p-5">
-                        <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-xl font-semibold text-gray-900">{{ elem.name }}</h3>
-                            <div class="flex -space-x-2">
-                                {% if elem.links | length >= 5 %}
-                                    <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium">+5</div>
-                                {% else %}
-                                    {% for member in elem.links %}
-                                        {% include "user/layout/components/elements/avatar.html.twig" %}
-                                    {% endfor %}
-                                {% endif %}
+
+                    <div class="absolute bottom-0 left-0 right-0 p-6 text-white flex flex-col gap-4 pointer-events-none">
+                        <div>
+                            <div class="text-xs uppercase tracking-[0.14em] text-white/70">
+                                {{ c.count }} aventure{{ c.count > 1 ? 's' }}{% if c.since %} · depuis {{ c.since }}{% endif %}
+                            </div>
+                            <h3 class="{{ loop.first ? 'text-4xl' : 'text-3xl' }} font-bold mt-1 leading-tight [text-wrap:balance]">{{ c.g.name }}</h3>
+                            <div class="text-sm text-white/80 mt-1">
+                                {{ c.photos }} photos{% if c.km %} · {{ c.km }} km parcourus{% endif %} · {{ c.g.levelString }}
                             </div>
                         </div>
-                        <div class="text-gray-600 text-sm mb-4">{{ elem.description | raw }}</div>
-                        <div class="flex items-center gap-2 mb-4">
-                            {% set levelColors = [
-                                'bg-gray-100 text-gray-700',
-                                'bg-blue-100 text-blue-700',
-                                'bg-green-100 text-green-700',
-                                'bg-yellow-100 text-yellow-700',
-                                'bg-red-100 text-red-700',
-                                'bg-gray-800 text-gray-200'
-                            ] %}
-                            <span class="{{ levelColors[elem.level] }} px-3 py-1 rounded-full text-xs font-medium">Niveau : {{ elem.levelString }}</span>
-                        </div>
-                        <div class="flex gap-2">
-                            {% if app.user.id == elem.author.id %}
-                                <a href="{{ path('user_aventures_groupes_update', {slug: elem.slug}) }}"
-                                   class="relative flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                                >
-                                    <span class="icon-pencil"></span>
-                                    <span class="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -top-7 left-0 text-xs hidden">Modifier</span>
-                                </a>
-                                <div class="delete-groupe relative flex-1"
-                                     data-context="groupes"
-                                     data-id="{{ elem.id }}"
-                                     data-name="{{ elem.name }}"
-                                >
-                                    <button class="relative w-full flex-1 bg-gray-50 hover:bg-red-50 text-gray-700 hover:text-red-600 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
-                                        <span class="icon-trash"></span>
-                                        <span class="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -top-7 right-2.5 text-xs hidden">Supprimer</span>
-                                    </button>
+
+                        <div class="flex items-end justify-between gap-4">
+                            {% if c.covers|length %}
+                                {% set filmMax = loop.first ? 6 : 4 %}
+                                <div class="flex gap-2 pointer-events-auto overflow-hidden">
+                                    {% for r in c.covers|slice(0, filmMax) %}
+                                        <a href="{{ path('user_aventures_randos_read', {slug: r.slug}) }}" title="{{ r.name }}"
+                                           class="block w-16 h-12 flex-none overflow-hidden rounded-md ring-1 ring-white/30 transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 active:scale-[0.97] motion-reduce:transition-none">
+                                            <img src="{{ path('intern_api_aventures_randos_cover_src', {id: r.id}) }}" alt="{{ r.name }}" loading="lazy" class="w-full h-full object-cover">
+                                        </a>
+                                    {% endfor %}
                                 </div>
+                            {% else %}
+                                <span></span>
                             {% endif %}
-                            <a href="{{ path('user_aventures_groupes_read', {slug: elem.slug}) }}"
-                               class="relative flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                            >
-                                <span class="icon-right-arrow"></span>
-                                <span class="tooltip bg-gray-800 text-slate-50 py-1 px-2 rounded absolute -top-7 right-0 text-xs hidden" style="width: 108px;">Accéder à la page</span>
-                            </a>
+                            <div class="pointer-events-auto"><div class="flex -space-x-2">
+                                {% for member in c.g.links|slice(0, 4) %}
+                                    {% include "user/layout/components/elements/avatar.html.twig" %}
+                                {% endfor %}
+                                {% if c.g.links|length > 4 %}
+                                    <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-white flex items-center justify-center text-white text-xs font-medium">+{{ c.g.links|length - 4 }}</div>
+                                {% endif %}
+                            </div></div>
                         </div>
                     </div>
-                </div>
+                </article>
             {% endfor %}
         </div>
     {% else %}

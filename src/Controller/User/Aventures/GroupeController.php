@@ -23,9 +23,7 @@ class GroupeController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $groupes = $groupService->getList($user);
-
-        return $this->render('user/pages/aventures/index.html.twig', ['groupes' => $groupes]);
+        return $this->render('user/pages/aventures/index.html.twig', ['cards' => $groupService->getCards($user)]);
     }
 
     #[Route('/groupe/{slug}', name: 'read', options: ['expose' => true])]

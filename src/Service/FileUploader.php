@@ -367,6 +367,51 @@ class FileUploader
         return $fileName;
     }
 
+    /**
+     * Converts an uploaded file in place to WebP (q80), downsized to $maxWidth, and deletes the
+     * original. Returns the new file name — or the original one, untouched, if it can't be converted.
+     */
+    public function toWebp(string $folder, string $fileName, int $maxWidth = 2400, bool $isPublic = true): string
+    {
+        $directory = $this->getDirectory($isPublic) . $folder . '/';
+        $fileOri = $directory . $fileName;
+
+        if (!file_exists($fileOri) || !$this->isPreviewable($fileOri)) {
+            return $fileName;
+        }
+
+        [$decodedPath, $isTemp] = $this->decodeForPreview($fileOri);
+
+        try {
+            $imagick = new Imagick($decodedPath);
+            $imagick->autoOrient();
+            $imagick->stripImage();
+
+            if ($imagick->getImageWidth() > $maxWidth) {
+                $imagick->resizeImage($maxWidth, 0, Imagick::FILTER_LANCZOS, 1);
+            }
+
+            $imagick->setImageFormat('webp');
+            $imagick->setImageCompressionQuality(80);
+
+            $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
+            $imagick->writeImage($directory . $newFileName);
+            $imagick->clear();
+
+            if ($newFileName !== $fileName) {
+                unlink($fileOri);
+            }
+
+            return $newFileName;
+        } catch (ImagickException $e) {
+            return $fileName;
+        } finally {
+            if ($isTemp) {
+                @unlink($decodedPath);
+            }
+        }
+    }
+
     public function deleteFile($fileName, $folderName, $isPublic = true): void
     {
         if($fileName){

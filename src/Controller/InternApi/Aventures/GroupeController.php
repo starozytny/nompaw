@@ -83,7 +83,7 @@ class GroupeController extends AbstractController
         $file = $request->files->get('image');
         if ($file) {
             $fileName = $fileUploader->replaceFile($file, RaGroupe::FOLDER_ILLU, $obj->getImage());
-            $obj->setImage($fileName);
+            $obj->setImage($fileName ? $fileUploader->toWebp(RaGroupe::FOLDER_ILLU, $fileName) : $fileName);
         }
 
         $repository->save($obj, true);

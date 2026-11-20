@@ -297,7 +297,9 @@ function PlanningTab ({ donnees, categories, savings, recurrences, y, m, yearMin
 
 	let currentSummary = summaries[month - 1];
 
-	let nData = data.filter(d => d.month === month).sort(SORTER);
+	// "Utiliser des économies" + revenu = 2 opérations liées : on n'affiche que la ligne d'économie utilisée (type 4)
+	let usedIds = new Set(data.filter(d => d.type === 4).map(d => d.id));
+	let nData = data.filter(d => d.month === month && !(d.type === 1 && usedIds.has(d.linkedItemId))).sort(SORTER);
 	let visibleRecurrences = nRecurrencesData.filter(r => {
 		let eligible = (year > r.initYear || (r.initYear === year && month >= r.initMonth)) && r.months.includes(month);
 		if (!eligible) return false;
