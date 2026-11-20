@@ -73,8 +73,8 @@ export function BudgetItem ({ elem, onEdit, onModal, onActive, onCancel, sortabl
 					</Badge>
 				)}
 				{elem.linkedItemId && (
-					<Badge variant="muted" title="Liée à une autre opération">
-						<span className="icon-link text-[10px] mr-1"></span>Liée
+					<Badge variant="muted" title={elem.type === 4 ? "Ajoutée aussi en revenu" : "Liée à une autre opération"}>
+						<span className="icon-link text-[10px] mr-1"></span>{elem.type === 4 ? "+ revenu" : "Liée"}
 					</Badge>
 				)}
 				{elem.type !== 4 && elem.category && (
