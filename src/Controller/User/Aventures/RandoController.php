@@ -8,6 +8,7 @@ use App\Entity\Rando\RaPropalDate;
 use App\Entity\Rando\RaRando;
 use App\Repository\Main\UserRepository;
 use App\Repository\Rando\RaGroupeRepository;
+use App\Repository\Rando\RaImageRepository;
 use App\Repository\Rando\RaPropalAdventureRepository;
 use App\Repository\Rando\RaPropalDateRepository;
 use App\Repository\Rando\RaRandoRepository;
@@ -22,7 +23,7 @@ class RandoController extends AbstractController
     #[Route('/{slug}', name: 'read', options: ['expose' => true])]
     public function read($slug, RaRandoRepository $repository, RaPropalDateRepository $propalDateRepository,
                          RaPropalAdventureRepository $adventureRepository, UserRepository $userRepository,
-                         SerializerInterface $serializer): Response
+                         RaImageRepository $imageRepository, SerializerInterface $serializer): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
         $propalDates = $propalDateRepository->findBy(['rando' => $obj]);
@@ -47,11 +48,18 @@ class RandoController extends AbstractController
         $propalDates = $serializer->serialize($propalDates, 'json', ['groups' => RaPropalDate::LIST]);
         $propalAdvs = $serializer->serialize($propalAdvs,  'json', ['groups' => RaPropalAdventure::LIST]);
 
+        // Header photos: the cover's HD source, plus another photo for the inset.
+        $hd = $imageRepository->findCoverSource($obj);
+        $insetPhoto = current(array_filter($imageRepository->findVisibleImagesPage($obj, false, 0, 2), fn ($i) => $i->getId() !== $hd?->getId())) ?: null;
+
         return $this->render('user/pages/aventures/rando/read.html.twig', [
             'elem' => $obj,
             'propalDates' => $propalDates,
             'propalAdvs' => $propalAdvs,
             'participants' => $participants,
+            'hd' => $hd,
+            'insetPhoto' => $insetPhoto,
+            'photos' => $imageRepository->countVisibleImages($obj, false),
         ]);
     }
 

@@ -13,6 +13,9 @@
 {% endset %}
 
 {% block main_content %}
+    {% import 'layout/components/lucide.html.twig' as lucide %}
+    {# Same tooltip recipe as GroupeDelete.jsx (shadcn tooltip look, CSS-only, delayed on show). #}
+    {% set tooltip = 'pointer-events-none absolute right-0 top-full z-10 mt-1.5 whitespace-nowrap rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md opacity-0 scale-95 origin-top-right transition-[opacity,transform] duration-150 ease-out group-hover/tip:opacity-100 group-hover/tip:scale-100 group-hover/tip:delay-300 group-focus-within/tip:opacity-100 group-focus-within/tip:scale-100 motion-reduce:transition-none' %}
     {% if cards | length > 0 %}
         <div class="grid gap-6 grid-cols-1 lg:grid-cols-2">
             {% for c in cards %}
@@ -21,7 +24,9 @@
                         <img src="{{ asset(c.g.imageFile) }}" alt="" loading="lazy"
                              class="w-full h-full object-cover transition-transform duration-300 ease-out [@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none">
                     </a>
-                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10"></div>
+                    {# Scrims: top for the badges/actions, a taller bottom one so the title and stats stay readable on bright photos. #}
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent"></div>
+                    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/90 via-black/55 to-transparent"></div>
 
                     <div class="absolute top-4 left-4 right-4 flex items-start justify-between gap-3">
                         <div class="flex flex-wrap gap-2">
@@ -35,12 +40,16 @@
                             {% endif %}
                         </div>
                         {% if app.user.id == c.g.author.id %}
-                            <div class="flex gap-1">
-                                <a href="{{ path('user_aventures_groupes_update', {slug: c.g.slug}) }}" aria-label="Modifier le groupe"
-                                   class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                                    <span class="icon-pencil"></span>
-                                </a>
-                                <div class="delete-groupe w-9 h-9 flex" data-context="groupes" data-id="{{ c.g.id }}" data-name="{{ c.g.name }}"></div>
+                            {# Shown on hover (pointer devices), always visible on touch, and when focused via keyboard. #}
+                            <div class="flex gap-1.5 transition-opacity duration-150 ease-out motion-reduce:transition-none [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100">
+                                <span class="relative inline-flex group/tip">
+                                    <a href="{{ path('user_aventures_groupes_update', {slug: c.g.slug}) }}" aria-label="Modifier le groupe"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-foreground shadow-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                        {{ lucide.icon('pencil') }}
+                                    </a>
+                                    <span role="tooltip" class="{{ tooltip }}">Modifier</span>
+                                </span>
+                                <div class="delete-groupe" data-context="groupes" data-id="{{ c.g.id }}" data-name="{{ c.g.name }}"></div>
                             </div>
                         {% endif %}
                     </div>
@@ -63,7 +72,7 @@
                                     {% for r in c.covers|slice(0, filmMax) %}
                                         <a href="{{ path('user_aventures_randos_read', {slug: r.slug}) }}" title="{{ r.name }}"
                                            class="block w-16 h-12 flex-none overflow-hidden rounded-md ring-1 ring-white/30 transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 active:scale-[0.97] motion-reduce:transition-none">
-                                            <img src="{{ path('intern_api_aventures_randos_cover_src', {id: r.id}) }}" alt="{{ r.name }}" loading="lazy" class="w-full h-full object-cover">
+                                            <img src="{{ path('intern_api_aventures_randos_cover_mini_src', {id: r.id, v: r.cover}) }}" alt="{{ r.name }}" loading="lazy" class="w-full h-full object-cover">
                                         </a>
                                     {% endfor %}
                                 </div>
