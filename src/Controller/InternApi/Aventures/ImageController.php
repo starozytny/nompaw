@@ -198,7 +198,7 @@ class ImageController extends AbstractController
     #[Route('/src/thumbs/{id}', name: 'thumbs_src', options: ['expose' => true], methods: 'GET')]
     public function getThumbs(RaImage $obj): Response
     {
-        return $this->file($this->getParameter('private_directory') . $obj->getThumbsFile());
+        return $this->fileOrPlaceholder($obj->getThumbsFile());
     }
 
     #[Route('/src/file/{id}', name: 'file_src', options: ['expose' => true], methods: 'GET')]
@@ -210,7 +210,7 @@ class ImageController extends AbstractController
     #[Route('/src/file-hd/{id}', name: 'file_hd_src', options: ['expose' => true], methods: 'GET')]
     public function getFileHD(RaImage $obj): Response
     {
-        return $this->file($this->getParameter('private_directory') . $obj->getLightboxFile());
+        return $this->fileOrPlaceholder($obj->getLightboxFile());
     }
 
     #[Route('/visibility/{id}', name: 'visibility', options: ['expose' => true], methods: 'PUT')]
@@ -244,5 +244,11 @@ class ImageController extends AbstractController
 
         $repository->save($obj, true);
         return $apiResponse->apiJsonResponse($obj, RaImage::LIST);
+    }
+
+    private function fileOrPlaceholder(string $relativePath): Response
+    {
+        $file = $this->getParameter('private_directory') . $relativePath;
+        return $this->file(is_file($file) ? $file : 'placeholders/placeholder.jpg');
     }
 }

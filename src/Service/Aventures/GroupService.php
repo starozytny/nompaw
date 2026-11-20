@@ -4,6 +4,7 @@ namespace App\Service\Aventures;
 
 use App\Entity\Main\User;
 use App\Entity\Rando\RaGroupe;
+use App\Entity\Rando\RaImage;
 use App\Entity\Rando\RaRando;
 use App\Repository\Rando\RaGroupeRepository;
 use App\Repository\Rando\RaImageRepository;
@@ -61,5 +62,23 @@ class GroupService
                 'next' => $next,
             ];
         }, $groupes);
+    }
+
+    /**
+     * Past adventures of a group as photo albums: HD cover source, public photo count, first photos.
+     *
+     * @param RaRando[] $randos
+     * @return array<array{r: RaRando, hd: ?RaImage, photos: int, peeks: RaImage[]}>
+     */
+    public function getAlbums(array $randos): array
+    {
+        $photos = $this->imageRepository->countPublicByRandos($randos);
+
+        return array_map(fn (RaRando $r) => [
+            'r' => $r,
+            'hd' => $this->imageRepository->findCoverSource($r),
+            'photos' => $photos[$r->getId()] ?? 0,
+            'peeks' => $this->imageRepository->findVisibleImagesPage($r, false, 0, 4),
+        ], $randos);
     }
 }

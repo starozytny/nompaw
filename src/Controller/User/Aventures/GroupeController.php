@@ -27,12 +27,12 @@ class GroupeController extends AbstractController
     }
 
     #[Route('/groupe/{slug}', name: 'read', options: ['expose' => true])]
-    public function read($slug, RaGroupeRepository $repository, RaRandoRepository $randoRepository): Response
+    public function read($slug, RaGroupeRepository $repository, RaRandoRepository $randoRepository, GroupService $groupService): Response
     {
         $obj = $repository->findOneBy(['slug' => $slug]);
         return $this->render('user/pages/aventures/groupe/read.html.twig', [
             'elem' => $obj,
-            'randos' => $randoRepository->findBy(['isNext' => false, 'groupe' => $obj], ['startAt' => 'DESC']),
+            'albums' => $groupService->getAlbums($randoRepository->findBy(['isNext' => false, 'groupe' => $obj], ['startAt' => 'DESC'])),
             'next' => $randoRepository->findOneBy(['isNext' => true, 'groupe' => $obj])
         ]);
     }
