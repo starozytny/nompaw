@@ -8,6 +8,15 @@ prerequis: []
 deblocage: null
 indicateur: "Revenu net réel, dépenses nettes"
 termes: ["revenu réel", "transfert", "remboursement", "dépense nette"]
+definitions:
+  revenu réel: "Argent qui entre dans ton patrimoine : salaire, revenus d'une activité, intérêts."
+  transfert: "Argent qui change simplement de poche entre tes propres comptes."
+  remboursement: "Argent qui annule une dépense que tu avais avancée."
+  dépense nette: "Dépenses brutes moins les remboursements qui leur sont rattachés."
+chiffre_cle:
+  valeur: "37 900 €"
+  libelle: "de revenu réel"
+  contexte: "au lieu des 53 824 € affichés par le bilan brut"
 verifier: []
 maj: 2026-11-20
 quiz:
