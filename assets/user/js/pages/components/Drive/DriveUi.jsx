@@ -255,10 +255,11 @@ export function SidePanel ({ open, onClose, children, label, closeIcon }) {
 }
 
 /** Image en grand sur fond sombre, avec un panneau d'infos (à droite sur ordinateur, dessous sur mobile). */
-export function Lightbox ({ open, onClose, onPrev, onNext, counter, image, children, icons }) {
+export function Lightbox ({ open, onClose, onPrev, onNext, counter, image, children, icons, summary }) {
+	const isMobile = useMediaQuery("(max-width: 767px)");
 	const { mounted, closing } = usePresence(open, 150);
-	const last = useRef({ image, children, counter });
-	if (open) last.current = { image, children, counter };
+	const last = useRef({ image, children, counter, summary });
+	if (open) last.current = { image, children, counter, summary };
 	useEscape(open, onClose);
 	useEffect(() => {
 		if (!open) return;
@@ -275,24 +276,94 @@ export function Lightbox ({ open, onClose, onPrev, onNext, counter, image, child
 	const round = "drive-press flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/20";
 	return <div className={`drive-fade fixed inset-0 z-50 flex flex-col bg-black/90 md:flex-row ${closing ? "drive-fade-out" : ""}`} role="dialog" aria-modal="true" aria-label="Image en grand">
 		{/* Un clic hors de l'image et des boutons ferme ; l'image remplit la zone, d'où closest() plutôt que target === currentTarget. */}
-		<div className="relative flex min-h-0 flex-1 items-center justify-center p-4 md:px-20 md:py-8" onClick={(e) => !e.target.closest("img, button") && onClose()}>
+		<div className="relative flex min-h-0 flex-1 items-center justify-center p-4 max-md:pb-[calc(var(--drive-peek)+16px)] md:px-20 md:py-8" onClick={(e) => !e.target.closest("img, button") && onClose()}>
 			{/* drive-zoom sur un conteneur stable : l'animation joue à l'ouverture, pas à chaque image suivante */}
 			<div className="drive-zoom flex h-full w-full items-center justify-center">{last.current.image}</div>
 			<Hint label="Fermer (Échap)" side="right">
 				<button type="button" aria-label="Fermer" onClick={onClose} className={`${round} absolute left-3 top-3`}>{icons.close}</button>
 			</Hint>
-			{last.current.counter && <span className="absolute right-4 top-5 text-sm tabular-nums text-white/70" aria-live="polite">{last.current.counter}</span>}
+			{last.current.counter && <span className="absolute right-4 top-5 text-sm tabular-nums text-white/70 max-md:hidden" aria-live="polite">{last.current.counter}</span>}
 			{/* Centrées par -mt (pas translate : .drive-press:active remplace transform et le bouton sautait sous le curseur).
 			    Aux extrémités, la flèche reste en place (atténuée) : si elle disparaissait, un clic répété tomberait sur le fond et fermerait la vue. */}
 			{last.current.counter && <>
 				<Hint label="Image précédente (←)" side="right">
-					<button type="button" aria-label="Image précédente" aria-disabled={!onPrev} onClick={() => onPrev?.()} className={`${round} absolute left-3 top-1/2 -mt-[22px] aria-disabled:cursor-default aria-disabled:opacity-30 aria-disabled:hover:bg-white/10`}>{icons.prev}</button>
+					<button type="button" aria-label="Image précédente" aria-disabled={!onPrev} onClick={() => onPrev?.()} className={`${round} absolute left-3 top-1/2 -mt-[22px] max-md:hidden aria-disabled:cursor-default aria-disabled:opacity-30 aria-disabled:hover:bg-white/10`}>{icons.prev}</button>
 				</Hint>
 				<Hint label="Image suivante (→)" side="left">
-					<button type="button" aria-label="Image suivante" aria-disabled={!onNext} onClick={() => onNext?.()} className={`${round} absolute right-3 top-1/2 -mt-[22px] aria-disabled:cursor-default aria-disabled:opacity-30 aria-disabled:hover:bg-white/10`}>{icons.next}</button>
+					<button type="button" aria-label="Image suivante" aria-disabled={!onNext} onClick={() => onNext?.()} className={`${round} absolute right-3 top-1/2 -mt-[22px] max-md:hidden aria-disabled:cursor-default aria-disabled:opacity-30 aria-disabled:hover:bg-white/10`}>{icons.next}</button>
 				</Hint>
 			</>}
 		</div>
-		<aside className="max-h-[45svh] shrink-0 overflow-y-auto border-white/10 bg-neutral-900 pt-4 max-md:border-t md:max-h-none md:w-[360px] md:border-l">{last.current.children}</aside>
+		{isMobile
+			// Sur mobile, navigation et compteur passent dans la bande : toujours visibles (même ouverte) et sous le pouce.
+			? <InfoSheet summary={last.current.summary} counter={last.current.counter} onPrev={onPrev} onNext={onNext} icons={icons}>{last.current.children}</InfoSheet>
+			: <aside className="w-[360px] shrink-0 overflow-y-auto border-l border-white/10 bg-neutral-900 pt-4">{last.current.children}</aside>}
+	</div>
+}
+
+/**
+ * Infos de l'image sur mobile : bande « aperçu » en bas (nom, taille · date), qu'on tire vers le haut pour le détail.
+ * Le geste ne se prend que sur la bande (le contenu ouvert défile normalement). Suit le doigt 1:1, freine au-delà
+ * des bornes, et une chiquenaude suffit (vitesse) ; un appui simple bascule. Ouverte/fermée via [data-open] + transition
+ * CSS : interruptible, et le style posé pendant le glisser est retiré au relâcher pour laisser la classe reprendre la main.
+ */
+function InfoSheet ({ summary, counter, onPrev, onNext, icons, children }) {
+	const [open, setOpen] = useState(false);
+	const sheet = useRef();
+	const drag = useRef(null);
+	const closedY = () => sheet.current.offsetHeight - parseFloat(getComputedStyle(sheet.current).getPropertyValue("--drive-peek"));
+
+	const down = (e) => {
+		if (drag.current || e.target.closest("button")) return; // un seul doigt ; un appui sur ‹ › ne tire pas la bande
+		drag.current = { y: e.clientY, t: performance.now(), base: open ? 0 : closedY(), moved: false };
+		sheet.current.style.transition = "none";
+		e.currentTarget.setPointerCapture(e.pointerId);
+	};
+	const move = (e) => {
+		if (!drag.current) return;
+		const dy = e.clientY - drag.current.y;
+		if (Math.abs(dy) > 4) drag.current.moved = true;
+		const max = closedY();
+		let y = drag.current.base + dy;
+		if (y < 0) y /= 3; else if (y > max) y = max + (y - max) / 3; // friction au-delà des bornes
+		sheet.current.style.transform = `translateY(${y}px)`;
+	};
+	const up = (e) => {
+		const d = drag.current;
+		if (!d) return;
+		drag.current = null;
+		sheet.current.style.transition = "";
+		sheet.current.style.transform = "";
+		if (!d.moved) { setOpen(o => !o); return; }
+		const dy = e.clientY - d.y;
+		const velocity = dy / Math.max(1, performance.now() - d.t);
+		setOpen(Math.abs(velocity) > 0.11 ? velocity < 0 : d.base + dy < closedY() / 2);
+	};
+
+	return <div ref={sheet} data-open={open ? "" : undefined}
+				className="drive-info-sheet absolute inset-x-0 bottom-0 z-10 flex max-h-[75svh] flex-col rounded-t-2xl border-t border-white/10 bg-neutral-900 shadow-2xl">
+		<div onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
+			 className="shrink-0 touch-none select-none px-3 pb-2 pt-2" style={{ minHeight: "var(--drive-peek)" }}>
+			<span className="mx-auto mb-1.5 block h-1 w-9 rounded-full bg-white/30" />
+			<div className="flex items-center gap-1">
+				<div role="button" tabIndex={0} aria-expanded={open} aria-label={open ? "Masquer les détails" : "Afficher les détails"}
+					 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(o => !o); } }}
+					 className="min-w-0 flex-1 rounded-md px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+					<span className="block truncate text-[15px] font-medium text-white">{summary?.name}</span>
+					<span className="block text-xs text-white/60">{summary?.meta}</span>
+				</div>
+				{counter && <>
+					<button type="button" aria-label="Image précédente" aria-disabled={!onPrev} onClick={() => onPrev?.()}
+							className="drive-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white active:bg-white/10 aria-disabled:opacity-30">{icons.prev}</button>
+					<span className="shrink-0 text-xs tabular-nums text-white/60" aria-live="polite">{counter}</span>
+					<button type="button" aria-label="Image suivante" aria-disabled={!onNext} onClick={() => onNext?.()}
+							className="drive-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white active:bg-white/10 aria-disabled:opacity-30">{icons.next}</button>
+				</>}
+			</div>
+		</div>
+		{/* Fermée : contenu hors écran, retiré du focus clavier. */}
+		<div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[max(12px,env(safe-area-inset-bottom))]" {...(open ? {} : { inert: "" })}>
+			{children}
+		</div>
 	</div>
 }
