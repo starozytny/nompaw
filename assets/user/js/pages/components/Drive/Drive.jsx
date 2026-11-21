@@ -3,11 +3,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Check, ChevronLeft, ChevronRight, Copy, CornerUpRight, Download, Folder, FolderInput, FolderPlus, Link2, Pencil, Search, Trash2, Upload, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, CornerUpRight, Download, ExternalLink, Folder, FolderInput, FolderPlus, Link2, LogOut, Pencil, Search, Trash2, Upload, Users, X } from "lucide-react";
 import { Button, ButtonA } from "@tailwindComponents/Elements/Button";
 import { TooltipProvider } from "@shadcnComponents/ui/tooltip";
 import {
-	BottomSheet, DropOverlay, FILTERS, FileGlyph, Hint, KINDS, Lightbox, SidePanel, Snackbar,
+	DropOverlay, FILTERS, FileGlyph, Hint, KINDS, Lightbox, SidePanel, Snackbar,
 	formatDate, formatSize, kindOf, period, useConfirmTap, useMediaQuery, useSnackbar, useWindowDrop,
 } from "./DriveUi";
 import "./drive.css";
@@ -16,6 +16,7 @@ const URL_LIST = "intern_api_drive_list";
 const URL_UPLOAD = "intern_api_drive_upload";
 const URL_DOWNLOAD = "intern_api_drive_download";
 const URL_THUMB = "intern_api_drive_thumb";
+const URL_PDF_PAGES = "intern_api_drive_pdf_pages";
 const URL_DELETE = "intern_api_drive_delete";
 const URL_RENAME = "intern_api_drive_rename";
 const URL_SHARE = "intern_api_drive_share";
@@ -25,6 +26,10 @@ const URL_ALBUM_CREATE = "intern_api_drive_album_create";
 const URL_ALBUM_RENAME = "intern_api_drive_album_rename";
 const URL_ALBUM_DELETE = "intern_api_drive_album_delete";
 const URL_ALBUM_MOVE = "intern_api_drive_album_move";
+const URL_USERS = "intern_api_drive_users";
+const URL_MEMBER_SET = "intern_api_drive_album_member_set";
+const URL_MEMBER_REMOVE = "intern_api_drive_album_member_remove";
+const ROLE_LABELS = { owner: "Propriétaire", editor: "Éditeur", viewer: "Lecteur" };
 const URL_SHORTCUT_CREATE = "intern_api_drive_shortcut_create";
 const URL_SHORTCUT_DELETE = "intern_api_drive_shortcut_delete";
 
@@ -52,12 +57,17 @@ export function Drive () {
 	const [albums, setAlbums] = useState([]);
 	const [albumId, setAlbumId] = useState(null); // dossier ouvert ; null = « Mon Drive »
 	const [creating, setCreating] = useState(false);
+	// Déposer : à sa racine, ou dans un dossier dont on est propriétaire ou éditeur.
+	const canUpload = albumId === null || ["owner", "editor"].includes(albums.find(a => a.id === albumId)?.role);
 	const [shortcuts, setShortcuts] = useState([]); // [{ id, fileId, albumId }]
+	const [me, setMe] = useState(null);
+	const [sharing, setSharing] = useState(false); // panneau « Partager » du dossier ouvert
 
 	const applyState = (data) => {
 		setFiles(data.files);
 		setAlbums(data.albums);
 		setShortcuts(data.shortcuts);
+		setMe(data.me);
 		setUsed(data.used);
 		setQuota(data.quota);
 	};
@@ -72,6 +82,7 @@ export function Drive () {
 	const onFiles = useCallback((fileList) => {
 		const list = Array.from(fileList || []);
 		if (list.length === 0 || pending.length > 0) return;
+		if (!canUpload) { show("Ce dossier partagé est en lecture seule."); return; }
 
 		const total = list.reduce((s, f) => s + f.size, 0);
 		if (used + total > quota) {
@@ -99,7 +110,7 @@ export function Drive () {
 			})
 			.catch((error) => show(errorMessage(error)))
 			.then(() => setPending([]));
-	}, [pending.length, used, quota, files, show, albumId]);
+	}, [pending.length, used, quota, files, show, albumId, canUpload]);
 
 	const dragging = useWindowDrop(onFiles);
 
@@ -125,7 +136,7 @@ export function Drive () {
 		onShare: (duration) => update(axios.post(Routing.generate(URL_SHARE, { id: file.id }), { duration }), file.shareUrl ? "Durée du partage mise à jour" : "Lien de partage créé", file.id),
 		onUnshare: () => update(axios.delete(Routing.generate(URL_UNSHARE, { id: file.id })), "Partage arrêté : l'ancien lien ne fonctionne plus", file.id),
 		onMove: (id) => moveFile(file, id, file.id),
-		albums: tree(),
+		albums: tree(writable), // où ranger le fichier ; les raccourcis ne vont que dans ses propres dossiers (filtré dans Preview)
 		shortcuts: shortcuts.filter(sc => sc.fileId === file.id),
 		albumName: (id) => id ? albums.find(a => a.id === id)?.name : "Mon Drive",
 		onAddShortcut: (id) => update(axios.post(Routing.generate(URL_SHORTCUT_CREATE), { fileId: file.id, albumId: id }),
@@ -156,12 +167,16 @@ export function Drive () {
 		const file = files.find(f => f.id === id);
 		if (!file) return;
 		const alreadyThere = (file.albumId ?? null) === targetId || shortcuts.some(sc => sc.fileId === id && (sc.albumId ?? null) === targetId);
-		if (shortcutOnDrop && targetId !== null) {
+		if (shortcutOnDrop && targetId !== null && albums.find(a => a.id === targetId)?.role === "owner") {
 			if (alreadyThere) return show(`« ${file.name} » est déjà dans « ${nameOf(targetId)} »`);
 			return update(axios.post(Routing.generate(URL_SHORTCUT_CREATE), { fileId: id, albumId: targetId }), `Raccourci vers « ${file.name} » ajouté dans « ${nameOf(targetId)} »`);
 		}
 		if ((file.albumId ?? null) !== targetId) moveFile(file, targetId);
 	};
+	const setMember = (userId, role) => update(axios.post(Routing.generate(URL_MEMBER_SET, { id: albumId }), { userId, role }), "Partage mis à jour");
+	const removeMember = (userId) => update(axios.delete(Routing.generate(URL_MEMBER_REMOVE, { id: albumId, userId })), "Accès retiré");
+	const leaveAlbum = () => update(axios.delete(Routing.generate(URL_MEMBER_REMOVE, { id: albumId, userId: me })), "Tu as quitté le dossier partagé")
+		.then((ok) => ok && go(null));
 	const createAlbum = (name) => update(axios.post(Routing.generate(URL_ALBUM_CREATE), { name, parentId: albumId }), "Dossier créé");
 	const renameAlbum = (name) => update(axios.put(Routing.generate(URL_ALBUM_RENAME, { id: albumId }), { name }), "Dossier renommé");
 	const deleteAlbum = () => {
@@ -169,12 +184,14 @@ export function Drive () {
 		return update(axios.delete(Routing.generate(URL_ALBUM_DELETE, { id: albumId })), `Dossier supprimé : son contenu est dans « ${parent ? parent.name : "Mon Drive"} »`)
 			.then((ok) => ok && go(parent ? parent.id : null));
 	};
-	const go = (id) => { setCreating(false); setAlbumId(id); };
+	const go = (id) => { setCreating(false); setSharing(false); setAlbumId(id); };
 	const childrenOf = (id) => albums.filter(a => (a.parentId ?? null) === id);
 	// Ancêtres du dossier, de la racine vers lui (sans lui-même).
 	const ancestorsOf = (id) => { const path = []; let a = albums.find(x => x.id === albums.find(y => y.id === id)?.parentId); while (a) { path.unshift(a); a = albums.find(x => x.id === a.parentId); } return path; };
 	// Arborescence aplatie pour le sélecteur « Dossier » : [{ id, name, depth }] dans l'ordre d'affichage.
-	const tree = (parentId = null, depth = 0) => childrenOf(parentId).flatMap(a => [{ ...a, depth }, ...tree(a.id, depth + 1)]);
+	const tree = (keep = () => true, parentId = null, depth = 0) => childrenOf(parentId).filter(keep).flatMap(a => [{ ...a, depth }, ...tree(keep, a.id, depth + 1)]);
+	const writable = (a) => a.role === "owner" || a.role === "editor";
+	const owned = (a) => a.role === "owner";
 
 	// Recherche et filtres portent sur tout le Drive ; sinon on liste le dossier ouvert (ou la racine).
 	const searching = !!(query || filter);
@@ -201,7 +218,7 @@ export function Drive () {
 
 	const byKind = useMemo(() => {
 		const m = {};
-		files.forEach(f => { const k = kindOf(f.mime); m[k] = (m[k] || 0) + f.size; });
+		files.filter(f => f.mine).forEach(f => { const k = kindOf(f.mime); m[k] = (m[k] || 0) + f.size; });
 		return Object.entries(m).sort((a, b) => b[1] - a[1]);
 	}, [files]);
 
@@ -220,10 +237,14 @@ export function Drive () {
 	const preview = open && <Preview file={open} {...actions(open)} />;
 	const uploading = pending.length > 0;
 	const isImage = !!open && kindOf(open.mime) === "image";
-	// Navigation dans l'ordre de la liste affichée (recherche et filtres compris).
-	const images = visible.filter(f => kindOf(f.mime) === "image");
-	const imgIndex = isImage ? images.findIndex(f => f.id === open.id) : -1;
-	const importHint = uploading ? "Importation en cours…" : `Ou glisse tes fichiers dans la page · ${formatSize(Math.max(0, quota - used))} disponibles`;
+	const isPdf = !!open && kindOf(open.mime) === "pdf";
+	// Visionneuse plein écran : tous les fichiers sur mobile (bande d'infos à tirer), images et PDF sur ordinateur
+	// (les autres y ont le panneau latéral). Navigation dans l'ordre de la liste affichée, recherche et filtres compris.
+	const viewable = (f) => ["image", "pdf"].includes(kindOf(f.mime));
+	const inViewer = !!open && (viewable(open) || isMobile);
+	const viewerList = isMobile ? visible : visible.filter(viewable);
+	const viewerIndex = inViewer ? viewerList.findIndex(f => f.id === open.id) : -1;
+	const importHint = !canUpload ? "Dossier partagé en lecture seule" : uploading ? "Importation en cours…" : `Ou glisse tes fichiers dans la page · ${formatSize(Math.max(0, quota - used))} disponibles`;
 
 	// contain: inline-size — la largeur de la page vient de l'écran, jamais de son contenu : sans ça,
 	// une rangée défilante ou un bouton qui s'élargit (« Confirmer ») poussait toute la page hors écran
@@ -245,7 +266,7 @@ export function Drive () {
 				    Les noms de la police d'icônes sont inversés : « download » dessine la flèche montante. */}
 				<Hint label={importHint} side="bottom" align="end">
 					<span className="hidden md:inline-flex">
-						<Button type={uploading ? "disabled" : "blue"} iconLeft="download" onClick={() => input.current.click()}>Importer</Button>
+						<Button type={uploading || !canUpload ? "disabled" : "blue"} iconLeft="download" onClick={() => canUpload && input.current.click()}>Importer</Button>
 					</span>
 				</Hint>
 			</div>
@@ -265,10 +286,10 @@ export function Drive () {
 		{!searching && currentAlbum && <>
 			<AlbumBar key={currentAlbum.id} album={currentAlbum} ancestors={ancestorsOf(currentAlbum.id)} count={countIn(currentAlbum.id)}
 					  onNavigate={go} onRename={renameAlbum} onDelete={deleteAlbum} dropInto={dropInto}
-					  moveTargets={[{ id: null, name: "Mon Drive", depth: 0 }, ...tree().map(a => ({ ...a, depth: a.depth + 1 }))]
+					  moveTargets={[{ id: null, name: "Mon Drive", depth: 0 }, ...tree(owned).map(a => ({ ...a, depth: a.depth + 1 }))]
 						  .filter(a => a.id !== currentAlbum.id && a.id !== (currentAlbum.parentId ?? null) && !descendantsOf(currentAlbum.id).includes(a.id))}
-					  onMoveTo={(parentId) => moveAlbum(currentAlbum.id, parentId)} />
-			<FolderGrid items={childrenOf(currentAlbum.id)} creating={creating} setCreating={setCreating} onCreate={createAlbum}
+					  onMoveTo={(parentId) => moveAlbum(currentAlbum.id, parentId)} onShare={() => setSharing(true)} onLeave={leaveAlbum} />
+			<FolderGrid title="Sous-dossiers" items={childrenOf(currentAlbum.id)} canCreate={currentAlbum.role === "owner"} creating={creating} setCreating={setCreating} onCreate={createAlbum}
 						countIn={countIn} subCount={(id) => childrenOf(id).length} onOpen={go} dropInto={dropInto} compact />
 		</>}
 
@@ -322,7 +343,7 @@ export function Drive () {
 							</div>
 						))}
 						{files.slice(0, 6).map((f, i) => (
-							<button key={f.id} type="button" onClick={() => setOpen(f)} style={{ "--i": i }} {...dragFile(f)}
+							<button key={f.id} type="button" onClick={() => setOpen(f)} style={{ "--i": i }} {...(f.mine ? dragFile(f) : {})}
 									className={`drive-stagger drive-press w-36 shrink-0 snap-start overflow-hidden rounded-xl bg-white text-left ring-1 ring-gray-200 hover:shadow-md md:w-auto ${freshIds.includes(f.id) ? "drive-flash" : ""}`}>
 								<Thumb file={f} className="aspect-square" iconSize={40} />
 								<div className="px-3 py-2">
@@ -335,9 +356,11 @@ export function Drive () {
 				</section>
 			)}
 
-			<FolderGrid items={childrenOf(null)} creating={creating} setCreating={setCreating} onCreate={createAlbum}
+			<FolderGrid items={childrenOf(null).filter(owned)} creating={creating} setCreating={setCreating} onCreate={createAlbum}
 						countIn={countIn} subCount={(id) => childrenOf(id).length} onOpen={go} dropInto={dropInto} fileDropLabel="Raccourci ici"
 						hint="Range tes fichiers par thème : crée un dossier, puis glisse-y des fichiers." />
+			<FolderGrid title="Partagés avec moi" items={albums.filter(a => a.sharedRoot)} canCreate={false}
+						countIn={countIn} subCount={(id) => childrenOf(id).length} onOpen={go} dropInto={dropInto} />
 		</>}
 
 		{/* Tous les fichiers, groupés par période */}
@@ -361,22 +384,23 @@ export function Drive () {
 		</section>
 
 		{/* Bouton flottant mobile aux couleurs du Button « blue » du site ; remonte au-dessus de la snackbar */}
-		<button type="button" onClick={() => input.current.click()} disabled={uploading}
+		<button type="button" onClick={() => input.current.click()} disabled={uploading || !canUpload}
 				style={{ transform: `translateY(${snack ? -64 : 0}px)` }}
 				className="fixed bottom-6 right-4 z-30 flex h-12 items-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-semibold text-slate-50 shadow-lg ring-1 ring-inset ring-blue-600 transition-[transform,background-color] duration-200 ease-out hover:bg-blue-500 active:scale-[0.97] disabled:bg-gray-200 disabled:text-gray-900 disabled:ring-gray-300 md:hidden">
 			<span className="icon-download" aria-hidden="true"></span> {uploading ? "Importation…" : "Importer"}
 		</button>
 
-		{isMobile
-			? <BottomSheet open={!!open && !isImage} onClose={() => setOpen(null)} label="Aperçu du fichier">{preview}</BottomSheet>
-			: <SidePanel open={!!open && !isImage} onClose={() => setOpen(null)} label="Aperçu du fichier" closeIcon={<X size={20} />}>{preview}</SidePanel>}
-		<Lightbox open={isImage} onClose={() => setOpen(null)}
-				  onPrev={images[imgIndex - 1] ? () => setOpen(images[imgIndex - 1]) : null}
-				  onNext={imgIndex >= 0 && images[imgIndex + 1] ? () => setOpen(images[imgIndex + 1]) : null}
-				  counter={imgIndex >= 0 && images.length > 1 ? `${imgIndex + 1} / ${images.length}` : null}
+		<SidePanel open={sharing && currentAlbum?.role === "owner"} onClose={() => setSharing(false)} label="Partager le dossier" closeIcon={<X size={20} />}>
+			{currentAlbum && <SharePanel album={currentAlbum} onSet={setMember} onRemove={removeMember} />}
+		</SidePanel>
+		{!isMobile && <SidePanel open={!!open && !inViewer} onClose={() => setOpen(null)} label="Aperçu du fichier" closeIcon={<X size={20} />}>{preview}</SidePanel>}
+		<Lightbox open={inViewer} onClose={() => setOpen(null)} label={isImage ? "Image en grand" : "Aperçu du fichier"}
+				  onPrev={viewerList[viewerIndex - 1] ? () => setOpen(viewerList[viewerIndex - 1]) : null}
+				  onNext={viewerIndex >= 0 && viewerList[viewerIndex + 1] ? () => setOpen(viewerList[viewerIndex + 1]) : null}
+				  counter={viewerIndex >= 0 && viewerList.length > 1 ? `${viewerIndex + 1} / ${viewerList.length}` : null}
 				  icons={{ close: <X size={22} />, prev: <ChevronLeft size={24} />, next: <ChevronRight size={24} /> }}
 				  summary={open && { name: open.name, meta: `${formatSize(open.size)} · ${formatDate(open.createdAt)}` }}
-				  image={open && <FullImage key={open.id} file={open} />}>
+				  image={open && (isImage ? <FullImage key={open.id} file={open} /> : isPdf ? <PdfPage key={open.id} file={open} /> : <FilePoster key={open.id} file={open} />)}>
 			{/* Sur mobile, la bande d'infos affiche déjà le nom. */}
 			{open && <Preview file={open} {...actions(open)} thumb={false} dark hideTitle={isMobile} />}
 		</Lightbox>
@@ -400,15 +424,129 @@ function highlight (name, q) {
 	return <>{name.slice(0, i)}<mark className="rounded-sm bg-[#c2e7ff] text-inherit">{name.slice(i, i + q.length)}</mark>{name.slice(i + q.length)}</>;
 }
 
-/** Aperçu : vraie miniature pour les images, icône du type sinon. */
+/** Fichier non-image dans la visionneuse : grande icône du type (le nom est dans la bande d'infos). */
+function FilePoster ({ file }) {
+	return <span data-viewer-item className="flex flex-col items-center gap-3">
+		<Thumb file={file} className="h-40 w-40 rounded-3xl" iconSize={72} />
+		<span className="text-sm text-white/60">{KINDS[kindOf(file.mime)].label}</span>
+	</span>
+}
+
+/**
+ * PDF dans la visionneuse : pages rendues par le serveur, navigation ‹ ›, ↑/↓ au clavier (←/→ restent pour changer
+ * de fichier) et swipe horizontal au doigt ; pages voisines préchargées. « Ouvrir le PDF » donne le document complet
+ * dans la visionneuse du navigateur.
+ */
+function PdfPage ({ file }) {
+	const [pages, setPages] = useState(0);
+	const [page, setPage] = useState(0);
+	const [loaded, setLoaded] = useState(false);       // page courante affichée
+	const [everLoaded, setEverLoaded] = useState(false); // évite le flash blanc : l'ancienne page reste visible pendant le chargement
+	const [failed, setFailed] = useState(false);
+	const pageRef = useRef();
+	const swipe = useRef(null);
+	const src = (n) => Routing.generate(URL_THUMB, { id: file.id, large: 1, ...(n ? { page: n } : {}) });
+
+	useEffect(() => {
+		axios.get(Routing.generate(URL_PDF_PAGES, { id: file.id })).then((r) => setPages(r.data.pages)).catch(() => {});
+	}, [file.id]);
+	useEffect(() => {
+		const key = (e) => {
+			if (e.target.closest?.("input, textarea, select")) return;
+			if (["ArrowDown", "PageDown"].includes(e.key)) { e.preventDefault(); go(page + 1); }
+			if (["ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); go(page - 1); }
+		};
+		window.addEventListener("keydown", key);
+		return () => window.removeEventListener("keydown", key);
+	});
+	const go = (n) => { if (n >= 0 && n < pages && n !== page) { setPage(n); setLoaded(false); } };
+	const onLoad = () => { setLoaded(true); setEverLoaded(true); };
+	// Précharge les voisines (le serveur les rend pendant la lecture) dès que la page est affichée ET le nombre de pages connu,
+	// dans n'importe quel ordre d'arrivée : changer de page, au bouton comme au doigt, est alors instantané.
+	useEffect(() => {
+		if (!loaded) return;
+		if (page + 1 < pages) new Image().src = src(page + 1);
+		if (page > 0) new Image().src = src(page - 1);
+	}, [loaded, pages, page]);
+
+	// Swipe horizontal (tactile) : la page suit le doigt, freine aux extrémités ; au relâcher, un quart de largeur ou une
+	// chiquenaude change de page (l'ancienne sort, la nouvelle entre par le côté opposé), sinon retour en place.
+	// touch-action: pan-y laisse le défilement vertical et le zoom au navigateur.
+	const onSwipeStart = (e) => {
+		if (e.pointerType === "mouse" || swipe.current || pages < 2) return;
+		swipe.current = { x: e.clientX, t: performance.now(), id: e.pointerId };
+		pageRef.current.style.transition = "none";
+		e.currentTarget.setPointerCapture(e.pointerId);
+	};
+	const onSwipeMove = (e) => {
+		const sw = swipe.current;
+		if (!sw || e.pointerId !== sw.id) return;
+		let dx = e.clientX - sw.x;
+		if ((dx > 0 && page === 0) || (dx < 0 && page >= pages - 1)) dx /= 3;
+		pageRef.current.style.transform = `translateX(${dx}px)`;
+	};
+	const onSwipeEnd = (e) => {
+		const sw = swipe.current;
+		if (!sw || e.pointerId !== sw.id) return;
+		swipe.current = null;
+		const el = pageRef.current;
+		const dx = e.clientX - sw.x;
+		const velocity = Math.abs(dx) / Math.max(1, performance.now() - sw.t);
+		const dir = dx < 0 ? 1 : -1;
+		const target = page + dir;
+		const commit = e.type !== "pointercancel" && target >= 0 && target < pages && (Math.abs(dx) > el.offsetWidth / 4 || (velocity > 0.11 && Math.abs(dx) > 10));
+		el.style.transition = "";
+		if (!commit) { el.style.transform = ""; return; }
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { el.style.transform = ""; go(target); return; }
+		el.style.transform = `translateX(${-dir * 110}%)`;
+		setTimeout(() => {
+			el.style.transition = "none";
+			el.style.transform = `translateX(${dir * 40}px)`;
+			go(target);
+			requestAnimationFrame(() => requestAnimationFrame(() => { el.style.transition = ""; el.style.transform = ""; }));
+		}, 180);
+	};
+
+	if (failed) return <FilePoster file={file} />;
+	return <span data-viewer-item className="flex h-full w-full flex-col items-center justify-center gap-3">
+		<span className="relative flex min-h-0 w-full flex-1 touch-pan-y items-center justify-center"
+			  onPointerDown={onSwipeStart} onPointerMove={onSwipeMove} onPointerUp={onSwipeEnd} onPointerCancel={onSwipeEnd}>
+			{/* Le premier rendu d'une page prend jusqu'à une seconde côté serveur. */}
+			{!loaded && <span className="absolute z-10 h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white motion-reduce:animate-none" aria-hidden="true" />}
+			<img ref={pageRef} src={src(page)} alt={`Page ${page + 1} de ${file.name}`} draggable={false}
+				 onLoad={onLoad} onError={() => (everLoaded ? setLoaded(true) : setFailed(true))}
+				 className={`max-h-full max-w-full select-none rounded-sm bg-white object-contain shadow-2xl [transition:transform_220ms_var(--drive-ease-out),opacity_200ms_ease-out] ${everLoaded ? "" : "opacity-0"}`} />
+		</span>
+		<span className="flex shrink-0 items-center gap-2">
+			{pages > 1 && <span className="flex items-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20">
+				<Hint label="Page précédente (↑)">
+					<button type="button" aria-label="Page précédente" aria-disabled={page === 0} onClick={() => go(page - 1)}
+							className="drive-press flex h-9 w-9 items-center justify-center rounded-full text-white hover:bg-white/10 aria-disabled:cursor-default aria-disabled:opacity-30"><ChevronLeft size={18} /></button>
+				</Hint>
+				<span className="min-w-[5.5rem] text-center text-sm tabular-nums text-white" aria-live="polite">Page {page + 1} / {pages}</span>
+				<Hint label="Page suivante (↓)">
+					<button type="button" aria-label="Page suivante" aria-disabled={page >= pages - 1} onClick={() => go(page + 1)}
+							className="drive-press flex h-9 w-9 items-center justify-center rounded-full text-white hover:bg-white/10 aria-disabled:cursor-default aria-disabled:opacity-30"><ChevronRight size={18} /></button>
+				</Hint>
+			</span>}
+			<a href={Routing.generate(URL_DOWNLOAD, { id: file.id, inline: 1 })} target="_blank" rel="noopener"
+			   className="drive-press flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/20 hover:bg-white/20">
+				<ExternalLink size={16} /> Ouvrir le PDF
+			</a>
+		</span>
+	</span>
+}
+
+/** Aperçu : miniature réelle pour les images et les PDF (1re page), icône du type sinon. */
 function Thumb ({ file, className = "", iconSize = 48, strokeWidth = 1.25 }) {
 	const kind = kindOf(file.mime);
 	const k = KINDS[kind];
 	const [failed, setFailed] = useState(false);
-	const showImg = kind === "image" && !failed;
+	const showImg = (kind === "image" || kind === "pdf") && !failed;
 	return <span className={`flex items-center justify-center overflow-hidden ${className}`} style={{ background: k.bg }}>
 		{showImg
-			? <img src={Routing.generate(URL_THUMB, { id: file.id })} alt="" loading="lazy" draggable={false} onError={() => setFailed(true)} className="h-full w-full object-cover" />
+			? <img src={Routing.generate(URL_THUMB, { id: file.id })} alt="" loading="lazy" draggable={false} onError={() => setFailed(true)}
+				   className={`h-full w-full object-cover ${kind === "pdf" ? "bg-white object-top" : ""}`} />
 			: <k.Icon size={iconSize} color={k.color} strokeWidth={strokeWidth} aria-hidden="true" />}
 	</span>
 }
@@ -418,7 +556,7 @@ function FileRow ({ file, index, query, onOpen, onDelete, onRemoveShortcut }) {
 	const [armed, setArmed] = useConfirmTap(file.id);
 
 	// Un raccourci ne se glisse pas : on déplacerait le fichier d'origine, ce qui surprendrait.
-	return <div style={{ "--i": index }} {...(file.shortcutId ? {} : dragFile(file))} className="drive-stagger group flex items-center border-b border-gray-100 transition-colors duration-150 last:border-0 hover:bg-gray-50">
+	return <div style={{ "--i": index }} {...(file.shortcutId || !file.mine ? {} : dragFile(file))} className="drive-stagger group flex items-center border-b border-gray-100 transition-colors duration-150 last:border-0 hover:bg-gray-50">
 		<button type="button" onClick={onOpen}
 				className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-4 pr-2 text-left focus-visible:bg-gray-100 focus-visible:outline-none active:bg-gray-100">
 			<span className="relative shrink-0">
@@ -430,7 +568,7 @@ function FileRow ({ file, index, query, onOpen, onDelete, onRemoveShortcut }) {
 			<span className="min-w-0 flex-1">
 				<span className="block truncate text-[15px] text-gray-900 md:text-sm">{highlight(file.name, query)}</span>
 				<span className="flex items-center gap-1 text-xs text-gray-500">
-					{file.shareActive && <Link2 size={12} className="text-blue-600" aria-label="Partagé" />}{file.shortcutId && "Raccourci · "}{formatSize(file.size)} · {formatDate(file.createdAt)}
+					{file.shareActive && <Link2 size={12} className="text-blue-600" aria-label="Partagé" />}{file.shortcutId && "Raccourci · "}{formatSize(file.size)} · {formatDate(file.createdAt)}{!file.mine && ` · par ${file.ownerName}`}
 				</span>
 			</span>
 		</button>
@@ -444,7 +582,7 @@ function FileRow ({ file, index, query, onOpen, onDelete, onRemoveShortcut }) {
 			{file.shortcutId ? <Hint label="Retirer le raccourci (le fichier est conservé)">
 				<button type="button" onClick={onRemoveShortcut} aria-label={`Retirer le raccourci vers ${file.name}`}
 						className="drive-press flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-black/5"><X size={18} /></button>
-			</Hint> : <Hint label={armed ? "Clique à nouveau pour supprimer définitivement" : "Supprimer"}>
+			</Hint> : file.canDelete && <Hint label={armed ? "Clique à nouveau pour supprimer définitivement" : "Supprimer"}>
 				<button type="button" onClick={() => armed ? onDelete() : setArmed(true)}
 						aria-label={armed ? `Confirmer la suppression de ${file.name}` : `Supprimer ${file.name}`}
 						className={`drive-press flex h-10 items-center justify-center gap-1.5 rounded-full text-sm font-medium ${armed ? "bg-[#b3261e] px-3 text-white" : "w-10 text-[#b3261e] hover:bg-[#fce8e6]"}`}>
@@ -494,9 +632,9 @@ function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMo
 				? <InlineName initial={file.name} selectBase label="Nouveau nom du fichier" onSubmit={onRename} onDone={() => setEditing(false)}
 							  className={`min-w-0 flex-1 rounded-md border-0 px-2 py-1 text-lg font-medium ring-1 ring-inset focus:ring-2 ${t.input}`} />
 				: hideTitle
-					? <button type="button" onClick={() => setEditing(true)} className={`drive-press -ml-3 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold ${t.link}`}><Pencil size={16} /> Renommer</button>
+					? file.mine && <button type="button" onClick={() => setEditing(true)} className={`drive-press -ml-3 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold ${t.link}`}><Pencil size={16} /> Renommer</button>
 					: <h3 className={`min-w-0 flex-1 break-words text-lg font-medium ${t.title}`}>{file.name}</h3>}
-			{!editing && !hideTitle && <Hint label="Renommer">
+			{!editing && !hideTitle && file.mine && <Hint label="Renommer">
 				<button type="button" aria-label="Renommer" onClick={() => setEditing(true)} className={`drive-press -mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${t.icon}`}><Pencil size={16} /></button>
 			</Hint>}
 		</div>
@@ -504,12 +642,14 @@ function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMo
 			<dt className={t.label}>Type</dt><dd className={t.value}>{KINDS[kindOf(file.mime)].label}</dd>
 			<dt className={t.label}>Taille</dt><dd className={t.value}>{formatSize(file.size)}</dd>
 			<dt className={t.label}>Ajouté</dt><dd className={t.value}>{formatDateTime(file.createdAt)}</dd>
-			<dt className={`${t.label} self-center`}><label htmlFor={`drive-move-${file.id}`}>Dossier</label></dt>
+			{!file.mine && <><dt className={t.label}>Déposé par</dt><dd className={t.value}>{file.ownerName}</dd></>}
+			{/* Ranger, raccourcis et lien public : réservés à qui a déposé le fichier. */}
+			{file.mine && <><dt className={`${t.label} self-center`}><label htmlFor={`drive-move-${file.id}`}>Dossier</label></dt>
 			<dd>
 				<select id={`drive-move-${file.id}`} value={file.albumId ?? ""} onChange={(e) => onMove(e.target.value ? Number(e.target.value) : null)}
 						className={`w-full max-w-[16rem] rounded-md border-0 py-1 pl-2 pr-8 text-sm ring-1 ring-inset [&>option]:text-gray-900 ${t.input}`}>
 					<option value="">Mon Drive</option>
-					{albums.map(a => <option key={a.id} value={a.id}>{"\u00A0\u00A0\u00A0".repeat(a.depth) + a.name}</option>)}
+					{albums.map(a => <option key={a.id} value={a.id}>{"\u00A0\u00A0\u00A0".repeat(a.depth) + a.name + (a.role === "owner" ? "" : " · partagé")}</option>)}
 				</select>
 			</dd>
 			<dt className={`${t.label} pt-1`}>Raccourcis</dt>
@@ -528,17 +668,17 @@ function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMo
 						className={`rounded-md border-0 py-0.5 pl-2 pr-7 text-xs ring-1 ring-inset [&>option]:text-gray-900 ${t.input}`}>
 					<option value="">+ Ajouter dans…</option>
 					{file.albumId && !shortcuts.some(sc => !sc.albumId) && <option value="root">Mon Drive</option>}
-					{albums.filter(a => a.id !== file.albumId && !shortcuts.some(sc => sc.albumId === a.id))
+					{albums.filter(a => a.role === "owner" && a.id !== file.albumId && !shortcuts.some(sc => sc.albumId === a.id))
 						.map(a => <option key={a.id} value={a.id}>{"\u00A0\u00A0\u00A0".repeat(a.depth) + a.name}</option>)}
 				</select>
-			</dd>
+			</dd></>}
 		</dl>
 		<div className="mt-5 flex gap-2">
 			{/* Boutons standards du site ; les <span> portent les infobulles (pas de ref sur ces composants). */}
 			<Hint label="Télécharger le fichier d'origine">
 				<span className="flex flex-1"><ButtonA type="blue" width="w-full" iconLeft="upload" onClick={Routing.generate(URL_DOWNLOAD, { id: file.id })}>Télécharger</ButtonA></span>
 			</Hint>
-			<Hint label={armed ? "Clique à nouveau pour supprimer définitivement" : shortcuts.length ? `Supprimer définitivement (et ses ${shortcuts.length} raccourci${shortcuts.length > 1 ? "s" : ""})` : "Supprimer définitivement"}>
+			{file.canDelete && <Hint label={armed ? "Clique à nouveau pour supprimer définitivement" : shortcuts.length ? `Supprimer définitivement (et ses ${shortcuts.length} raccourci${shortcuts.length > 1 ? "s" : ""})` : "Supprimer définitivement"}>
 				{dark && !armed
 					// Sur fond sombre, le Button « default » serait un bloc blanc : même forme et typo, fond translucide.
 					? <button type="button" onClick={onDeleteClick} className="flex items-center justify-center gap-2 rounded-md bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/15 transition-colors hover:bg-white/15">
@@ -547,10 +687,10 @@ function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMo
 					: <span className="flex">
 						<Button type={armed ? "red" : "default"} iconLeft="trash" onClick={onDeleteClick}>{armed ? "Confirmer" : "Supprimer"}</Button>
 					</span>}
-			</Hint>
+			</Hint>}
 		</div>
 
-		<div className={`mt-5 border-t pt-4 ${t.border}`}>
+		{file.mine && <div className={`mt-5 border-t pt-4 ${t.border}`}>
 			<h4 className={`text-sm font-medium ${t.title}`}>Partage</h4>
 			{file.shareUrl ? <>
 				<p className={`mt-1 text-xs ${file.shareActive ? t.muted : t.expired}`}>
@@ -572,7 +712,7 @@ function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMo
 				<p className={`mt-1 text-xs ${t.muted}`}>Crée un lien pour envoyer ce fichier à quelqu'un, même sans compte.</p>
 				<DurationPicker label="Partager pendant :" t={t} onPick={onShare} />
 			</>}
-		</div>
+		</div>}
 	</div>
 }
 
@@ -607,13 +747,18 @@ function InlineName ({ initial = "", label, selectBase = false, onSubmit, onDone
 				  onBlur={(e) => end(e.target.value)} className={className} />
 }
 
-/** Barre du dossier ouvert : fil d'Ariane (chaque niveau accepte un dépôt), renommer, déplacer, supprimer (deux appuis, contenu conservé). */
-function AlbumBar ({ album, ancestors, count, onNavigate, onRename, onDelete, dropInto, moveTargets, onMoveTo }) {
+/**
+ * Barre du dossier ouvert : fil d'Ariane (chaque niveau accepte un dépôt). Propriétaire : renommer, partager, déplacer,
+ * supprimer (deux appuis, contenu conservé). Membre : propriétaire et rôle, et « Quitter » en haut du partage.
+ */
+function AlbumBar ({ album, ancestors, count, onNavigate, onRename, onDelete, dropInto, moveTargets, onMoveTo, onShare, onLeave }) {
+	const isOwner = album.role === "owner";
 	const [editing, setEditing] = useState(false);
 	const [armed, setArmed] = useConfirmTap(album.id);
 	const parent = ancestors[ancestors.length - 1] ?? null;
 	const [over, dropProps] = useDriveDrop(dropInto(parent ? parent.id : null));
 	const parentName = parent ? parent.name : "Mon Drive";
+	const icon = "drive-press flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100";
 	return <div className="drive-rise mt-2 flex items-center gap-1 rounded-2xl bg-white p-2 pr-3 shadow-sm ring-1 ring-gray-200">
 		<span {...dropProps} className={`shrink-0 rounded-full transition-colors duration-150 ${over ? "bg-blue-50 ring-2 ring-blue-600" : ""}`}>
 			<Hint label={over ? `Déposer dans « ${parentName} »` : `Retour à « ${parentName} »`}>
@@ -627,31 +772,101 @@ function AlbumBar ({ album, ancestors, count, onNavigate, onRename, onDelete, dr
 				<ChevronRight size={14} className="shrink-0 text-gray-400" />
 			</React.Fragment>)}
 		</nav>
-		<Folder size={18} className="ml-1 shrink-0 text-gray-500" />
+		{isOwner && album.members.length ? <Users size={18} className="ml-1 shrink-0 text-blue-600" aria-label="Dossier partagé" /> : <Folder size={18} className="ml-1 shrink-0 text-gray-500" />}
 		{editing
 			? <InlineName initial={album.name} label="Nom du dossier" onSubmit={onRename} onDone={() => setEditing(false)}
 						  className="min-w-0 flex-1 rounded-md border-0 px-2 py-1 font-medium text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600" />
-			: <h2 className="min-w-0 flex-1 truncate px-1 font-medium text-gray-900">{album.name} <span className="font-normal text-gray-500">· {count} fichier{count > 1 ? "s" : ""}</span></h2>}
-		{!editing && <Hint label="Renommer le dossier">
-			<button type="button" aria-label="Renommer le dossier" onClick={() => setEditing(true)} className="drive-press flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100"><Pencil size={16} /></button>
-		</Hint>}
-		{/* Déplacer sans souris (mobile) : un <select> natif invisible posé sur l'icône. */}
-		{moveTargets.length > 0 && <Hint label="Déplacer le dossier">
-			<span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100">
-				<FolderInput size={16} />
-				<select value="" aria-label="Déplacer le dossier vers" onChange={(e) => e.target.value !== "" && onMoveTo(e.target.value === "root" ? null : Number(e.target.value))}
-						className="absolute inset-0 cursor-pointer opacity-0">
-					<option value="">Déplacer vers…</option>
-					{moveTargets.map(a => <option key={a.id ?? "root"} value={a.id ?? "root"}>{"   ".repeat(a.depth) + a.name}</option>)}
-				</select>
-			</span>
-		</Hint>}
-		<Hint label={armed ? `Clique à nouveau : son contenu ira dans « ${parentName} »` : "Supprimer le dossier (son contenu est conservé)"}>
-			<button type="button" onClick={() => armed ? onDelete() : setArmed(true)} aria-label={armed ? "Confirmer la suppression du dossier" : "Supprimer le dossier"}
-					className={`drive-press flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full text-sm font-medium ${armed ? "bg-[#b3261e] px-3 text-white" : "w-9 text-[#b3261e] hover:bg-[#fce8e6]"}`}>
-				<Trash2 size={16} />{armed && <span className="drive-check">Confirmer</span>}
+			: <h2 className="min-w-0 flex-1 truncate px-1 font-medium text-gray-900">
+				{album.name} <span className="font-normal text-gray-500">· {count} fichier{count > 1 ? "s" : ""}{!isOwner && ` · par ${album.ownerName} (${ROLE_LABELS[album.role]})`}</span>
+			</h2>}
+		{isOwner ? <>
+			{!editing && <Hint label="Renommer le dossier">
+				<button type="button" aria-label="Renommer le dossier" onClick={() => setEditing(true)} className={icon}><Pencil size={16} /></button>
+			</Hint>}
+			<Hint label={album.members.length ? `Partagé avec ${album.members.length} personne${album.members.length > 1 ? "s" : ""}` : "Partager le dossier"}>
+				<button type="button" aria-label="Partager le dossier" onClick={onShare} className={icon}><Users size={16} /></button>
+			</Hint>
+			{/* Déplacer sans souris (mobile) : un <select> natif invisible posé sur l'icône. */}
+			{moveTargets.length > 0 && <Hint label="Déplacer le dossier">
+				<span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100">
+					<FolderInput size={16} />
+					<select value="" aria-label="Déplacer le dossier vers" onChange={(e) => e.target.value !== "" && onMoveTo(e.target.value === "root" ? null : Number(e.target.value))}
+							className="absolute inset-0 cursor-pointer opacity-0">
+						<option value="">Déplacer vers…</option>
+						{moveTargets.map(a => <option key={a.id ?? "root"} value={a.id ?? "root"}>{"   ".repeat(a.depth) + a.name}</option>)}
+					</select>
+				</span>
+			</Hint>}
+			<Hint label={armed ? `Clique à nouveau : son contenu ira dans « ${parentName} »` : "Supprimer le dossier (son contenu est conservé)"}>
+				<button type="button" onClick={() => armed ? onDelete() : setArmed(true)} aria-label={armed ? "Confirmer la suppression du dossier" : "Supprimer le dossier"}
+						className={`drive-press flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full text-sm font-medium ${armed ? "bg-[#b3261e] px-3 text-white" : "w-9 text-[#b3261e] hover:bg-[#fce8e6]"}`}>
+					<Trash2 size={16} />{armed && <span className="drive-check">Confirmer</span>}
+				</button>
+			</Hint>
+		</> : album.sharedRoot && <Hint label={armed ? "Clique à nouveau : tu n'y auras plus accès (tes fichiers restent à toi)" : "Quitter le dossier partagé"}>
+			<button type="button" onClick={() => armed ? onLeave() : setArmed(true)} aria-label={armed ? "Confirmer : quitter le dossier" : "Quitter le dossier partagé"}
+					className={`drive-press flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full text-sm font-medium ${armed ? "bg-[#b3261e] px-3 text-white" : "w-9 text-gray-500 hover:bg-gray-100"}`}>
+				<LogOut size={16} />{armed && <span className="drive-check">Quitter</span>}
 			</button>
-		</Hint>
+		</Hint>}
+	</div>
+}
+
+/** Panneau « Partager » (propriétaire) : inviter un compte du site comme Lecteur ou Éditeur, changer un rôle, retirer l'accès. */
+function SharePanel ({ album, onSet, onRemove }) {
+	const [q, setQ] = useState("");
+	const [role, setRole] = useState("viewer");
+	const [results, setResults] = useState(null); // null = pas encore cherché
+	useEffect(() => {
+		const term = q.trim();
+		if (term.length < 2) { setResults(null); return; }
+		const t = setTimeout(() => axios.get(Routing.generate(URL_USERS, { q: term })).then((r) => setResults(r.data.users)).catch(() => setResults([])), 250);
+		return () => clearTimeout(t);
+	}, [q]);
+	const memberIds = album.members.map(m => m.userId);
+	const field = "rounded-md border-0 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600";
+
+	return <div className="px-5 pb-4">
+		<h3 className="text-lg font-medium text-gray-900">Partager « {album.name} »</h3>
+		<p className="mt-1 text-sm text-gray-500">Les membres accèdent à ce dossier et à ses sous-dossiers.</p>
+		<div className="mt-4 flex gap-2">
+			<input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un utilisateur" aria-label="Rechercher un utilisateur à inviter"
+				   className={`min-w-0 flex-1 px-3 py-2 ${field}`} />
+			<select value={role} onChange={(e) => setRole(e.target.value)} aria-label="Rôle de la personne invitée" className={`py-2 pl-2 pr-8 ${field}`}>
+				<option value="viewer">Lecteur</option><option value="editor">Éditeur</option>
+			</select>
+		</div>
+		{results && (results.length === 0
+			? <p className="mt-2 text-sm text-gray-500">Aucun utilisateur trouvé.</p>
+			: <ul className="mt-2 ml-0 list-none divide-y divide-gray-100 overflow-hidden rounded-md pl-0 ring-1 ring-gray-200">
+				{results.map(u => {
+					const already = memberIds.includes(u.id);
+					return <li key={u.id}>
+						<button type="button" disabled={already} onClick={() => onSet(u.id, role).then((ok) => ok && setQ(""))}
+								className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 disabled:cursor-default disabled:opacity-50">
+							<span className="min-w-0 truncate"><span className="font-medium text-gray-900">{u.name}</span> <span className="text-gray-500">@{u.username}</span></span>
+							<span className="shrink-0 font-semibold text-blue-600">{already ? "Déjà membre" : `Inviter (${ROLE_LABELS[role]})`}</span>
+						</button>
+					</li>
+				})}
+			</ul>)}
+
+		<h4 className="mt-6 text-sm font-medium text-gray-900">Membres</h4>
+		{album.members.length === 0
+			? <p className="mt-1 text-sm text-gray-500">Personne pour l'instant.</p>
+			: <ul className="mt-1 ml-0 list-none divide-y divide-gray-100 pl-0">
+				{album.members.map(m => <li key={m.userId} className="flex items-center gap-2 py-2">
+					<span className="min-w-0 flex-1 truncate text-sm text-gray-900">{m.name}</span>
+					<select value={m.role} onChange={(e) => onSet(m.userId, e.target.value)} aria-label={`Rôle de ${m.name}`} className={`py-1 pl-2 pr-8 ${field}`}>
+						<option value="viewer">Lecteur</option><option value="editor">Éditeur</option>
+					</select>
+					<Hint label="Retirer l'accès">
+						<button type="button" aria-label={`Retirer l'accès de ${m.name}`} onClick={() => onRemove(m.userId)}
+								className="drive-press flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100"><X size={16} /></button>
+					</Hint>
+				</li>)}
+			</ul>}
+		<p className="mt-4 text-xs text-gray-500">Lecteur : voir et télécharger. Éditeur : en plus, ajouter des fichiers et gérer les siens. Chaque fichier compte dans le quota de celui qui l'a déposé.</p>
 	</div>
 }
 
@@ -663,18 +878,19 @@ function Crumb ({ label, onClick, onDrop }) {
 	</button>
 }
 
-/** Grille des dossiers d'un niveau, avec création en ligne. */
-function FolderGrid ({ items, creating, setCreating, onCreate, countIn, subCount, onOpen, dropInto, hint, fileDropLabel = "Déposer ici", compact = false }) {
+/** Grille des dossiers d'un niveau, avec création en ligne (si canCreate). */
+function FolderGrid ({ title = "Dossiers", items, canCreate = true, creating, setCreating, onCreate, countIn, subCount, onOpen, dropInto, hint, fileDropLabel = "Déposer ici", compact = false }) {
+	if (!canCreate && items.length === 0) return null;
 	return <section className={compact ? "mt-4" : "mt-6"}>
 		<div className="mb-3 flex items-center justify-between gap-3">
-			<h2 className={compact ? "text-sm font-medium text-gray-600" : "text-base font-medium text-gray-900"}>{compact ? "Sous-dossiers" : "Dossiers"}</h2>
-			<button type="button" onClick={() => setCreating(true)} className="drive-press -mr-3 flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold text-blue-600 hover:bg-blue-50">
+			<h2 className={compact ? "text-sm font-medium text-gray-600" : "text-base font-medium text-gray-900"}>{title}</h2>
+			{canCreate && <button type="button" onClick={() => setCreating(true)} className="drive-press -mr-3 flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold text-blue-600 hover:bg-blue-50">
 				<FolderPlus size={16} /> Nouveau dossier
-			</button>
+			</button>}
 		</div>
 		{hint && items.length === 0 && !creating && <p className="text-sm text-gray-500">{hint}</p>}
-		{(items.length > 0 || creating) && <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-			{creating && <div className="drive-rise flex items-center gap-3 rounded-xl bg-white px-4 py-3 ring-2 ring-blue-600">
+		{(items.length > 0 || (canCreate && creating)) && <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+			{canCreate && creating && <div className="drive-rise flex items-center gap-3 rounded-xl bg-white px-4 py-3 ring-2 ring-blue-600">
 				<Folder size={22} className="shrink-0 text-gray-500" />
 				<InlineName label="Nom du dossier" onSubmit={onCreate} onDone={() => setCreating(false)}
 							className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0" />
@@ -708,13 +924,17 @@ function useDriveDrop (onDrop) {
 
 function AlbumCard ({ album, index, count, subCount, onOpen, onDrop, fileDropLabel }) {
 	const [over, dropProps] = useDriveDrop(onDrop);
-	return <button type="button" onClick={onOpen} style={{ "--i": index }} {...dragItem("folder", album.id)} {...dropProps}
+	const shared = album.role !== "owner" || album.members.length > 0;
+	const FolderIcon = shared ? Users : Folder;
+	return <button type="button" onClick={onOpen} style={{ "--i": index }} {...(album.role === "owner" ? dragItem("folder", album.id) : {})} {...dropProps}
 				   className={`drive-stagger drive-press flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors duration-150 hover:shadow-md ${over ? "bg-blue-50 ring-2 ring-blue-600" : "bg-white ring-1 ring-gray-200"}`}>
-		<Folder size={22} className={`shrink-0 ${over ? "text-blue-600" : "text-gray-500"}`} />
+		<FolderIcon size={22} className={`shrink-0 ${over || shared ? "text-blue-600" : "text-gray-500"}`} aria-label={shared ? "Dossier partagé" : undefined} />
 		<span className="min-w-0">
 			<span className="block truncate text-sm font-medium text-gray-900">{album.name}</span>
 			<span className="block text-xs text-gray-500">
-				{over === "folder" ? "Déplacer ici" : over ? fileDropLabel : `${count} fichier${count > 1 ? "s" : ""}${subCount ? ` · ${subCount} dossier${subCount > 1 ? "s" : ""}` : ""}`}
+				{over === "folder" ? "Déplacer ici" : over ? fileDropLabel
+					: album.role !== "owner" && album.sharedRoot ? `par ${album.ownerName} · ${ROLE_LABELS[album.role]}`
+					: `${count} fichier${count > 1 ? "s" : ""}${subCount ? ` · ${subCount} dossier${subCount > 1 ? "s" : ""}` : ""}`}
 			</span>
 		</span>
 	</button>
