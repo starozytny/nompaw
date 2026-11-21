@@ -44,9 +44,18 @@ class DrFile
     #[Groups(['dr_file_list'])]
     private ?\DateTimeImmutable $createdAt = null;
 
+    /** Dossier ; null = à la racine (« Mon Drive »). */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?DrAlbum $album = null;
+
     /** Jeton du lien public de partage ; null = fichier non partagé. */
     #[ORM\Column(length: 64, unique: true, nullable: true)]
     private ?string $shareToken = null;
+
+    /** Fin de validité du lien ; null = lien créé avant l'ajout des durées, valable jusqu'à l'arrêt du partage. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $shareExpiresAt = null;
 
     public function __construct()
     {
@@ -128,6 +137,18 @@ class DrFile
         return $this->createdAt;
     }
 
+    public function getAlbum(): ?DrAlbum
+    {
+        return $this->album;
+    }
+
+    public function setAlbum(?DrAlbum $album): static
+    {
+        $this->album = $album;
+
+        return $this;
+    }
+
     public function getShareToken(): ?string
     {
         return $this->shareToken;
@@ -138,5 +159,22 @@ class DrFile
         $this->shareToken = $shareToken;
 
         return $this;
+    }
+
+    public function getShareExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->shareExpiresAt;
+    }
+
+    public function setShareExpiresAt(?\DateTimeImmutable $shareExpiresAt): static
+    {
+        $this->shareExpiresAt = $shareExpiresAt;
+
+        return $this;
+    }
+
+    public function isShareActive(): bool
+    {
+        return $this->shareToken !== null && ($this->shareExpiresAt === null || $this->shareExpiresAt > new \DateTimeImmutable());
     }
 }
