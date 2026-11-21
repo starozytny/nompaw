@@ -36,9 +36,17 @@ class TradeController extends AbstractController
     }
 
     #[Route('/holdings', name: 'holdings', options: ['expose' => true], methods: 'GET')]
-    public function holdings(ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
+    public function holdings(ApiResponse $apiResponse, CrTradeReplayService $replayService, CrPriceService $priceService): Response
     {
-        return $apiResponse->apiJsonResponseCustom($replayService->computeHoldings($this->getUser()));
+        $data = $replayService->computeHoldings($this->getUser());
+        // Latest cached daily price (no network call): today's, else yesterday's if today isn't imported yet.
+        foreach ($data['holdings'] as &$holding) {
+            $holding['currentPrice'] = $priceService->getPriceEur($holding['coin'], new \DateTimeImmutable('today'), false)
+                ?? $priceService->getPriceEur($holding['coin'], new \DateTimeImmutable('yesterday'), false);
+        }
+        unset($holding);
+
+        return $apiResponse->apiJsonResponseCustom($data);
     }
 
     /**

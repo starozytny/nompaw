@@ -285,10 +285,122 @@ class CrTradeReplayService
             }
         }
 
+        $replay = $this->replayHoldings($trades);
+        $basis = $this->costBasisByCoin($trades);
+        foreach ($replay['holdings'] as &$holding) {
+            $b = $basis[$holding['coin']] ?? ['quantity' => 0.0, 'cost' => 0.0, 'unpriced' => 0];
+            $holding += $this->sellTargets($b) + ['unpriced' => $b['unpriced']];
+        }
+        unset($holding);
+
         return [
-            ...$this->replayHoldings($trades),
+            ...$replay,
             'netInvested' => ['depot' => round($netDepot, 2), 'retrait' => round($netRetrait, 2)],
         ];
+    }
+
+    /** Gains shown on "Cryptos restantes": 0 = break-even (average cost), then +10/20/30 %. */
+    private const TARGET_GAINS = [0, 10, 20, 30];
+
+    /**
+     * Weighted average cost of what's left of each coin (same quantity rules as applyHolding):
+     * - Achat/Vente bringing the coin in add getTotal() (EUR, fee included) to its cost;
+     * - any token leaving (sold, used to pay, withdrawn) takes its share of the cost with it, so selling
+     *   doesn't move the average cost of the tokens left;
+     * - a withdrawal's cost is kept "in transit" and handed to the next deposit of that coin (transfer
+     *   between two platforms), whatever is never deposited back is gone (external wallet, lost);
+     * - rewards (Stacking/Récupération) and deposits beyond what was in transit come at no cost.
+     *
+     * @param CrTrade[] $trades chronological
+     * @return array<string, array{quantity: float, cost: float, unpriced: int}>
+     */
+    private function costBasisByCoin(array $trades): array
+    {
+        $book = [];
+        $in = function (?string $coin, ?float $qty, float $cost, bool $unpriced = false) use (&$book): void {
+            if (!$coin || $coin === 'EUR' || !$qty) {
+                return;
+            }
+            $book[$coin] ??= ['quantity' => 0.0, 'cost' => 0.0, 'unpriced' => 0, 'transitQty' => 0.0, 'transitCost' => 0.0];
+            $book[$coin]['quantity'] += $qty;
+            $book[$coin]['cost'] += $cost;
+            $book[$coin]['unpriced'] += $unpriced ? 1 : 0;
+        };
+        // Removes $qty at the average cost, returns the cost it carried away.
+        $out = function (?string $coin, ?float $qty) use (&$book): float {
+            if (!$coin || $coin === 'EUR' || !$qty || !isset($book[$coin])) {
+                return 0.0;
+            }
+            $b = &$book[$coin];
+            $share = $b['quantity'] > 0 ? min(1.0, $qty / $b['quantity']) : 0.0;
+            $cost = $b['cost'] * $share;
+            $b['cost'] -= $cost;
+            $b['quantity'] -= $qty;
+            if ($b['quantity'] <= self::DEFICIT_EPSILON) {
+                $b['cost'] = 0.0;
+            }
+
+            return $cost;
+        };
+
+        foreach ($trades as $trade) {
+            $from = $trade->getFromCoin();
+            $to = $trade->getToCoin();
+            switch ($trade->getType()) {
+                case TypeType::Achat:
+                case TypeType::Vente:
+                    $out($from, $trade->getFromNbToken());
+                    $in($to, $trade->getToNbToken(), (float) $trade->getTotal(), (float) $trade->getTotal() == 0.0);
+                    break;
+                case TypeType::Retrait:
+                    if ($from && $from !== 'EUR') {
+                        $cost = $out($from, $trade->getFromNbToken());
+                        $book[$from]['transitQty'] += (float) $trade->getFromNbToken();
+                        $book[$from]['transitCost'] += $cost;
+                    }
+                    break;
+                case TypeType::Depot:
+                    if ($to && $to !== 'EUR') {
+                        $qty = (float) $trade->getToNbToken();
+                        $t = $book[$to] ?? null;
+                        $cost = 0.0;
+                        if ($t !== null && $t['transitQty'] > 0) {
+                            $taken = min($qty, $t['transitQty']);
+                            $cost = $t['transitCost'] * $taken / $t['transitQty'];
+                            $book[$to]['transitQty'] -= $taken;
+                            $book[$to]['transitCost'] -= $cost;
+                        }
+                        $in($to, $qty, $cost);
+                    }
+                    break;
+                case TypeType::Recuperation:
+                case TypeType::Stacking:
+                    $in($from, $trade->getFromNbToken(), 0.0);
+                    break;
+            }
+        }
+
+        return array_map(fn (array $b) => ['quantity' => $b['quantity'], 'cost' => max(0.0, $b['cost']), 'unpriced' => $b['unpriced']], $book);
+    }
+
+    /**
+     * Sell prices for the tokens left: average cost per token (= break-even) and +x % on it, with the
+     * matching gain in euros on those tokens. Prices null when the tokens cost nothing (rewards only).
+     *
+     * @param array{quantity: float, cost: float} $basis
+     */
+    public function sellTargets(array $basis): array
+    {
+        // Below a cent, it's float residue of the proportional removals, not money paid.
+        $unitCost = $basis['quantity'] > 0 && $basis['cost'] >= 0.01 ? $basis['cost'] / $basis['quantity'] : null;
+        $targets = [];
+        $gains = [];
+        foreach (self::TARGET_GAINS as $gain) {
+            $targets[$gain] = $unitCost !== null ? $unitCost * (1 + $gain / 100) : null;
+            $gains[$gain] = round($basis['cost'] * $gain / 100, 2);
+        }
+
+        return ['cost' => round($basis['cost'], 2), 'unitCost' => $unitCost, 'targets' => $targets, 'gains' => $gains];
     }
 
     /**

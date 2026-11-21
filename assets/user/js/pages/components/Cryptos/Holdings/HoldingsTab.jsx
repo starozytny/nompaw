@@ -54,7 +54,7 @@ export function HoldingsTab ({ refreshSignal }) {
 
 		<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
 			<span className="icon-warning1 text-xs" />
-			Quantités calculées à partir de tes transactions (Achat, Vente, Stacking, Récupération) — pas une valorisation en euros.
+			« Vendre à » : prix d'un token pour vendre ce qu'il te reste au prix de revient moyen (Équilibre), ou avec 10, 20, 30 % de gain. Les ventes passées ne changent pas ce prix de revient ; les récompenses le baissent.
 		</div>
 
 		{holdings.length === 0
@@ -68,15 +68,26 @@ export function HoldingsTab ({ refreshSignal }) {
 						<button type="button" aria-expanded={openCoin === h.coin}
 								onClick={() => setOpenCoin(openCoin === h.coin ? null : h.coin)}
 								className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50">
-							<div className="flex items-center gap-3">
+							<div className="flex min-w-0 items-center gap-3">
 								<CoinIcon coin={h.coin} size={32} />
-								<span className="font-medium text-sm">{h.coin}</span>
+								<div className="min-w-0">
+									<div className="text-sm font-medium">{h.coin}</div>
+									{h.unitCost !== null && <div className="text-[11px] text-muted-foreground">
+										Prix de revient {fmtPrice(h.unitCost)} / token · {fmtEur2(h.cost)} pour ce qu'il te reste
+									</div>}
+								</div>
 							</div>
-							<span className="flex items-center gap-2 text-sm font-semibold tabular-nums">
-								{fmt(h.quantity)}
+							<div className="flex items-center gap-4">
+								<div className="text-right">
+									<div className="text-sm font-semibold tabular-nums">{fmt(h.quantity)}</div>
+									{h.currentPrice !== null && <div className="text-[11px] text-muted-foreground tabular-nums">
+										Cours {fmtPrice(h.currentPrice)}
+									</div>}
+								</div>
 								<span className={`icon-${openCoin === h.coin ? 'up' : 'down'}-chevron text-xs text-muted-foreground`} />
-							</span>
+							</div>
 						</button>
+						<SellTargets holding={h} />
 						{openCoin === h.coin && <CoinLedger coin={h.coin} refreshSignal={refreshSignal} />}
 					</div>)}
 				</div>
@@ -86,6 +97,54 @@ export function HoldingsTab ({ refreshSignal }) {
 }
 
 const fmt = (n) => Number(n.toFixed(8)).toLocaleString('fr-FR', { maximumFractionDigits: 8 });
+const fmtEur = (n) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+const fmtEur2 = (n) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+// Token prices range from 0.00001 € to 80 000 €: cents above 1 €, 4 significant digits below.
+const fmtPrice = (n) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', ...(n >= 1 ? { maximumFractionDigits: 2 } : { maximumSignificantDigits: 4 }) });
+
+const TARGET_LABELS = { 0: 'Équilibre', 10: '+10 %', 20: '+20 %', 30: '+30 %' };
+
+// Sell price per token for the tokens left: their average cost (Équilibre) or +10/20/30 % on it, with the
+// gain in euros on those tokens (CrTradeReplayService::sellTargets). Green once the current price is above.
+function SellTargets ({ holding }) {
+	const { targets, gains, currentPrice, unitCost, unpriced, coin } = holding;
+
+	const unpricedWarning = unpriced > 0 && <div className="flex items-start gap-1.5 text-[11px]" style={{ color: 'var(--status-critical)' }}>
+		<span className="icon-warning1 mt-0.5 text-[10px]" />
+		<span>
+			{unpriced} achat{unpriced > 1 ? "s" : ""} de {coin} sans montant (total réel à 0) : {unitCost !== null ? "le prix de revient et les prix ci-dessus sont sous-estimés" : "impossible de calculer un prix de vente"}.
+			{' '}Lance <code>app:crypto:trades:fill-prices</code> ou complète le total réel de ces achats.
+		</span>
+	</div>;
+
+	if (unitCost === null) {
+		return <div className="px-4 pb-3 pl-[60px]">
+			{unpricedWarning || <div className="text-[11px] text-muted-foreground">
+				Obtenu sans rien payer (récompenses, dépôts) : n'importe quel prix de vente est un gain.
+			</div>}
+		</div>;
+	}
+
+	return <div className="flex flex-col gap-2 px-4 pb-3 pl-[60px]">
+		<div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+			{Object.entries(TARGET_LABELS).map(([gain, label]) => {
+				const price = targets[gain];
+				const reached = currentPrice !== null && currentPrice >= price;
+				return <div key={gain} className={`rounded-md border px-2.5 py-1.5 ${reached ? 'border-[var(--status-good)]/50 bg-[var(--status-good-soft)]' : 'bg-background'}`}>
+					<div className="flex items-baseline justify-between gap-2 text-[11px]">
+						<span className="font-semibold">{label}</span>
+						<span className="tabular-nums text-muted-foreground">{Number(gain) === 0 ? "gain 0 €" : `gain +${fmtEur2(gains[gain])}`}</span>
+					</div>
+					<div className="text-[11px] text-muted-foreground">
+						Vendre à <span className="text-sm font-semibold tabular-nums text-foreground" style={reached ? { color: 'var(--status-good)' } : undefined}>{fmtPrice(price)}</span>
+					</div>
+					{reached && <div className="text-[10px]" style={{ color: 'var(--status-good)' }}>✓ le cours actuel est au-dessus</div>}
+				</div>
+			})}
+		</div>
+		{unpricedWarning}
+	</div>;
+}
 
 // Movements of one coin: totals per type, then every trade with its signed delta and running balance.
 function CoinLedger ({ coin, refreshSignal }) {
