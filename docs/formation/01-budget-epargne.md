@@ -8,6 +8,15 @@ prerequis: ["revenus-reels"]
 deblocage: null
 indicateur: "Taux d'épargne, reste à vivre"
 termes: ["taux d'épargne", "reste à vivre", "enveloppe", "charges fixes"]
+definitions:
+  taux d'épargne: "Épargne ÷ revenu : la part de ton revenu réellement mise de côté."
+  reste à vivre: "Ce qui reste une fois les charges fixes payées."
+  enveloppe: "Montant fixé à l'avance pour une catégorie de dépenses."
+  charges fixes: "Dépenses qui reviennent chaque mois : prêt, énergie, assurances, abonnements."
+chiffre_cle:
+  valeur: "37 %"
+  libelle: "de taux d'épargne"
+  contexte: "900 € sur 2 461 € de revenu — le repère courant est 10 à 20 %"
 verifier: []
 maj: 2026-11-20
 quiz:
