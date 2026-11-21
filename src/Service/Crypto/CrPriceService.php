@@ -3,6 +3,7 @@
 namespace App\Service\Crypto;
 
 use App\Entity\Crypto\CrPriceHistory;
+use App\Entity\Crypto\CrTrade;
 use App\Repository\Crypto\CrPriceHistoryRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
@@ -233,4 +234,46 @@ class CrPriceService
         $this->priceHistoryRepository->save($history, true);
     }
 
+
+    /**
+     * Prices for a trade's empty (null/0) fromPrice/toPrice, without touching the trade: the coin's EUR
+     * price of the day, else implied from the other leg (otherQty × otherPrice / qty — e.g. 5 CRO bought
+     * for 100 EUR → 20 €). Same-coin legs (stacking, rewards) can't be implied. Shared by the import and
+     * app:crypto:trades:fill-prices.
+     *
+     * @return array{prices: array<'from'|'to', array{0: float, 1: 'cours'|'déduit'}>, missing: list<string>}
+     */
+    public function resolveMissingPrices(CrTrade $trade, bool $liveFetch = false): array
+    {
+        $legs = [
+            'from' => ['coin' => $trade->getFromCoin(), 'qty' => (float) $trade->getFromNbToken(), 'price' => (float) $trade->getFromPrice()],
+            'to' => ['coin' => $trade->getToCoin(), 'qty' => (float) $trade->getToNbToken(), 'price' => (float) $trade->getToPrice()],
+        ];
+        $prices = [];
+
+        foreach ($legs as $side => $leg) {
+            if ($leg['coin'] && $leg['price'] == 0.0) {
+                $price = $this->getPriceEur($leg['coin'], $trade->getTradeAt(), $liveFetch);
+                if ($price !== null) {
+                    $prices[$side] = [$price, 'cours'];
+                    $legs[$side]['price'] = $price;
+                }
+            }
+        }
+
+        $missing = [];
+        foreach ($legs as $side => $leg) {
+            if (!$leg['coin'] || $leg['price'] != 0.0) {
+                continue;
+            }
+            $other = $legs[$side === 'from' ? 'to' : 'from'];
+            if ($leg['qty'] > 0 && $other['qty'] > 0 && $other['price'] > 0 && strtoupper((string) $other['coin']) !== strtoupper($leg['coin'])) {
+                $prices[$side] = [$other['qty'] * $other['price'] / $leg['qty'], 'déduit'];
+            } else {
+                $missing[] = strtoupper($leg['coin']);
+            }
+        }
+
+        return ['prices' => $prices, 'missing' => $missing];
+    }
 }

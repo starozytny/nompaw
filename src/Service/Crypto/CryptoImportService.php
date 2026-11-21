@@ -4,6 +4,7 @@ namespace App\Service\Crypto;
 
 use App\Entity\Crypto\CrImportLog;
 use App\Entity\Crypto\CrTrade;
+use App\Entity\Enum\Crypto\TypeType;
 use App\Entity\Main\User;
 use App\Repository\Crypto\CrImportLogRepository;
 use App\Repository\Crypto\CrTradeRepository;
@@ -48,6 +49,7 @@ class CryptoImportService
         private readonly CrImportLogRepository $importLogRepository,
         private readonly ValidatorService $validator,
         private readonly EntityManagerInterface $entityManager,
+        private readonly CrPriceService $priceService,
         private readonly string $privateDirectory,
     ) {
         $this->parsers = [
@@ -100,8 +102,10 @@ class CryptoImportService
             $imported += $result['imported'];
             $duplicates += $result['duplicates'];
             $errors = array_merge($errors, $result['errors']);
+            $newTrades = array_merge($newTrades ?? [], $result['trades']);
         }
 
+        $this->fillMissingValues($newTrades ?? []);
         $this->entityManager->flush();
 
         if ($extractedDir !== null) {
@@ -130,6 +134,7 @@ class CryptoImportService
         $result = $this->persistParsedTrades($user, $source, $parsedTrades, $existingIds, $source);
         $this->logImport($user, $source, 'api', null, $result);
 
+        $this->fillMissingValues($result['trades']);
         $this->entityManager->flush();
 
         return [
@@ -149,6 +154,7 @@ class CryptoImportService
         $imported = 0;
         $duplicates = 0;
         $errors = [];
+        $trades = [];
 
         foreach ($parsedTrades as $data) {
             if (isset($existingIds[$data['importedId']])) {
@@ -188,9 +194,52 @@ class CryptoImportService
             $this->tradeRepository->save($trade);
             $existingIds[$data['importedId']] = true;
             $imported++;
+            $trades[] = $trade;
         }
 
-        return ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $errors];
+        return ['imported' => $imported, 'duplicates' => $duplicates, 'errors' => $errors, 'trades' => $trades];
+    }
+
+    /**
+     * Fills what the exchange export left empty on the just-imported trades: fromPrice/toPrice (day price,
+     * else implied from the other leg — see CrPriceService::resolveMissingPrices) and totalReal (EUR value
+     * of what was received, like the trade form; total = totalReal + EUR fee). Binance daily prices of the
+     * imported coins are refreshed first (incremental, only the days not cached yet). totalReal is only
+     * derived for Achat/Vente/rewards: on Dépôt/Retrait/Transfert it would count a crypto move as euros
+     * in "Net investi".
+     *
+     * @param CrTrade[] $trades
+     */
+    private function fillMissingValues(array $trades): void
+    {
+        $firstDates = [];
+        foreach ($trades as $trade) {
+            foreach ([$trade->getFromCoin(), $trade->getToCoin()] as $coin) {
+                $coin = strtoupper((string) $coin);
+                if ($coin !== '' && (!isset($firstDates[$coin]) || $trade->getTradeAt() < $firstDates[$coin])) {
+                    $firstDates[$coin] = $trade->getTradeAt();
+                }
+            }
+        }
+        foreach ($firstDates as $coin => $from) {
+            $this->priceService->importDailyHistory($coin, $from);
+        }
+
+        foreach ($trades as $trade) {
+            foreach ($this->priceService->resolveMissingPrices($trade)['prices'] as $side => [$price]) {
+                $side === 'from' ? $trade->setFromPrice($price) : $trade->setToPrice($price);
+            }
+
+            if ((float) $trade->getTotalReal() == 0.0 && in_array($trade->getType(), [TypeType::Achat, TypeType::Vente, TypeType::Recuperation, TypeType::Stacking], true)) {
+                $value = (float) $trade->getToNbToken() * (float) $trade->getToPrice() ?: (float) $trade->getFromNbToken() * (float) $trade->getFromPrice();
+                if ($value > 0) {
+                    $trade->setTotalReal(round($value, 2));
+                    if ((float) $trade->getTotal() == 0.0) {
+                        $trade->setTotal(round($value + ($trade->getCostCoin() === 'EUR' ? (float) $trade->getCostPrice() : 0.0), 2));
+                    }
+                }
+            }
+        }
     }
 
     /**
