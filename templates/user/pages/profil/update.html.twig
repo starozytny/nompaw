@@ -3,15 +3,6 @@
 {% set page_title %}Modifier son profil{% endset %}
 {% set page_subtitle %}Modification de votre profil : {{ app.user.lastname }} {{ app.user.firstname }}{% endset %}
 
-{% set page_actions %}
-    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-        btn_link: path('user_profil_index'),
-        btn_type: 'default',
-        btn_icon: 'left-arrow',
-        btn_text: 'Retourner au profil'
-    } %}
-{% endset %}
-
 {% block main_content %}
     <div id="profil_update"
          data-obj="{{ obj }}"

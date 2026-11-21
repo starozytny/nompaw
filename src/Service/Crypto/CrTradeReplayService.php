@@ -231,7 +231,8 @@ class CrTradeReplayService
     /**
      * Every trade touching $coin (as fromCoin or toCoin), chronological, with the coin's running balance
      * after it under the checkValidity rules — the same balance that drives the red rows and findIssues().
-     * Read-only view for analysis (MCP), so an AI can see exactly where and why a coin goes negative.
+     * Read-only view for analysis (MCP + "Cryptos restantes" detail). For any non-EUR coin this balance
+     * equals the applyHolding one (the two rule sets only differ on EUR legs), so it ends on the holding.
      *
      * @return list<array<string, mixed>>
      */

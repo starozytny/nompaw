@@ -10,12 +10,6 @@
 
 {% set page_actions %}
     {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-        btn_link: path('user_projects_index'),
-        btn_type: 'default',
-        btn_icon: 'left-arrow',
-        btn_text: 'Retourner à liste'
-    } %}
-    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
         btn_link: path('user_projects_read', {slug: elem.slug}),
         btn_type: 'default',
         btn_icon: 'vision',

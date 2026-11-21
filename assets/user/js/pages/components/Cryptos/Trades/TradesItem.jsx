@@ -18,8 +18,8 @@ const TRANSFERT = 6;
 const A_CATEGORISER = 7;
 
 export const TYPE_LABEL = ['Achat', 'Vente', 'Dépôt', 'Retrait', 'Récupération', 'Stacking', 'Transfert', 'À catégoriser'];
-const TYPE_ICON = ['cart', 'receipt', 'download', 'upload', 'refresh1', 'time', 'arrow-swap-horizontal', 'warning1'];
-const TYPE_COLOR = ['var(--cat-crypto)', 'var(--status-good)', 'var(--cat-income)', 'var(--cat-expense)', 'var(--cat-saving)', 'var(--cat-saving)', 'hsl(var(--muted-foreground))', 'var(--status-critical)'];
+export const TYPE_ICON = ['cart', 'receipt', 'download', 'upload', 'refresh1', 'time', 'arrow-swap-horizontal', 'warning1'];
+export const TYPE_COLOR = ['var(--cat-crypto)', 'var(--status-good)', 'var(--cat-income)', 'var(--cat-expense)', 'var(--cat-saving)', 'var(--cat-saving)', 'hsl(var(--muted-foreground))', 'var(--status-critical)'];
 const TYPE_SOFT = ['var(--cat-crypto-soft)', 'var(--status-good-soft)', 'var(--cat-income-soft)', 'var(--cat-expense-soft)', 'var(--cat-saving-soft)', 'var(--cat-saving-soft)', 'hsl(var(--muted))', 'var(--status-critical-soft)'];
 
 // Which side of the trade a given type actually moves, so "Sortie"/"Entrée" only show what's relevant
@@ -31,7 +31,7 @@ function formatAmount (qty, coin) {
 	return coin === "EUR" ? Sanitaze.toFormatCurrency(qty) : `${qty} ${coin}`;
 }
 
-export function TradesItem ({ elem, onModal, onEditElement, invalid }) {
+export function TradesItem ({ elem, onModal, onEditElement, invalid, pending }) {
 	const color = TYPE_COLOR[elem.type];
 	const soft = TYPE_SOFT[elem.type];
 
@@ -41,7 +41,7 @@ export function TradesItem ({ elem, onModal, onEditElement, invalid }) {
 	// Only the trade that first drove a coin negative is the cause (strong red); later ones are its knock-on effect.
 	const isCause = invalid && invalid.root !== false;
 
-	return <tr className={cn("border-t hover:bg-muted/40",
+	return <tr aria-busy={!!pending} className={cn("border-t hover:bg-muted/40", pending && "opacity-60",
 		isCause && "bg-[var(--status-critical-soft)] shadow-[inset_3px_0_0_var(--status-critical)] hover:bg-[var(--status-critical-soft)]",
 		invalid && !isCause && "bg-[var(--status-critical-soft)]/40 hover:bg-[var(--status-critical-soft)]/60")}>
 		<td className="py-2.5 pl-4 pr-3 text-sm align-top">
@@ -97,10 +97,16 @@ export function TradesItem ({ elem, onModal, onEditElement, invalid }) {
 		</td>
 
 		<td className="py-2.5 pr-4 text-right align-top whitespace-nowrap">
-			<div className="flex justify-end gap-0.5">
-				<ButtonIcon type="default" icon="pencil" onClick={() => onEditElement(elem)}>Modifier</ButtonIcon>
-				<ButtonIcon type="default" icon="trash" onClick={() => onModal('delete', elem)}>Supprimer</ButtonIcon>
-			</div>
+			{pending
+				? <span className="inline-flex items-center gap-1.5 py-1.5 text-xs text-muted-foreground" role="status">
+					<span className="icon-chart-3 inline-block animate-spin" />
+					{pending === "delete" ? "Suppression…" : "Mise à jour…"}
+				</span>
+				: <div className="flex justify-end gap-0.5">
+					<ButtonIcon type="default" icon="pencil" onClick={() => onEditElement(elem)}>Modifier</ButtonIcon>
+					<ButtonIcon type="default" icon="trash" onClick={() => onModal('delete', elem)}>Supprimer</ButtonIcon>
+				</div>
+			}
 		</td>
 	</tr>
 }

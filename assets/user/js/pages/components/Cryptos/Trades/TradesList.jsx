@@ -9,7 +9,8 @@ import Sanitaze from "@commonFunctions/sanitaze";
 
 import { SelectSimple } from "@shadcnComponents/elements/Select/Select";
 import { ComboboxMultiple } from "@shadcnComponents/elements/Combobox/Combobox";
-import { TradesItem, TYPE_LABEL } from "@userPages/Cryptos/Trades/TradesItem";
+import { TradesItem, TYPE_LABEL, TYPE_ICON, TYPE_COLOR } from "@userPages/Cryptos/Trades/TradesItem";
+import { CoinIcon } from "@userPages/Cryptos/CoinIcon";
 import { CryptosYearDialog } from "@userPages/Cryptos/Trades/CryptosYearDialog";
 
 const COLUMNS = 6;
@@ -31,12 +32,12 @@ function toggleFilterValue (setter) {
  * component only does light client-side work now: grouping into months and applying the type/platform/
  * token filters, both cheap over a single year's worth of data.
  */
-export const TradesList = React.memo(function TradesList ({ data, years, selectedYear, yearStats, yearHoldings, filterOptions, focusCoin, onYearChange, onModal, onEdit }) {
+export const TradesList = React.memo(function TradesList ({ data, years, selectedYear, yearStats, yearHoldings, filterOptions, focusCoin, pending = {}, onYearChange, onModal, onEdit }) {
 	const [openMonths, setOpenMonths] = useState({});
 	const [typeFilter, setTypeFilter] = useState([]);
 	const [platformFilter, setPlatformFilter] = useState([]);
 	const [tokenFilter, setTokenFilter] = useState([]);
-	const [hideStacking, setHideStacking] = useState(false);
+	const [hideStacking, setHideStacking] = useState(true);
 	const [cryptosDialogOpen, setCryptosDialogOpen] = useState(false);
 
 	// Set from TradesIssues' "Voir dans la liste": narrow the list to the coin of the selected problem.
@@ -44,6 +45,7 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 		if (focusCoin) {
 			setTypeFilter([]);
 			setPlatformFilter([]);
+			setHideStacking(false); // the problem trade may be a stacking one
 			setTokenFilter([{ value: focusCoin.coin, label: focusCoin.coin }]);
 		}
 	}, [focusCoin]);
@@ -55,12 +57,12 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 		</div>
 	}
 
-	const typeItems = TYPE_LABEL.map((label, index) => ({ value: String(index), label }));
+	const typeItems = TYPE_LABEL.map((label, index) => ({ value: String(index), label, icon: <span className={`icon-${TYPE_ICON[index]} text-xs`} style={{ color: TYPE_COLOR[index] }} /> }));
 	const platformItems = [
 		...(filterOptions.hasManual ? [{ value: MANUAL_PLATFORM, label: "Manuel (non importé)" }] : []),
 		...filterOptions.platforms.map(p => ({ value: p, label: p })),
 	];
-	const tokenItems = filterOptions.tokens.map(t => ({ value: t, label: t }));
+	const tokenItems = filterOptions.tokens.map(t => ({ value: t, label: t, icon: <CoinIcon coin={t} size={16} /> }));
 
 	const filteredData = data.filter(item => {
 		if (hideStacking && item.type === TYPE_STACKING) return false;
@@ -80,10 +82,12 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 		{tokenItems.length > 0 && <div className="w-52">
 			<ComboboxMultiple identifiant="token" valeurs={tokenFilter} items={tokenItems} withItems placeholder="Tous les tokens" onSelect={toggleFilterValue(setTokenFilter)} />
 		</div>}
-		<label className="flex cursor-pointer select-none items-center gap-1.5 text-sm text-muted-foreground">
-			<input type="checkbox" checked={hideStacking} onChange={e => setHideStacking(e.target.checked)} />
-			Masquer le stacking
-		</label>
+		<button type="button" aria-pressed={hideStacking} onClick={() => setHideStacking(v => !v)}
+				className={cn("inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm shadow-sm transition-colors",
+					hideStacking ? "border-[var(--cat-saving)] bg-[var(--cat-saving-soft)] text-[var(--cat-saving)]" : "bg-background text-gray-400 hover:bg-gray-50")}>
+			<span className={`icon-${TYPE_ICON[TYPE_STACKING]} text-xs`} />
+			{hideStacking ? "Stacking masqué" : "Masquer le stacking"}
+		</button>
 	</div>;
 
 	const yearSelect = <div className="w-28">
@@ -121,9 +125,12 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 		bucket.trades.push(item);
 	});
 
+	// Stacking rows are hidden from the list, so they're left out of the year count too.
+	const yearCount = yearStats.count - (hideStacking ? data.filter(t => t.type === TYPE_STACKING).length : 0);
+
 	let itemsMonth = monthsData.map((mItem, ind) => {
 		let itemsTrade = mItem.trades.map(elem => (
-			<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} invalid={elem.invalid} />
+			<TradesItem key={elem.id} elem={elem} onModal={onModal} onEditElement={onEdit} invalid={elem.invalid} pending={pending[elem.id]} />
 		));
 		// Trades within the month are chronological ascending (needed above for the "last = cumulative
 		// as of this month" read), but displayed newest first.
@@ -131,13 +138,14 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 
 		const last = mItem.trades[mItem.trades.length - 1];
 		const monthKey = `${selectedYear}-${mItem.month}`;
-		const monthOpen = openMonths[monthKey] ?? true;
+		// Only the most recent month starts open (lighter render on big years); the rest on demand.
+		const monthOpen = openMonths[monthKey] ?? (ind === monthsData.length - 1);
 
 		return <React.Fragment key={ind}>
-			<tr className="border-t bg-muted/40">
-				<td colSpan={COLUMNS} className="p-0">
-					<button type="button"
-							className="flex w-full items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs text-left"
+			<tr className="border-t">
+				<td colSpan={COLUMNS} className="sticky top-0 z-[1] bg-background p-0 shadow-[0_1px_0_hsl(var(--border))]">
+					<button type="button" aria-expanded={monthOpen}
+							className="flex w-full bg-muted/40 items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs text-left"
 							onClick={() => setOpenMonths(o => ({ ...o, [monthKey]: !monthOpen }))}>
 						<span className="flex items-center gap-1.5 font-semibold text-foreground capitalize">
 							<span className={cn("icon-down-chevron text-[9px] text-muted-foreground transition-transform", monthOpen && "rotate-180")} />
@@ -165,7 +173,7 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 				{yearSelect}
 				{filters}
 			</div>
-			<span className="text-xs text-muted-foreground">{yearStats.count} transaction{yearStats.count > 1 ? "s" : ""} en {selectedYear}</span>
+			<span className="text-xs text-muted-foreground">{yearCount} transaction{yearCount > 1 ? "s" : ""} en {selectedYear}</span>
 		</div>
 
 		<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -195,8 +203,8 @@ export const TradesList = React.memo(function TradesList ({ data, years, selecte
 
 		<CryptosYearDialog open={cryptosDialogOpen} onOpenChange={setCryptosDialogOpen} year={selectedYear} holdings={yearHoldings} />
 
-		<div className="-mx-4 overflow-x-auto border-t">
-			<table className="w-full min-w-[820px]">
+		<div className="-mx-4 border-t max-lg:overflow-x-auto">
+			<table className="w-full max-lg:min-w-[820px]">
 				<thead>
 					<tr className="border-b bg-[var(--cat-crypto-soft)] text-left text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--cat-crypto)' }}>
 						<th className="py-2.5 pl-4 pr-3">Type de transaction</th>

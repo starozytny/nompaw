@@ -78,7 +78,7 @@ export function Input ({
 						   type = "text", identifiant, name, valeur, errors, onChange, children, placeholder = "", autocomplete = "on", disabled = false,
 						   onBlur = null, min = "", max = "", step = 1,
 						   options = { numeral: true, numeralDecimalScale: 10, numeralThousandsGroupStyle: 'thousand', delimiter: ' ' },
-						   prefix, onKeyDown
+						   prefix, onKeyDown, list
 					   }) {
 	const [showValue, setShowValue] = useState(false);
 
@@ -126,7 +126,7 @@ export function Input ({
 	} else {
 		content = <input type={nType} name={nName} id={identifiant} value={valeur}
 						 placeholder={nPlaceholder} onChange={onChange} autoComplete={nAutocomplete}
-						 disabled={disabled}
+						 disabled={disabled} list={list}
 						 className={styleInput
 							 + " " + (error ? "ring-red-400" : "ring-gray-300")
 							 + " " + (type === "color" ? "bg-white h-8.5 w-16" : "w-full")}

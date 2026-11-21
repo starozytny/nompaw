@@ -41,12 +41,16 @@ export class Trades extends Component {
 			filterOptions: { platforms: [], tokens: [], hasManual: false },
 			issues: [],
 			focusCoin: null,
+			pending: {},
 		}
 
 		// One year's trades per key, so switching back to an already-visited year is instant instead of
 		// refetching — the trade-off for moving the replay server-side and no longer holding the full
 		// history in the browser. Cleared on any mutation/refresh so a stale year is never shown again.
 		this.yearCache = {};
+		// Only the latest year request may write state: with several edits/deletes in a row, an older
+		// slower refetch must not overwrite a newer one (nor clear the rows still pending).
+		this.yearSeq = 0;
 
 		this.delete = React.createRef();
 	}
@@ -74,10 +78,11 @@ export class Trades extends Component {
 	// instead of being blanked out by LoaderElements for a mutation the user just triggered themselves.
 	handleGetYearData = (year, { silent = false } = {}) => {
 		const self = this;
+		const seq = ++this.yearSeq;
 
 		if (year !== null && this.yearCache[year]) {
 			const cached = this.yearCache[year];
-			this.setState({ data: cached.trades, selectedYear: year, years: cached.years, yearStats: cached.yearStats, yearHoldings: cached.yearHoldings, loadingData: false });
+			this.setState({ data: cached.trades, selectedYear: year, years: cached.years, yearStats: cached.yearStats, yearHoldings: cached.yearHoldings, loadingData: false, pending: {} });
 			return;
 		}
 
@@ -87,31 +92,35 @@ export class Trades extends Component {
 
 		axios({ method: "GET", url: Routing.generate(URL_GET_DATA), params: year !== null ? { year } : {} })
 			.then(function (response) {
+				if (seq !== self.yearSeq) return;
 				const { trades, years, yearStats, year: resolvedYear } = response.data;
 
 				if (resolvedYear === null) {
-					self.setState({ data: trades, years, yearStats, yearHoldings: [], selectedYear: resolvedYear, loadingData: false });
+					self.setState({ data: trades, years, yearStats, yearHoldings: [], selectedYear: resolvedYear, loadingData: false, pending: {} });
 					return;
 				}
 
 				axios({ method: "GET", url: Routing.generate(URL_GET_HOLDINGS_YEAR, { year: resolvedYear }) })
 					.then(function (holdingsResponse) {
+						if (seq !== self.yearSeq) return;
 						const yearHoldings = holdingsResponse.data.holdings;
 						self.yearCache[resolvedYear] = { trades, years, yearStats, yearHoldings };
-						self.setState({ data: trades, years, yearStats, yearHoldings, selectedYear: resolvedYear, loadingData: false });
+						self.setState({ data: trades, years, yearStats, yearHoldings, selectedYear: resolvedYear, loadingData: false, pending: {} });
 					})
 					.catch(function (error) {
+						if (seq !== self.yearSeq) return;
 						console.log(error)
 						Formulaire.displayErrors(self, error);
 						self.yearCache[resolvedYear] = { trades, years, yearStats, yearHoldings: [] };
-						self.setState({ data: trades, years, yearStats, yearHoldings: [], selectedYear: resolvedYear, loadingData: false });
+						self.setState({ data: trades, years, yearStats, yearHoldings: [], selectedYear: resolvedYear, loadingData: false, pending: {} });
 					})
 				;
 			})
 			.catch(function (error) {
+				if (seq !== self.yearSeq) return;
 				console.log(error)
 				Formulaire.displayErrors(self, error);
-				self.setState({ loadingData: false })
+				self.setState({ loadingData: false, pending: {} })
 			})
 		;
 	}
@@ -172,8 +181,13 @@ export class Trades extends Component {
 	// A create/update/delete can shift the running "Dispo" balance and holdings for any year from the
 	// mutated trade's date onward (not just the currently displayed one), so the safe, simple choice is
 	// to drop the whole cache and refetch rather than try to patch state locally.
-	handleUpdateList = () => {
+	// Marks the touched row (spinner on that line only) until the refetch lands, so the rest of the list
+	// stays usable meanwhile. A create has no row yet, so nothing to mark.
+	handleUpdateList = (elem, context) => {
 		this.yearCache = {};
+		if (elem?.id && context !== "create") {
+			this.setState(prev => ({ pending: { ...prev.pending, [elem.id]: context } }));
+		}
 		this.handleGetYearData(this.state.selectedYear, { silent: true });
 		this.handleGetHoldings();
 		this.handleGetFilters();
@@ -198,7 +212,7 @@ export class Trades extends Component {
 	}
 
 	render () {
-		const { data, loadingData, deleteElement, editElement, sheetOpen, years, selectedYear, yearStats, yearHoldings, holdings, netInvested, filterOptions, issues, focusCoin } = this.state;
+		const { data, loadingData, pending, deleteElement, editElement, sheetOpen, years, selectedYear, yearStats, yearHoldings, holdings, netInvested, filterOptions, issues, focusCoin } = this.state;
 
 		return <>
 			{loadingData
@@ -244,7 +258,8 @@ export class Trades extends Component {
 					{issues.length > 0 && <TradesIssues issues={issues} invalidCount={issues.reduce((sum, i) => sum + i.count, 0)}
 														onFix={this.handleFixIssue} onShow={this.handleShowIssue} />}
 
-					<Card className="overflow-hidden">
+					{/* overflow-clip (not hidden): clips the corners without becoming a scroll container, so the sticky month rows stick to the page */}
+					<Card className="overflow-clip">
 						<CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b p-4">
 							<CardTitle className="text-sm">Transactions</CardTitle>
 							<Button type="blue" onClick={this.handleOpenCreate}>
@@ -255,7 +270,7 @@ export class Trades extends Component {
 							<TradesList data={data} years={years} selectedYear={selectedYear} yearStats={yearStats}
 										yearHoldings={yearHoldings}
 										filterOptions={filterOptions} onYearChange={this.handleYearChange}
-										focusCoin={focusCoin}
+										focusCoin={focusCoin} pending={pending}
 										onModal={this.handleModal} onEdit={this.handleEdit} />
 						</CardContent>
 					</Card>
@@ -263,9 +278,15 @@ export class Trades extends Component {
 				</div>
             }
 
+			{!loadingData && !sheetOpen && <button type="button" onClick={this.handleOpenCreate}
+				aria-label="Ajouter une transaction" title="Ajouter une transaction"
+				className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-transform hover:scale-105 hover:bg-blue-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300">
+				<span className="icon-add text-xl" />
+			</button>}
+
 			<TradesFormulaire context={editElement?.id ? "update" : "create"} element={editElement}
 							  open={sheetOpen} onOpenChange={this.handleSheetOpenChange}
-							  onUpdateList={this.handleUpdateList} />
+							  onUpdateList={this.handleUpdateList} tokens={filterOptions.tokens} />
 
 			<ModalDelete refModal={this.delete} element={deleteElement} routeName={URL_DELETE_ELEMENT}
 						 title="Supprimer cette transaction" msgSuccess="Transaction supprimée."

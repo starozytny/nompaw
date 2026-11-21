@@ -8,15 +8,6 @@
     {{ parent() }}
 {% endblock %}
 
-{% set page_actions %}
-    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-        btn_link: path('user_birthdays_index'),
-        btn_type: 'default',
-        btn_icon: 'left-arrow',
-        btn_text: 'Retourner à liste'
-    } %}
-{% endset %}
-
 {% block main_content %}
     <div id="birthdays_create">
         {% include "layout/components/tailwind/loaders/loader.html.twig" %}

@@ -183,7 +183,7 @@ export function ComboboxMultiple({ identifiant, valeurs, items, onSelect, placeh
                                 })
 
                                 return <div className="flex items-stretch border border-color1-o-4 rounded-md" key={index}>
-                                    <span className="bg-white rounded-l-sm py-0.5 pl-2 pr-1.5">{valeurLabel}</span>
+                                    <span className="flex items-center gap-1 bg-white rounded-l-sm py-0.5 pl-2 pr-1.5">{valeurItem?.icon}{valeurLabel}</span>
                                     <div onClick={(e) => handleDel(e, onlyValue ? valeurItem : val)} className="flex items-center justify-center bg-red-50 hover:bg-red-100 rounded-r-sm py-0.5 px-1.5 transition-colors">
                                         <span className="icon-close !text-xs"></span>
                                     </div>
@@ -239,6 +239,7 @@ export function ComboboxMultiple({ identifiant, valeurs, items, onSelect, placeh
                                             onSelect(identifiant, choice)
                                         }}
                                     >
+                                        {choice.icon}
                                         {choice.label}
                                         <Check
                                             className={cn(
