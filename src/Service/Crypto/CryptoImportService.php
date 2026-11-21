@@ -50,6 +50,7 @@ class CryptoImportService
         private readonly ValidatorService $validator,
         private readonly EntityManagerInterface $entityManager,
         private readonly CrPriceService $priceService,
+        private readonly CrCoinIconService $iconService,
         private readonly string $privateDirectory,
     ) {
         $this->parsers = [
@@ -204,7 +205,7 @@ class CryptoImportService
      * Fills what the exchange export left empty on the just-imported trades: fromPrice/toPrice (day price,
      * else implied from the other leg — see CrPriceService::resolveMissingPrices) and totalReal (EUR value
      * of what was received, like the trade form; total = totalReal + EUR fee). Binance daily prices of the
-     * imported coins are refreshed first (incremental, only the days not cached yet). totalReal is only
+     * imported coins are refreshed first (incremental, only the days not cached yet), and their icons stored. totalReal is only
      * derived for Achat/Vente/rewards: on Dépôt/Retrait/Transfert it would count a crypto move as euros
      * in "Net investi".
      *
@@ -223,6 +224,7 @@ class CryptoImportService
         }
         foreach ($firstDates as $coin => $from) {
             $this->priceService->importDailyHistory($coin, $from);
+            $this->iconService->download($coin); // no-op when the icon is already stored
         }
 
         foreach ($trades as $trade) {
