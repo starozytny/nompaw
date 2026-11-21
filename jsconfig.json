@@ -16,7 +16,8 @@
       "@userPages/*": ["assets/user/js/pages/components/*"],
       "@userFunctions/*": ["assets/user/js/functions/*"],
       "@nodeModulesFolder/*": ["node_modules/*"]
-    }
+    },
+    "jsx": "react"
   },
   "exclude": ["node_modules", "vendor", "var"]
 }

@@ -99,3 +99,13 @@ Import aliases (defined in both `webpack.config.js` and `jsconfig.json`, keep th
 ### Runnings
 
 Pour la section running, lis /docs/RUNNING_CONTEXT.md
+
+### Caveman (MCP local — économie de contexte)
+
+Le serveur MCP `caveman` est disponible. À utiliser automatiquement :
+
+- **Références `ccr://…` / `<<ccr:…>>`** (laissées par les hooks ou une compression) : récupérer le contenu avec `caveman_retrieve` (avec une `query` ciblée si seul un détail est utile, sans `query` pour l'original exact) avant de s'appuyer dessus.
+- **JSON tabulaire volumineux** (tableaux d'objets de même forme, ex. réponses des outils Nompaw, dumps Doctrine, `fos_js_routes.json`) à recopier ou à garder en contexte : le ré-encoder en TOON avec `caveman_toon_encode` ; `caveman_toon_decode` pour revenir au JSON.
+- **Gros textes à reporter** (logs, sorties de commandes longues, contenus à réutiliser plus tard) : `caveman_compress`, en conservant le `recovery_handle` pour un `caveman_retrieve` ultérieur.
+- Ne jamais éditer du code ni citer des valeurs exactes à partir d'une version compressée (lossy) : relire le fichier source ou récupérer l'original via `caveman_retrieve`.
+- `caveman_stats` uniquement sur demande.

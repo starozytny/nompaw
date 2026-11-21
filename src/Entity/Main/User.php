@@ -41,6 +41,8 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
     const CODE_ROLE_DEVELOPER = 1;
     const CODE_ROLE_ADMIN = 2;
 
+    const DRIVE_DEFAULT_QUOTA = 250 * 1024 * 1024;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -208,6 +210,12 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
      */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $runningNotes = null;
+
+    /**
+     * Quota de l'espace Drive, en octets. Réglable uniquement par un admin (Admin\DriveController).
+     */
+    #[ORM\Column(type: Types::BIGINT, options: ['default' => self::DRIVE_DEFAULT_QUOTA])]
+    private int|string $driveQuota = self::DRIVE_DEFAULT_QUOTA;
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: \App\Entity\Photo\PhMedia::class)]
     private Collection $phMedia;
@@ -1215,6 +1223,18 @@ class User extends DataEntity implements UserInterface, PasswordAuthenticatedUse
                 $phAccessToken->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDriveQuota(): int
+    {
+        return (int) $this->driveQuota;
+    }
+
+    public function setDriveQuota(int $driveQuota): static
+    {
+        $this->driveQuota = $driveQuota;
 
         return $this;
     }

@@ -1,0 +1,15 @@
+{% extends 'admin/layout/layout.html.twig' %}
+
+{% set page_title %}Drive{% endset %}
+{% set page_subtitle %}Espace utilisé et quota de chaque utilisateur.{% endset %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('admin_drive') }}
+{% endblock %}
+
+{% block main_content %}
+    <div id="drive_quotas">
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+{% endblock %}

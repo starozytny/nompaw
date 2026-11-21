@@ -1,0 +1,21 @@
+{% extends 'user/layout/layout.html.twig' %}
+
+{% set page_title %}Drive{% endset %}
+{% set page_subtitle %}Vos fichiers personnels{% endset %}
+{% set breadcrumbs = [{ text: "Drive", icon: "folder", url: path('user_drive_index') }] %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('user_drive') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user_drive') }}
+{% endblock %}
+
+{% block main_content %}
+    <div id="drive">
+        {% include "layout/components/tailwind/loaders/loader.html.twig" %}
+    </div>
+{% endblock %}

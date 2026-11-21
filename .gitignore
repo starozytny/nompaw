@@ -32,6 +32,7 @@ winpty.exe.stackdump
 /public/tinymce/
 /bin/backup/*
 /documents/data/*
+/documents/drive/
 
 /config/databaseConfig.json
 /config/packages/doctrine.yaml

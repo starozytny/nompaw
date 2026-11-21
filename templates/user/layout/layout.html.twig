@@ -35,6 +35,11 @@
             'user_birthdays_index', 'user_birthdays_read', 'user_birthdays_create', 'user_birthdays_update']
     },
     {
+        name: "Drive", icon: "folder",
+        path: path('user_drive_index'),
+        matchRoute: ['user_drive_index']
+    },
+    {
         name: "Planificateur", icon: "calculator",
         path: path('user_budget_index', {'year': 'now'|date('Y')}),
         matchRoute: ['user_budget_index']
