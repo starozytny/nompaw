@@ -3,15 +3,19 @@
 namespace App\Controller\InternApi\Drive;
 
 use App\Entity\Drive\DrAlbum;
+use App\Entity\Drive\DrAlbumMember;
 use App\Entity\Drive\DrFile;
 use App\Entity\Drive\DrShortcut;
 use App\Entity\Main\User;
+use App\Repository\Drive\DrAlbumMemberRepository;
 use App\Repository\Drive\DrAlbumRepository;
 use App\Repository\Drive\DrFileRepository;
 use App\Repository\Drive\DrShortcutRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\Api\ApiResponse;
+use App\Service\Drive\DriveAccess;
 use App\Service\FileUploader;
+use App\Repository\Main\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -32,6 +36,8 @@ class DriveController extends AbstractController
     public function __construct(
         private readonly DrAlbumRepository $albumRepository,
         private readonly DrShortcutRepository $shortcutRepository,
+        private readonly DrAlbumMemberRepository $memberRepository,
+        private readonly DriveAccess $access,
     ) {
     }
 
@@ -52,9 +58,9 @@ class DriveController extends AbstractController
 
         $album = null;
         if ($request->request->get('albumId')) {
-            $album = $this->albumRepository->findOneBy(['id' => $request->request->getInt('albumId'), 'owner' => $user]);
-            if (!$album) {
-                return $apiResponse->apiJsonResponseBadRequest("Ce dossier n'existe pas.");
+            $album = $this->albumRepository->find($request->request->getInt('albumId'));
+            if (!$album || !$this->access->canWriteInto($album, $user)) {
+                return $apiResponse->apiJsonResponseBadRequest("Tu ne peux pas déposer de fichiers dans ce dossier.");
             }
         }
 
@@ -110,7 +116,7 @@ class DriveController extends AbstractController
     #[Route('/download/{id}', name: 'download', options: ['expose' => true], methods: 'GET')]
     public function download(DrFile $obj, Request $request, ApiResponse $apiResponse): BinaryFileResponse|JsonResponse
     {
-        if ($obj->getOwner() !== $this->getUser()) {
+        if (!$this->access->canRead($obj, $this->getUser())) {
             return $apiResponse->apiJsonResponseForbidden();
         }
 
@@ -156,9 +162,9 @@ class DriveController extends AbstractController
         }
 
         $albumId = json_decode($request->getContent())->albumId ?? null;
-        $album = $albumId ? $this->albumRepository->findOneBy(['id' => (int) $albumId, 'owner' => $user]) : null;
-        if ($albumId && !$album) {
-            return $apiResponse->apiJsonResponseBadRequest("Ce dossier n'existe pas.");
+        $album = $albumId ? $this->albumRepository->find((int) $albumId) : null;
+        if ($albumId && (!$album || !$this->access->canWriteInto($album, $user))) {
+            return $apiResponse->apiJsonResponseBadRequest("Tu ne peux pas déposer de fichiers dans ce dossier.");
         }
 
         // Un raccourci vers ce fichier dans son nouveau dossier ferait doublon.
@@ -349,7 +355,7 @@ class DriveController extends AbstractController
     #[Route('/thumb/{id}', name: 'thumb', options: ['expose' => true], methods: 'GET')]
     public function thumb(DrFile $obj, Request $request, FileUploader $fileUploader): Response
     {
-        if ($obj->getOwner() !== $this->getUser()) {
+        if (!$this->access->canRead($obj, $this->getUser())) {
             throw $this->createAccessDeniedException();
         }
 
@@ -375,7 +381,7 @@ class DriveController extends AbstractController
     #[Route('/pdf-pages/{id}', name: 'pdf_pages', options: ['expose' => true], methods: 'GET')]
     public function pdfPages(DrFile $obj, ApiResponse $apiResponse, FileUploader $fileUploader): JsonResponse
     {
-        if ($obj->getOwner() !== $this->getUser()) {
+        if (!$this->access->canRead($obj, $this->getUser())) {
             return $apiResponse->apiJsonResponseForbidden();
         }
         if ($obj->getMime() !== 'application/pdf') {
@@ -405,7 +411,7 @@ class DriveController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        if ($obj->getOwner() !== $user) {
+        if (!$this->access->canDelete($obj, $user)) {
             return $apiResponse->apiJsonResponseForbidden();
         }
 
@@ -424,28 +430,114 @@ class DriveController extends AbstractController
         return $this->state($user, $repository, $apiResponse);
     }
 
+    /** Recherche d'un compte à inviter (tous les utilisateurs du site, hors comptes bloqués et accès « photos » seuls). */
+    #[Route('/users', name: 'users', options: ['expose' => true], methods: 'GET')]
+    public function users(Request $request, UserRepository $userRepository, ApiResponse $apiResponse): JsonResponse
+    {
+        $q = trim((string) $request->query->get('q', ''));
+        if (mb_strlen($q) < 2) {
+            return $apiResponse->apiJsonResponseCustom(['users' => []]);
+        }
+
+        $found = $userRepository->createQueryBuilder('u')
+            ->where('u.id != :me')->andWhere('u.isBlocked = false')->andWhere('u.photosOnly = false')
+            ->andWhere('u.displayName LIKE :q OR u.username LIKE :q')
+            ->setParameter('me', $this->getUser()->getId())->setParameter('q', '%' . addcslashes($q, '%_') . '%')
+            ->orderBy('u.displayName', 'ASC')->setMaxResults(8)->getQuery()->getResult();
+
+        return $apiResponse->apiJsonResponseCustom(['users' => array_map(fn (User $u) => ['id' => $u->getId(), 'name' => $u->getDisplayName(), 'username' => $u->getUsername()], $found)]);
+    }
+
+    /** Ajoute un membre ou change son rôle (propriétaire du dossier seulement). */
+    #[Route('/albums/{id}/members', name: 'album_member_set', options: ['expose' => true], methods: 'POST')]
+    public function setMember(DrAlbum $album, Request $request, DrFileRepository $repository, UserRepository $userRepository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($album->getOwner() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $data = json_decode($request->getContent());
+        $role = $data->role ?? '';
+        if (!in_array($role, DrAlbumMember::ROLES, true)) {
+            return $apiResponse->apiJsonResponseBadRequest('Rôle invalide.');
+        }
+        $member = $userRepository->find((int) ($data->userId ?? 0));
+        if (!$member || $member === $user || $member->isIsBlocked() || $member->isPhotosOnly()) {
+            return $apiResponse->apiJsonResponseBadRequest('Utilisateur introuvable.');
+        }
+
+        $membership = $this->memberRepository->findOneBy(['album' => $album, 'user' => $member]) ?? (new DrAlbumMember())->setAlbum($album)->setUser($member);
+        $this->memberRepository->save($membership->setRole($role), true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    /** Retire un membre (propriétaire), ou quitte le dossier (le membre lui-même). Ses fichiers restent les siens. */
+    #[Route('/albums/{id}/members/{userId}', name: 'album_member_remove', options: ['expose' => true], methods: 'DELETE')]
+    public function removeMember(DrAlbum $album, int $userId, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $membership = $this->memberRepository->findOneBy(['album' => $album, 'user' => $userId]);
+        if (!$membership) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce membre n'existe pas.");
+        }
+        if ($album->getOwner() !== $user && $membership->getUser() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $this->memberRepository->remove($membership, true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
     private function state(User $user, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
     {
-        $files = $repository->findBy(['owner' => $user], ['createdAt' => 'DESC']);
-        $albums = $this->albumRepository->findBy(['owner' => $user], ['name' => 'ASC']);
+        // Mes fichiers + tous ceux des dossiers auxquels j'ai accès (les miens, partagés avec moi), quel que soit le déposant.
+        $access = $this->access->accessibleAlbums($user);
+        $files = $repository->createQueryBuilder('f')
+            ->where('f.owner = :me')->orWhere('f.album IN (:albums)')
+            ->setParameter('me', $user)->setParameter('albums', array_keys($access) ?: [0])
+            ->orderBy('f.createdAt', 'DESC')->getQuery()->getResult();
+        $owned = array_filter(array_column($access, 'album'), fn (DrAlbum $a) => $a->getOwner() === $user);
+        $membersByAlbum = [];
+        foreach ($owned ? $this->memberRepository->findBy(['album' => array_values($owned)]) : [] as $m) {
+            $membersByAlbum[$m->getAlbum()->getId()][] = ['userId' => $m->getUser()->getId(), 'name' => $m->getUser()->getDisplayName(), 'role' => $m->getRole()];
+        }
 
         return $apiResponse->apiJsonResponseCustom([
             'shortcuts' => array_map(fn (DrShortcut $sc) => ['id' => $sc->getId(), 'fileId' => $sc->getFile()->getId(), 'albumId' => $sc->getAlbum()?->getId()],
                 $this->shortcutRepository->findBy(['owner' => $user])),
-            'albums' => array_map(fn (DrAlbum $a) => ['id' => $a->getId(), 'name' => $a->getName(), 'parentId' => $a->getParent()?->getId()], $albums),
+            // Un haut de partage reçu s'affiche à part (« Partagés avec moi ») : son vrai parent m'est invisible.
+            'albums' => array_values(array_map(fn (array $x) => [
+                'id' => $x['album']->getId(),
+                'name' => $x['album']->getName(),
+                'parentId' => $x['sharedRoot'] ? null : $x['album']->getParent()?->getId(),
+                'role' => $x['role'],
+                'sharedRoot' => $x['sharedRoot'],
+                'ownerName' => $x['role'] === DriveAccess::OWNER ? null : $x['album']->getOwner()->getDisplayName(),
+                'members' => $membersByAlbum[$x['album']->getId()] ?? [],
+            ], $access)),
             'files' => array_map(fn (DrFile $f) => [
                 'id' => $f->getId(),
                 'name' => $f->getName(),
                 'mime' => $f->getMime(),
                 'size' => $f->getSize(),
                 'createdAt' => $f->getCreatedAt()->format('c'),
-                'albumId' => $f->getAlbum()?->getId(),
+                // Dossier qui ne m'est plus accessible (retiré d'un partage) : mon fichier réapparaît à ma racine.
+                'albumId' => isset($access[$f->getAlbum()?->getId()]) ? $f->getAlbum()->getId() : null,
+                'mine' => $f->getOwner() === $user,
+                'canDelete' => $f->getOwner() === $user || ($access[$f->getAlbum()?->getId()]['role'] ?? null) === DriveAccess::OWNER,
+                'ownerName' => $f->getOwner() === $user ? null : $f->getOwner()->getDisplayName(),
                 'shareUrl' => $f->getShareToken()
                     ? $this->generateUrl('app_drive_share', ['token' => $f->getShareToken()], UrlGeneratorInterface::ABSOLUTE_URL)
                     : null,
                 'shareExpiresAt' => $f->getShareExpiresAt()?->format('c'),
                 'shareActive' => $f->isShareActive(),
             ], $files),
+            'me' => $user->getId(),
             'used' => $repository->getUsedSize($user),
             'quota' => $user->getDriveQuota(),
         ]);

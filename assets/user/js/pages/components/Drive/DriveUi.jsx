@@ -204,7 +204,7 @@ export function SidePanel ({ open, onClose, children, label, closeIcon }) {
 	if (!mounted) return null;
 	return <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={label}>
 		<div className={`drive-fade absolute inset-0 bg-black/20 ${closing ? "drive-fade-out" : ""}`} onClick={onClose} />
-		<aside className={`drive-panel absolute bottom-2 right-2 top-2 w-[380px] overflow-y-auto rounded-2xl bg-white pt-3 shadow-2xl ${closing ? "drive-panel-out" : ""}`}>
+		<aside className={`drive-panel absolute bottom-2 right-2 top-2 w-[380px] max-w-[calc(100vw-16px)] overflow-y-auto rounded-2xl bg-white pt-3 shadow-2xl ${closing ? "drive-panel-out" : ""}`}>
 			<div className="flex justify-end px-3 pb-2">
 				<Hint label="Fermer (Échap)" side="left">
 					<button type="button" aria-label="Fermer" onClick={onClose} className="drive-press flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">{closeIcon}</button>
