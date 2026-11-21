@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -107,7 +108,7 @@ class DriveController extends AbstractController
     }
 
     #[Route('/download/{id}', name: 'download', options: ['expose' => true], methods: 'GET')]
-    public function download(DrFile $obj, ApiResponse $apiResponse): BinaryFileResponse|JsonResponse
+    public function download(DrFile $obj, Request $request, ApiResponse $apiResponse): BinaryFileResponse|JsonResponse
     {
         if ($obj->getOwner() !== $this->getUser()) {
             return $apiResponse->apiJsonResponseForbidden();
@@ -118,7 +119,12 @@ class DriveController extends AbstractController
             return $apiResponse->apiJsonResponseBadRequest("Le fichier n'existe pas.");
         }
 
-        return $this->file($path, $obj->getName());
+        // ?inline=1 : ouvrir un PDF dans la visionneuse du navigateur (toutes les pages) ; jamais pour un autre type (HTML/SVG = XSS).
+        $inline = $request->query->getBoolean('inline') && $obj->getMime() === 'application/pdf';
+        $response = $this->file($path, $obj->getName(), $inline ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT);
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+
+        return $response;
     }
 
     #[Route('/rename/{id}', name: 'rename', options: ['expose' => true], methods: 'PUT')]
@@ -341,7 +347,7 @@ class DriveController extends AbstractController
     }
 
     #[Route('/thumb/{id}', name: 'thumb', options: ['expose' => true], methods: 'GET')]
-    public function thumb(DrFile $obj, FileUploader $fileUploader): Response
+    public function thumb(DrFile $obj, Request $request, FileUploader $fileUploader): Response
     {
         if ($obj->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
@@ -349,11 +355,48 @@ class DriveController extends AbstractController
 
         // Miniature WebP générée à la première demande puis servie depuis le disque (le contenu
         // d'un fichier du Drive ne change jamais pour un id donné, donc cache navigateur sûr).
-        $mini = str_starts_with((string) $obj->getMime(), 'image/')
-            ? $fileUploader->miniature($obj->getFolder() . '/' . $obj->getFile(), $this->thumbFolder($obj), $this->thumbName($obj), 480)
+        // Images et PDF. ?large=1 : version lisible pour la visionneuse ; ?page=N (PDF, à partir de 0) : page à rendre.
+        $large = $request->query->getBoolean('large');
+        $isPdf = $obj->getMime() === 'application/pdf';
+        $page = $isPdf ? max(0, min(9999, $request->query->getInt('page'))) : 0;
+        $previewable = $isPdf || str_starts_with((string) $obj->getMime(), 'image/');
+        $mini = $previewable
+            ? $fileUploader->miniature($obj->getFolder() . '/' . $obj->getFile(), $this->thumbFolder($obj), $this->thumbName($obj, $large, $page), $large ? 1400 : 480, $page)
             : null;
+        // Pas d'aperçu (type non géré, PDF abîmé, format illisible) : 404 pour que le client affiche l'icône du type
+        // plutôt que l'image de remplacement générique.
+        if (!$mini) {
+            throw $this->createNotFoundException();
+        }
 
         return $fileUploader->cachedImage($mini);
+    }
+
+    #[Route('/pdf-pages/{id}', name: 'pdf_pages', options: ['expose' => true], methods: 'GET')]
+    public function pdfPages(DrFile $obj, ApiResponse $apiResponse, FileUploader $fileUploader): JsonResponse
+    {
+        if ($obj->getOwner() !== $this->getUser()) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+        if ($obj->getMime() !== 'application/pdf') {
+            return $apiResponse->apiJsonResponseBadRequest("Ce fichier n'est pas un PDF.");
+        }
+
+        // Compter lance Ghostscript : résultat gardé à côté des rendus de pages.
+        $cache = $this->getParameter('private_directory') . $this->thumbFolder($obj) . '/' . pathinfo($obj->getFile(), PATHINFO_FILENAME) . '.pages';
+        if (is_file($cache)) {
+            $pages = (int) file_get_contents($cache);
+        } else {
+            $pages = $fileUploader->pdfPageCount($obj->getFolder() . '/' . $obj->getFile());
+            if ($pages > 0) {
+                if (!is_dir(dirname($cache))) {
+                    mkdir(dirname($cache), 0755, true);
+                }
+                file_put_contents($cache, (string) $pages);
+            }
+        }
+
+        return $apiResponse->apiJsonResponseCustom(['pages' => $pages]);
     }
 
     #[Route('/delete/{id}', name: 'delete', options: ['expose' => true], methods: 'DELETE')]
@@ -370,9 +413,10 @@ class DriveController extends AbstractController
         if (is_file($path)) {
             unlink($path);
         }
-        $thumb = $this->getParameter('private_directory') . $this->thumbFolder($obj) . '/' . $this->thumbName($obj);
-        if (is_file($thumb)) {
-            unlink($thumb);
+        // Tous les dérivés du fichier : miniatures, version large, pages de PDF, nombre de pages.
+        $base = $this->getParameter('private_directory') . $this->thumbFolder($obj) . '/' . pathinfo($obj->getFile(), PATHINFO_FILENAME);
+        foreach (glob($base . '*') ?: [] as $derived) {
+            unlink($derived);
         }
 
         $repository->remove($obj, true);
@@ -428,9 +472,9 @@ class DriveController extends AbstractController
         return $obj->getFolder() . '/thumbs';
     }
 
-    private function thumbName(DrFile $obj): string
+    private function thumbName(DrFile $obj, bool $large = false, int $page = 0): string
     {
-        return pathinfo($obj->getFile(), PATHINFO_FILENAME) . '.webp';
+        return pathinfo($obj->getFile(), PATHINFO_FILENAME) . ($large ? '-l' : '') . ($page ? '-p' . $page : '') . '.webp';
     }
 
     private function formatSize(int $bytes): string

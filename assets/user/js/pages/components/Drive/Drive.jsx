@@ -3,11 +3,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import axios from "axios";
 import Routing from '@publicFolder/bundles/fosjsrouting/js/router.min.js';
 
-import { Check, ChevronLeft, ChevronRight, Copy, CornerUpRight, Download, Folder, FolderInput, FolderPlus, Link2, Pencil, Search, Trash2, Upload, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, CornerUpRight, Download, ExternalLink, Folder, FolderInput, FolderPlus, Link2, Pencil, Search, Trash2, Upload, X } from "lucide-react";
 import { Button, ButtonA } from "@tailwindComponents/Elements/Button";
 import { TooltipProvider } from "@shadcnComponents/ui/tooltip";
 import {
-	BottomSheet, DropOverlay, FILTERS, FileGlyph, Hint, KINDS, Lightbox, SidePanel, Snackbar,
+	DropOverlay, FILTERS, FileGlyph, Hint, KINDS, Lightbox, SidePanel, Snackbar,
 	formatDate, formatSize, kindOf, period, useConfirmTap, useMediaQuery, useSnackbar, useWindowDrop,
 } from "./DriveUi";
 import "./drive.css";
@@ -16,6 +16,7 @@ const URL_LIST = "intern_api_drive_list";
 const URL_UPLOAD = "intern_api_drive_upload";
 const URL_DOWNLOAD = "intern_api_drive_download";
 const URL_THUMB = "intern_api_drive_thumb";
+const URL_PDF_PAGES = "intern_api_drive_pdf_pages";
 const URL_DELETE = "intern_api_drive_delete";
 const URL_RENAME = "intern_api_drive_rename";
 const URL_SHARE = "intern_api_drive_share";
@@ -220,9 +221,13 @@ export function Drive () {
 	const preview = open && <Preview file={open} {...actions(open)} />;
 	const uploading = pending.length > 0;
 	const isImage = !!open && kindOf(open.mime) === "image";
-	// Navigation dans l'ordre de la liste affichée (recherche et filtres compris).
-	const images = visible.filter(f => kindOf(f.mime) === "image");
-	const imgIndex = isImage ? images.findIndex(f => f.id === open.id) : -1;
+	const isPdf = !!open && kindOf(open.mime) === "pdf";
+	// Visionneuse plein écran : tous les fichiers sur mobile (bande d'infos à tirer), images et PDF sur ordinateur
+	// (les autres y ont le panneau latéral). Navigation dans l'ordre de la liste affichée, recherche et filtres compris.
+	const viewable = (f) => ["image", "pdf"].includes(kindOf(f.mime));
+	const inViewer = !!open && (viewable(open) || isMobile);
+	const viewerList = isMobile ? visible : visible.filter(viewable);
+	const viewerIndex = inViewer ? viewerList.findIndex(f => f.id === open.id) : -1;
 	const importHint = uploading ? "Importation en cours…" : `Ou glisse tes fichiers dans la page · ${formatSize(Math.max(0, quota - used))} disponibles`;
 
 	// contain: inline-size — la largeur de la page vient de l'écran, jamais de son contenu : sans ça,
@@ -367,16 +372,14 @@ export function Drive () {
 			<span className="icon-download" aria-hidden="true"></span> {uploading ? "Importation…" : "Importer"}
 		</button>
 
-		{isMobile
-			? <BottomSheet open={!!open && !isImage} onClose={() => setOpen(null)} label="Aperçu du fichier">{preview}</BottomSheet>
-			: <SidePanel open={!!open && !isImage} onClose={() => setOpen(null)} label="Aperçu du fichier" closeIcon={<X size={20} />}>{preview}</SidePanel>}
-		<Lightbox open={isImage} onClose={() => setOpen(null)}
-				  onPrev={images[imgIndex - 1] ? () => setOpen(images[imgIndex - 1]) : null}
-				  onNext={imgIndex >= 0 && images[imgIndex + 1] ? () => setOpen(images[imgIndex + 1]) : null}
-				  counter={imgIndex >= 0 && images.length > 1 ? `${imgIndex + 1} / ${images.length}` : null}
+		{!isMobile && <SidePanel open={!!open && !inViewer} onClose={() => setOpen(null)} label="Aperçu du fichier" closeIcon={<X size={20} />}>{preview}</SidePanel>}
+		<Lightbox open={inViewer} onClose={() => setOpen(null)} label={isImage ? "Image en grand" : "Aperçu du fichier"}
+				  onPrev={viewerList[viewerIndex - 1] ? () => setOpen(viewerList[viewerIndex - 1]) : null}
+				  onNext={viewerIndex >= 0 && viewerList[viewerIndex + 1] ? () => setOpen(viewerList[viewerIndex + 1]) : null}
+				  counter={viewerIndex >= 0 && viewerList.length > 1 ? `${viewerIndex + 1} / ${viewerList.length}` : null}
 				  icons={{ close: <X size={22} />, prev: <ChevronLeft size={24} />, next: <ChevronRight size={24} /> }}
 				  summary={open && { name: open.name, meta: `${formatSize(open.size)} · ${formatDate(open.createdAt)}` }}
-				  image={open && <FullImage key={open.id} file={open} />}>
+				  image={open && (isImage ? <FullImage key={open.id} file={open} /> : isPdf ? <PdfPage key={open.id} file={open} /> : <FilePoster key={open.id} file={open} />)}>
 			{/* Sur mobile, la bande d'infos affiche déjà le nom. */}
 			{open && <Preview file={open} {...actions(open)} thumb={false} dark hideTitle={isMobile} />}
 		</Lightbox>
@@ -400,15 +403,83 @@ function highlight (name, q) {
 	return <>{name.slice(0, i)}<mark className="rounded-sm bg-[#c2e7ff] text-inherit">{name.slice(i, i + q.length)}</mark>{name.slice(i + q.length)}</>;
 }
 
-/** Aperçu : vraie miniature pour les images, icône du type sinon. */
+/** Fichier non-image dans la visionneuse : grande icône du type (le nom est dans la bande d'infos). */
+function FilePoster ({ file }) {
+	return <span data-viewer-item className="flex flex-col items-center gap-3">
+		<Thumb file={file} className="h-40 w-40 rounded-3xl" iconSize={72} />
+		<span className="text-sm text-white/60">{KINDS[kindOf(file.mime)].label}</span>
+	</span>
+}
+
+/**
+ * PDF dans la visionneuse : pages rendues par le serveur, navigation ‹ › (et ↑/↓ au clavier ; ←/→ restent pour changer
+ * de fichier), page suivante préchargée. « Ouvrir le PDF » donne le document complet dans la visionneuse du navigateur.
+ */
+function PdfPage ({ file }) {
+	const [pages, setPages] = useState(0);
+	const [page, setPage] = useState(0);
+	const [loaded, setLoaded] = useState(false);       // page courante affichée
+	const [everLoaded, setEverLoaded] = useState(false); // évite le flash blanc : l'ancienne page reste visible pendant le chargement
+	const [failed, setFailed] = useState(false);
+	const src = (n) => Routing.generate(URL_THUMB, { id: file.id, large: 1, ...(n ? { page: n } : {}) });
+
+	useEffect(() => {
+		axios.get(Routing.generate(URL_PDF_PAGES, { id: file.id })).then((r) => setPages(r.data.pages)).catch(() => {});
+	}, [file.id]);
+	useEffect(() => {
+		const key = (e) => {
+			if (e.target.closest?.("input, textarea, select")) return;
+			if (["ArrowDown", "PageDown"].includes(e.key)) { e.preventDefault(); go(page + 1); }
+			if (["ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); go(page - 1); }
+		};
+		window.addEventListener("keydown", key);
+		return () => window.removeEventListener("keydown", key);
+	});
+	const go = (n) => { if (n >= 0 && n < pages && n !== page) { setPage(n); setLoaded(false); } };
+	const onLoad = () => { setLoaded(true); setEverLoaded(true); };
+	// Précharge la suivante (le serveur la rend pendant la lecture) dès que la page est affichée ET le nombre de pages connu,
+	// dans n'importe quel ordre d'arrivée.
+	useEffect(() => { if (loaded && page + 1 < pages) new Image().src = src(page + 1); }, [loaded, pages, page]);
+
+	if (failed) return <FilePoster file={file} />;
+	return <span data-viewer-item className="flex h-full w-full flex-col items-center justify-center gap-3">
+		<span className="relative flex min-h-0 w-full flex-1 items-center justify-center">
+			{/* Le premier rendu d'une page prend jusqu'à une seconde côté serveur. */}
+			{!loaded && <span className="absolute z-10 h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white motion-reduce:animate-none" aria-hidden="true" />}
+			<img src={src(page)} alt={`Page ${page + 1} de ${file.name}`} draggable={false}
+				 onLoad={onLoad} onError={() => (everLoaded ? setLoaded(true) : setFailed(true))}
+				 className={`max-h-full max-w-full rounded-sm bg-white object-contain shadow-2xl transition-opacity duration-200 ease-out ${everLoaded ? "" : "opacity-0"}`} />
+		</span>
+		<span className="flex shrink-0 items-center gap-2">
+			{pages > 1 && <span className="flex items-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20">
+				<Hint label="Page précédente (↑)">
+					<button type="button" aria-label="Page précédente" aria-disabled={page === 0} onClick={() => go(page - 1)}
+							className="drive-press flex h-9 w-9 items-center justify-center rounded-full text-white hover:bg-white/10 aria-disabled:cursor-default aria-disabled:opacity-30"><ChevronLeft size={18} /></button>
+				</Hint>
+				<span className="min-w-[5.5rem] text-center text-sm tabular-nums text-white" aria-live="polite">Page {page + 1} / {pages}</span>
+				<Hint label="Page suivante (↓)">
+					<button type="button" aria-label="Page suivante" aria-disabled={page >= pages - 1} onClick={() => go(page + 1)}
+							className="drive-press flex h-9 w-9 items-center justify-center rounded-full text-white hover:bg-white/10 aria-disabled:cursor-default aria-disabled:opacity-30"><ChevronRight size={18} /></button>
+				</Hint>
+			</span>}
+			<a href={Routing.generate(URL_DOWNLOAD, { id: file.id, inline: 1 })} target="_blank" rel="noopener"
+			   className="drive-press flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/20 hover:bg-white/20">
+				<ExternalLink size={16} /> Ouvrir le PDF
+			</a>
+		</span>
+	</span>
+}
+
+/** Aperçu : miniature réelle pour les images et les PDF (1re page), icône du type sinon. */
 function Thumb ({ file, className = "", iconSize = 48, strokeWidth = 1.25 }) {
 	const kind = kindOf(file.mime);
 	const k = KINDS[kind];
 	const [failed, setFailed] = useState(false);
-	const showImg = kind === "image" && !failed;
+	const showImg = (kind === "image" || kind === "pdf") && !failed;
 	return <span className={`flex items-center justify-center overflow-hidden ${className}`} style={{ background: k.bg }}>
 		{showImg
-			? <img src={Routing.generate(URL_THUMB, { id: file.id })} alt="" loading="lazy" draggable={false} onError={() => setFailed(true)} className="h-full w-full object-cover" />
+			? <img src={Routing.generate(URL_THUMB, { id: file.id })} alt="" loading="lazy" draggable={false} onError={() => setFailed(true)}
+				   className={`h-full w-full object-cover ${kind === "pdf" ? "bg-white object-top" : ""}`} />
 			: <k.Icon size={iconSize} color={k.color} strokeWidth={strokeWidth} aria-hidden="true" />}
 	</span>
 }

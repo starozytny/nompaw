@@ -195,45 +195,6 @@ export function DropOverlay ({ show, target = "ton Drive" }) {
 	</div>
 }
 
-/** Panneau du bas (mobile), qu'on peut fermer en le tirant vers le bas. */
-export function BottomSheet ({ open, onClose, children, label }) {
-	const { mounted, closing } = usePresence(open, 240);
-	const sheet = useRef();
-	const drag = useRef(null);
-	const last = useRef(children);
-	if (open) last.current = children;
-	useEscape(open, onClose);
-
-	if (!mounted) return null;
-
-	const down = (e) => { drag.current = { y: e.clientY, dy: 0, t: Date.now() }; sheet.current.style.transition = "none"; e.currentTarget.setPointerCapture(e.pointerId); };
-	const move = (e) => {
-		if (!drag.current) return;
-		const dy = Math.max(0, e.clientY - drag.current.y);
-		drag.current.dy = dy;
-		sheet.current.style.transform = `translateY(${dy}px)`;
-	};
-	const up = () => {
-		if (!drag.current) return;
-		const { dy, t } = drag.current;
-		const velocity = dy / Math.max(1, Date.now() - t);
-		drag.current = null;
-		sheet.current.style.transition = "";
-		sheet.current.style.transform = "";
-		if (dy > 80 || velocity > 0.5) onClose();
-	};
-
-	return <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={label}>
-		<div className={`drive-fade absolute inset-0 bg-black/40 ${closing ? "drive-fade-out" : ""}`} onClick={onClose} />
-		<div ref={sheet} className={`drive-sheet absolute inset-x-0 bottom-0 max-h-[90svh] overflow-y-auto rounded-t-2xl bg-white pb-[max(12px,env(safe-area-inset-bottom))] shadow-2xl ${closing ? "drive-sheet-out" : ""}`}>
-			<div className="flex touch-none justify-center pb-1 pt-3" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
-				<span className="h-1 w-8 rounded-full bg-gray-300" />
-			</div>
-			{last.current}
-		</div>
-	</div>
-}
-
 /** Panneau latéral (ordinateur). */
 export function SidePanel ({ open, onClose, children, label, closeIcon }) {
 	const { mounted, closing } = usePresence(open, 220);
@@ -255,7 +216,7 @@ export function SidePanel ({ open, onClose, children, label, closeIcon }) {
 }
 
 /** Image en grand sur fond sombre, avec un panneau d'infos (à droite sur ordinateur, dessous sur mobile). */
-export function Lightbox ({ open, onClose, onPrev, onNext, counter, image, children, icons, summary }) {
+export function Lightbox ({ open, onClose, onPrev, onNext, counter, image, children, icons, summary, label = "Image en grand" }) {
 	const isMobile = useMediaQuery("(max-width: 767px)");
 	const { mounted, closing } = usePresence(open, 150);
 	const last = useRef({ image, children, counter, summary });
@@ -274,9 +235,9 @@ export function Lightbox ({ open, onClose, onPrev, onNext, counter, image, child
 	if (!mounted) return null;
 
 	const round = "drive-press flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/20";
-	return <div className={`drive-fade fixed inset-0 z-50 flex flex-col bg-black/90 md:flex-row ${closing ? "drive-fade-out" : ""}`} role="dialog" aria-modal="true" aria-label="Image en grand">
+	return <div className={`drive-fade fixed inset-0 z-50 flex flex-col bg-black/90 md:flex-row ${closing ? "drive-fade-out" : ""}`} role="dialog" aria-modal="true" aria-label={label}>
 		{/* Un clic hors de l'image et des boutons ferme ; l'image remplit la zone, d'où closest() plutôt que target === currentTarget. */}
-		<div className="relative flex min-h-0 flex-1 items-center justify-center p-4 max-md:pb-[calc(var(--drive-peek)+16px)] md:px-20 md:py-8" onClick={(e) => !e.target.closest("img, button") && onClose()}>
+		<div className="relative flex min-h-0 flex-1 items-center justify-center p-4 max-md:pb-[calc(var(--drive-peek)+16px)] md:px-20 md:py-8" onClick={(e) => !e.target.closest("img, button, [data-viewer-item]") && onClose()}>
 			{/* drive-zoom sur un conteneur stable : l'animation joue à l'ouverture, pas à chaque image suivante */}
 			<div className="drive-zoom flex h-full w-full items-center justify-center">{last.current.image}</div>
 			<Hint label="Fermer (Échap)" side="right">
@@ -353,10 +314,10 @@ function InfoSheet ({ summary, counter, onPrev, onNext, icons, children }) {
 					<span className="block text-xs text-white/60">{summary?.meta}</span>
 				</div>
 				{counter && <>
-					<button type="button" aria-label="Image précédente" aria-disabled={!onPrev} onClick={() => onPrev?.()}
+					<button type="button" aria-label="Précédent" aria-disabled={!onPrev} onClick={() => onPrev?.()}
 							className="drive-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white active:bg-white/10 aria-disabled:opacity-30">{icons.prev}</button>
 					<span className="shrink-0 text-xs tabular-nums text-white/60" aria-live="polite">{counter}</span>
-					<button type="button" aria-label="Image suivante" aria-disabled={!onNext} onClick={() => onNext?.()}
+					<button type="button" aria-label="Suivant" aria-disabled={!onNext} onClick={() => onNext?.()}
 							className="drive-press flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white active:bg-white/10 aria-disabled:opacity-30">{icons.next}</button>
 				</>}
 			</div>

@@ -415,10 +415,10 @@ class FileUploader
     }
 
     /**
-     * Small WebP copy of a private file, for thumbnails shown at ~100px. Generated on first request,
+     * Small WebP copy of a private file (image, or first page of a PDF), for thumbnails. Generated on first request,
      * then served from disk. Returns the absolute path, or null if the source is missing.
      */
-    public function miniature(string $sourceRelative, string $targetFolder, string $targetName, int $width = 240): ?string
+    public function miniature(string $sourceRelative, string $targetFolder, string $targetName, int $width = 240, int $pdfPage = 0): ?string
     {
         $target = $this->privateDirectory . $targetFolder . '/' . $targetName;
         if (is_file($target)) {
@@ -431,8 +431,18 @@ class FileUploader
         }
 
         try {
-            $imagick = new Imagick($source);
-            $imagick->autoOrient();
+            if (strtolower(pathinfo($source, PATHINFO_EXTENSION)) === 'pdf') {
+                // PDF : une seule page (sinon Imagick rend tout le document), assez fine pour être lisible, sur fond blanc.
+                $this->prepareGhostscript();
+                $imagick = new Imagick();
+                $imagick->setResolution(150, 150);
+                $imagick->readImage($source . '[' . $pdfPage . ']');
+                $imagick->setImageBackgroundColor('white');
+                $imagick = $imagick->mergeImageLayers(Imagick::LAYERMETHOD_FLATTEN);
+            } else {
+                $imagick = new Imagick($source);
+                $imagick->autoOrient();
+            }
             if ($imagick->getImageWidth() > $width) {
                 $imagick->thumbnailImage($width, 0);
             }
@@ -450,6 +460,33 @@ class FileUploader
         } catch (ImagickException $e) {
             return null;
         }
+    }
+
+    /** Nombre de pages d'un PDF privé (0 si illisible). Lance Ghostscript : à mettre en cache côté appelant. */
+    public function pdfPageCount(string $sourceRelative): int
+    {
+        $source = $this->privateDirectory . ltrim($sourceRelative, '/');
+        if (!is_file($source)) {
+            return 0;
+        }
+
+        try {
+            $this->prepareGhostscript();
+            $imagick = new Imagick();
+            $imagick->pingImage($source);
+            $count = $imagick->getNumberImages();
+            $imagick->clear();
+
+            return $count;
+        } catch (ImagickException $e) {
+            return 0;
+        }
+    }
+
+    /** Cache de polices inscriptible pour Ghostscript (lancé par Imagick pour les PDF), sinon fontconfig inonde les logs. */
+    private function prepareGhostscript(): void
+    {
+        putenv('XDG_CACHE_HOME=' . sys_get_temp_dir());
     }
 
     /**
