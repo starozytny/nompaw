@@ -8,6 +8,7 @@ import Sanitaze from "@commonFunctions/sanitaze";
 
 import { LoaderElements } from "@tailwindComponents/Elements/Loader";
 import { Card } from "@shadcnComponents/ui/card";
+import { CoinIcon } from "@userPages/Cryptos/CoinIcon";
 
 const URL_GET_DATA = "intern_api_cryptos_trades_holdings";
 const URL_GET_LEDGER = "intern_api_cryptos_trades_ledger";
@@ -68,10 +69,7 @@ export function HoldingsTab ({ refreshSignal }) {
 								onClick={() => setOpenCoin(openCoin === h.coin ? null : h.coin)}
 								className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50">
 							<div className="flex items-center gap-3">
-								<div className="flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold"
-									 style={{ background: 'var(--cat-crypto-soft)', color: 'var(--cat-crypto)' }}>
-									{h.coin.slice(0, 3)}
-								</div>
+								<CoinIcon coin={h.coin} size={32} />
 								<span className="font-medium text-sm">{h.coin}</span>
 							</div>
 							<span className="flex items-center gap-2 text-sm font-semibold tabular-nums">

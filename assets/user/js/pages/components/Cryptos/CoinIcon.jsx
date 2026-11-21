@@ -1,14 +1,27 @@
 import React, { useState } from "react";
 import PropTypes from 'prop-types';
 
-// Public, MIT-licensed icon set (atomiclabs/cryptocurrency-icons), served via jsDelivr's GitHub CDN.
-const CDN_BASE = "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@0.18.1/svg/color";
+// Icons are stored locally by app:crypto:icons:download / the import (CrCoinIconService), as one file per
+// ticker — svg or png depending on its source — so no third-party call from the browser. Initials otherwise.
+const SOURCES = [
+	t => `/crypto-icons/${t}.svg`,
+	t => `/crypto-icons/${t}.png`,
+];
+
+// Same project under a new ticker (SwissBorg CHSB → BORG).
+const ALIASES = { BORG: 'CHSB' };
+
+// ticker → index of the first source known to work, shared by every icon on the page so a coin's
+// failing sources are only tried once, not once per row.
+const resolved = {};
 
 const FIAT_SYMBOL = { EUR: '€', USD: '$', GBP: '£' };
 
 export function CoinIcon ({ coin, size = 18 }) {
-	const [failed, setFailed] = useState(false);
-	const ticker = (coin || '').toUpperCase();
+	const raw = (coin || '').toUpperCase();
+	const ticker = ALIASES[raw] ?? raw;
+	const [, rerender] = useState(0);
+	const source = resolved[ticker] ?? 0;
 
 	if (!ticker) return null;
 
@@ -19,15 +32,23 @@ export function CoinIcon ({ coin, size = 18 }) {
 		</span>
 	}
 
-	if (failed) {
+	if (source >= SOURCES.length) {
 		return <span className="inline-flex items-center justify-center rounded-full bg-muted text-muted-foreground font-semibold flex-shrink-0"
 					  style={{ width: size, height: size, fontSize: size * 0.4 }}>
-			{ticker.slice(0, 2)}
+			{raw.slice(0, 2)}
 		</span>
 	}
 
-	return <img src={`${CDN_BASE}/${ticker.toLowerCase()}.svg`} alt="" width={size} height={size} loading="lazy"
-				className="inline-block flex-shrink-0" onError={() => setFailed(true)} />;
+	const handleError = () => {
+		// Several icons of the same coin fail at once: only the first moves the shared index forward.
+		if ((resolved[ticker] ?? 0) === source) {
+			resolved[ticker] = source + 1;
+		}
+		rerender(n => n + 1);
+	}
+
+	return <img key={source} src={SOURCES[source](ticker)} alt="" width={size} height={size} loading="lazy"
+				className="inline-block flex-shrink-0 rounded-full" onError={handleError} />;
 }
 
 CoinIcon.propTypes = {
