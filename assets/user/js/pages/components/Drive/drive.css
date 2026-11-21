@@ -1,0 +1,52 @@
+/* Drive — animations (entrées en ease-out, panneaux en courbe « drawer »). */
+:root {
+	--drive-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+	--drive-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes drive-fade-in { from { opacity: 0; } }
+@keyframes drive-fade-out { to { opacity: 0; } }
+@keyframes drive-rise-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes drive-sheet-in { from { transform: translateY(100%); } }
+@keyframes drive-sheet-out { to { transform: translateY(100%); } }
+@keyframes drive-panel-in { from { transform: translateX(100%); } }
+@keyframes drive-panel-out { to { transform: translateX(100%); } }
+@keyframes drive-snack-in { from { opacity: 0; transform: translate(-50%, 12px); } }
+@keyframes drive-snack-out { to { opacity: 0; transform: translate(-50%, 0) scale(0.98); } }
+@keyframes drive-flash { from { box-shadow: 0 0 0 3px #a8c7fa; } }
+@keyframes drive-check-in { from { opacity: 0; transform: scale(0.6); } }
+@keyframes drive-zoom-in { from { opacity: 0; transform: scale(0.96); } }
+.drive-zoom { animation: drive-zoom-in 200ms var(--drive-ease-out); }
+
+.drive-fade { animation: drive-fade-in 200ms ease-out; }
+.drive-fade-out { animation: drive-fade-out 150ms ease-out forwards; }
+.drive-rise { animation: drive-rise-in 220ms var(--drive-ease-out) both; }
+.drive-sheet { animation: drive-sheet-in 320ms var(--drive-ease-drawer); transition: transform 320ms var(--drive-ease-drawer); }
+.drive-sheet-out { animation: drive-sheet-out 240ms var(--drive-ease-drawer) forwards; }
+.drive-panel { animation: drive-panel-in 300ms var(--drive-ease-drawer); }
+.drive-panel-out { animation: drive-panel-out 220ms var(--drive-ease-drawer) forwards; }
+.drive-snack { bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); animation: drive-snack-in 220ms var(--drive-ease-out); }
+.drive-snack-out { animation: drive-snack-out 160ms ease-out forwards; }
+.drive-flash { animation: drive-flash 1400ms ease-out; }
+.drive-check { animation: drive-check-in 180ms var(--drive-ease-out); }
+
+/* Entrée échelonnée, plafonnée pour ne jamais faire attendre. */
+.drive-stagger { animation: drive-rise-in 240ms var(--drive-ease-out) both; animation-delay: calc(min(var(--i, 0), 10) * 25ms); }
+
+.drive-press { transition: transform 160ms var(--drive-ease-out), background-color 150ms ease-out, box-shadow 150ms ease-out, color 150ms ease-out; }
+.drive-press:active { transform: scale(0.97); }
+
+/* Actions rapides des lignes : visibles au survol/focus sur ordinateur, toujours visibles au tactile. */
+@media (hover: hover) and (pointer: fine) {
+	.drive-row-actions { opacity: 0; transition: opacity 150ms ease-out; }
+	.group:hover .drive-row-actions, .group:focus-within .drive-row-actions, .drive-row-actions[data-armed] { opacity: 1; }
+}
+
+.drive-noscrollbar { scrollbar-width: none; }
+.drive-noscrollbar::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+	.drive-rise, .drive-sheet, .drive-panel, .drive-stagger, .drive-check, .drive-snack, .drive-zoom { animation-name: drive-fade-in; animation-duration: 150ms; }
+	.drive-sheet-out, .drive-panel-out, .drive-snack-out { animation-name: drive-fade-out; }
+	.drive-press:active { transform: none; }
+}

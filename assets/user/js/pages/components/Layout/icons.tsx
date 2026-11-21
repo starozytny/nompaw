@@ -16,6 +16,7 @@ import {
   Package,
   Mail,
   TrendingUp,
+  FolderOpen,
   type LucideIcon,
 } from "lucide-react"
 
@@ -37,6 +38,7 @@ export const MENU_ICONS: Record<string, LucideIcon> = {
   box: Package,
   email: Mail,
   "chart-up": TrendingUp,
+  folder: FolderOpen,
 }
 
 export function menuIcon(key: string): LucideIcon {

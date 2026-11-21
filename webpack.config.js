@@ -81,6 +81,7 @@ Encore
     .addEntry('admin_contacts', './assets/admin/js/pages/contacts.js')
     .addEntry('admin_storage', './assets/admin/js/pages/storage.js')
     .addEntry('admin_photos_access', './assets/admin/js/pages/photosAccess.js')
+    .addEntry('admin_drive', './assets/admin/js/pages/drive.js')
 
     .addEntry('user_app', './assets/user/js/app.js')
     .addEntry('user_profil', './assets/user/js/pages/profil.js')
@@ -92,6 +93,7 @@ Encore
     .addEntry('user_cryptos', './assets/user/js/pages/cryptos.js')
     .addEntry('user_videos', './assets/user/js/pages/videos.js')
     .addEntry('user_photos', './assets/user/js/pages/photos.js')
+    .addEntry('user_drive', './assets/user/js/pages/drive.js')
     .addEntry('user_running', './assets/user/js/pages/running.js')
     .addEntry('user_invest', './assets/user/js/pages/invest.js')
     .addEntry('user_suggestions', './assets/user/js/pages/suggestions.js')
