@@ -6,6 +6,7 @@ use App\Repository\Drive\DrFileRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 class DriveShareController extends AbstractController
@@ -21,6 +22,9 @@ class DriveShareController extends AbstractController
 
         if (!$path || !is_file($path)) {
             throw $this->createNotFoundException("Ce lien de partage n'existe pas ou n'est plus actif.");
+        }
+        if (!$file->isShareActive()) {
+            throw new GoneHttpException('Ce lien de partage a expiré.');
         }
 
         $inline = in_array($file->getMime(), self::INLINE_MIMES, true);

@@ -185,12 +185,12 @@ export function Snackbar ({ snack }) {
 	</div>
 }
 
-export function DropOverlay ({ show }) {
+export function DropOverlay ({ show, target = "ton Drive" }) {
 	const { mounted, closing } = usePresence(show, 150);
 	if (!mounted) return null;
 	return <div className={`drive-fade pointer-events-none fixed inset-0 z-40 flex items-end justify-center bg-[#1a73e8]/10 p-6 ring-4 ring-inset ring-[#1a73e8] ${closing ? "drive-fade-out" : ""}`}>
 		<div className="drive-rise mb-10 rounded-full bg-[#1a73e8] px-5 py-3 text-sm font-medium text-white shadow-lg">
-			Dépose tes fichiers pour les importer dans ton Drive
+			Dépose tes fichiers pour les importer dans {target === "ton Drive" ? target : `« ${target} »`}
 		</div>
 	</div>
 }

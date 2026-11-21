@@ -2,9 +2,14 @@
 
 namespace App\Controller\InternApi\Drive;
 
+use App\Entity\Drive\DrAlbum;
 use App\Entity\Drive\DrFile;
+use App\Entity\Drive\DrShortcut;
 use App\Entity\Main\User;
+use App\Repository\Drive\DrAlbumRepository;
 use App\Repository\Drive\DrFileRepository;
+use App\Repository\Drive\DrShortcutRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Service\Api\ApiResponse;
 use App\Service\FileUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +25,15 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[Route('/intern/api/drive', name: 'intern_api_drive_')]
 class DriveController extends AbstractController
 {
+    /** Mêmes durées que les partages de photos. */
+    private const SHARE_DURATIONS = ['1d' => 1, '7d' => 7, '30d' => 30];
+
+    public function __construct(
+        private readonly DrAlbumRepository $albumRepository,
+        private readonly DrShortcutRepository $shortcutRepository,
+    ) {
+    }
+
     #[Route('/list', name: 'list', options: ['expose' => true], methods: 'GET')]
     public function list(DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
     {
@@ -34,6 +48,14 @@ class DriveController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        $album = null;
+        if ($request->request->get('albumId')) {
+            $album = $this->albumRepository->findOneBy(['id' => $request->request->getInt('albumId'), 'owner' => $user]);
+            if (!$album) {
+                return $apiResponse->apiJsonResponseBadRequest("Ce dossier n'existe pas.");
+            }
+        }
 
         /** @var UploadedFile[] $files */
         $files = $request->files->all('files');
@@ -77,6 +99,7 @@ class DriveController extends AbstractController
                 ->setFile($fileName)
                 ->setMime($mime)
                 ->setSize($size)
+                ->setAlbum($album)
             , true);
         }
 
@@ -107,12 +130,9 @@ class DriveController extends AbstractController
             return $apiResponse->apiJsonResponseForbidden();
         }
 
-        $name = trim((string) (json_decode($request->getContent())->name ?? ''));
-        // « / » et « \ » sont refusés par Content-Disposition (le téléchargement planterait).
-        if ($name === '' || mb_strlen($name) > 255 || preg_match('#[/\\\\\x00-\x1F\x7F]#', $name)) {
-            return $apiResponse->apiJsonResponseValidationFailed([
-                ['name' => 'name', 'message' => 'Nom invalide : 1 à 255 caractères, sans « / » ni « \\ ».']
-            ]);
+        $name = $this->validName($request);
+        if ($name === null) {
+            return $this->invalidName($apiResponse);
         }
 
         $repository->save($obj->setName($name), true);
@@ -120,8 +140,8 @@ class DriveController extends AbstractController
         return $this->state($user, $repository, $apiResponse);
     }
 
-    #[Route('/share/{id}', name: 'share', options: ['expose' => true], methods: 'POST')]
-    public function share(DrFile $obj, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    #[Route('/move/{id}', name: 'move', options: ['expose' => true], methods: 'PUT')]
+    public function move(DrFile $obj, Request $request, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -129,9 +149,178 @@ class DriveController extends AbstractController
             return $apiResponse->apiJsonResponseForbidden();
         }
 
-        if (!$obj->getShareToken()) {
-            $repository->save($obj->setShareToken(bin2hex(random_bytes(32))), true);
+        $albumId = json_decode($request->getContent())->albumId ?? null;
+        $album = $albumId ? $this->albumRepository->findOneBy(['id' => (int) $albumId, 'owner' => $user]) : null;
+        if ($albumId && !$album) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce dossier n'existe pas.");
         }
+
+        // Un raccourci vers ce fichier dans son nouveau dossier ferait doublon.
+        foreach ($this->shortcutRepository->findBy(['file' => $obj, 'album' => $album]) as $shortcut) {
+            $this->shortcutRepository->remove($shortcut);
+        }
+        $repository->save($obj->setAlbum($album), true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    #[Route('/shortcuts', name: 'shortcut_create', options: ['expose' => true], methods: 'POST')]
+    public function createShortcut(Request $request, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = json_decode($request->getContent());
+
+        $file = $repository->findOneBy(['id' => (int) ($data->fileId ?? 0), 'owner' => $user]);
+        if (!$file) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce fichier n'existe pas.");
+        }
+
+        $albumId = $data->albumId ?? null;
+        $album = $albumId ? $this->albumRepository->findOneBy(['id' => (int) $albumId, 'owner' => $user]) : null;
+        if ($albumId && !$album) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce dossier n'existe pas.");
+        }
+        if ($file->getAlbum() === $album) {
+            return $apiResponse->apiJsonResponseBadRequest('Le fichier est déjà dans ce dossier.');
+        }
+        if ($this->shortcutRepository->findOneBy(['file' => $file, 'album' => $album])) {
+            return $apiResponse->apiJsonResponseBadRequest('Ce raccourci existe déjà.');
+        }
+
+        $this->shortcutRepository->save((new DrShortcut())->setOwner($user)->setFile($file)->setAlbum($album), true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    /** Retire le raccourci ; le fichier n'est pas touché. */
+    #[Route('/shortcuts/{id}', name: 'shortcut_delete', options: ['expose' => true], methods: 'DELETE')]
+    public function deleteShortcut(DrShortcut $shortcut, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($shortcut->getOwner() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $this->shortcutRepository->remove($shortcut, true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    #[Route('/albums', name: 'album_create', options: ['expose' => true], methods: 'POST')]
+    public function createAlbum(Request $request, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $name = $this->validName($request);
+        if ($name === null) {
+            return $this->invalidName($apiResponse);
+        }
+
+        $parentId = json_decode($request->getContent())->parentId ?? null;
+        $parent = $parentId ? $this->albumRepository->findOneBy(['id' => (int) $parentId, 'owner' => $user]) : null;
+        if ($parentId && !$parent) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce dossier n'existe pas.");
+        }
+
+        $this->albumRepository->save((new DrAlbum())->setOwner($user)->setName($name)->setParent($parent), true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    #[Route('/albums/{id}', name: 'album_rename', options: ['expose' => true], methods: 'PUT')]
+    public function renameAlbum(DrAlbum $album, Request $request, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($album->getOwner() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $name = $this->validName($request);
+        if ($name === null) {
+            return $this->invalidName($apiResponse);
+        }
+
+        $this->albumRepository->save($album->setName($name), true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    #[Route('/albums/{id}/move', name: 'album_move', options: ['expose' => true], methods: 'PUT')]
+    public function moveAlbum(DrAlbum $album, Request $request, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($album->getOwner() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $parentId = json_decode($request->getContent())->parentId ?? null;
+        $parent = $parentId ? $this->albumRepository->findOneBy(['id' => (int) $parentId, 'owner' => $user]) : null;
+        if ($parentId && !$parent) {
+            return $apiResponse->apiJsonResponseBadRequest("Ce dossier n'existe pas.");
+        }
+        // Ni dans lui-même, ni dans un de ses descendants : l'arborescence formerait une boucle.
+        for ($a = $parent; $a !== null; $a = $a->getParent()) {
+            if ($a === $album) {
+                return $apiResponse->apiJsonResponseBadRequest('Impossible de déplacer un dossier dans lui-même ou dans un de ses sous-dossiers.');
+            }
+        }
+
+        $this->albumRepository->save($album->setParent($parent), true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    #[Route('/albums/{id}', name: 'album_delete', options: ['expose' => true], methods: 'DELETE')]
+    public function deleteAlbum(DrAlbum $album, DrFileRepository $repository, ApiResponse $apiResponse, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($album->getOwner() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        // Son contenu (fichiers et sous-dossiers) remonte dans le parent : rien n'est supprimé. Mises à jour en DQL ;
+        // aucun fichier ni sous-dossier n'est chargé avant, donc state() les relit à jour depuis la base.
+        $parent = $album->getParent();
+        $repository->createQueryBuilder('f')->update()->set('f.album', ':parent')->where('f.album = :album')
+            ->setParameter('parent', $parent)->setParameter('album', $album)->getQuery()->execute();
+        $this->albumRepository->createQueryBuilder('a')->update()->set('a.parent', ':parent')->where('a.parent = :album')
+            ->setParameter('parent', $parent)->setParameter('album', $album)->getQuery()->execute();
+        $this->shortcutRepository->createQueryBuilder('s')->update()->set('s.album', ':parent')->where('s.album = :album')
+            ->setParameter('parent', $parent)->setParameter('album', $album)->getQuery()->execute();
+        // Après remontée, retirer les raccourcis devenus inutiles : vers le dossier même du fichier, ou en double (<=> compare aussi NULL).
+        $conn = $em->getConnection();
+        $conn->executeStatement('DELETE s FROM dr_shortcut s JOIN dr_file f ON f.id = s.file_id WHERE s.owner_id = ? AND s.album_id <=> f.album_id', [$user->getId()]);
+        $conn->executeStatement('DELETE s1 FROM dr_shortcut s1 JOIN dr_shortcut s2 ON s1.file_id = s2.file_id AND s1.album_id <=> s2.album_id AND s1.id > s2.id WHERE s1.owner_id = ?', [$user->getId()]);
+        $this->albumRepository->remove($album, true);
+
+        return $this->state($user, $repository, $apiResponse);
+    }
+
+    /** Crée le lien, ou change sa durée (à partir de maintenant) en gardant le même lien. */
+    #[Route('/share/{id}', name: 'share', options: ['expose' => true], methods: 'POST')]
+    public function share(DrFile $obj, Request $request, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($obj->getOwner() !== $user) {
+            return $apiResponse->apiJsonResponseForbidden();
+        }
+
+        $days = self::SHARE_DURATIONS[json_decode($request->getContent())->duration ?? ''] ?? null;
+        if ($days === null) {
+            return $apiResponse->apiJsonResponseBadRequest('Durée de partage invalide.');
+        }
+
+        $repository->save($obj
+            ->setShareToken($obj->getShareToken() ?? bin2hex(random_bytes(32)))
+            ->setShareExpiresAt(new \DateTimeImmutable("+{$days} days"))
+        , true);
 
         return $this->state($user, $repository, $apiResponse);
     }
@@ -146,7 +335,7 @@ class DriveController extends AbstractController
         }
 
         // Supprimer le jeton invalide définitivement l'ancien lien ; un nouveau partage en crée un autre.
-        $repository->save($obj->setShareToken(null), true);
+        $repository->save($obj->setShareToken(null)->setShareExpiresAt(null), true);
 
         return $this->state($user, $repository, $apiResponse);
     }
@@ -194,20 +383,43 @@ class DriveController extends AbstractController
     private function state(User $user, DrFileRepository $repository, ApiResponse $apiResponse): JsonResponse
     {
         $files = $repository->findBy(['owner' => $user], ['createdAt' => 'DESC']);
+        $albums = $this->albumRepository->findBy(['owner' => $user], ['name' => 'ASC']);
 
         return $apiResponse->apiJsonResponseCustom([
+            'shortcuts' => array_map(fn (DrShortcut $sc) => ['id' => $sc->getId(), 'fileId' => $sc->getFile()->getId(), 'albumId' => $sc->getAlbum()?->getId()],
+                $this->shortcutRepository->findBy(['owner' => $user])),
+            'albums' => array_map(fn (DrAlbum $a) => ['id' => $a->getId(), 'name' => $a->getName(), 'parentId' => $a->getParent()?->getId()], $albums),
             'files' => array_map(fn (DrFile $f) => [
                 'id' => $f->getId(),
                 'name' => $f->getName(),
                 'mime' => $f->getMime(),
                 'size' => $f->getSize(),
                 'createdAt' => $f->getCreatedAt()->format('c'),
+                'albumId' => $f->getAlbum()?->getId(),
                 'shareUrl' => $f->getShareToken()
                     ? $this->generateUrl('app_drive_share', ['token' => $f->getShareToken()], UrlGeneratorInterface::ABSOLUTE_URL)
                     : null,
+                'shareExpiresAt' => $f->getShareExpiresAt()?->format('c'),
+                'shareActive' => $f->isShareActive(),
             ], $files),
             'used' => $repository->getUsedSize($user),
             'quota' => $user->getDriveQuota(),
+        ]);
+    }
+
+    /** Nom de fichier ou de dossier, nettoyé ; null s'il est invalide. */
+    private function validName(Request $request): ?string
+    {
+        $name = trim((string) (json_decode($request->getContent())->name ?? ''));
+
+        // « / » et « \ » sont refusés par Content-Disposition (le téléchargement planterait).
+        return $name === '' || mb_strlen($name) > 255 || preg_match('#[/\\\\\x00-\x1F\x7F]#', $name) ? null : $name;
+    }
+
+    private function invalidName(ApiResponse $apiResponse): JsonResponse
+    {
+        return $apiResponse->apiJsonResponseValidationFailed([
+            ['name' => 'name', 'message' => 'Nom invalide : 1 à 255 caractères, sans « / » ni « \\ ».']
         ]);
     }
 
