@@ -6,18 +6,12 @@
 
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
-        { text: page_title_alone, url: path('user_projects_read', {'slug': elem.slug}) },
+        { text: page_title, url: path('user_projects_read', {'slug': elem.slug}) },
     ]) %}
     {{ parent() }}
 {% endblock %}
 
 {% set page_actions %}
-    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-        btn_link: path('user_projects_index'),
-        btn_type: 'default',
-        btn_icon: 'left-arrow',
-        btn_text: 'Retourner aux projets'
-    } %}
     {% if app.user.id == elem.author.id or app.user.isAdmin %}
         {% include 'layout/components/tailwind/buttons/button.html.twig' with {
             btn_link: path('user_projects_update', {slug: elem.slug}),

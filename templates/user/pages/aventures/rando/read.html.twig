@@ -13,19 +13,13 @@
 {% block breadcrumb %}
     {% set breadcrumbs = breadcrumbs | merge([
         { text: groupe.name, url: path('user_aventures_groupes_read', {'slug': groupe.slug}) },
-        { text: page_title_alone, url: path('user_aventures_randos_read', {'slug': elem.slug}) },
+        { text: page_title, url: path('user_aventures_randos_read', {'slug': elem.slug}) },
     ]) %}
     {{ parent() }}
 {% endblock %}
 
 {% set page_actions %}
     <div class="flex flex-wrap items-center justify-end gap-2">
-        {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-            btn_link: path('user_aventures_groupes_read', {slug: groupe.slug}),
-            btn_type: 'default',
-            btn_icon: 'left-arrow',
-            btn_text: 'Retourner au groupe'
-        } %}
         {% if canManage %}
             {% include 'layout/components/tailwind/buttons/button.html.twig' with {
                 btn_link: path('user_aventures_randos_update', {slug: elem.slug}),

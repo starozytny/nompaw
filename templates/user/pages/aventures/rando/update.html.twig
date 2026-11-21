@@ -13,12 +13,6 @@
 
 {% set page_actions %}
     {% include 'layout/components/tailwind/buttons/button.html.twig' with {
-        btn_link: path('user_aventures_groupes_read', {slug: elem.groupe.slug}),
-        btn_type: 'default',
-        btn_icon: 'left-arrow',
-        btn_text: 'Retourner à liste'
-    } %}
-    {% include 'layout/components/tailwind/buttons/button.html.twig' with {
         btn_link: path('user_aventures_randos_read', {slug: elem.slug}),
         btn_type: 'default',
         btn_icon: 'vision',
