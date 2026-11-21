@@ -4,7 +4,9 @@ namespace App\Service\Crypto;
 
 use App\Entity\Crypto\CrPriceHistory;
 use App\Entity\Crypto\CrTrade;
+use App\Entity\Enum\Crypto\TypeType;
 use App\Repository\Crypto\CrPriceHistoryRepository;
+use App\Repository\Crypto\CrTradeRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -38,10 +40,25 @@ class CrPriceService
         private readonly LoggerInterface $logger,
         private readonly string $coingeckoApiKey = '',
         private readonly ?HttpClientInterface $binanceClient = null,
+        private readonly ?CrTradeRepository $tradeRepository = null,
     ) {}
+
+    /** @var array<int, array<string, array<string, float>>> userId => COIN => Y-m-d => price, see manualPriceOn() */
+    private array $manualPrices = [];
 
     /** Dollar and stablecoins valued straight from the EUR/USDT rate (USDC & co treated as 1 USDT). */
     private const USD_STABLES = ['USD', 'USDT', 'USDC', 'BUSD', 'FDUSD', 'TUSD', 'DAI'];
+
+    /** CoinGecko plan: 100 calls/min → at least 0.6 s between two calls (all CoinGecko calls of this instance). */
+    private const COINGECKO_MIN_INTERVAL = 0.6;
+
+    /** History depth allowed by the CoinGecko plan (older ranges answer 401). One day of margin. */
+    private const COINGECKO_HISTORY_DAYS = 364;
+
+    private float $lastCoingeckoCallAt = 0.0;
+
+    /** CoinGecko calls made by this instance (1 call = 1 credit), for the caller's budget/report. */
+    public int $coingeckoCalls = 0;
 
     /** @var array<string, float>|null EUR/USDT daily open, loaded once per service instance */
     private ?array $eurUsdt = null;
@@ -172,18 +189,10 @@ class CrPriceService
         }
 
         try {
-            $response = $this->coingeckoClient->request('GET', "coins/{$coingeckoId}/history", [
-                'query' => [
-                    'date' => $day->format('d-m-Y'),
-                    'localization' => 'false',
-                ],
-                'headers' => $this->coingeckoApiKey !== ''
-                    ? ['x-cg-demo-api-key' => $this->coingeckoApiKey]
-                    : [],
-                'timeout' => 5,
+            $data = $this->coingeckoGet("coins/{$coingeckoId}/history", [
+                'date' => $day->format('d-m-Y'),
+                'localization' => 'false',
             ]);
-
-            $data = $response->toArray();
             $priceEur = $data['market_data']['current_price']['eur'] ?? null;
         } catch (HttpExceptionInterface|\Throwable $e) {
             $this->logger->warning('Crypto tax report: CoinGecko price lookup failed for {coin} on {date}: {message}', [
@@ -236,7 +245,37 @@ class CrPriceService
 
 
     /**
-     * Prices for a trade's empty (null/0) fromPrice/toPrice, without touching the trade: the coin's EUR
+     * EUR price of $coin set by hand on one of the user's disposals of that same day in the "Rapport fiscal"
+     * (CrTrade::manualCoinPrices: the portfolio valued at the moment of a sale). Loaded once per user.
+     */
+    private function manualPriceOn(CrTrade $trade, string $coin): ?float
+    {
+        $user = $trade->getUser();
+        if ($user === null || $this->tradeRepository === null) {
+            return null;
+        }
+
+        if (!isset($this->manualPrices[$user->getId()])) {
+            $index = [];
+            $rows = $this->tradeRepository->createQueryBuilder('t')
+                ->select('t.tradeAt, t.manualCoinPrices')
+                ->where('t.user = :user AND t.manualCoinPrices IS NOT NULL')
+                ->setParameter('user', $user)
+                ->getQuery()->getArrayResult();
+            foreach ($rows as $row) {
+                foreach ($row['manualCoinPrices'] ?? [] as $ticker => $price) {
+                    $index[strtoupper($ticker)][$row['tradeAt']->format('Y-m-d')] ??= (float) $price;
+                }
+            }
+            $this->manualPrices[$user->getId()] = $index;
+        }
+
+        return $this->manualPrices[$user->getId()][strtoupper($coin)][$trade->getTradeAt()->format('Y-m-d')] ?? null;
+    }
+
+    /**
+     * Prices for a trade's empty (null/0) fromPrice/toPrice, without touching the trade: a price set the
+     * same day in the "Rapport fiscal" (same precedence as the report itself), else the coin's EUR
      * price of the day, else implied from the other leg (otherQty × otherPrice / qty — e.g. 5 CRO bought
      * for 100 EUR → 20 €). Same-coin legs (stacking, rewards) can't be implied. Shared by the import and
      * app:crypto:trades:fill-prices.
@@ -253,9 +292,10 @@ class CrPriceService
 
         foreach ($legs as $side => $leg) {
             if ($leg['coin'] && $leg['price'] == 0.0) {
-                $price = $this->getPriceEur($leg['coin'], $trade->getTradeAt(), $liveFetch);
+                $manual = strtoupper($leg['coin']) === 'EUR' ? null : $this->manualPriceOn($trade, $leg['coin']);
+                $price = $manual ?? $this->getPriceEur($leg['coin'], $trade->getTradeAt(), $liveFetch);
                 if ($price !== null) {
-                    $prices[$side] = [$price, 'cours'];
+                    $prices[$side] = [$price, $manual !== null ? 'rapport fiscal' : 'cours'];
                     $legs[$side]['price'] = $price;
                 }
             }
@@ -276,4 +316,111 @@ class CrPriceService
 
         return ['prices' => $prices, 'missing' => $missing];
     }
+
+    /**
+     * Daily EUR prices of $coin between two days in ONE CoinGecko call (market_chart/range) — 1 credit
+     * for a whole year instead of one /history call per day. Keeps each day's first point (00:00 UTC
+     * when the range is > 90 days, same "open" semantics as Binance) and stores them as 'coingecko'.
+     *
+     * @return int|string rows written, or the reason nothing was fetched
+     */
+    public function importCoinGeckoRange(string $coin, \DateTimeInterface $from, \DateTimeInterface $to): int|string
+    {
+        $coingeckoId = CoinGeckoIdMap::resolve($coin);
+        if ($coingeckoId === null) {
+            return 'ticker non mappé (CoinGeckoIdMap)';
+        }
+
+        // The plan refuses (401, credit still spent) anything older than 365 days: clip, or skip without a call.
+        $oldest = new \DateTimeImmutable('-' . self::COINGECKO_HISTORY_DAYS . ' days midnight');
+        if ($to < $oldest) {
+            return 'plus vieux que ' . self::COINGECKO_HISTORY_DAYS . ' jours (limite du plan CoinGecko), pas d\'appel';
+        }
+        if ($from < $oldest) {
+            $from = $oldest;
+        }
+
+        try {
+            $data = $this->coingeckoGet("coins/{$coingeckoId}/market_chart/range", [
+                'vs_currency' => 'eur',
+                'from' => \DateTimeImmutable::createFromInterface($from)->setTime(0, 0)->getTimestamp(),
+                'to' => \DateTimeImmutable::createFromInterface($to)->setTime(23, 59, 59)->getTimestamp(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Crypto prices: CoinGecko range failed for {coin}: {message}', ['coin' => $coin, 'message' => $e->getMessage()]);
+
+            return 'erreur CoinGecko (' . substr($e->getMessage(), 0, 80) . ')';
+        }
+
+        $prices = [];
+        foreach ($data['prices'] ?? [] as [$ms, $price]) {
+            $day = gmdate('Y-m-d', (int) ($ms / 1000));
+            if (!isset($prices[$day]) && is_numeric($price)) {
+                $prices[$day] = (float) $price;
+            }
+        }
+
+        return $prices === [] ? 'aucun cours renvoyé' : $this->priceHistoryRepository->upsertImported(strtoupper($coin), $prices, 'coingecko');
+    }
+
+    /**
+     * Every CoinGecko call goes through here: spaced to respect the per-minute limit, counted, and
+     * retried once after a minute when the API still answers 429 (limit shared with other uses).
+     */
+    private function coingeckoGet(string $path, array $query): array
+    {
+        for ($attempt = 0; ; $attempt++) {
+            $wait = $this->lastCoingeckoCallAt + self::COINGECKO_MIN_INTERVAL - microtime(true);
+            if ($wait > 0) {
+                usleep((int) ($wait * 1_000_000));
+            }
+            $this->lastCoingeckoCallAt = microtime(true);
+            $this->coingeckoCalls++;
+
+            $response = $this->coingeckoClient->request('GET', $path, [
+                'query' => $query,
+                'headers' => $this->coingeckoApiKey !== '' ? ['x-cg-demo-api-key' => $this->coingeckoApiKey] : [],
+                'timeout' => 15,
+            ]);
+            if ($response->getStatusCode() === 429 && $attempt === 0) {
+                sleep(60);
+                continue;
+            }
+
+            return $response->toArray();
+        }
+    }
+
+    /**
+     * Fills what's empty on a trade, from cached prices only (no network): fromPrice/toPrice via
+     * resolveMissingPrices(), then totalReal = EUR value of what was received (like the trade form;
+     * total = totalReal + EUR fee when also empty). totalReal is only derived for Achat/Vente/rewards:
+     * on Dépôt/Retrait/Transfert it would count a crypto move as euros in "Net investi".
+     * Shared by the import and app:crypto:trades:fill-prices.
+     *
+     * @return array{prices: array<'from'|'to', array{0: float, 1: string}>, missing: list<string>, totalReal: ?float}
+     */
+    public function fillMissingValues(CrTrade $trade): array
+    {
+        $resolved = $this->resolveMissingPrices($trade);
+        foreach ($resolved['prices'] as $side => [$price]) {
+            $side === 'from' ? $trade->setFromPrice($price) : $trade->setToPrice($price);
+        }
+
+        $resolved['totalReal'] = null;
+        if ((float) $trade->getTotalReal() == 0.0 && in_array($trade->getType(), self::TOTAL_TYPES, true)) {
+            $value = (float) $trade->getToNbToken() * (float) $trade->getToPrice() ?: (float) $trade->getFromNbToken() * (float) $trade->getFromPrice();
+            if ($value > 0) {
+                $resolved['totalReal'] = round($value, 2);
+                $trade->setTotalReal($resolved['totalReal']);
+                if ((float) $trade->getTotal() == 0.0) {
+                    $trade->setTotal(round($value + ($trade->getCostCoin() === 'EUR' ? (float) $trade->getCostPrice() : 0.0), 2));
+                }
+            }
+        }
+
+        return $resolved;
+    }
+
+    public const TOTAL_TYPES = [TypeType::Achat, TypeType::Vente, TypeType::Recuperation, TypeType::Stacking];
 }
