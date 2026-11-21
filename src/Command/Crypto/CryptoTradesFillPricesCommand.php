@@ -65,7 +65,7 @@ class CryptoTradesFillPricesCommand extends Command
         }
 
         $filled = 0;
-        $implied = 0;
+        $bySource = [];
         $totals = 0;
         $trades = 0;
         $missing = [];
@@ -85,9 +85,7 @@ class CryptoTradesFillPricesCommand extends Command
                         $side === 'from' ? 'cédé' : 'reçu', $side === 'from' ? $trade->getFromCoin() : $trade->getToCoin(), $price, $how));
                 }
                 $filled++;
-                if ($how === 'déduit') {
-                    $implied++;
-                }
+                $bySource[$how] = ($bySource[$how] ?? 0) + 1;
             }
             if ($result['totalReal'] !== null) {
                 $totals++;
@@ -118,8 +116,9 @@ class CryptoTradesFillPricesCommand extends Command
             $io->table(['Token', 'Prix manquants'], array_map(null, array_keys($top), array_values($top)));
         }
 
-        $io->success(sprintf('%s%s%d prix (dont %d déduits de l\'autre côté) et %d total(aux) réel(s) %s sur %d transaction(s), %d prix introuvable(s).',
-            $dryRun ? '[dry-run] ' : '', $year ? "$year : " : '', $filled, $implied, $totals,
+        $sources = implode(', ', array_map(fn ($how, $n) => "$how : $n", array_keys($bySource), $bySource));
+        $io->success(sprintf('%s%s%d prix (%s) et %d total(aux) réel(s) %s sur %d transaction(s), %d prix introuvable(s).',
+            $dryRun ? '[dry-run] ' : '', $year ? "$year : " : '', $filled, $sources ?: 'aucun', $totals,
             $dryRun ? 'à renseigner' : 'renseignés', $trades, array_sum($missing)));
 
         return Command::SUCCESS;
