@@ -2,6 +2,7 @@
 :root {
 	--drive-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 	--drive-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+	--drive-peek: 84px; /* hauteur de la bande d'infos repliée (vue en grand, mobile) */
 }
 
 @keyframes drive-fade-in { from { opacity: 0; } }
@@ -42,6 +43,10 @@
 	.group:hover .drive-row-actions, .group:focus-within .drive-row-actions, .drive-row-actions[data-armed] { opacity: 1; }
 }
 
+/* Bande d'infos de la vue en grand (mobile) : repliée = seule la bande dépasse ; transition interruptible. */
+.drive-info-sheet { transform: translateY(calc(100% - var(--drive-peek))); transition: transform 380ms var(--drive-ease-drawer); }
+.drive-info-sheet[data-open] { transform: translateY(0); }
+
 .drive-noscrollbar { scrollbar-width: none; }
 .drive-noscrollbar::-webkit-scrollbar { display: none; }
 
@@ -49,4 +54,5 @@
 	.drive-rise, .drive-sheet, .drive-panel, .drive-stagger, .drive-check, .drive-snack, .drive-zoom { animation-name: drive-fade-in; animation-duration: 150ms; }
 	.drive-sheet-out, .drive-panel-out, .drive-snack-out { animation-name: drive-fade-out; }
 	.drive-press:active { transform: none; }
+	.drive-info-sheet { transition-duration: 0ms; }
 }

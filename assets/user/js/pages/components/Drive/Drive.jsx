@@ -375,8 +375,10 @@ export function Drive () {
 				  onNext={imgIndex >= 0 && images[imgIndex + 1] ? () => setOpen(images[imgIndex + 1]) : null}
 				  counter={imgIndex >= 0 && images.length > 1 ? `${imgIndex + 1} / ${images.length}` : null}
 				  icons={{ close: <X size={22} />, prev: <ChevronLeft size={24} />, next: <ChevronRight size={24} /> }}
+				  summary={open && { name: open.name, meta: `${formatSize(open.size)} · ${formatDate(open.createdAt)}` }}
 				  image={open && <FullImage key={open.id} file={open} />}>
-			{open && <Preview file={open} {...actions(open)} thumb={false} dark />}
+			{/* Sur mobile, la bande d'infos affiche déjà le nom. */}
+			{open && <Preview file={open} {...actions(open)} thumb={false} dark hideTitle={isMobile} />}
 		</Lightbox>
 
 		<input ref={input} type="file" multiple className="hidden" onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
@@ -467,7 +469,7 @@ function FullImage ({ file }) {
 	</div>
 }
 
-function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMove, onAddShortcut, onRemoveShortcut, onShare, onUnshare, notify, thumb = true, dark = false }) {
+function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMove, onAddShortcut, onRemoveShortcut, onShare, onUnshare, notify, thumb = true, dark = false, hideTitle = false }) {
 	const [armed, setArmed] = useConfirmTap(file.id);
 	const [editing, setEditing] = useState(false);
 	useEffect(() => { setEditing(false); }, [file.id]);
@@ -487,12 +489,14 @@ function Preview ({ file, albums, shortcuts, albumName, onDelete, onRename, onMo
 
 	return <div className="px-5 pb-2">
 		{thumb && <Thumb file={file} className="aspect-video rounded-2xl md:aspect-[4/3]" iconSize={72} />}
-		<div className="mt-4 flex items-start gap-1">
+		<div className={`${hideTitle ? "" : "mt-4"} flex items-start gap-1`}>
 			{editing
 				? <InlineName initial={file.name} selectBase label="Nouveau nom du fichier" onSubmit={onRename} onDone={() => setEditing(false)}
 							  className={`min-w-0 flex-1 rounded-md border-0 px-2 py-1 text-lg font-medium ring-1 ring-inset focus:ring-2 ${t.input}`} />
-				: <h3 className={`min-w-0 flex-1 break-words text-lg font-medium ${t.title}`}>{file.name}</h3>}
-			{!editing && <Hint label="Renommer">
+				: hideTitle
+					? <button type="button" onClick={() => setEditing(true)} className={`drive-press -ml-3 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold ${t.link}`}><Pencil size={16} /> Renommer</button>
+					: <h3 className={`min-w-0 flex-1 break-words text-lg font-medium ${t.title}`}>{file.name}</h3>}
+			{!editing && !hideTitle && <Hint label="Renommer">
 				<button type="button" aria-label="Renommer" onClick={() => setEditing(true)} className={`drive-press -mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${t.icon}`}><Pencil size={16} /></button>
 			</Hint>}
 		</div>
