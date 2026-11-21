@@ -5,6 +5,7 @@ namespace App\Controller\InternApi\Cryptos;
 use App\Entity\Crypto\CrTrade;
 use App\Repository\Crypto\CrTradeRepository;
 use App\Service\Api\ApiResponse;
+use App\Service\Crypto\CrPriceService;
 use App\Service\Crypto\CrTradeReplayService;
 use App\Service\Data\DataCrypto;
 use App\Service\SanitizeData;
@@ -44,6 +45,31 @@ class TradeController extends AbstractController
      * Powers the "Cryptos" year stat card/modal: per coin, quantity held at year-end plus how much was
      * bought/sold during $year — see CrTradeReplayService::computeYearCryptoBreakdown().
      */
+    /** "Cryptos restantes" detail: every movement of one coin with its running balance. */
+    #[Route('/ledger/{coin}', name: 'ledger', requirements: ['coin' => '[A-Za-z0-9._-]{1,20}'], options: ['expose' => true], methods: 'GET')]
+    public function ledger(string $coin, ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
+    {
+        return $apiResponse->apiJsonResponseCustom(['ledger' => $replayService->coinLedger($this->getUser(), $coin)]);
+    }
+
+    /** Trade form "cours du jour" helper: a coin's EUR price on a given day (cached CoinGecko/Binance). */
+    #[Route('/price', name: 'price', options: ['expose' => true], methods: 'GET')]
+    public function price(Request $request, ApiResponse $apiResponse, CrPriceService $priceService, SanitizeData $sanitizeData): Response
+    {
+        $coin = strtoupper((string) $request->query->get('coin'));
+        $date = $sanitizeData->createDateTime($request->query->get('date'));
+        if ($date === null || !preg_match('/^[A-Z0-9._-]{1,20}$/', $coin)) {
+            return $apiResponse->apiJsonResponseBadRequest('Token ou date invalide.');
+        }
+
+        $price = $priceService->getPriceEur($coin, $date);
+        if ($price === null) {
+            return $apiResponse->apiJsonResponseBadRequest("Cours introuvable pour {$coin} à cette date.");
+        }
+
+        return $apiResponse->apiJsonResponseCustom(['price' => $price]);
+    }
+
     #[Route('/holdings-year/{year}', name: 'holdings_year', requirements: ['year' => '\d{4}'], options: ['expose' => true], methods: 'GET')]
     public function holdingsYear(int $year, ApiResponse $apiResponse, CrTradeReplayService $replayService): Response
     {
